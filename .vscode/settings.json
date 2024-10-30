@@ -1,0 +1,4 @@
+{
+	"appService.defaultWebAppToDeploy": "undefined/subscriptions/016ef6e8-363e-4b25-a41f-f048c80d7546/resourceGroups/appsvc_linux_centralus/providers/Microsoft.Web/sites/mighty-lube-backend",
+	"appService.deploySubpath": "."
+}
