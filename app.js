@@ -479,122 +479,20 @@ async function addProteinGeneralInfo(newProteinGeneralInfo) {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// createTables()
-//     .then(() => {
-//         const port = process.env.PORT || 3030;
-//         app.listen(port, () => {
-//             console.log(`Listening on port ${port}...`);
-//         });
-//     })
-//     .catch(err => {
-//         process.exit(1);
-//     });
-
-const port = process.env.PORT || 3030;
-app.listen(port, () => {
-	console.log(`Listening on port ${port}...`);
-});
+createTables()
+    .then(() => {
+        const port = process.env.PORT || 3030;
+        app.listen(port, () => {
+            console.log(`Listening on port ${port}...`);
+        });
+    })
+    .catch(err => {
+        process.exit(1);
+    });
+
+// const port = process.env.PORT || 3030;
+// app.listen(port, () => {
+// 	console.log(`Listening on port ${port}...`);
+// });
 
 
