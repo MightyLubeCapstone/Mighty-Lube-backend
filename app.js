@@ -338,29 +338,144 @@ async function getUser(username) {
 
 //curl -X GET http://localhost:3030/api/users?username=zsparson23
 //results in 200 because that is a valid username
-app.get('/api/users', async (req,res) => 
-{
-    try
-    {
+app.get('/api/users', async (req, res) => {
+    try {
         const { username } = req.query;
         const user = await getUser(username);
-        if(!user)
-        {
-            res.status(200).json({message: 'Username available!' });
+        if (!user) {
+            res.status(200).json({ message: 'Username available!' });
             return;
         }
 
-        res.status(400).json({error: 'Account with that username already exists!' });
+        res.status(400).json({ error: 'Account with that username already exists!' });
     }
 
-    catch(error)
-    {
-        res.status(500).json({error: 'Internal server error'});
+    catch (error) {
+        res.status(500).json({ error: 'Internal server error' });
     }
 
 });
 
 
+async function addMachine(newMachine) {
+
+
+    try {
+        await poolConnect;
+        const request = pool.request();
+
+
+        const query = 'Insert into tblMachine values (@machineID, @machineName, @machineType)';
+
+
+        request.input('machineID', sql.VarChar, newMachine.machineID);
+        request.input('machineName', sql.VarChar, newMachine.machineName);
+        request.input('machineType', sql.VarChar, newMachine.machineType);
+
+
+        await request.query(query);
+
+
+        console.log('Machine Added');
+
+
+    }
+
+    catch (error) {
+        console.error('Error', error);
+
+        throw error;
+    }
+
+
+
+}
+
+
+async function addProtein(newProtein) {
+
+
+    try {
+        await poolConnect;
+        const request = pool.request();
+
+
+        const query = 'Insert into tblProtein values (@machineID, @machineName, @popularity, @price, @dateAdded)';
+
+
+        request.input('machineID', sql.VarChar, newProtein.machineID);
+        request.input('machineName', sql.VarChar, newProtein.machineName);
+        request.input('popularity', sql.Int, newProtein.popularity);
+        request.input('price', sql.Decimal, newProtein.price);
+        request.input('dateAdded', sql.Date, newProtein.dateAdded);
+
+
+
+
+        await request.query(query);
+
+
+        console.log('Protein Added');
+
+
+    }
+
+    catch (error) {
+        console.error('Error', error);
+
+        throw error;
+    }
+
+
+
+}
+
+
+async function addProteinGeneralInfo(newProteinGeneralInfo) {
+
+
+    try {
+        await poolConnect;
+        const request = pool.request();
+
+
+        const query = 'Insert into tblProteinGeneralInfo values (@proteinProductID, @machineID, @productName, @conveyorSystemName, @conveyorChainSize, @chainManufacturer, @conveyorLength, @conveyorLengthUnit, @travelDirection, @applicationEnviroment, @temperatureArea, @loadedStatus, @numRequested)';
+
+
+        request.input('proteinProductID', sql.VarChar, newProteinGeneralInfo.proteinProductID);
+        request.input('machineID', sql.VarChar, newProteinGeneralInfo.machineID);
+        request.input('productName', sql.VarChar, newProteinGeneralInfo.productName);
+        request.input('conveyorSystemName', sql.VarChar, newProteinGeneralInfo.conveyorSystemName);
+        request.input('conveyorChainSize', sql.VarChar, newProteinGeneralInfo.conveyorChainSize);
+        request.input('chainManufacturer', sql.VarChar, newProteinGeneralInfo.chainManufacturer);
+        request.input('conveyorLength', sql.Decimal, newProteinGeneralInfo.conveyorLength);
+        request.input('conveyorLengthUnit', sql.VarChar, newProteinGeneralInfo.conveyorLengthUnit);
+        request.input('travelDirection', sql.Bit, newProteinGeneralInfo.travelDirection);
+        request.input('applicationEnviroment', sql.VarChar, newProteinGeneralInfo.applicationEnviroment);
+        request.input('temperatureArea', sql.Bit, newProteinGeneralInfo.temperatureArea);
+        request.input('loadedStatus', sql.Bit, newProteinGeneralInfo.loadedStatus);
+        request.input('numRequested', sql.Int, newProteinGeneralInfo.numRequested);
+
+
+
+
+        await request.query(query);
+
+
+        console.log('Protein Added');
+
+
+    }
+
+    catch (error) {
+        console.error('Error', error);
+
+        throw error;
+    }
+
+
+
+}
 
 
 
@@ -375,6 +490,9 @@ createTables()
         process.exit(1);
     });
 
-    
+// const port = process.env.PORT || 3030;
+// app.listen(port, () => {
+// 	console.log(`Listening on port ${port}...`);
+// });
 
 
