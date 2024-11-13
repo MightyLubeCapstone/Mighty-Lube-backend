@@ -4,249 +4,402 @@ async function createTables() {
 	try {
 		const request = pool.request();
 
-		//Create tblUser
-		await request.query(`
-                IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblControlVoltageUnit')
-                CREATE TABLE tblControlVoltageUnit (
-                    controlVoltage CHAR(1) NOT NULL PRIMARY KEY,
-                    controlVoltageName VARCHAR(50) DEFAULT NULL
-                );
-            `);
+        await request.query(`
+            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblAppEnv')
+            CREATE TABLE tblAppEnv (
+                appEnvType INT PRIMARY KEY,
+                appEnvName VARCHAR(50)
+            );
+        `);
+        
+        await request.query(`
+            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblApplicationType')
+            CREATE TABLE tblApplicationType (
+                applicationType INT PRIMARY KEY,
+                applicationTypeName VARCHAR(50)
+            );
+        `);
+        
+        await request.query(`
+            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblConveyorStyle')
+            CREATE TABLE tblConveyorStyle (
+                conveyorStyleType INT PRIMARY KEY,
+                conveyorStyleName VARCHAR(50)
+            );
+        `);
+        
+        await request.query(`
+            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblChainSize')
+            CREATE TABLE tblChainSize (
+                chainSizeType INT PRIMARY KEY,
+                chainSizeName VARCHAR(50)
+            );
+        `);
+        
+        await request.query(`
+            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblChainPinType')
+            CREATE TABLE tblChainPinType (
+                chainPinType INT PRIMARY KEY,
+                chainPinName VARCHAR(50)
+            );
+        `);
+        
+        await request.query(`
+            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblIndustrial')
+            CREATE TABLE tblIndustrial (
+                productID VARCHAR(50),
+                industrialType INT,
+                FOREIGN KEY (productID) REFERENCES tblProduct (productID),
+                FOREIGN KEY (industrialType) REFERENCES tblIndustrialType (industrialType)
+            );
+        `);
+        
+        await request.query(`
+            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblIndustrialApplication')
+            CREATE TABLE tblIndustrialApplication (
+                productID VARCHAR(50),
+                applicationType INT,
+                FOREIGN KEY (productID) REFERENCES tblProduct (productID),
+                FOREIGN KEY (applicationType) REFERENCES tblApplicationType (applicationType)
+            );
+        `);
+        
+        await request.query(`
+            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblIndustrialInfo')
+            CREATE TABLE tblIndustrialInfo (
+                industrialInfoID VARCHAR(36) PRIMARY KEY,
+                industrialPopularity INT,
+                industrialPrice DECIMAL(10,2),
+                industrialDateAdded DATETIME
+            );
+        `);
+        
+        await request.query(`
+            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblIndustrialProduct')
+            CREATE TABLE tblIndustrialProduct (
+                productID VARCHAR(50),
+                industrialName VARCHAR(255),
+                industrialInfoID VARCHAR(36),
+                FOREIGN KEY (productID) REFERENCES tblProduct (productID),
+                FOREIGN KEY (industrialInfoID) REFERENCES tblIndustrialInfo (industrialInfoID)
+            );
+        `);
 
-		await request.query(`
-                IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblJunctionBoxUnit')
-                CREATE TABLE tblJunctionBoxUnit (
-                    junctionBoxUnit CHAR(1) NOT NULL PRIMARY KEY,
-                    junctionBoxUnitName VARCHAR(50) DEFAULT NULL
-                );
-            `);
 
-		await request.query(`
-                IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblMachine')
-                CREATE TABLE tblMachine (
-                    machineID VARCHAR(50) NOT NULL PRIMARY KEY,
-                    machineName VARCHAR(255) DEFAULT NULL,
-                    machineType VARCHAR(25) DEFAULT NULL
-                );
-            `);
+        await request.query(`
+            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblIndustrialType')
+            CREATE TABLE tblIndustrialType (
+                industrialType INT PRIMARY KEY,
+                industrialTypeName VARCHAR(50)
+            );
+        `);
+        
+        await request.query(`
+            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblMeasurementUnit')
+            CREATE TABLE tblMeasurementUnit (
+                measurementUnitType INT PRIMARY KEY,
+                measurementUnitName VARCHAR(50)
+            );
+        `);
+        
+        await request.query(`
+            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblOrder')
+            CREATE TABLE tblOrder (
+                orderID VARCHAR(36) PRIMARY KEY,
+                productID VARCHAR(50),
+                userID VARCHAR(50),
+                FOREIGN KEY (productID) REFERENCES tblProduct (productID),
+                FOREIGN KEY (userID) REFERENCES tblUsers (userID)
+            );
+        `);
+        
+        await request.query(`
+            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblOtherWheelManufacturer')
+            CREATE TABLE tblOtherWheelManufacturer (
+                orderID VARCHAR(36),
+                otherWheelManufacturerName VARCHAR(50),
+                FOREIGN KEY (orderID) REFERENCES tblOrder (orderID)
+            );
+        `);
+        
+        await request.query(`
+            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblOtherTrolleyColor')
+            CREATE TABLE tblOtherTrolleyColor (
+                orderID VARCHAR(36),
+                otherTrolleyColorName VARCHAR(50),
+                FOREIGN KEY (orderID) REFERENCES tblOrder (orderID)
+            );
+        `);
+        
+        await request.query(`
+            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblOtherConveyorStyle')
+            CREATE TABLE tblOtherConveyorStyle (
+                orderID VARCHAR(36),
+                otherConveyorStyleName VARCHAR(50),
+                FOREIGN KEY (orderID) REFERENCES tblOrder (orderID)
+            );
+        `);
+        
+        await request.query(`
+            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblOtherChainSize')
+            CREATE TABLE tblOtherChainSize (
+                orderID VARCHAR(36),
+                otherChainSizeName VARCHAR(50),
+                FOREIGN KEY (orderID) REFERENCES tblOrder (orderID)
+            );
+        `);
+        
+        await request.query(`
+            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblOtherAppEnv')
+            CREATE TABLE tblOtherAppEnv (
+                orderID VARCHAR(36),
+                otherAppEnvName VARCHAR(50),
+                FOREIGN KEY (orderID) REFERENCES tblOrder (orderID)
+            );
+        `);
+        
+        await request.query(`
+            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblProduct')
+            CREATE TABLE tblProduct (
+                productID VARCHAR(50) PRIMARY KEY,
+                productType INT,
+                FOREIGN KEY (productType) REFERENCES tblProductType (productType)
+            );
+        `);
+        
+        await request.query(`
+            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblProductType')
+            CREATE TABLE tblProductType (
+                productType INT PRIMARY KEY,
+                productTypeName VARCHAR(50)
+            );
+        `);
+        
+        await request.query(`
+            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblProteinAdditional')
+            CREATE TABLE tblProteinAdditional (
+                orderID VARCHAR(36),
+                oppsSpecification BIT,
+                washDown BIT,
+                foodIndustry BIT,
+                powerPanel BIT,
+                pushButtonSwitch BIT,
+                enclosedShroud INT,
+                additionalOtherInfo VARCHAR(255),
+                FOREIGN KEY (orderID) REFERENCES tblOrder (orderID)
+            );
+        `);
+        
+        await request.query(`
+            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblProteinChainManufacturer')
+            CREATE TABLE tblProteinChainManufacturer (
+                chainManufacturerType INT PRIMARY KEY,
+                chainManufacturerName VARCHAR(50)
+            );
+        `);
+        
+        await request.query(`
+            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblProteinCustomPower')
+            CREATE TABLE tblProteinCustomPower (
+                orderID VARCHAR(36),
+                operatingVoltSingle DECIMAL(5,2),
+                operatingVoltTriple DECIMAL(5,2),
+                controlVoltSingle DECIMAL(5,2),
+                FOREIGN KEY (orderID) REFERENCES tblOrder (orderID)
+            );
+        `);
+        
+        await request.query(`
+            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblProteinConveyorSpec')
+            CREATE TABLE tblProteinConveyorSpec (
+                orderID VARCHAR(36),
+                sideLubrication BIT,
+                topLubrication BIT,
+                timeLubrication VARCHAR(50),
+                timeDelay VARCHAR(50),
+                reservoirSizeType INT,
+                reservoirSizeQuanity INT,
+                chainCleanStatus BIT,
+                FOREIGN KEY (orderID) REFERENCES tblOrder (orderID),
+                FOREIGN KEY (reservoirSizeType) REFERENCES tblReservoirSize (reservoirSizeType)
+            );
+        `);
+        
+        await request.query(`
+            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblProteinGeneral')
+            CREATE TABLE tblProteinGeneral (
+                orderID VARCHAR(36),
+                conveyorName VARCHAR(255),
+                chainSizeType INT,
+                chainManufacturerType INT,
+                wheelManufacturerType INT,
+                chainPinType INT,
+                conveyorSpeed DECIMAL(5,2),
+                speedUnitType INT,
+                variableSpeed DECIMAL(5,2),
+                metalType INT,
+                conveyorStyleType INT,
+                trolleyType INT,
+                swingStatus BIT,
+                plantLayout BIT,
+                chainPictures BIT,
+                conveyorLength DECIMAL(5,2),
+                measurementUnitType INT,
+                travelDirectionType INT,
+                appEnvType INT,
+                tempSurrounding BIT,
+                loadedStatus BIT,
+                numProductRequested INT,
+                FOREIGN KEY (orderID) REFERENCES tblOrder (orderID),
+                FOREIGN KEY (chainSizeType) REFERENCES tblChainSize (chainSizeType),
+                FOREIGN KEY (chainManufacturerType) REFERENCES tblProteinChainManufacturer (chainManufacturerType),
+                FOREIGN KEY (wheelManufacturerType) REFERENCES tblWheelManufacturer (wheelManufacturerType),
+                FOREIGN KEY (chainPinType) REFERENCES tblChainPinType (chainPinType),
+                FOREIGN KEY (speedUnitType) REFERENCES tblSpeedUnit (speedUnitType),
+                FOREIGN KEY (metalType) REFERENCES tblMetalType (metalType),
+                FOREIGN KEY (conveyorStyleType) REFERENCES tblConveyorStyle (conveyorStyleType),
+                FOREIGN KEY (trolleyType) REFERENCES tblTrolleyType (trolleyType),
+                FOREIGN KEY (measurementUnitType) REFERENCES tblMeasurementUnit (measurementUnitType),
+                FOREIGN KEY (travelDirectionType) REFERENCES tblTravelDirection (travelDirectionType),
+                FOREIGN KEY (appEnvType) REFERENCES tblAppEnv (appEnvType)
+            );
+        `);
+        
+        await request.query(`
+            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblProteinInfo')
+            CREATE TABLE tblProteinInfo (
+                proteinInfoID VARCHAR(36) PRIMARY KEY,
+                proteinPopularity INT,
+                proteinPrice DECIMAL(10,2),
+                proteinDateAdded DATETIME
+            );
+        `);
+        
+        await request.query(`
+            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblProteinMonitoring')
+            CREATE TABLE tblProteinMonitoring (
+                orderID VARCHAR(36),
+                existingConnection BIT,
+                newConnection BIT,
+                motorAmp BIT,
+                driveTakeUp BIT,
+                takeUpDistance BIT,
+                motorTemp BIT,
+                motorValidation BIT,
+                pitchValidation BIT,
+                FOREIGN KEY (orderID) REFERENCES tblOrder (orderID)
+            );
+        `);
+        
+        await request.query(`
+            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblProteinMeasurement')
+            CREATE TABLE tblProteinMeasurement (
+                orderID VARCHAR(36),
+                powerTrolleyWheel DECIMAL(5,2),
+                powerRailWidth DECIMAL(5,2),
+                powerRailHeight DECIMAL(5,2),
+                chainDrop DECIMAL(5,2),
+                measurementUnitType INT,
+                FOREIGN KEY (orderID) REFERENCES tblOrder (orderID),
+                FOREIGN KEY (measurementUnitType) REFERENCES tblMeasurementUnit (measurementUnitType)
+            );
+        `);
+        
+        await request.query(`
+            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblProteinProduct')
+            CREATE TABLE tblProteinProduct (
+                productID VARCHAR(50),
+                proteinName VARCHAR(255),
+                proteinInfoID VARCHAR(36),
+                FOREIGN KEY (productID) REFERENCES tblProduct (productID),
+                FOREIGN KEY (proteinInfoID) REFERENCES tblProteinInfo (proteinInfoID)
+            );
+        `);
+        
+        await request.query(`
+            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblProteinWire')
+            CREATE TABLE tblProteinWire (
+                orderID VARCHAR(36),
+                twoConductor INT,
+                fourConductor INT,
+                sevenConductor INT,
+                twelveConductor INT,
+                junctionBoxNum INT,
+                wireMeasurementUnitType INT,
+                FOREIGN KEY (orderID) REFERENCES tblOrder (orderID),
+                FOREIGN KEY (wireMeasurementUnitType) REFERENCES tblMeasurementUnit (measurementUnitType)
+            );
+        `);
+        
+        await request.query(`
+            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblReservoirSize')
+            CREATE TABLE tblReservoirSize (
+                reservoirSizeType INT PRIMARY KEY,
+                reservoirSizeName VARCHAR(50)
+            );
+        `);
+        
+        await request.query(`
+            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblSessions')
+            CREATE TABLE tblSessions (
+                sessionID VARCHAR(50) PRIMARY KEY,
+                userID VARCHAR(50) NOT NULL,
+                sessionCreateTime DATETIME NOT NULL DEFAULT GETDATE(),
+                sessionExpireTime DATETIME,
+                FOREIGN KEY (userID) REFERENCES tblUsers (userID)
+            );
+        `);
+        
+        await request.query(`
+            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblTrolleyType')
+            CREATE TABLE tblTrolleyType (
+                trolleyType INT PRIMARY KEY,
+                trolleyTypeName VARCHAR(50)
+            );
+        `);
+        
+        await request.query(`
+            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblTrolleyColor')
+            CREATE TABLE tblTrolleyColor (
+                trolleyColorType INT PRIMARY KEY,
+                trolleyColorName VARCHAR(50)
+            );
+        `);
+        
+        await request.query(`
+            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblSpeedUnit')
+            CREATE TABLE tblSpeedUnit (
+                speedUnitType INT PRIMARY KEY,
+                speedUnitName VARCHAR(50)
+            );
+        `);
+        
+        await request.query(`
+            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblTravelDirection')
+            CREATE TABLE tblTravelDirection (
+                travelDirectionType INT PRIMARY KEY,
+                travelDirectionDescription VARCHAR(50)
+            );
+        `);
+        
+        await request.query(`
+            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblWheelManufacturer')
+            CREATE TABLE tblWheelManufacturer (
+                wheelManufacturerType INT PRIMARY KEY,
+                wheelManufacturerName VARCHAR(50)
+            );
+        `);
+        
+        await request.query(`
+            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblMetalType')
+            CREATE TABLE tblMetalType (
+                metalType INT PRIMARY KEY,
+                metalTypeName VARCHAR(50)
+            );
+        `);
+        
 
-		await request.query(`
-                IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblOperatingVoltageUnit')
-                CREATE TABLE tblOperatingVoltageUnit (
-                    operatingVoltage CHAR(1) NOT NULL PRIMARY KEY,
-                    operatingVoltageName VARCHAR(50) DEFAULT NULL
-                );
-            `);
 
-		await request.query(`
-                IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblPinType')
-                CREATE TABLE tblPinType (
-                    chainPinType CHAR(1) NOT NULL PRIMARY KEY,
-                    chainPinName VARCHAR(50) DEFAULT NULL
-                );
-            `);
-
-		await request.query(`
-                IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblPowerRailWidthUnit')
-                CREATE TABLE tblPowerRailWidthUnit (
-                    powerRailWidthUnit CHAR(1) NOT NULL PRIMARY KEY,
-                    powerRailWidthUnitName VARCHAR(50) DEFAULT NULL
-                );
-            `);
-
-		await request.query(`
-                IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblPowerRailHeightUnit')
-                CREATE TABLE tblPowerRailHeightUnit (
-                    powerRailHeightUnit CHAR(1) NOT NULL PRIMARY KEY,
-                    powerRailHeightUnitName VARCHAR(50) DEFAULT NULL
-                );
-            `);
-
-		await request.query(`
-                IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblProtein')
-                CREATE TABLE tblProtein (
-                    machineID VARCHAR(50) DEFAULT NULL,
-                    machineName VARCHAR(255) DEFAULT NULL,
-                    popularity INT DEFAULT NULL,
-                    price DECIMAL(10, 2) DEFAULT NULL,
-                    dateAdded DATE DEFAULT NULL,
-                    FOREIGN KEY (machineID) REFERENCES tblMachine (machineID)
-                );
-            `);
-
-		await request.query(`
-                IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblProteinFGLMAdditionalGeneral')
-                CREATE TABLE tblProteinFGLMAdditionalGeneral (
-                    proteinProductID VARCHAR(50) DEFAULT NULL,
-                    wheelManufacturer VARCHAR(50) DEFAULT NULL,
-                    chainPinType CHAR(1) NOT NULL,
-                    conveyorSpeed DECIMAL(10, 2) DEFAULT NULL,
-                    conveyorSpeedUnit BIT DEFAULT NULL,
-                    variableSpeedConditions VARCHAR(50) DEFAULT NULL,
-                    metalType VARCHAR(50) NOT NULL,
-                    conveyorStyle VARCHAR(50) NOT NULL,
-                    trolleyColor VARCHAR(25) NOT NULL,
-                    trolleyType VARCHAR(100) DEFAULT NULL,
-                    conveyorSwingStatus BIT NOT NULL,
-                    planLayout BIT DEFAULT NULL,
-                    chainPhotos BIT DEFAULT NULL,
-                    FOREIGN KEY (proteinProductID) REFERENCES tblProteinGeneralInfo (proteinProductID),
-                    FOREIGN KEY (chainPinType) REFERENCES tblPinType (chainPinType)
-                );
-            `);
-
-		await request.query(`
-                IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblProteinFGLMMeasurement')
-                CREATE TABLE tblProteinFGLMMeasurement (
-                    proteinProductID VARCHAR(50) DEFAULT NULL,
-                    trolleyWheelDiameter DECIMAL(10, 2) DEFAULT NULL,
-                    trolleyWheelUnit CHAR(1) DEFAULT NULL,
-                    powerRailWidth DECIMAL(10, 2) DEFAULT NULL,
-                    powerRailWidthUnit CHAR(1) DEFAULT NULL,
-                    powerRailHeight DECIMAL(10, 2) DEFAULT NULL,
-                    powerRailHeightUnit CHAR(1) DEFAULT NULL,
-                    FOREIGN KEY (proteinProductID) REFERENCES tblProteinGeneralInfo (proteinProductID),
-                    FOREIGN KEY (trolleyWheelUnit) REFERENCES tblTrolleyWheelUnit (trolleyWheelUnit),
-                    FOREIGN KEY (powerRailWidthUnit) REFERENCES tblPowerRailWidthUnit (powerRailWidthUnit),
-                    FOREIGN KEY (powerRailHeightUnit) REFERENCES tblPowerRailHeightUnit (powerRailHeightUnit)
-                );
-            `);
-
-		await request.query(`
-                IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblProteinFGLMMonitoring')
-                CREATE TABLE tblProteinFGLMMonitoring (
-                    proteinProductID VARCHAR(50) DEFAULT NULL,
-                    existingSystem BIT DEFAULT NULL,
-                    newSystem BIT DEFAULT NULL,
-                    motorAmp BIT DEFAULT NULL,
-                    takeUpAir BIT DEFAULT NULL,
-                    takeUpDistance BIT DEFAULT NULL,
-                    motorTemp BIT DEFAULT NULL,
-                    motorVibration BIT DEFAULT NULL,
-                    pitchValidation BIT DEFAULT NULL,
-                    FOREIGN KEY (proteinProductID) REFERENCES tblProteinGeneralInfo (proteinProductID)
-                );
-            `);
-
-		await request.query(`
-                IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblProteinFGLMConveyorSpecs')
-                CREATE TABLE tblProteinFGLMConveyorSpecs (
-                    proteinProductID VARCHAR(50) DEFAULT NULL,
-                    sideLubrication BIT DEFAULT NULL,
-                    topLubrication BIT DEFAULT NULL,
-                    timeLubrication VARCHAR(50) DEFAULT NULL,
-                    timeDelayLubrication VARCHAR(50) DEFAULT NULL,
-                    reservoirSizeType CHAR(1) DEFAULT NULL,
-                    reservoirSizeQuantity INT DEFAULT NULL,
-                    chainCleanStatus BIT DEFAULT NULL,
-                    FOREIGN KEY (proteinProductID) REFERENCES tblProteinGeneralInfo (proteinProductID),
-                    FOREIGN KEY (reservoirSizeType) REFERENCES tblReservoirSize (reservoirSizeType)
-                );
-            `);
-
-		await request.query(`
-                IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblProteinFGLMPowerUtilities')
-                CREATE TABLE tblProteinFGLMPowerUtilities (
-                    proteinProductID VARCHAR(50) DEFAULT NULL,
-                    operatingVoltage CHAR(1) NOT NULL,
-                    controlVoltage CHAR(1) NOT NULL,
-                    FOREIGN KEY (operatingVoltage) REFERENCES tblOperatingVoltageUnit (operatingVoltage),
-                    FOREIGN KEY (controlVoltage) REFERENCES tblControlVoltageUnit (controlVoltage),
-                    FOREIGN KEY (proteinProductID) REFERENCES tblProteinGeneralInfo (proteinProductID)
-                );
-            `);
-
-		await request.query(`
-                IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblProteinFGLMWire')
-                CREATE TABLE tblProteinFGLMWire (
-                    proteinProductID VARCHAR(50) DEFAULT NULL,
-                    twoConductorNum INT DEFAULT NULL,
-                    fourConductorNum INT DEFAULT NULL,
-                    sevenConductorNum INT DEFAULT NULL,
-                    twelveConductorNum INT DEFAULT NULL,
-                    junctionBoxNum INT DEFAULT NULL,
-                    junctionBoxUnit CHAR(1) DEFAULT NULL,
-                    FOREIGN KEY (proteinProductID) REFERENCES tblProteinGeneralInfo (proteinProductID),
-                    FOREIGN KEY (junctionBoxUnit) REFERENCES tblJunctionBoxUnit (junctionBoxUnit)
-                );
-            `);
-
-		await request.query(`
-                IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblProteinGeneralInfo')
-                CREATE TABLE tblProteinGeneralInfo (
-                    proteinProductID VARCHAR(50) NOT NULL PRIMARY KEY,
-                    machineID VARCHAR(50) DEFAULT NULL,
-                    productName VARCHAR(255) DEFAULT NULL,
-                    conveyorSystemName VARCHAR(255) DEFAULT NULL,
-                    conveyorChainSize VARCHAR(50) DEFAULT NULL,
-                    chainManufacturer VARCHAR(50) DEFAULT NULL,
-                    conveyorLength DECIMAL(10, 2) DEFAULT NULL,
-                    conveyorLengthUnit VARCHAR(10) DEFAULT NULL,
-                    travelDirection BIT DEFAULT NULL,
-                    applicationEnvironment VARCHAR(50) NOT NULL,
-                    temperatureArea BIT DEFAULT NULL,
-                    loadedStatus BIT NOT NULL,
-                    numRequested INT DEFAULT NULL,
-                    FOREIGN KEY (machineID) REFERENCES tblMachine (machineID)
-                );
-            `);
-
-		await request.query(`
-                IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblProteinProductOrders')
-                CREATE TABLE tblProteinProductOrders (
-                    proteinProductID VARCHAR(50) DEFAULT NULL,
-                    machineID VARCHAR(50) DEFAULT NULL,
-                    numRequested INT DEFAULT NULL,
-                    FOREIGN KEY (proteinProductID) REFERENCES tblProteinGeneralInfo (proteinProductID),
-                    FOREIGN KEY (machineID) REFERENCES tblMachine (machineID)
-                );
-            `);
-
-		await request.query(`
-                IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblReservoirSize')
-                CREATE TABLE tblReservoirSize (
-                    reservoirSizeType CHAR(1) NOT NULL PRIMARY KEY,
-                    reservoirSizeName VARCHAR(50) DEFAULT NULL
-                );
-            `);
-
-		await request.query(`
-                IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblSessions')
-                CREATE TABLE tblSessions (
-                    sessionID VARCHAR(50) NOT NULL PRIMARY KEY,
-                    userID VARCHAR(50) NOT NULL,
-                    sessionCreateTime DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                    sessionExpireTime DATETIME DEFAULT NULL,
-                    FOREIGN KEY (userID) REFERENCES tblUsers (userID)
-                );
-            `);
-
-		await request.query(`
-                IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblTrolleyWheelUnit')
-                CREATE TABLE tblTrolleyWheelUnit (
-                    trolleyWheelUnit CHAR(1) NOT NULL PRIMARY KEY,
-                    trolleyWheelUnitName VARCHAR(50) DEFAULT NULL
-                );
-            `);
-
-		await request.query(`
-                IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblUsers')
-                CREATE TABLE tblUsers (
-                    userID VARCHAR(50) NOT NULL PRIMARY KEY,
-                    username VARCHAR(24) NOT NULL UNIQUE,
-                    password VARCHAR(50) NOT NULL,
-                    firstName VARCHAR(50) NOT NULL,
-                    lastName VARCHAR(50) NOT NULL,
-                    emailAddress VARCHAR(100) NOT NULL UNIQUE,
-                    phoneNumber VARCHAR(10) DEFAULT NULL UNIQUE,
-                    country VARCHAR(15) DEFAULT NULL,
-                    companyName VARCHAR(255) DEFAULT NULL,
-                    CONSTRAINT checkEmail CHECK (emailAddress LIKE '%_@__%.__%'),
-                    CONSTRAINT checkPassword CHECK (password LIKE '%[A-Z]%' AND password LIKE '%[a-z]%' AND password LIKE '%[0-9]%' AND password LIKE '%[^a-zA-Z0-9]%' AND LEN(password) >= 8),
-                    CONSTRAINT checkPhoneNum CHECK (phoneNumber LIKE '[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'),
-                    CONSTRAINT checkUsername CHECK (username LIKE '%[a-z0-9]%')
-                );
-            `);
 	} catch (error) {
 		console.log(error);
 		throw error;
