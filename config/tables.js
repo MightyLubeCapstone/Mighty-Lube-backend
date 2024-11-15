@@ -409,6 +409,24 @@ async function createTables() {
         `);
         
 
+        await request.query(`
+            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblUsers')
+            CREATE TABLE tblUsers (
+                userID VARCHAR(50) NOT NULL PRIMARY KEY,
+                username VARCHAR(24) NOT NULL UNIQUE,
+                password VARCHAR(60) NOT NULL,
+                firstName VARCHAR(50) NOT NULL,
+                lastName VARCHAR(50) NOT NULL,
+                emailAddress VARCHAR(100) NOT NULL UNIQUE,
+                phoneNumber VARCHAR(10) DEFAULT NULL UNIQUE,
+                country VARCHAR(15) DEFAULT NULL,
+                companyName VARCHAR(255) DEFAULT NULL,
+                CONSTRAINT checkEmail CHECK (emailAddress LIKE '%_@__%.__%' ESCAPE '_'),
+                CONSTRAINT checkPassword CHECK (password LIKE '%[A-Z]%' AND password LIKE '%[a-z]%' AND password LIKE '%[0-9]%' AND password LIKE '%[^a-zA-Z0-9]%'),
+                CONSTRAINT checkPhoneNum CHECK (phoneNumber LIKE '[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'),
+                CONSTRAINT checkUsername CHECK (username LIKE '[a-z0-9]%')
+            );
+        `);
 
 	} catch (error) {
 		console.log(error);

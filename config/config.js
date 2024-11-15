@@ -23,8 +23,12 @@ const pool = new sql.ConnectionPool(dbConfig);
 const poolConnect = pool.connect();
 
 // Handling connection errors at the top level once
-poolConnect.catch((err) => {
-	console.error("Database Connection Failed:", err);
-});
+poolConnect
+	.then(() => {
+		console.log("Connected to the database.");
+	})
+	.catch((err) => {
+		console.error("Database Connection Failed:", err);
+	});;
 
 module.exports = { sql, pool, poolConnect };
