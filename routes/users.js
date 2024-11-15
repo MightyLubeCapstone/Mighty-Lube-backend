@@ -1,6 +1,7 @@
 const express = require("express");
-const crypto = require("crypto"); // used for creating hash of password
+const bcyrpt = require("bcrypt"); // used for creating hash of password
 const { sql, pool } = require("../config/config");
+const uuid = require("uuid"); // used for creating session ID
 
 const router = express.Router();
 
@@ -19,7 +20,7 @@ async function getUser(username) {
 
 router.get("/", async (req, res) => {
 	try {
-		const { username } = req.query;
+		const { username } = req.header("username");
 		const user = await getUser(username);
 		if (!user) {
 			res.status(200).json({ message: "Username available!" });
@@ -31,7 +32,44 @@ router.get("/", async (req, res) => {
 	}
 });
 
-router.post("/", (req, res) => {
+async function postUser(userID, firstName, lastName, username, passwordHash, emailAddress, phoneNumber, companyName, country) {
+	try { // FIXME: Should I call to getuser to check if that user already exists
+		const request = pool.request();
+		const response = await request
+			.input("userID", sql.VarChar, userID)
+			.input("firstName", sql.VarChar, firstName)
+			.input("lastName", sql.VarChar, lastName)
+			.input("username", sql.VarChar, username)
+			.input("password", sql.VarChar, passwordHash)
+			.input("emailAddress", sql.VarChar, emailAddress)
+			.input("phoneNumber", sql.VarChar, phoneNumber)
+			.input("companyName", sql.VarChar, companyName)
+			.input("country", sql.VarChar, country)
+			.query(`INSERT INTO tblUsers (userID, firstName, lastName, username, password, emailAddress, phoneNumber, companyName, country)
+					VALUES ('${userID}', '${firstName}', '${lastName}', '${username}', '${passwordHash}', '${emailAddress}', '${phoneNumber}',
+					'${companyName}', '${country}')`);
+		return response.recordset[0];
+	} catch (error) {
+		console.log(error);
+		throw error;
+	}
+}
+
+async function postSession(sessionID, userID) {
+	try {
+		const request = pool.request();
+		const response = await request
+			.input("sessionID", sql.VarChar, sessionID)
+			.input("userID", sql.VarChar, userID)
+			.query(`INSERT INTO tblSessions (sessionID, userID) VALUES ('${sessionID}', '${userID}')`);
+		return response.recordset[0];
+	} catch (error) {
+		console.log(error);
+		throw error;
+	}
+}
+
+router.post("/", async (req, res) => {
 	try {
 		// Get header fields
 		const userID = req.header("userID"); // User ID
@@ -44,14 +82,7 @@ router.post("/", (req, res) => {
 		const companyName = req.header("companyName"); // Company name
 		const country = req.header("country"); // Country
 		// Check if not null fields are empty
-		if (
-			!userID ||
-			!username ||
-			!password ||
-			!firstName ||
-			!lastName ||
-			!emailAddress
-		) {
+		if (!userID || !username || !password || !firstName || !lastName || !emailAddress) {
 			return res.status(400).send("Missing fields");
 		}
 		// Username/password verification
@@ -95,46 +126,92 @@ router.post("/", (req, res) => {
 			return res.status(400).send("Invalid country");
 		} else {
 			// Hash password
-			const passwordHash = crypto
-				.createHash("sha256")
-				.update(username) // Use the username as the salt
-				.update(password) // Use the password as the data
-				.digest("hex"); // Get the hash in hexadecimal
+			const saltRounds = 10;
+			const passwordHash = bcyrpt.hashSync(password, saltRounds);
+
 			// Insert new account into database
-			database.executeQuery(
-				`INSERT INTO tblUsers (userID, firstName, lastName, username, password, emailAddress, phoneNumber, companyName, country)
-                     VALUES ('${userID}', '${firstName}', '${lastName}', '${username}', '${passwordHash}', '${emailAddress}', '${phoneNumber}',
-                      '${companyName}', '${country}')`
-			);
+			// FIXME: check if userID and username already exist using user var
+			const user = await postUser(userID, firstName, lastName, username, passwordHash, emailAddress, phoneNumber, companyName, country);
+
+			// // Insert new account into database
+			// database.executeQuery(
+			// 	`INSERT INTO tblUsers (userID, firstName, lastName, username, password, emailAddress, phoneNumber, companyName, country)
+            //          VALUES ('${userID}', '${firstName}', '${lastName}', '${username}', '${passwordHash}', '${emailAddress}', '${phoneNumber}',
+            //           '${companyName}', '${country}')`
+			// );
+
 			// Generate session ID
-			// FIXME: How do we generate a session ID?
+            const sessionID = uuid.v4();
 
 			// Add new session to tblSessions
-			database
-				.executeQuery(
-					`INSERT INTO tblSessions (sessionID, userID) VALUES ('${sessionID}', '${userID}')`
-				)
-				.then(() => {
-					// Return session ID
-					return res.status(200).send({
-						status: "success",
-						sessionID: sessionID,
-					});
-				})
-				.catch((e) => {
-					if (
-						e instanceof RequestError &&
-						e.message.includes("Violation of PRIMARY KEY constraint")
-					) {
-						return res.status(400).send("User already exists");
-					} else {
-						console.error(e);
-					}
+			const sessionInsert = await postSession(sessionID, userID);
+			if (sessionInsert) { // FIXME: how to handle errors
+				// Return session ID
+				return res.status(200).send({
+					status: "success",
+					sessionID: sessionID,
 				});
+			}
+
+			// Add new session to tblSessions
+			// database
+			// 	.executeQuery(
+			// 		`INSERT INTO tblSessions (sessionID, userID) VALUES ('${sessionID}', '${userID}')`
+			// 	)
+			// 	.then(() => {
+			// 		// Return session ID
+			// 		return res.status(200).send({
+			// 			status: "success",
+			// 			sessionID: sessionID,
+			// 		});
+			// 	})
+			// 	.catch((e) => {
+			// 		if (
+			// 			e instanceof RequestError &&
+			// 			e.message.includes("Violation of PRIMARY KEY constraint")
+			// 		) {
+			// 			return res.status(400).send("User already exists");
+			// 		} else {
+			// 			console.error(e);
+			// 		}
+			// 	});
 		}
 	} catch (e) {
 		console.error(e);
 		return res.status(500).send("Internal server error");
+	}
+});
+
+async function deleteSession(sessionID) {
+	try {
+		const request = pool.request();
+		const response = await request
+			.input("sessionID", sql.VarChar, sessionID)
+			.query("DELETE FROM tblSessions WHERE sessionID = @sessionID");
+			if (response.rowsAffected[0] === 0) {
+				res.status(400).json({ error: "Session not found" });
+			} else {
+				res.status(200).json({ message: "Session deleted" });
+			}
+		return response.recordset[0];
+	} catch (error) {
+		console.log(error);
+		throw error;
+	}
+}
+
+router.delete("/", async (req, res) => {
+	try {
+		const { sessionID } = req.header("sessionID");
+		const response = deleteSession(sessionID); // FIXME: how to handle errors
+		// if (!response) {
+		// 	res.status(400).json({ error: "Session not found" });
+		// } else {
+		// 	res.status(200).json({ message: "Session deleted" });
+		// }
+		
+	} catch (error) {
+		res.status(500).json({ error: "Internal server error" });
 	}
 });
 
