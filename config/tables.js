@@ -121,6 +121,16 @@ async function createTables() {
                 FOREIGN KEY (orderID) REFERENCES tblOrder (orderID)
             );
         `);
+
+        await request.query(`
+            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblOtherChainManufacturer')
+                create table tblOtherChainManufacturer(
+                orderID VARCHAR(36), 
+                otherChainManufacturerName VARCHAR(50),
+                FOREIGN KEY (orderID) REFERENCES tblOrder (orderID)
+            );
+        `);
+
         
         await request.query(`
             IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblOtherTrolleyColor')
