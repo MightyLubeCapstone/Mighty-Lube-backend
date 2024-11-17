@@ -2,6 +2,7 @@ const express = require("express");
 const bcyrpt = require("bcrypt"); // used for creating hash of password
 const { sql, pool } = require("../config/config");
 const uuid = require("uuid"); // used for creating session ID
+const sessions = require("./sessions");
 
 const router = express.Router();
 
@@ -32,7 +33,8 @@ router.get("/", async (req, res) => {
 	}
 });
 
-async function postUser(userID, firstName, lastName, username, passwordHash, emailAddress, phoneNumber, companyName, country) {
+async function postUser(userID, firstName, lastName, username, passwordHash, 
+						emailAddress, phoneNumber, companyName, country) {
 	try { // FIXME: Should I call to getuser to check if that user already exists
 		const request = pool.request();
 		const response = await request
@@ -48,20 +50,6 @@ async function postUser(userID, firstName, lastName, username, passwordHash, ema
 			.query(`INSERT INTO tblUsers (userID, firstName, lastName, username, password, emailAddress, phoneNumber, companyName, country)
 					VALUES ('${userID}', '${firstName}', '${lastName}', '${username}', '${passwordHash}', '${emailAddress}', '${phoneNumber}',
 					'${companyName}', '${country}')`);
-		return response.recordset[0];
-	} catch (error) {
-		console.log(error);
-		throw error;
-	}
-}
-
-async function postSession(sessionID, userID) {
-	try {
-		const request = pool.request();
-		const response = await request
-			.input("sessionID", sql.VarChar, sessionID)
-			.input("userID", sql.VarChar, userID)
-			.query(`INSERT INTO tblSessions (sessionID, userID) VALUES ('${sessionID}', '${userID}')`);
 		return response.recordset[0];
 	} catch (error) {
 		console.log(error);
@@ -87,12 +75,8 @@ router.post("/", async (req, res) => {
 		}
 		// Username/password verification
 		// FIXME: What are the username/password min requirements?
-		else if (
-			username.length < 6 ||
-			username.length > 24 ||
-			password.length < 8 ||
-			password.length > 50
-		) {
+		else if (username.length < 6 || username.length > 24 ||
+				 password.length < 8 || password.length > 50) {
 			return res.status(400).send("Invalid username/password");
 		}
 		// Prevent SQL injection
@@ -104,21 +88,14 @@ router.post("/", async (req, res) => {
 			return res.status(400).send("Invalid first name");
 		} else if (!lastName.match(/^[a-zA-Z]+$/)) {
 			return res.status(400).send("Invalid last name");
-		} else if (
-			!emailAddress.match(/^[a-zA-Z0-9]+@[a-zA-Z0-9]+\.[a-zA-Z0-9]+$/)
-		) {
+		} else if ( !emailAddress.match(/^[a-zA-Z0-9]+@[a-zA-Z0-9]+\.[a-zA-Z0-9]+$/)) {
 			return res.status(400).send("Invalid email address");
-		} else if (
-			phoneNumber !== undefined &&
-			!phoneNumber.match(/^\(?\d{3}\)?[\d -]?\d{3}[\d -]?\d{4}$/)
-		) {
+		} else if (phoneNumber !== undefined &&
+				   !phoneNumber.match(/^\(?\d{3}\)?[\d -]?\d{3}[\d -]?\d{4}$/)) {
 			return res.status(400).send("Invalid phone number");
 		}
 		// Handle non-required fields
-		else if (
-			companyName !== undefined &&
-			!companyName.match(/^[a-zA-Z0-9]+$/)
-		) {
+		else if (companyName !== undefined && !companyName.match(/^[a-zA-Z0-9]+$/)) {
 			return res.status(400).send("Invalid company name");
 		}
 		// FIXME: Do we want to check if the country is valid? https://www.npmjs.com/package/countries-list
@@ -131,74 +108,31 @@ router.post("/", async (req, res) => {
 
 			// Insert new account into database
 			// FIXME: check if userID and username already exist using user var
-			const user = await postUser(userID, firstName, lastName, username, passwordHash, emailAddress, phoneNumber, companyName, country);
+			const user = await postUser(userID, firstName, lastName, username, 
+										passwordHash, emailAddress, phoneNumber, 
+										companyName, country);
+			if (user) {
+				// Generate session ID
+				const sessionID = uuid.v4();
 
-			// // Insert new account into database
-			// database.executeQuery(
-			// 	`INSERT INTO tblUsers (userID, firstName, lastName, username, password, emailAddress, phoneNumber, companyName, country)
-            //          VALUES ('${userID}', '${firstName}', '${lastName}', '${username}', '${passwordHash}', '${emailAddress}', '${phoneNumber}',
-            //           '${companyName}', '${country}')`
-			// );
-
-			// Generate session ID
-            const sessionID = uuid.v4();
-
-			// Add new session to tblSessions
-			const sessionInsert = await postSession(sessionID, userID);
-			if (sessionInsert) { // FIXME: how to handle errors
-				// Return session ID
-				return res.status(200).send({
-					status: "success",
-					sessionID: sessionID,
-				});
+				// Add new session to tblSessions
+				const sessionInsert = await sessions.postSession(sessionID, userID);
+				if (sessionInsert) {
+					// Return session ID
+					return res.status(200).send({
+						status: "success",
+						sessionID: sessionID,
+					});
+				}
+			} else{
+				return res.status(400).send("Account not created");
 			}
-
-			// Add new session to tblSessions
-			// database
-			// 	.executeQuery(
-			// 		`INSERT INTO tblSessions (sessionID, userID) VALUES ('${sessionID}', '${userID}')`
-			// 	)
-			// 	.then(() => {
-			// 		// Return session ID
-			// 		return res.status(200).send({
-			// 			status: "success",
-			// 			sessionID: sessionID,
-			// 		});
-			// 	})
-			// 	.catch((e) => {
-			// 		if (
-			// 			e instanceof RequestError &&
-			// 			e.message.includes("Violation of PRIMARY KEY constraint")
-			// 		) {
-			// 			return res.status(400).send("User already exists");
-			// 		} else {
-			// 			console.error(e);
-			// 		}
-			// 	});
 		}
 	} catch (e) {
 		console.error(e);
 		return res.status(500).send("Internal server error");
 	}
 });
-
-async function deleteSession(sessionID) {
-	try {
-		const request = pool.request();
-		const response = await request
-			.input("sessionID", sql.VarChar, sessionID)
-			.query("DELETE FROM tblSessions WHERE sessionID = @sessionID");
-			if (response.rowsAffected[0] === 0) {
-				res.status(400).json({ error: "Session not found" });
-			} else {
-				res.status(200).json({ message: "Session deleted" });
-			}
-		return response.recordset[0];
-	} catch (error) {
-		console.log(error);
-		throw error;
-	}
-}
 
 async function deleteUser() {
 	try {
@@ -215,14 +149,13 @@ async function deleteUser() {
 
 router.delete("/", async (req, res) => {
 	try {
-		const { sessionID } = req.header("sessionID");
-		const response = deleteSession(sessionID); // FIXME: how to handle errors
-		// if (!response) {
-		// 	res.status(400).json({ error: "Session not found" });
-		// } else {
-		// 	res.status(200).json({ message: "Session deleted" });
-		// }
-		
+		const { userID } = req.header("userID");
+		const response = deleteUser(userID);
+		if (!response) {
+			res.status(400).json({ error: "User not found" });
+		} else {
+			res.status(200).json({ message: "User deleted" });
+		}
 	} catch (error) {
 		res.status(500).json({ error: "Internal server error" });
 	}
