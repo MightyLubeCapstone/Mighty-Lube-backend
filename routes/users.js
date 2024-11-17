@@ -200,6 +200,19 @@ async function deleteSession(sessionID) {
 	}
 }
 
+async function deleteUser() {
+	try {
+		const request = pool.request();
+		const response = await request
+			.input("userID", sql.VarChar, userID)
+			.query("DELETE FROM tblUsers WHERE userID = @userID");
+		return response.recordset[0];
+	} catch (error) {
+		console.log(error);
+		throw error;
+	}
+}
+
 router.delete("/", async (req, res) => {
 	try {
 		const { sessionID } = req.header("sessionID");
