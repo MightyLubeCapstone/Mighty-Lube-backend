@@ -183,37 +183,4 @@ router.post("/register", async (req, res) => {
 	}
 });
 
-async function deleteSession(sessionID) {
-	try {
-		const request = pool.request();
-		const response = await request
-			.input("sessionID", sql.VarChar, sessionID)
-			.query("DELETE FROM tblSessions WHERE sessionID = @sessionID");
-		if (response.rowsAffected[0] === 0) {
-			res.status(400).json({ error: "Session not found" });
-		} else {
-			res.status(200).json({ message: "Session deleted" });
-		}
-		return response.recordset[0];
-	} catch (error) {
-		console.log(error);
-		throw error;
-	}
-}
-
-router.delete("/", async (req, res) => {
-	try {
-		const { sessionID } = req.header("sessionID");
-		const response = deleteSession(sessionID); // FIXME: how to handle errors
-		// if (!response) {
-		// 	res.status(400).json({ error: "Session not found" });
-		// } else {
-		// 	res.status(200).json({ message: "Session deleted" });
-		// }
-
-	} catch (error) {
-		res.status(500).json({ error: "Internal server error" });
-	}
-});
-
 module.exports = router;
