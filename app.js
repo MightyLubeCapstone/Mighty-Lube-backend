@@ -3,10 +3,8 @@ const session = require("express-session");
 const uuid = require("uuid");
 const bodyParser = require("body-parser");
 const cors = require("cors");
-const bcrypt = require("bcrypt");
 
 const { createTables } = require("./config/tables");
-const { sql, pool, poolConnect } = require("./config/config");
 const dotenv = require("dotenv");
 dotenv.config();
 
@@ -33,9 +31,11 @@ app.use(
 
 // Import route modules
 const usersRoute = require("./routes/users");
+const { sessionsRoute } = require("./routes/sessions")
 
 // Use route modules
 app.use("/api/users", usersRoute);
+app.use("/api/sessions", sessionsRoute);
 
 let boolCreate = false; // variable to conditionally run the createTables function.
 
