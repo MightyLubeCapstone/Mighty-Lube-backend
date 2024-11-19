@@ -16,7 +16,7 @@ async function comparePassword(password, hash) {
 	return await bcrypt.compare(password, hash);
 }
 
-async function authenticate(req, res, next) {
+async function login(req, res, next) {
 	try {
 		const { username, password } = req.headers;
 		await poolConnect;
@@ -24,17 +24,17 @@ async function authenticate(req, res, next) {
 		const result = await request.input('Username', sql.NVarChar, username)
 			.query('SELECT * FROM tblUsers WHERE Username = @Username');
 		if (result.recordset.length === 0) {
-			return false;
+			return res.status(400).json({ error: "Invalid username" });
 		}
 		const user = result.recordset[0];
 		const isValid = await comparePassword(password, user.password);
 		if (!isValid) {
-			return false;
+			return res.status(401).json({ error: "Invalid password" });
 		}
 		req.userID = user.userID;
 		next();
 	} catch (error) {
-		console.log(error);
+		throw error;
 	}
 }
 
@@ -53,7 +53,7 @@ async function postSession(sessionID, userID) {
 	}
 }
 
-sessionsRoute.post("/", authenticate, async (req, res) => {
+sessionsRoute.post("/", login, async (req, res) => {
 	try {
 		// Add new session to tblSessions
 		const sessionID = uuid.v4();
@@ -90,15 +90,29 @@ async function deleteSession(sessionID) {
 	}
 }
 
-sessionsRoute.delete("/", async (req, res) => {
-	try {
-		const { sessionid: sessionID } = req.headers;
-		if (sessionID == null) {
-			res.status(400).json({ error: "No session provided!" });
+async function authenticate(req, res, next) {
+	const { authorization } = req.headers;
+	if (authorization && authorization.startsWith("Bearer ")) {
+		req.sessionID = authorization.slice(7); // Add token to the request object
+		await poolConnect;
+		const request = pool.request();
+		const response = await request
+			.input("sessionID", sql.VarChar, req.sessionID)
+			.query("SELECT * FROM tblSessions WHERE sessionID = @sessionID"); // this will need to be more complex later to handle expired sessions that are still in the table.
+		if (response.recordset.length === 0) {
+			return res.status(401).json({ error: "Invalid session!" });
 		}
-		const response = await deleteSession(sessionID); // FIXME: how to handle errors
+		next();
+	} else {
+		res.status(401).json({ error: "Unauthorized: Missing token" });
+	}
+}
+
+sessionsRoute.delete("/", authenticate, async (req, res) => {
+	try {
+		const response = await deleteSession(req.sessionID); // FIXME: how to handle errors
 		if (!response) {
-			res.status(400).json({ error: "Session not found" });
+			res.status(400).json({ error: "Session could not be deleted" });
 		} else {
 			res.status(200).json({ message: "Session deleted" });
 		}
@@ -108,4 +122,4 @@ sessionsRoute.delete("/", async (req, res) => {
 	}
 });
 
-module.exports = { hashPassword, postSession, sessionsRoute };
+module.exports = { authenticate, hashPassword, postSession, sessionsRoute };
