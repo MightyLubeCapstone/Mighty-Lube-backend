@@ -347,16 +347,18 @@ async function addMeasurementUnit(newMeasurementUnit) {
 	}
 };
 
-async function addOrder(newAppEnv) {
+async function addOrder(newOrder) {
 
 	try {
 		const request = pool.request();
 
 		const query =
-			"Insert into ** values ()";
+			"Insert into tblOrder values (@orderID, @productID, @userID)";
 
-		request.input("**", sql.**, newAppEnv.**);
-		
+		request.input("orderID", sql.VarChar, newOrder.orderID);
+		request.input("productID", sql.VarChar, newOrder.productID);
+		request.input("userID", sql.VarChar, newOrder.userID);
+
 
 		await request.query(query);
 
@@ -372,16 +374,16 @@ async function addOrder(newAppEnv) {
 };
 
 
-async function addOtherWheelManufacturer(newAppEnv) {
+async function addOtherWheelManufacturer(newOtherWheelManufacturer) {
 
 	try {
 		const request = pool.request();
 
 		const query =
-			"Insert into ** values ()";
+			"Insert into tblOtherWheelManufacturer values (@orderID, @otherWheelManufacturerName)";
 
-		request.input("**", sql.**, newAppEnv.**);
-		
+			request.input("orderID", sql.VarChar, newOtherWheelManufacturer.orderID);
+			request.input("otherWheelManufacturerName", sql.VarChar, newOtherWheelManufacturer.otherWheelManufacturerName);
 
 		await request.query(query);
 
@@ -397,16 +399,17 @@ async function addOtherWheelManufacturer(newAppEnv) {
 };
 
 
-async function addOtherTrolleyColor(newAppEnv) {
+async function addOtherTrolleyColor(newOtherTrolleyColor) {
 
 	try {
 		const request = pool.request();
 
 		const query =
-			"Insert into ** values ()";
+			"Insert into tblOtherTrolleyColor values (@orderID, @oherTrolleyColorName)";
 
-		request.input("**", sql.**, newAppEnv.**);
-		
+		request.input("orderID", sql.VarChar, newOtherTrolleyColor.orderID);
+		request.input("oherTrolleyColorName", sql.VarChar, newOtherTrolleyColor.oherTrolleyColorName);
+
 
 		await request.query(query);
 
@@ -422,16 +425,17 @@ async function addOtherTrolleyColor(newAppEnv) {
 };
 
 
-async function addOtherConveyorStyle(newAppEnv) {
+async function addOtherConveyorStyle(newOtherConveyorStyle) {
 
 	try {
 		const request = pool.request();
 
 		const query =
-			"Insert into ** values ()";
+			"Insert into tblOtherConveyorStyle values (@orderID, @otherConveyorStyleName)";
 
-		request.input("**", sql.**, newAppEnv.**);
-		
+			request.input("orderID", sql.VarChar, newOtherConveyorStyle.orderID);
+			request.input("otherConveyorStyleName", sql.VarChar, newOtherConveyorStyle.otherConveyorStyleName);
+
 
 		await request.query(query);
 
@@ -520,16 +524,17 @@ async function addOtherAppEnv(newOtherAppEnv) {
 
 
 
-async function addProduct(newAppEnv) {
+async function addProduct(newProduct) {
 
 	try {
 		const request = pool.request();
 
 		const query =
-			"Insert into ** values ()";
+			"Insert into tblProduct values (@productID, @productType)";
 
-		request.input("**", sql.**, newAppEnv.**);
-		
+		request.input("productID", sql.VarChar, newProduct.productID);
+		request.input("productType", sql.Int, newProduct.productType);
+
 
 		await request.query(query);
 
@@ -545,16 +550,17 @@ async function addProduct(newAppEnv) {
 };
 
 
-async function addProductType(newAppEnv) {
+async function addProductType(newProductType) {
 
 	try {
 		const request = pool.request();
 
 		const query =
-			"Insert into ** values ()";
+			"Insert into tblProductType values (@productType, @productTypeName)";
 
-		request.input("**", sql.**, newAppEnv.**);
-		
+		request.input("productType", sql.Int, newProductType.productType);
+		request.input("productTypeName", sql.Int, newProductType.productTypeName);
+
 
 		await request.query(query);
 
@@ -570,16 +576,18 @@ async function addProductType(newAppEnv) {
 };
 
 
-async function addProteinProduct(newAppEnv) {
+async function addProteinProduct(newProteinProduct) {
 
 	try {
 		const request = pool.request();
 
 		const query =
-			"Insert into ** values ()";
+			"Insert into tblProteinProduct values (@productID, @proteinName, @proteinInfoID)";
 
-		request.input("**", sql.**, newAppEnv.**);
-		
+		request.input("productID", sql.VarChar, newProteinProduct.productID);
+		request.input("proteinName", sql.VarChar, newProteinProduct.proteinName);
+		request.input("proteinInfoID", sql.VarChar, newProteinProduct.proteinInfoID);
+
 
 		await request.query(query);
 
@@ -595,16 +603,17 @@ async function addProteinProduct(newAppEnv) {
 };
 
 
-async function addReservoirSize(newAppEnv) {
+async function addReservoirSize(newReservoirSize) {
 
 	try {
 		const request = pool.request();
 
 		const query =
-			"Insert into ** values ()";
+			"Insert into tblReservoirSize values (@reservoirSizeType, @reservoirSizeName)";
 
-		request.input("**", sql.**, newAppEnv.**);
-		
+		request.input("reservoirSizeType", sql.Int, newReservoirSize.reservoirSizeType);
+		request.input("reservoirSizeName", sql.VarChar, newReservoirSize.reservoirSizeName);
+
 
 		await request.query(query);
 
@@ -620,16 +629,17 @@ async function addReservoirSize(newAppEnv) {
 };
 
 
-async function addSession(newAppEnv) {
+async function addTrolleyType(newTrolleyType) {
 
 	try {
 		const request = pool.request();
 
 		const query =
-			"Insert into ** values ()";
+			"Insert into tblTrolleyType values (@trolleyType, @trolleyTypeName)";
 
-		request.input("**", sql.**, newAppEnv.**);
-		
+		request.input("trolleyType", sql.Int, newTrolleyType.trolleyType);
+		request.input("trolleyTypeName", sql.Int, newTrolleyType.trolleyTypeName);
+
 
 		await request.query(query);
 
@@ -645,16 +655,16 @@ async function addSession(newAppEnv) {
 };
 
 
-async function addTrolleyType(newAppEnv) {
+async function addTrolleyColor(newTrolleyColor) {
 
 	try {
 		const request = pool.request();
 
 		const query =
-			"Insert into ** values ()";
+			"Insert into tblTrolleyColor values (@trolleyColorType, @trolleyColorName)";
 
-		request.input("**", sql.**, newAppEnv.**);
-		
+		request.input("trolleyColorType", sql.Int, newTrolleyColor.trolleyColorType);
+		request.input("trolleyColorName", sql.Int, newTrolleyColor.trolleyColorName);		
 
 		await request.query(query);
 
@@ -670,16 +680,17 @@ async function addTrolleyType(newAppEnv) {
 };
 
 
-async function addTrolleyColor(newAppEnv) {
+async function addSpeedUnit(newSpeedUnit) {
 
 	try {
 		const request = pool.request();
 
 		const query =
-			"Insert into ** values ()";
+			"Insert into tblSpeedUnit values (@speedUnitType, @speedUnitName)";
 
-		request.input("**", sql.**, newAppEnv.**);
-		
+		request.input("speedUnitType", sql.Int, newSpeedUnit.speedUnitType);
+		request.input("speedUnitName", sql.Int, newSpeedUnit.speedUnitName);
+
 
 		await request.query(query);
 
@@ -695,16 +706,17 @@ async function addTrolleyColor(newAppEnv) {
 };
 
 
-async function addSpeedUnit(newAppEnv) {
+async function addTravelDirection(newTravelDirection) {
 
 	try {
 		const request = pool.request();
 
 		const query =
-			"Insert into ** values ()";
+			"Insert into tblTravelDirection values (@travelDirectionType, @travelDirectionDescription)";
 
-		request.input("**", sql.**, newAppEnv.**);
-		
+		request.input("travelDirectionType", sql.Int, newTravelDirection.travelDirectionType);
+		request.input("travelDirectionDescription", sql.Int, newTravelDirection.travelDirectionDescription);
+
 
 		await request.query(query);
 
@@ -720,16 +732,16 @@ async function addSpeedUnit(newAppEnv) {
 };
 
 
-async function addTravelDirection(newAppEnv) {
+async function addWheelManufacturer(newWheelManufacturer) {
 
 	try {
 		const request = pool.request();
 
 		const query =
-			"Insert into ** values ()";
+			"Insert into tblWheelManufacturer values (@wheelManufacturerType, @wheelManufacturerName)";
 
-		request.input("**", sql.**, newAppEnv.**);
-		
+		request.input("wheelManufacturerType", sql.Int, newWheelManufacturer.wheelManufacturerType);
+		request.input("wheelManufacturerName", sql.VarChar, newWheelManufacturer.wheelManufacturerName);
 
 		await request.query(query);
 
@@ -745,16 +757,17 @@ async function addTravelDirection(newAppEnv) {
 };
 
 
-async function addWheelManufacturer(newAppEnv) {
+async function addMetalType(newMetalType) {
 
 	try {
 		const request = pool.request();
 
 		const query =
-			"Insert into ** values ()";
+			"Insert into tblMetalType values (@metalType, @metalTypeName)";
 
-		request.input("**", sql.**, newAppEnv.**);
-		
+		request.input("metalType", sql.Int, newMetalType.metalType);
+		request.input("metalTypeName", sql.Int, newMetalType.metalTypeName);
+
 
 		await request.query(query);
 
@@ -770,41 +783,16 @@ async function addWheelManufacturer(newAppEnv) {
 };
 
 
-async function addMetalType(newAppEnv) {
+async function addProteinChainManufacturer(newProteinChainManufacturer) {
 
 	try {
 		const request = pool.request();
 
 		const query =
-			"Insert into ** values ()";
+			"Insert into tblProteinChainManufacturer values (@chainManufacturerType, @chainManufacturerName)";
 
-		request.input("**", sql.**, newAppEnv.**);
-		
-
-		await request.query(query);
-
-		console.log("** Added");
-	} catch (error) {
-		console.error("Error", error);
-
-		throw error;
-	}
-
-
-
-};
-
-
-async function addProteinChainManufacturer(newAppEnv) {
-
-	try {
-		const request = pool.request();
-
-		const query =
-			"Insert into ** values ()";
-
-		request.input("**", sql.**, newAppEnv.**);
-		
+		request.input("chainManufacturerType", sql.Int, newProteinChainManufacturer.chainManufacturerType);
+		request.input("chainManufacturerName", sql.VarChar, newProteinChainManufacturer.chainManufacturerName);
 
 		await request.query(query);
 
@@ -985,9 +973,177 @@ async function addProteinMeasurementOP8SS(newProteinMeasurementOP8SS){
 	}
 };
 
-async function addProteinCustomPowerFoodGradeLubrication
-async function addProteinConveyorSpecFoodGradeLubrication
-async function addProteinGeneralFoodGradeLubrication
-async function addProteinMonitoringFoodGradeLubrication
-async function addProteinMeasurementFoodGradeLubrication
-async function addProteinWireFoodGradeLubrication
+
+async function addProteinGeneralFoodGradeLubrication(newProteinGeneralFoodGradeLubrication){
+	try {
+		const request = pool.request();
+
+		const query =
+			"Insert into tblProteinGeneral values (@orderID, @conveyorName, @chainSizeType, @chainManufacturerType, @wheelManufacturerType, @chainPinType, @conveyorLength, @measurementUnitType, @conveyorSpeed, @speedUnitType, @variableSpeed, @travelDirection, @metalType, @conveyorStyleType, @trolleyColorType, @trolleyType, @appEnvType, @tempSurrounding, @loadedStatus, @swingStatus, @plantLayout, @chainPictures, @numProductRequested)";
+
+		request.input("orderID", sql.VarChar, newProteinGeneralFoodGradeLubrication.orderID);
+		request.input("conveyorName", sql.VarChar, newProteinGeneralFoodGradeLubrication.conveyorName);
+		request.input("chainSizeType", sql.Int, newProteinGeneralFoodGradeLubrication.chainSizeType);
+		request.input("chainManufacturerType", sql.Int, newProteinGeneralFoodGradeLubrication.chainManufacturerType);
+		request.input("wheelManufacturerType", sql.Int, newProteinGeneralFoodGradeLubrication.wheelManufacturerType);
+		request.input("chainPinType", sql.Int, newProteinGeneralFoodGradeLubrication.chainPinType);
+		request.input("conveyorLength", sql.Decimal, newProteinGeneralFoodGradeLubrication.conveyorLength);
+		request.input("measurementUnitType", sql.Int, newProteinGeneralFoodGradeLubrication.measurementUnitType);
+		request.input("conveyorSpeed", sql.Decimal, newProteinGeneralFoodGradeLubrication.conveyorSpeed);
+		request.input("speedUnitType", sql.Int, newProteinGeneralFoodGradeLubrication.speedUnitType);
+		request.input("variableSpeed", sql.Decimal, newProteinGeneralFoodGradeLubrication.variableSpeed);
+		request.input("travelDirection", sql.Int, newProteinGeneralFoodGradeLubrication.travelDirection);
+		request.input("metalType", sql.Int, newProteinGeneralFoodGradeLubrication.metalType);
+		request.input("conveyorStyleType", sql.Int, newProteinGeneralFoodGradeLubrication.conveyorStyleType);
+		request.input("trolleyColorType", sql.Int, newProteinGeneralFoodGradeLubrication.trolleyColorType);
+		request.input("trolleyType", sql.Int, newProteinGeneralFoodGradeLubrication.trolleyType);
+		request.input("appEnvType", sql.Int, newProteinGeneralFoodGradeLubrication.appEnvType);
+		request.input("tempSurrounding", sql.Bit, newProteinGeneralFoodGradeLubrication.tempSurrounding);
+		request.input("loadedStatus", sql.Bit, newProteinGeneralFoodGradeLubrication.loadedStatus);
+		request.input("swingStatus", sql.Bit, newProteinGeneralFoodGradeLubrication.swingStatus);
+		request.input("plantLayout", sql.Bit, newProteinGeneralFoodGradeLubrication.plantLayout);
+		request.input("chainPictures", sql.Bit, newProteinGeneralFoodGradeLubrication.chainPictures);
+		request.input("numProductRequested", sql.Int, newProteinGeneralFoodGradeLubrication.numProductRequested);
+
+		await request.query(query);
+
+		console.log(" Info Added");
+	} catch (error) {
+		console.error("Error", error);
+
+		throw error;
+	}
+};
+
+
+async function addProteinCustomPowerFoodGradeLubrication(newProteinCustomPowerFoodGradeLubrication){
+	try {
+		const request = pool.request();
+
+		const query =
+			"Insert into tblProteinCustomPower values (@orderID, @operatingVoltSingle, @controlVolt)"
+		request.input("orderID", sql.VarChar, newProteinCustomPowerFoodGradeLubrication.orderID);
+		request.input("operatingVoltSingle", sql.Decimal, newProteinCustomPowerFoodGradeLubrication.operatingVoltSingle);
+		request.input("controlVolt", sql.Decimal, newProteinCustomPowerFoodGradeLubrication.controlVolt);
+
+
+		await request.query(query);
+
+		console.log(" Info Added");
+	} catch (error) {
+		console.error("Error", error);
+
+		throw error;
+	}
+};
+
+
+async function addProteinMonitoringFoodGradeLubrication(newProteinMonitoringFoodGradeLubrication){
+	try {
+		const request = pool.request();
+
+		const query =
+			"Insert into tblProteinMonitoring values (@orderID, @existingConnection, @newConnection, @motorAmp, @driveTakeUp, @takeUpDistance, @motorTemp, @motorValidation, @pitchValidation)";
+
+		request.input("orderID", sql.VarChar, newProteinMonitoringFoodGradeLubrication.orderID);
+		request.input("existingConnection", sql.Bit, newProteinMonitoringFoodGradeLubrication.existingConnection);
+		request.input("newConnection", sql.Bit, newProteinMonitoringFoodGradeLubrication.newConnection);
+		request.input("motorAmp", sql.Bit, newProteinMonitoringFoodGradeLubrication.motorAmp);
+		request.input("driveTakeUp", sql.Bit, newProteinMonitoringFoodGradeLubrication.orderID);
+		request.input("takeUpDistance", sql.Bit, newProteinMonitoringFoodGradeLubrication.takeUpDistance);
+		request.input("motorTemp", sql.Bit, newProteinMonitoringFoodGradeLubrication.motorTemp);
+		request.input("motorValidation", sql.Bit, newProteinMonitoringFoodGradeLubrication.motorValidation);
+		request.input("pitchValidation", sql.Bit, newProteinMonitoringFoodGradeLubrication.pitchValidation);
+
+
+		await request.query(query);
+
+		console.log("Info Added");
+	} catch (error) {
+		console.error("Error", error);
+
+		throw error;
+	}
+};
+
+
+async function addProteinConveyorSpecFoodGradeLubrication(newProteinConveyorSpecFoodGradeLubrication){
+	try {
+		const request = pool.request();
+
+		const query =
+			"Insert into tblProteinConveyorSpec values (@orderID, @sideLubrication, @topLubrication, @timeLubrication, @timeDelay, @reservoirSizeType, @reservoirSizeQuanity, @chainCleanStatus)";
+
+		request.input("orderID", sql.VarChar, newProteinConveyorSpecFoodGradeLubrication.orderID);
+		request.input("sideLubrication", sql.Bit, newProteinConveyorSpecFoodGradeLubrication.sideLubrication);
+		request.input("timeLubrication", sql.Bit, newProteinConveyorSpecFoodGradeLubrication.timeLubrication);
+		request.input("timeDelay", sql.VarChar, newProteinConveyorSpecFoodGradeLubrication.timeDelay);
+		request.input("reservoirSizeType", sql.Int, newProteinConveyorSpecFoodGradeLubrication.reservoirSizeType);
+		request.input("reservoirSizeQuanity", sql.Int, newProteinConveyorSpecFoodGradeLubrication.reservoirSizeQuanity);
+		request.input("chainCleanStatus", sql.Bit, newProteinConveyorSpecFoodGradeLubrication.chainCleanStatus);
+
+		await request.query(query);
+
+		console.log("OP-8SS Measurement Info Added");
+	} catch (error) {
+		console.error("Error", error);
+
+		throw error;
+	}
+};
+
+
+async function addProteinWireFoodGradeLubrication(newProteinWireFoodGradeLubrication){
+	try {
+		const request = pool.request();
+
+		const query =
+			"Insert into tblProteinWire values (@orderID, @twoConductor, @fourConductor, @sevenConductor, @twelveConductor, @junctionBoxNum, @wireMeasurementUnitType)";
+
+		request.input("orderID", sql.VarChar, newProteinWireFoodGradeLubrication.orderID);
+		request.input("twoConductor", sql.Int, newProteinWireFoodGradeLubrication.twoConductor);
+		request.input("fourConductor", sql.Int, newProteinWireFoodGradeLubrication.fourConductor);
+		request.input("sevenConductor", sql.Int, newProteinWireFoodGradeLubrication.sevenConductor);
+		request.input("twelveConductor", sql.Int, newProteinWireFoodGradeLubrication.twelveConductor);
+		request.input("junctionBoxNum", sql.Int, newProteinWireFoodGradeLubrication.junctionBoxNum);
+		request.input("wireMeasurementUnitType", sql.Int, newProteinWireFoodGradeLubrication.wireMeasurementUnitType);
+
+		await request.query(query);
+
+		console.log(" Info Added");
+	} catch (error) {
+		console.error("Error", error);
+
+		throw error;
+	}
+};
+
+
+
+async function addProteinMeasurementFoodGradeLubrication(newProteinMeasurementFoodGradeLubrication){
+	try {
+		const request = pool.request();
+
+		const query =
+			"Insert into tblProteinMeasurement values (@orderID, @powerTrolleyWheel, @powerRailWidth, @powerRailHeight, @measurementUnitType)";
+
+		request.input("orderID", sql.VarChar, newProteinMeasurementFoodGradeLubrication.orderID);
+		request.input("powerTrolleyWheel", sql.Decimal, newProteinMeasurementFoodGradeLubrication.powerTrolleyWheel);
+		request.input("powerRailWidth", sql.Decimal, newProteinMeasurementFoodGradeLubrication.powerRailWidth);
+		request.input("powerRailHeight", sql.Decimal, newProteinMeasurementFoodGradeLubrication.powerRailHeight);
+		request.input("measurementUnitType", sql.Int, newProteinMeasurementFoodGradeLubrication.measurementUnitType);
+
+
+		await request.query(query);
+
+		console.log(" Info Added");
+	} catch (error) {
+		console.error("Error", error);
+
+		throw error;
+	}
+};
+
+
+
+

@@ -260,6 +260,7 @@ async function createTables() {
                 tempSurrounding BIT,
                 loadedStatus BIT,
                 numProductRequested INT,
+                trolleyColorType INT,
                 FOREIGN KEY (orderID) REFERENCES tblOrder (orderID),
                 FOREIGN KEY (chainSizeType) REFERENCES tblChainSize (chainSizeType),
                 FOREIGN KEY (chainManufacturerType) REFERENCES tblProteinChainManufacturer (chainManufacturerType),
@@ -271,7 +272,8 @@ async function createTables() {
                 FOREIGN KEY (trolleyType) REFERENCES tblTrolleyType (trolleyType),
                 FOREIGN KEY (measurementUnitType) REFERENCES tblMeasurementUnit (measurementUnitType),
                 FOREIGN KEY (travelDirectionType) REFERENCES tblTravelDirection (travelDirectionType),
-                FOREIGN KEY (appEnvType) REFERENCES tblAppEnv (appEnvType)
+                FOREIGN KEY (appEnvType) REFERENCES tblAppEnv (appEnvType),
+                FOREIGN KEY (trolleyColorType) REFERENCES tblTrolleyColor(trolleyColorType)
             );
         `);
         
