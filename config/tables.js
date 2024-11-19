@@ -430,6 +430,22 @@ async function createTables() {
             );
         `);
 
+
+
+        await request.query(`
+            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblDrafts')
+            create table tblDrafts(
+                draftID varchar(10) Primary key,
+                draftName varchar(50),
+                dateCreated datetime not null default getdate(),
+                totalPrice decimal (10,2),
+                orderID varchar(36),
+                
+                foreign key(orderID) references tblOrder(orderID)
+            );
+        `);
+
+
 	} catch (error) {
 		console.log(error);
 		throw error;
