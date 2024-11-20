@@ -108,6 +108,8 @@ async function createTables() {
                 orderID VARCHAR(36) PRIMARY KEY,
                 productID VARCHAR(50),
                 userID VARCHAR(50),
+                orderStatus BIT,
+                quantity INT,
                 FOREIGN KEY (productID) REFERENCES tblProduct (productID),
                 FOREIGN KEY (userID) REFERENCES tblUsers (userID)
             );
@@ -259,7 +261,6 @@ async function createTables() {
                 appEnvType INT,
                 tempSurrounding BIT,
                 loadedStatus BIT,
-                numProductRequested INT,
                 trolleyColorType INT,
                 FOREIGN KEY (orderID) REFERENCES tblOrder (orderID),
                 FOREIGN KEY (chainSizeType) REFERENCES tblChainSize (chainSizeType),
@@ -431,7 +432,6 @@ async function createTables() {
         `);
 
 
-
         await request.query(`
             IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblDrafts')
             create table tblDrafts(
@@ -440,7 +440,6 @@ async function createTables() {
                 dateCreated datetime not null default getdate(),
                 totalPrice decimal (10,2),
                 orderID varchar(36),
-                
                 foreign key(orderID) references tblOrder(orderID)
             );
         `);
