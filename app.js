@@ -65,7 +65,7 @@ if (boolCreate) {
 		});
 } else {
 	const port = process.env.PORT || 3030;
-	await readyDatabase();
+	readyDatabase();
 	app.listen(port, () => {
 		console.log(`Listening on port ${port}...`);
 	});
