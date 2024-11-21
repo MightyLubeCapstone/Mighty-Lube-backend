@@ -5,6 +5,34 @@ const uuid = require("uuid"); // used for creating session ID
 
 const sessionsRoute = express.Router();
 
+async function getSession(sessionID) {
+	try {
+		await poolConnect;
+		const request = pool.request();
+		const response = await request
+			.input("sessionID", sql.VarChar, sessionID)
+			.query("SELECT * FROM tblSessions WHERE sessionID = @sessionID"); // this will need to be more complex later to handle expired sessions that are still in the table.
+		return response.recordset[0];
+	} catch (error) {
+		console.log(error);
+		throw error;
+	}
+}
+
+sessionsRoute.get("/", async (req, res) => {
+	try {
+		const response = await getSession(req.sessionID);
+		if (!response) {
+			res.status(400).json({ error: "Session not found" });
+		} else {
+			res.status(200).json({ status: "Valid Session"});
+		}
+	}
+	catch (e) {
+		res.status(500).json({ error: "Internal server error : ", e });
+	}
+});
+
 async function hashPassword(password) {
 	const saltRounds = 10;
 	const salt = await bcrypt.genSalt(saltRounds);
@@ -21,7 +49,7 @@ async function login(req, res, next) {
 		const { username, password } = req.headers;
 		await poolConnect;
 		const request = pool.request();
-		const result = await request.input('Username', sql.NVarChar, username)
+		const result = await request.input('Username', sql.VarChar, username)
 			.query('SELECT * FROM tblUsers WHERE Username = @Username');
 		if (result.recordset.length === 0) {
 			return res.status(400).json({ error: "Invalid username" });
