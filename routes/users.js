@@ -35,6 +35,21 @@ async function getUser(username) {
 	}
 }
 
+async function getUserFirstNameLastName(username) {
+	try {
+		await poolConnect;
+		const request = pool.request();
+		const response = await request
+			.input("username", sql.VarChar, username)
+			.query("Select firstName, lastName from tblUsers Where username = @username");
+		return response.recordset[0];
+	} catch (error) {
+		console.log(error);
+		throw error;
+	}
+}
+
+
 router.get("/username", async (req, res) => {
 	try {
 		const { username } = req.header("username");
@@ -48,6 +63,34 @@ router.get("/username", async (req, res) => {
 		res.status(500).json({ error: "Internal server error" });
 	}
 });
+
+
+router.get("/userinfo", async (req, res) => {
+	try {
+		const username = req.header("username");
+
+		if (!username) {
+			return res.status(400).json({ message: "Username is required!" });
+		}
+
+		const user = await getUserFirstNameLastName(username);
+
+		if (!user) {
+			return res.status(404).json({ message: "User not found!" });
+		}
+
+		console.log(`First Name: ${user.firstName}, Last Name: ${user.lastName}`);
+
+		return res.status(200).json({
+			firstName: user.firstName,
+			lastName: user.lastName,
+		});
+	} catch (error) {
+		console.error("Error getting users first name, last name:", error);
+		return res.status(500).json({ message: "Internal server error" });
+	}
+});
+
 
 async function postUser(userID, firstName, lastName, username, passwordHash,
 	emailAddress, phoneNumber, companyName, country) {
