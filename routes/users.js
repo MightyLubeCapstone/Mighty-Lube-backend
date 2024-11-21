@@ -35,7 +35,7 @@ async function getUser(username) {
 	}
 }
 
-router.get("/", async (req, res) => {
+router.get("/username", async (req, res) => {
 	try {
 		const { username } = req.header("username");
 		const user = await getUser(username);
