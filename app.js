@@ -31,11 +31,24 @@ app.use(
 
 // Import route modules
 const usersRoute = require("./routes/users");
-const { sessionsRoute } = require("./routes/sessions")
+const { sessionsRoute } = require("./routes/sessions");
+const { poolConnect, pool } = require("./config/config");
 
 // Use route modules
 app.use("/api/users", usersRoute);
 app.use("/api/sessions", sessionsRoute);
+
+async function readyDatabase() {
+	try {
+		console.log("Readying Azure SQL...");
+		await poolConnect;
+		const request = pool.request();
+		await request.query('SELECT 1'); // lightweight query to wake up the database
+		console.log('Database is awake!');
+	} catch (error) {
+		console.log('Database sleeping error: ', error)
+	}
+}
 
 let boolCreate = false; // variable to conditionally run the createTables function.
 
@@ -52,6 +65,7 @@ if (boolCreate) {
 		});
 } else {
 	const port = process.env.PORT || 3030;
+	await readyDatabase();
 	app.listen(port, () => {
 		console.log(`Listening on port ${port}...`);
 	});
