@@ -337,3 +337,5 @@ class Users {
         this.companyName = companyName;
     }
 }
+
+module.exports = { ProteinGeneral };
