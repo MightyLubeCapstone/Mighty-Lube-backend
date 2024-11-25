@@ -1,53 +1,53 @@
-class appEnv {
+class AppEnv {
     constructor(applicationType, applicationTypeName) {
         this.applicationType = applicationType;
         this.applicationTypeName = applicationTypeName;
     } 
 }
 
-class applicationType {
+class ApplicationType {
     constructor(applicationType, applicationTypeName) {
         this.applicationType = applicationType;
         this.applicationTypeName = applicationTypeName;
     } 
 }
 
-class conveyorStyle{
+class ConveyorStyle{
     constructor(conveyorStyleType, conveyorStyleName) {
         this.conveyorStyleType = conveyorStyleType;
         this.conveyorStyleName = conveyorStyleName;
     }
 }
 
-class chainSize {
+class ChainSize {
     constructor(chainSizeType, chainSizeName) {
         this.chainSizeType = chainSizeType;
         this.chainSizeName = chainSizeName;
     }
 }
 
-class chainPinType {
+class ChainPinType {
     constructor(chainPinType, chainPinName) {
         this.chainPinType = chainPinType;
         this.chainPinName = chainPinName;
     }
 }
 
-class industrial {
+class Industrial {
     constructor(productID, industrialType) {
         this.productID = productID;
         this.industrialType = industrialType;
     }
 }
 
-class industrialApplication {
+class IndustrialApplication {
     constructor(productID, applicationType) {
         this.productID = productID;
         this.applicationType = applicationType;
     }
 }
 
-class industrialInfo {
+class IndustrialInfo {
     constructor(industrialInfoID, industrialPopularity, industrialPrice, industrialDateAdded) { 
         this.industrialInfoID = industrialInfoID;
         this.industrialPopularity = industrialPopularity;
@@ -56,7 +56,7 @@ class industrialInfo {
     }
 }
 
-class industrialProduct {
+class IndustrialProduct {
     constructor(productID, industrialName, industrialInfoID) {
         this.productID = productID;
         this.industrialName = industrialName;
@@ -64,21 +64,21 @@ class industrialProduct {
     }
 }
 
-class industrialType {
+class IndustrialType {
     constructor(industrialType, industrialTypeName) {
         this.industrialType = industrialType;
         this.industrialTypeName = industrialTypeName;
     }
 }
 
-class measurementUnit {
+class MeasurementUnit {
     constructor(measurementUnitType, measurementUnitName) {
         this.measurementUnitType = measurementUnitType;
         this.measurementUnitName = measurementUnitName;
     }
 }
 
-class order {
+class Order {
     constructor(orderID, productID, userID){
         this.orderID = orderID;
         this.productID = productID;
@@ -86,63 +86,63 @@ class order {
     }
 }
 
-class otherWheelManufacturer {
+class OtherWheelManufacturer {
     constructor(orderID, otherWheelManufacturerName){
         this.orderID = orderID;
         this.otherWheelManufacturerName = otherWheelManufacturerName;
     }
 }
 
-class otherChainManufacturer {
+class OtherChainManufacturer {
     constructor(orderID, otherChainManufacturerName){
         this.orderID = orderID;
         this.otherChainManufacturerName = otherChainManufacturerName;
     }
 }
 
-class otherTrolleyColor {
+class OtherTrolleyColor {
     constructor(orderID, otherTrolleyColorName){
         this.orderID = orderID;
         this.otherTrolleyColorName = otherTrolleyColorName;
     }
 }
 
-class addOtherConveyorStyle {
+class AddOtherConveyorStyle {
     constructor(orderID, otherConveyorStyleName){
         this.orderID = orderID;
         this.otherConveyorStyleName = otherConveyorStyleName;
     }
 }
 
-class otherChainSize {
+class OtherChainSize {
     constructor(orderID, otherChainSizeName){
         this.orderID = orderID;
         this.otherChainSizeName = otherChainSizeName;
     }
 }
 
-class otherAppEnv {
+class OtherAppEnv {
     constructor(orderID, otherAppEnvName){
         this.orderID = orderID;
         this.otherAppEnvName = otherAppEnvName;
     }
 }
 
-class product {
+class Product {
     constructor(productID, productType){
         this.productID = productID;
         this.productType = productType;
     }
 }
 
-class productType {
+class ProductType {
     constructor(productType, productTypeName){
         this.productType = productType;
         this.productTypeName = productTypeName;
     }
 }
 
-class proteinAdditional {
+class ProteinAdditional {
     constructor(orderID, oppsSpecification, washDown, foodIndustry, powerPanel, pushButtonSwitch, enclosedShroud, additionalOtherInfo){
         this.orderID = orderID;
         this.oppsSpecification = oppsSpecification;
@@ -155,14 +155,14 @@ class proteinAdditional {
     }
 }
 
-class proteinChainManufacturer {
+class ProteinChainManufacturer {
     constructor(chainManufacturerType, chainManufacturerName){
         this.chainManufacturerType = chainManufacturerType;
         this.chainManufacturerName = chainManufacturerName;
     }
 }
 
-class proteinCustomPower {
+class ProteinCustomPower {
     constructor(orderID, operatingVoltSingle, operatingVoltTriple, controlVoltSingle){
         this.orderID = orderID;
         this.operatingVoltSingle = operatingVoltSingle;
@@ -171,7 +171,7 @@ class proteinCustomPower {
     }
 }
 
-class proteinConveyorSpec {
+class ProteinConveyorSpec {
     constructor(orderID, sideLubrication, topLubrication, timeLubrication, timeDelay, reservoirSize, reservoirSizeQuantity, chainCleanStatus){
         this.orderID = orderID;
         this.sideLubrication = sideLubrication;
@@ -184,8 +184,8 @@ class proteinConveyorSpec {
     }
 }
 
-class proteinGeneral {
-    constructor(orderID, conveyorName, chainSizeType, chainManufacturerType, wheelManufacturerType, chainPinType, conveyorSpeed, speedUnitType, variableSpeed, metalType, conveyorStyleType, trolleyType, swingStatus, plantLayout, chainPictures, conveyorLength, measurementUnitType, appEnvType, tempSurrounding, loadedStatus, numProductRequested, trolleyColorType){
+class ProteinGeneral {
+    constructor(orderID, conveyorName, chainSizeType, chainManufacturerType, wheelManufacturerType, chainPinType, conveyorSpeed, speedUnitType, variableSpeed, metalType, conveyorStyleType, trolleyType, swingStatus, plantLayout, chainPictures, conveyorLength, measurementUnitType, travelDirection, appEnvType, tempSurrounding, loadedStatus, numProductRequested, trolleyColorType){
         this.orderID = orderID;
         this.conveyorName = conveyorName;
         this.chainSizeType = chainSizeType;
@@ -203,6 +203,7 @@ class proteinGeneral {
         this.chainPictures = chainPictures;
         this.conveyorLength = conveyorLength;
         this.measurementUnitType = measurementUnitType;
+        this.travelDirection = travelDirection;
         this.appEnvType = appEnvType;
         this.tempSurrounding = tempSurrounding;
         this.loadedStatus = loadedStatus;
@@ -211,7 +212,7 @@ class proteinGeneral {
     }
 }
 
-class proteinInfo {
+class ProteinInfo {
     constructor(proteinInfoID, proteinPopularity, proteinPrice, proteinDateAdded){
         this.proteinInfoID = proteinInfoID;
         this.proteinPopularity = proteinPopularity;
@@ -220,7 +221,7 @@ class proteinInfo {
     }
 }
 
-class proteinMonitoring {
+class ProteinMonitoring {
     constructor(orderID, existingConnection, newConnection, motorAmp, driveTakeUp, takeUpDistance, motorTemp, motorValidation, pitchValidation){
         this.orderID = orderID;
         this.existingConnection = existingConnection;
@@ -234,7 +235,7 @@ class proteinMonitoring {
     }
 }
 
-class proteinMeasurement {
+class ProteinMeasurement {
     constructor(orderID, powerTrolleyWheel, powerRailWidth, powerRailHeight, chainDrop, measurementUnitType){
         this.orderID = orderID;
         this.powerTrolleyWheel = powerTrolleyWheel;
@@ -245,7 +246,7 @@ class proteinMeasurement {
     }
 }
 
-class proteinProduct {
+class ProteinProduct {
     constructor(productID, proteinName, proteinInfoID){
         this.productID = productID;
         this.proteinName = proteinName;
@@ -253,7 +254,7 @@ class proteinProduct {
     }
 }
 
-class proteinWire {
+class ProteinWire {
     constructor(orderID, twoConductor, fourConductor, sevenConductor, twelveConductor, junctionBoxNum, wireMeasurementUnitType){
         this.orderID = orderID;
         this.twoConductor = twoConductor;
@@ -265,14 +266,14 @@ class proteinWire {
     }
 }
 
-class reservoirSize {
+class ReservoirSize {
     constructor(reservoirSizeType, reservoirSizeName){
         this.reservoirSizeType = reservoirSizeType;
         this.reservoirSizeName = reservoirSizeName;
     }
 }
 
-class sessions {
+class Sessions {
     constructor(sessionID, userID, sessionCreateTime, sessionExpireTime){
         this.sessionID = sessionID;
         this.userID = userID;
@@ -281,49 +282,49 @@ class sessions {
     }
 }
 
-class trolleyType {
+class TrolleyType {
     constructor(trolleyType, trolleyTypeName){
         this.trolleyType = trolleyType;
         this.trolleyTypeName = trolleyTypeName;
     }
 }
 
-class trolleyColor {
+class TrolleyColor {
     constructor(trolleyColorType, trolleyColorName){
         this.trolleyColorType = trolleyColorType;
         this.trolleyColorName = trolleyColorName;
     }
 }
 
-class speedUnit {
+class SpeedUnit {
     constructor(speedUnitType, speedUnitName){
         this.speedUnitType = speedUnitType;
         this.speedUnitName = speedUnitName;
     }
 }
 
-class travelDirection {
+class TravelDirection {
     constructor(travelDirectionType, travelDirectionDescription){
         this.travelDirectionType = travelDirectionType;
         this.travelDirectionDescription = travelDirectionDescription;
     }
 }
 
-class wheelManufacturer {
+class WheelManufacturer {
     constructor(wheelManufacturerType, wheelManufacturerName){
         this.wheelManufacturerType = wheelManufacturerType;
         this.wheelManufacturerName = wheelManufacturerName;
     }
 }
 
-class metalType {
+class MetalType {
     constructor(metalType, metalTypeName){
         this.metalType = metalType;
         this.metalTypeName = metalTypeName;
     }
 }
 
-class users {
+class Users {
     constructor(userID, username, password, firstName, lastName, emailAddress, phoneNumber, country, companyName){
         this.userID = userID;
         this.username = username;
