@@ -1,3 +1,5 @@
+const { poolConnect } = require("../config/config");
+
 async function addMachine(newMachine) {
 	try {
 		const request = pool.request();
@@ -976,6 +978,7 @@ async function addProteinMeasurementOP8SS(newProteinMeasurementOP8SS){
 
 async function addProteinGeneralFoodGradeLubrication(newProteinGeneralFoodGradeLubrication){
 	try {
+		await poolConnect;
 		const request = pool.request();
 
 		const query =
@@ -1144,6 +1147,5 @@ async function addProteinMeasurementFoodGradeLubrication(newProteinMeasurementFo
 	}
 };
 
-
-
+module.exports = { addProteinGeneralFoodGradeLubrication };
 
