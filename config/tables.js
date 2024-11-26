@@ -108,10 +108,13 @@ async function createTables() {
                 orderID VARCHAR(36) PRIMARY KEY,
                 productID VARCHAR(50),
                 userID VARCHAR(50),
-                orderStatus BIT,
-                quantity INT,
+                orderStatus INT NOT NULL,
+                quantity INT NOT NULL,
+                timeRequested DATETIME NOT NULL DEFAULT GETDATE(),
+                FOREIGN KEY (orderStatus) REFERENCES tblOrderStatus (orderStatus),
                 FOREIGN KEY (productID) REFERENCES tblProduct (productID),
                 FOREIGN KEY (userID) REFERENCES tblUsers (userID)
+);
             );
         `);
         
