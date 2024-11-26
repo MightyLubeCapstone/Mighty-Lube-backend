@@ -50,6 +50,42 @@ async function getUserFirstNameLastName(username) {
 }
 
 
+async function postUser(userID, firstName, lastName, username, passwordHash,
+	emailAddress, phoneNumber, companyName, country) {
+	try { // FIXME: Should I call to getuser to check if that user already exists
+		await poolConnect;
+		const request = pool.request();
+		const response = await request
+			.input("userID", sql.VarChar, userID)
+			.input("firstName", sql.VarChar, firstName)
+			.input("lastName", sql.VarChar, lastName)
+			.input("username", sql.VarChar, username)
+			.input("password", sql.VarChar, passwordHash)
+			.input("emailAddress", sql.VarChar, emailAddress)
+			.input("phoneNumber", sql.VarChar, phoneNumber)
+			.input("companyName", sql.VarChar, companyName)
+			.input("country", sql.VarChar, country)
+			.query(`INSERT INTO tblUsers (userID, firstName, lastName, username, password, emailAddress, phoneNumber, companyName, country)
+					VALUES (@userID, @firstName, @lastName, @username, @password, @emailAddress, @phoneNumber, @companyName, @country)`);
+		return response.rowsAffected[0] > 0 ? true : false;
+	} catch (error) {
+		console.log(error);
+	}
+}
+
+async function deleteUser() {
+	try {
+		const request = pool.request();
+		const response = await request
+			.input("userID", sql.VarChar, userID)
+			.query("DELETE FROM tblUsers WHERE userID = @userID");
+		return response.recordset[0];
+	} catch (error) {
+		console.log(error);
+		throw error;
+	}
+}
+
 router.get("/username", async (req, res) => {
 	try {
 		const { username } = req.header("username");
@@ -92,28 +128,6 @@ router.get("/userinfo", async (req, res) => {
 });
 
 
-async function postUser(userID, firstName, lastName, username, passwordHash,
-	emailAddress, phoneNumber, companyName, country) {
-	try { // FIXME: Should I call to getuser to check if that user already exists
-		await poolConnect;
-		const request = pool.request();
-		const response = await request
-			.input("userID", sql.VarChar, userID)
-			.input("firstName", sql.VarChar, firstName)
-			.input("lastName", sql.VarChar, lastName)
-			.input("username", sql.VarChar, username)
-			.input("password", sql.VarChar, passwordHash)
-			.input("emailAddress", sql.VarChar, emailAddress)
-			.input("phoneNumber", sql.VarChar, phoneNumber)
-			.input("companyName", sql.VarChar, companyName)
-			.input("country", sql.VarChar, country)
-			.query(`INSERT INTO tblUsers (userID, firstName, lastName, username, password, emailAddress, phoneNumber, companyName, country)
-					VALUES (@userID, @firstName, @lastName, @username, @password, @emailAddress, @phoneNumber, @companyName, @country)`);
-		return response.rowsAffected[0] > 0 ? true : false;
-	} catch (error) {
-		console.log(error);
-	}
-}
 
 router.post("/", async (req, res) => {
 	try {
@@ -183,18 +197,6 @@ router.post("/", async (req, res) => {
 	}
 });
 
-async function deleteUser() {
-	try {
-		const request = pool.request();
-		const response = await request
-			.input("userID", sql.VarChar, userID)
-			.query("DELETE FROM tblUsers WHERE userID = @userID");
-		return response.recordset[0];
-	} catch (error) {
-		console.log(error);
-		throw error;
-	}
-}
 
 router.delete("/", async (req, res) => {
 	try {
