@@ -108,8 +108,13 @@ async function createTables() {
                 orderID VARCHAR(36) PRIMARY KEY,
                 productID VARCHAR(50),
                 userID VARCHAR(50),
+                orderStatus INT NOT NULL,
+                quantity INT NOT NULL,
+                timeRequested DATETIME NOT NULL DEFAULT GETDATE(),
+                FOREIGN KEY (orderStatus) REFERENCES tblOrderStatus (orderStatus),
                 FOREIGN KEY (productID) REFERENCES tblProduct (productID),
                 FOREIGN KEY (userID) REFERENCES tblUsers (userID)
+);
             );
         `);
         
@@ -259,7 +264,6 @@ async function createTables() {
                 appEnvType INT,
                 tempSurrounding BIT,
                 loadedStatus BIT,
-                numProductRequested INT,
                 trolleyColorType INT,
                 FOREIGN KEY (orderID) REFERENCES tblOrder (orderID),
                 FOREIGN KEY (chainSizeType) REFERENCES tblChainSize (chainSizeType),
@@ -423,13 +427,13 @@ async function createTables() {
                 phoneNumber VARCHAR(10) DEFAULT NULL UNIQUE,
                 country VARCHAR(15) DEFAULT NULL,
                 companyName VARCHAR(255) DEFAULT NULL,
+                userStatus BIT DEFAULT 1,
                 CONSTRAINT checkEmail CHECK (emailAddress LIKE '%_@__%.__%' ESCAPE '_'),
                 CONSTRAINT checkPassword CHECK (password LIKE '%[A-Z]%' AND password LIKE '%[a-z]%' AND password LIKE '%[0-9]%' AND password LIKE '%[^a-zA-Z0-9]%'),
                 CONSTRAINT checkPhoneNum CHECK (phoneNumber LIKE '[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'),
                 CONSTRAINT checkUsername CHECK (username LIKE '[a-z0-9]%')
             );
         `);
-
 
 
         await request.query(`
@@ -440,7 +444,6 @@ async function createTables() {
                 dateCreated datetime not null default getdate(),
                 totalPrice decimal (10,2),
                 orderID varchar(36),
-                
                 foreign key(orderID) references tblOrder(orderID)
             );
         `);

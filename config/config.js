@@ -17,6 +17,7 @@ const dbConfig = {
 		min: 0,
 		idleTimeoutMillis: 30000,
 	},
+	requestTimeout: 30000, // 30 seconds for individual queries
 };
 
 const pool = new sql.ConnectionPool(dbConfig);

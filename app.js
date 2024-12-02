@@ -43,7 +43,7 @@ async function readyDatabase() {
 		console.log("Readying Azure SQL...");
 		await poolConnect;
 		const request = pool.request();
-		await request.query('SELECT 1'); // lightweight query to wake up the database
+		const result = await request.query('SELECT 1'); // lightweight query to wake up the database
 		console.log('Database is awake!');
 	} catch (error) {
 		console.log('Database sleeping error: ', error)
@@ -65,7 +65,7 @@ if (boolCreate) {
 		});
 } else {
 	const port = process.env.PORT || 3030;
-	await readyDatabase();
+	readyDatabase();
 	app.listen(port, () => {
 		console.log(`Listening on port ${port}...`);
 	});
