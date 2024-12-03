@@ -27,7 +27,7 @@ async function getUser(username) {
 		const request = pool.request();
 		const response = await request
 			.input("username", sql.VarChar, username)
-			.query("Select * from tblUsers Where username = @username");
+			.query("SELECT * FROM tblUsers WHERE username = @username");
 		return response.recordset[0];
 	} catch (error) {
 		console.log(error);
@@ -41,7 +41,7 @@ async function getUserFirstNameLastName(username) {
 		const request = pool.request();
 		const response = await request
 			.input("username", sql.VarChar, username)
-			.query("Select firstName, lastName from tblUsers Where username = @username");
+			.query("SELECT firstName, lastName FROM tblUsers WHERE username = @username");
 		return response.recordset[0];
 	} catch (error) {
 		console.log(error);
@@ -73,7 +73,7 @@ async function postUser(userID, firstName, lastName, username, passwordHash,
 	}
 }
 
-async function deleteUser() {
+async function deleteUser(userID) {
 	try {
 		const request = pool.request();
 		const response = await request
@@ -90,7 +90,7 @@ router.get("/username", async (req, res) => {
 	try {
 		const { username } = req.header("username");
 		const user = await getUser(username);
-		if (!user) {
+		if (!user) { //FIXME: This does not actually check if username is available. Insomnia tests fail
 			res.status(200).json({ message: "Username available!" });
 			return;
 		}
@@ -200,7 +200,7 @@ router.post("/", async (req, res) => {
 
 router.delete("/", async (req, res) => {
 	try {
-		const { userID } = req.header("userID");
+		const { userID } = req.headers("userID");
 		const response = deleteUser(userID);
 		if (!response) {
 			res.status(400).json({ error: "User not found" });

@@ -1,4 +1,4 @@
-const { poolConnect } = require("../config/config");
+const { sql, pool, poolConnect } = require("../config/config");
 
 async function addMachine(newMachine) {
 	try {
@@ -981,7 +981,7 @@ async function addProteinGeneralFoodGradeLubrication(newProteinGeneralFoodGradeL
 		const request = pool.request();
 
 		const query =
-			"Insert into tblProteinGeneral values (@orderID, @conveyorName, @chainSizeType, @chainManufacturerType, @wheelManufacturerType, @chainPinType, @conveyorLength, @measurementUnitType, @conveyorSpeed, @speedUnitType, @variableSpeed, @travelDirection, @metalType, @conveyorStyleType, @trolleyColorType, @trolleyType, @appEnvType, @tempSurrounding, @loadedStatus, @swingStatus, @plantLayout, @chainPictures, @numProductRequested)";
+			"Insert into tblProteinGeneral(orderID, conveyorName, chainSizeType, chainManufacturerType, wheelManufacturerType, chainPinType, conveyorLength, measurementUnitType, conveyorSpeed, speedUnitType, variableSpeed, travelDirectionType, metalType, conveyorStyleType, trolleyColorType, trolleyType, appEnvType, tempSurrounding, loadedStatus, swingStatus, plantLayout, chainPictures) values (@orderID, @conveyorName, @chainSizeType, @chainManufacturerType, @wheelManufacturerType, @chainPinType, @conveyorLength, @measurementUnitType, @conveyorSpeed, @speedUnitType, @variableSpeed, @travelDirectionType, @metalType, @conveyorStyleType, @trolleyColorType, @trolleyType, @appEnvType, @tempSurrounding, @loadedStatus, @swingStatus, @plantLayout, @chainPictures)";
 
 		request.input("orderID", sql.VarChar, newProteinGeneralFoodGradeLubrication.orderID);
 		request.input("conveyorName", sql.VarChar, newProteinGeneralFoodGradeLubrication.conveyorName);
@@ -994,7 +994,7 @@ async function addProteinGeneralFoodGradeLubrication(newProteinGeneralFoodGradeL
 		request.input("conveyorSpeed", sql.Decimal, newProteinGeneralFoodGradeLubrication.conveyorSpeed);
 		request.input("speedUnitType", sql.Int, newProteinGeneralFoodGradeLubrication.speedUnitType);
 		request.input("variableSpeed", sql.Decimal, newProteinGeneralFoodGradeLubrication.variableSpeed);
-		request.input("travelDirection", sql.Int, newProteinGeneralFoodGradeLubrication.travelDirection);
+		request.input("travelDirectionType", sql.Int, newProteinGeneralFoodGradeLubrication.travelDirection);
 		request.input("metalType", sql.Int, newProteinGeneralFoodGradeLubrication.metalType);
 		request.input("conveyorStyleType", sql.Int, newProteinGeneralFoodGradeLubrication.conveyorStyleType);
 		request.input("trolleyColorType", sql.Int, newProteinGeneralFoodGradeLubrication.trolleyColorType);
@@ -1005,11 +1005,11 @@ async function addProteinGeneralFoodGradeLubrication(newProteinGeneralFoodGradeL
 		request.input("swingStatus", sql.Bit, newProteinGeneralFoodGradeLubrication.swingStatus);
 		request.input("plantLayout", sql.Bit, newProteinGeneralFoodGradeLubrication.plantLayout);
 		request.input("chainPictures", sql.Bit, newProteinGeneralFoodGradeLubrication.chainPictures);
-		request.input("numProductRequested", sql.Int, newProteinGeneralFoodGradeLubrication.numProductRequested);
 
-		await request.query(query);
+		const response = await request.query(query);
 
 		console.log(" Info Added");
+		return response.rowsAffected[0] > 0 ? true : false;
 	} catch (error) {
 		console.error("Error", error);
 

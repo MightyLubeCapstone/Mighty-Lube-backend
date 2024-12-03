@@ -1,22 +1,29 @@
+const express = require("express");
+const { sql, pool, poolConnect } = require("../config/config");
 const { authenticate } = require("./sessions");
-const { addProteinGeneralFoodGradeLubrication } = require("functions.js");
-const { ProteinGeneral } = require("tableclasses.js");
+const { addProteinGeneralFoodGradeLubrication } = require("./functions.js");
+const { ProteinGeneral } = require("./tableclasses.js");
 
 const router = express.Router();
 
 router.post("/", authenticate, async (req, res) => {
     // used for FGLM form
     try {
-        const { orderID, conveyorName, chainSizeType, chainManufacturerType, wheelManufacturerType, chainPinType, conveyorSpeed, 
-            speedUnitType, variableSpeed, metalType, conveyorStyleType, trolleyType, swingStatus, plantLayout, chainPictures, 
-            conveyorLength, measurementUnitType, travelDirection, appEnvType, tempSurrounding, loadedStatus, numProductRequested, 
-            trolleyColorType} = req.headers;
+        const { orderid: orderID, conveyorname: conveyorName, chainsizetype: chainSizeType, chainmanufacturertype: chainManufacturerType, wheelmanufacturertype: wheelManufacturerType, chainpintype: chainPinType, conveyorspeed: conveyorSpeed, speedunittype: 
+            speedUnitType, variablespeed: variableSpeed, metaltype: metalType, conveyorstyletype: conveyorStyleType, trolleytype: trolleyType,  swingstatus: swingStatus, plantlayout: plantLayout, chainpictures: chainPictures, conveyorlength:
+            conveyorLength, measurementtype: measurementUnitType, traveldirectiontype: travelDirectionType, appenvtype: appEnvType, tempsurrounding: tempSurrounding, loadedstatus: loadedStatus, 
+            trolleycolortype: trolleyColorType} = req.headers;
         const proteinGeneral = new ProteinGeneral(
             orderID, conveyorName, chainSizeType, chainManufacturerType, wheelManufacturerType, chainPinType, conveyorSpeed, 
             speedUnitType, variableSpeed, metalType, conveyorStyleType, trolleyType, swingStatus, plantLayout, chainPictures, 
-            conveyorLength, measurementUnitType, travelDirection, appEnvType, tempSurrounding, loadedStatus, numProductRequested, 
+            conveyorLength, measurementUnitType, travelDirectionType, appEnvType, tempSurrounding, loadedStatus, 
             trolleyColorType);
-        await addProteinGeneralFoodGradeLubrication(proteinGeneral);
+        const response = await addProteinGeneralFoodGradeLubrication(proteinGeneral);
+        if (!response) {
+            res.status(400).json({ error: "FGLM entry could not be added" });
+        } else {
+            res.status(200).json({ message: "FGLM entry added" });
+        }
     } catch (error) {
         console.log(error);
         res.status(500).json({ error: "Internal server error" });
@@ -101,7 +108,7 @@ async function putFglm(proteinGeneral) {
             .input("conveyorSpeed", sql.Decimal, proteinGeneral.conveyorSpeed)
             .input("speedUnitType", sql.Int, proteinGeneral.speedUnitType)
             .input("variableSpeed", sql.Decimal, proteinGeneral.variableSpeed)
-            .input("travelDirection", sql.Int, proteinGeneral.travelDirection)
+            .input("travelDirection", sql.Int, proteinGeneral.travelDirectionType)
             .input("metalType", sql.Int, proteinGeneral.metalType)
             .input("conveyorStyleType", sql.Int, proteinGeneral.conveyorStyleType)
             .input("trolleyColorType", sql.Int, proteinGeneral.trolleyColorType)
@@ -112,14 +119,13 @@ async function putFglm(proteinGeneral) {
             .input("swingStatus", sql.Bit, proteinGeneral.swingStatus)
             .input("plantLayout", sql.Bit, proteinGeneral.plantLayout)
             .input("chainPictures", sql.Bit, proteinGeneral.chainPictures)
-            .input("numProductRequested", sql.Int, proteinGeneral.numProductRequested)
             .query("UPDATE tblProteinGeneral SET conveyorName = @conveyorName, chainSizeType = @chainSizeType, \
                 chainManufacturerType = @chainManufacturerType, wheelManufacturerType = @wheelManufacturerType, chainPinType = @chainPinType, \
                 conveyorLength = @conveyorLength, measurementUnitType = @measurementUnitType, conveyorSpeed = @conveyorSpeed, \
-                speedUnitType = @speedUnitType, variableSpeed = @variableSpeed, travelDirection = @travelDirection, metalType = @metalType, \
+                speedUnitType = @speedUnitType, variableSpeed = @variableSpeed, travelDirectionType = @travelDirectionType, metalType = @metalType, \
                 conveyorStyleType = @conveyorStyleType, trolleyColorType = @trolleyColorType, trolleyType = @trolleyType, appEnvType = @appEnvType, \
                 tempSurrounding = @tempSurrounding, loadedStatus = @loadedStatus, swingStatus = @swingStatus, plantLayout = @plantLayout, \
-                chainPictures = @chainPictures, numProductRequested = @numProductRequested WHERE orderID = @orderID");
+                chainPictures = @chainPictures WHERE orderID = @orderID");
         return response.rowsAffected[0] > 0 ? true : false;
     } catch (error) {
         console.log(error);
@@ -129,14 +135,14 @@ async function putFglm(proteinGeneral) {
 
 router.put("/", authenticate, async (req, res) => {
     try {
-        const { orderID, conveyorName, chainSizeType, chainManufacturerType, wheelManufacturerType, chainPinType, conveyorSpeed, 
-            speedUnitType, variableSpeed, metalType, conveyorStyleType, trolleyType, swingStatus, plantLayout, chainPictures, 
-            conveyorLength, measurementUnitType, travelDirection, appEnvType, tempSurrounding, loadedStatus, numProductRequested, 
-            trolleyColorType} = req.headers;
+        const { orderid: orderID, conveyorname: conveyorName, chainsizetype: chainSizeType, chainmanufacturertype: chainManufacturerType, wheelmanufacturertype: wheelManufacturerType, chainpintype: chainPinType, conveyorspeed: conveyorSpeed, speedunittype: 
+            speedUnitType, variablespeed: variableSpeed, metaltype: metalType, conveyorstyletype: conveyorStyleType, trolleytype: trolleyType,  swingstatus: swingStatus, plantlayout: plantLayout, chainpictures: chainPictures, conveyorlength:
+            conveyorLength, measurementtype: measurementUnitType, traveldirectiontype: travelDirectionType, appenvtype: appEnvType, tempsurrounding: tempSurrounding, loadedstatus: loadedStatus, 
+            trolleycolortype: trolleyColorType} = req.headers;
         const proteinGeneral = new ProteinGeneral(
             orderID, conveyorName, chainSizeType, chainManufacturerType, wheelManufacturerType, chainPinType, conveyorSpeed, 
             speedUnitType, variableSpeed, metalType, conveyorStyleType, trolleyType, swingStatus, plantLayout, chainPictures, 
-            conveyorLength, measurementUnitType, travelDirection, appEnvType, tempSurrounding, loadedStatus, numProductRequested, 
+            conveyorLength, measurementUnitType, travelDirectionType, appEnvType, tempSurrounding, loadedStatus, 
             trolleyColorType);
         response = await putFglm(proteinGeneral);
         if (!response) {
