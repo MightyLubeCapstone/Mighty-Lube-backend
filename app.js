@@ -37,6 +37,7 @@ const { poolConnect, pool } = require("./config/config");
 // Use route modules
 app.use("/api/users", usersRoute);
 app.use("/api/sessions", sessionsRoute);
+app.use("/api/fglm", require("./routes/fglm"));
 
 async function readyDatabase() {
 	try {
