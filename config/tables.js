@@ -449,6 +449,16 @@ async function createTables() {
         `);
 
 
+        await request.query(`
+            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblOrderStatus')
+            create table tblOrderStatus(
+                orderStatus INT Primary key,
+                orderStatusType varchar(50)
+
+            );
+        `);
+
+
 	} catch (error) {
 		console.log(error);
 		throw error;
