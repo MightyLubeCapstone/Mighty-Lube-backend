@@ -338,4 +338,13 @@ class Users {
     }
 }
 
-module.exports = { ProteinGeneral };
+class OrderStatus {
+    // orderStatus default to pending
+    constructor(orderStatus, orderStatusType){
+        this.orderStatus = orderStatus;
+        this.orderStatusType = orderStatusType;
+    }
+    
+}
+
+module.exports = { ProteinGeneral, OrderStatus };
