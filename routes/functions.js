@@ -980,21 +980,8 @@ async function addProteinGeneralFoodGradeLubrication(newProteinGeneralFoodGradeL
 		await poolConnect;
 		const request = pool.request();
 		
-		// Insert foreign keys to their respective tables first
 		const query =
 			"INSERT INTO tblOrder(orderID, orderStatus) VALUES (@orderID, @orderStatus); \
-			INSERT INTO tblChainSize(chainSizeType) VALUES (@chainSizeType); \
-			INSERT INTO tblProteinChainManufacturer(chainManufacturerType) VALUES (@chainManufacturerType); \
-			INSERT INTO tblWheelManufacturer(wheelManufacturerType) VALUES (@wheelManufacturerType); \
-			INSERT INTO tblChainPinType(chainPinType) VALUES (@chainPinType); \
-			INSERT INTO tblSpeedUnit(speedUnitType) VALUES (@speedUnitType); \
-			INSERT INTO tblMetalType(metalType) VALUES (@metalType); \
-			INSERT INTO tblConveyorStyle(conveyorStyleType) VALUES (@conveyorStyleType); \
-			INSERT INTO tblTrolleyType(trolleyType) VALUES (@trolleyType); \
-			INSERT INTO tblMeasurementUnit(measurementUnitType) VALUES (@measurementUnitType); \
-			INSERT INTO tblTravelDirection(travelDirectionType) VALUES (@travelDirectionType); \
-			INSERT INTO tblAppEnv(appEnvType) VALUES (@appEnvType); \
-			INSERT INTO tblTrolleyColor(trolleyColorType) VALUES (@trolleyColorType); \
 			INSERT INTO tblProteinGeneral(orderID, conveyorName, chainSizeType, chainManufacturerType, wheelManufacturerType, chainPinType, conveyorLength, measurementUnitType, conveyorSpeed, speedUnitType, variableSpeed, travelDirectionType, metalType, conveyorStyleType, trolleyColorType, trolleyType, appEnvType, tempSurrounding, loadedStatus, swingStatus, plantLayout, chainPictures) VALUES (@orderID, @conveyorName, @chainSizeType, @chainManufacturerType, @wheelManufacturerType, @chainPinType, @conveyorLength, @measurementUnitType, @conveyorSpeed, @speedUnitType, @variableSpeed, @travelDirectionType, @metalType, @conveyorStyleType, @trolleyColorType, @trolleyType, @appEnvType, @tempSurrounding, @loadedStatus, @swingStatus, @plantLayout, @chainPictures)";
 
 		request.input("orderStatus", sql.VarChar, newOrderStatus.orderStatus);

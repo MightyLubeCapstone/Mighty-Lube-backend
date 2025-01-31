@@ -109,7 +109,7 @@ async function putFglm(proteinGeneral) {
             .input("conveyorSpeed", sql.Decimal, proteinGeneral.conveyorSpeed)
             .input("speedUnitType", sql.Int, proteinGeneral.speedUnitType)
             .input("variableSpeed", sql.Decimal, proteinGeneral.variableSpeed)
-            .input("travelDirection", sql.Int, proteinGeneral.travelDirectionType)
+            .input("travelDirectionType", sql.Int, proteinGeneral.travelDirectionType)
             .input("metalType", sql.Int, proteinGeneral.metalType)
             .input("conveyorStyleType", sql.Int, proteinGeneral.conveyorStyleType)
             .input("trolleyColorType", sql.Int, proteinGeneral.trolleyColorType)
@@ -163,7 +163,8 @@ async function deleteFglm(orderID) {
         const request = pool.request();
         const response = await request
             .input("orderID", sql.VarChar, orderID)
-            .query("DELETE FROM tblProteinGeneral WHERE orderID = @orderID");
+            .query("DELETE FROM tblProteinGeneral WHERE orderID = @orderID;\
+                DELETE FROM tblOrder WHERE orderID = @orderID; ");
         return response.rowsAffected[0] > 0 ? true : false;
     }
     catch (error) {
@@ -174,7 +175,7 @@ async function deleteFglm(orderID) {
 
 router.delete("/", authenticate, async (req, res) => {
     try {
-        const { orderID } = req.headers;
+        const { orderid: orderID } = req.headers;
         const response = await deleteFglm(orderID);
         if (!response) {
             res.status(400).json({ error: "FGLM entry could not be deleted" });
