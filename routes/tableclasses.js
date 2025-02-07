@@ -347,4 +347,4 @@ class OrderStatus {
     
 }
 
-module.exports = { ProteinGeneral, OrderStatus };
+module.exports = { ProteinGeneral, OrderStatus, ProteinCustomPower };

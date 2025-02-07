@@ -808,87 +808,26 @@ async function addProteinChainManufacturer(newProteinChainManufacturer) {
 
 };
 
-//Assuming the int for other is 1 for all "Type" fields
-async function addProteinGeneralOP8SS(newProteinGeneralOP8SS){
+async function addProteinCustomPowerOP8SS(newProteinCustomPowerOP8SS, newOrderStatus){
 	try {
 		const request = pool.request();
 
 		const query =
-			"Insert into tblProteinCustomPower values (@orderID, @conveyorName, @chainSizeType, @chainManufacturerType, @conveyorLength, @measurementUnitType, @travelDirection, @appEnvType, @tempSurrounding, @loadedStatus)";
+			"INSERT INTO tblOrder(orderID, orderStatus) VALUES (@orderID, @orderStatus); \
+			Insert into tblProteinCustomPower values (@orderID, @operatingVoltSingle, @operatingVoltTriple, @controlVoltSingle)";
 
-		request.input("orderID", sql.VarChar, newProteinGeneralOP8SS.orderID);
-		request.input("conveyorName", sql.VarChar, newProteinGeneralOP8SS.conveyorName);
-		request.input("chainSizeType", sql.Int, newProteinGeneralOP8SS.chainSizeType);
-		request.input("chainManufacturerType", sql.Int, newProteinGeneralOP8SS.chainManufacturerType);
-		request.input("conveyorLength", sql.Decimal, newProteinGeneralOP8SS.conveyorLength);
-		request.input("measurementUnitType", sql.Int, newProteinGeneralOP8SS.measurementUnitType);
-		request.input("travelDirection", sql.Int, newProteinGeneralOP8SS.travelDirection);
-		request.input("appEnvType", sql.Int, newProteinGeneralOP8SS.appEnvType);
-		request.input("tempSurrounding", sql.Bit, newProteinGeneralOP8SS.tempSurrounding);
-		request.input("loadedStatus", sql.Bit, newProteinGeneralOP8SS.loadedStatus);
-
-		if(newProteinGeneralOP8SS.chainSizeType === 1)
-		{
-			const otherChainSizeName = newProteinGeneralOP8SS.otherChainSizeName
-
-			await addOtherChainSize({
-
-				orderID: newProteinGeneralOP8SS.orderID,
-				otherChainSizeName: otherChainSizeName
-
-			})
-		}
-
-		if(newProteinGeneralOP8SS.chainManufacturerType === 1)
-		{
-			const otherChainManufacturerName = newProteinGeneralOP8SS.otherChainManufacturerName
-
-			await addOtherChainManufacturer({
-
-				orderID: newProteinGeneralOP8SS.orderID,
-				otherChainManufacturerName: otherChainManufacturerName
-
-			})
-		}
-
-		if(newProteinGeneralOP8SS.appEnvType === 1)
-		{
-			const otherAppEnvName = newProteinGeneralOP8SS.otherAppEnvName
-
-			await addOtherAppEnv({
-
-				orderID: newProteinGeneralOP8SS.orderID,
-				otherAppEnvName: otherAppEnvName
-
-			})
-		}
-
-		await request.query(query);
-
-		console.log("OP-8SS General Info Added");
-	} catch (error) {
-		console.error("Error", error);
-
-		throw error;
-	}
-};
-
-async function addProteinCustomPowerOP8SS(newProteinCustomPowerOP8SS){
-	try {
-		const request = pool.request();
-
-		const query =
-			"Insert into tblProteinCustomPower values (@orderID, @operatingVoltTriple, @controlVolt)";
-
+		request.input("orderStatus", sql.VarChar, newOrderStatus.orderStatus);
 		request.input("orderID", sql.VarChar, newProteinCustomPowerOP8SS.orderID);
+		request.input("operatingVoltSingle", sql.Decimal, newProteinCustomPowerOP8SS.operatingVoltSingle);
 		request.input("operatingVoltTriple", sql.Decimal, newProteinCustomPowerOP8SS.operatingVoltTriple);
-		request.input("controlVolt", sql.Decimal, newProteinCustomPowerOP8SS.controlVolt);
+		request.input("controlVoltSingle", sql.Decimal, newProteinCustomPowerOP8SS.controlVoltSingle);
 
 
 
-		await request.query(query);
+		const response = await request.query(query);
 
 		console.log("OP-8SS Custom Power Info Added");
+		return response.rowsAffected[0] > 0 ? true : false;
 	} catch (error) {
 		console.error("Error", error);
 
@@ -1148,5 +1087,5 @@ async function addProteinMeasurementFoodGradeLubrication(newProteinMeasurementFo
 	}
 };
 
-module.exports = { addProteinGeneralFoodGradeLubrication };
+module.exports = { addProteinGeneralFoodGradeLubrication, addProteinCustomPowerOP8SS };
 
