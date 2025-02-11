@@ -3,6 +3,74 @@ const { pool } = require("./config"); // Use pool directly as it auto-connects o
 async function createTables() {
 	try {
 		const request = pool.request();
+        
+        await request.query(`
+            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblProduct')
+            create table tblProduct (
+                productID VARCHAR(50) PRIMARY KEY,
+                productName VARCHAR(255)
+            );
+        `);
+
+
+        await request.query(`
+            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblProductInfo')
+            create table tblProductInfo (
+                productID VARCHAR(50),
+                productCategory VARCHAR(10),
+                productType VARCHAR(50),
+                productApplication VARCHAR(15),
+                FOREIGN KEY (productID) REFERENCES tblProduct (productID)
+            );
+        `);
+
+
+        await request.query(`
+            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblSortingInfo')
+            create table tblSortingInfo (
+                productID VARCHAR(50),
+                productPopularity INT,
+                productPrice DECIMAL(10,2),
+                productDateAdded DATETIME,
+                FOREIGN KEY (productID) REFERENCES tblProduct (productID)
+            );
+        `);
+
+
+        await request.query(`
+            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblOrder')
+            CREATE TABLE tblOrder (
+                orderID VARCHAR(36) PRIMARY KEY,
+                productID VARCHAR(50),
+                userID VARCHAR(50),
+                orderStatusType INT NOT NULL,
+                timeRequested DATETIME NOT NULL DEFAULT GETDATE(),
+                FOREIGN KEY (productID) REFERENCES tblProduct (productID),
+                FOREIGN KEY (userID) REFERENCES tblUsers (userID),
+                FOREIGN KEY (orderStatusType) REFERENCES tblOrderStatus (orderStatus)
+
+            );
+        `);
+
+        await request.query(`
+            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblNumProductRequested')
+            CREATE TABLE tblNumProductRequested (
+                orderID VARCHAR(36),
+                numProductRequested INT,
+                FOREIGN KEY (orderID) REFERENCES tblOrder(orderID)
+            );
+        `);
+
+
+        await request.query(`
+            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblOrderStatus')
+            create table tblOrderStatus(
+                orderStatus INT Primary key,
+                orderStatusType varchar(50)
+
+            );
+        `);
+
 
         await request.query(`
             IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblAppEnv')
@@ -12,13 +80,6 @@ async function createTables() {
             );
         `);
         
-        await request.query(`
-            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblApplicationType')
-            CREATE TABLE tblApplicationType (
-                applicationType INT PRIMARY KEY,
-                applicationTypeName VARCHAR(50)
-            );
-        `);
         
         await request.query(`
             IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblConveyorStyle')
@@ -44,55 +105,7 @@ async function createTables() {
             );
         `);
         
-        await request.query(`
-            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblIndustrial')
-            CREATE TABLE tblIndustrial (
-                productID VARCHAR(50),
-                industrialType INT,
-                FOREIGN KEY (productID) REFERENCES tblProduct (productID),
-                FOREIGN KEY (industrialType) REFERENCES tblIndustrialType (industrialType)
-            );
-        `);
-        
-        await request.query(`
-            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblIndustrialApplication')
-            CREATE TABLE tblIndustrialApplication (
-                productID VARCHAR(50),
-                applicationType INT,
-                FOREIGN KEY (productID) REFERENCES tblProduct (productID),
-                FOREIGN KEY (applicationType) REFERENCES tblApplicationType (applicationType)
-            );
-        `);
-        
-        await request.query(`
-            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblIndustrialInfo')
-            CREATE TABLE tblIndustrialInfo (
-                industrialInfoID VARCHAR(36) PRIMARY KEY,
-                industrialPopularity INT,
-                industrialPrice DECIMAL(10,2),
-                industrialDateAdded DATETIME
-            );
-        `);
-        
-        await request.query(`
-            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblIndustrialProduct')
-            CREATE TABLE tblIndustrialProduct (
-                productID VARCHAR(50),
-                industrialName VARCHAR(255),
-                industrialInfoID VARCHAR(36),
-                FOREIGN KEY (productID) REFERENCES tblProduct (productID),
-                FOREIGN KEY (industrialInfoID) REFERENCES tblIndustrialInfo (industrialInfoID)
-            );
-        `);
 
-
-        await request.query(`
-            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblIndustrialType')
-            CREATE TABLE tblIndustrialType (
-                industrialType INT PRIMARY KEY,
-                industrialTypeName VARCHAR(50)
-            );
-        `);
         
         await request.query(`
             IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblMeasurementUnit')
@@ -102,21 +115,7 @@ async function createTables() {
             );
         `);
         
-        await request.query(`
-            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblOrder')
-            CREATE TABLE tblOrder (
-                orderID VARCHAR(36) PRIMARY KEY,
-                productID VARCHAR(50),
-                userID VARCHAR(50),
-                orderStatus INT NOT NULL,
-                quantity INT NOT NULL,
-                timeRequested DATETIME NOT NULL DEFAULT GETDATE(),
-                FOREIGN KEY (orderStatus) REFERENCES tblOrderStatus (orderStatus),
-                FOREIGN KEY (productID) REFERENCES tblProduct (productID),
-                FOREIGN KEY (userID) REFERENCES tblUsers (userID)
-);
-            );
-        `);
+
         
         await request.query(`
             IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblOtherWheelManufacturer')
@@ -173,22 +172,7 @@ async function createTables() {
             );
         `);
         
-        await request.query(`
-            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblProduct')
-            CREATE TABLE tblProduct (
-                productID VARCHAR(50) PRIMARY KEY,
-                productType INT,
-                FOREIGN KEY (productType) REFERENCES tblProductType (productType)
-            );
-        `);
-        
-        await request.query(`
-            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblProductType')
-            CREATE TABLE tblProductType (
-                productType INT PRIMARY KEY,
-                productTypeName VARCHAR(50)
-            );
-        `);
+
         
         await request.query(`
             IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblProteinAdditional')
@@ -281,15 +265,7 @@ async function createTables() {
             );
         `);
         
-        await request.query(`
-            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblProteinInfo')
-            CREATE TABLE tblProteinInfo (
-                proteinInfoID VARCHAR(36) PRIMARY KEY,
-                proteinPopularity INT,
-                proteinPrice DECIMAL(10,2),
-                proteinDateAdded DATETIME
-            );
-        `);
+
         
         await request.query(`
             IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblProteinMonitoring')
@@ -321,16 +297,6 @@ async function createTables() {
             );
         `);
         
-        await request.query(`
-            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblProteinProduct')
-            CREATE TABLE tblProteinProduct (
-                productID VARCHAR(50),
-                proteinName VARCHAR(255),
-                proteinInfoID VARCHAR(36),
-                FOREIGN KEY (productID) REFERENCES tblProduct (productID),
-                FOREIGN KEY (proteinInfoID) REFERENCES tblProteinInfo (proteinInfoID)
-            );
-        `);
         
         await request.query(`
             IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblProteinWire')
@@ -448,15 +414,6 @@ async function createTables() {
             );
         `);
 
-
-        await request.query(`
-            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblOrderStatus')
-            create table tblOrderStatus(
-                orderStatus INT Primary key,
-                orderStatusType varchar(50)
-
-            );
-        `);
 
 
         await request.query(`
@@ -4016,24 +3973,6 @@ async function createTables() {
             );
         `);
 
-
-        await request.query(`
-            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'tblNumProductRequested')
-            CREATE TABLE tblNumProductRequested (
-                orderID VARCHAR(36),
-                numProductRequested INT,
-                FOREIGN KEY (orderID) REFERENCES tblOrder(orderID)
-            );
-        `);
-
-
-        await request.query(`
-            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = '')
-            create table (
-                
-
-            );
-        `);
 
 	} catch (error) {
 		console.log(error);
