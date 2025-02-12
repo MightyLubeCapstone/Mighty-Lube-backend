@@ -12,7 +12,7 @@ const router = express.Router();
 router.get("/username", async (req, res) => {
 	try {
 		const { username } = req.body;
-		// const result = await User.findOne({ "username": username });
+		const user = await User.findOne({ "username": username });
 		if (!user) {
 			res.status(200).json({ message: "Username available!" });
 			return;
@@ -89,21 +89,30 @@ router.post("/", async (req, res) => {
 			// Hash password
 			const passwordHash = await hashPassword(password);
 			// Insert new account into database
+			const newUser = new User({
+				userID: userID,
+				username: username,
+				password: passwordHash,
+				firstName: firstName,
+				lastName: lastName,
+				email: emailAddress,
+				phoneNumber: phoneNumber,
+				companyName: companyName,
+				country: country
+			});
+			const document = await User.insertOne(newUser);
 
-			// const result = await User.insertOne({userInfo}); something like this
-
-			if (user) {
+			if (document) {
 				// Generate session ID
 				const sessionID = uuid.v4();
 				// Add new session to tblSessions
-				const sessionInsert = await postSession(sessionID, userID);
-				if (sessionInsert) {
-					// Return session ID
-					return res.status(201).json({
-						status: "success",
-						sessionID: sessionID,
-					});
-				}
+				document.sessions.push({ sessionID });
+				await document.save();
+				// Return session ID
+				return res.status(201).json({
+					status: "success",
+					sessionID: sessionID,
+				});
 			} else {
 				return res.status(400).send("Account not created");
 			}
@@ -118,7 +127,9 @@ router.post("/", async (req, res) => {
 router.delete("/", async (req, res) => {
 	try {
 		// cleanup for testing
-		if (!response) {
+		const { sessionID } = req.body;
+		const result = await User.deleteOne({ "sessions.sessionID": sessionID });
+		if (result.deletedCount === 0) {
 			res.status(400).json({ error: "User not found" });
 		} else {
 			res.status(200).json({ message: "User deleted" });
