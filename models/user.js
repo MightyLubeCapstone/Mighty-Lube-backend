@@ -1,9 +1,11 @@
 const mongoose = require('mongoose');
+const uuid = require("uuid");
 
 const UserSchema = new mongoose.Schema({
     userID: {
         type: String,
         required: true,
+        default: uuid.v4(),
     },
     username: {
         type: String,
@@ -41,6 +43,7 @@ const UserSchema = new mongoose.Schema({
         sessionID: {
             type: String,
             required: true,
+            default: uuid.v4(),
         },
         createdAt: {
             type: Date,
@@ -51,6 +54,19 @@ const UserSchema = new mongoose.Schema({
             default: Date.now() + 1000 * 60 * 60 * 12, // 12 hour session window
         },
     }],
+    orders: [{
+        orderID: {
+            type: String,
+            required: true,
+        },
+        orderStatus: {
+            type: String,
+            default: "Incomplete" // maybe, depends on whatever they want it to say
+        },
+        productConfiguratonInfo: {
+            //... so much info will be here
+        },
+    }]
 });
 
 const User = mongoose.models.User || mongoose.model('User', UserSchema);
