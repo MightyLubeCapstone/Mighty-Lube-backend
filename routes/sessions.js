@@ -2,6 +2,7 @@ const express = require("express");
 const bcrypt = require("bcrypt"); // used for creating hash of password
 const { sql, pool, poolConnect } = require("../config/config");
 const uuid = require("uuid"); // used for creating session ID
+const User = require("../models/user");
 
 const sessionsRoute = express.Router();
 
@@ -25,7 +26,7 @@ sessionsRoute.get("/", async (req, res) => {
 		if (!response) {
 			res.status(400).json({ error: "Session not found" });
 		} else {
-			res.status(200).json({ status: "Valid Session"});
+			res.status(200).json({ status: "Valid Session" });
 		}
 	}
 	catch (e) {
@@ -122,14 +123,13 @@ async function authenticate(req, res, next) {
 	const { authorization } = req.headers;
 	if (authorization && authorization.startsWith("Bearer ")) {
 		req.sessionID = authorization.slice(7); // Add token to the request object
-		await poolConnect;
-		const request = pool.request();
-		const response = await request
-			.input("sessionID", sql.VarChar, req.sessionID)
-			.query("SELECT * FROM tblSessions WHERE sessionID = @sessionID"); // this will need to be more complex later to handle expired sessions that are still in the table.
-		if (response.recordset.length === 0) {
+		const user = await User.findOne({ "sessions.sessionID": req.sessionID });
+		// FIXME: add some logic to check against expiration date eventually, shouldn't be too hard
+		if(!user) {
 			return res.status(401).json({ error: "Invalid session!" });
 		}
+		req.user = user; // this ONE line should save on a TON of network traffic because we store the document
+						 // back inside the req body and use it in whichever function we need
 		next();
 	} else {
 		res.status(401).json({ error: "Unauthorized: Missing token" });
