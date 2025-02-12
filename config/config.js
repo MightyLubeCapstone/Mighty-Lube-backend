@@ -1,35 +1,19 @@
-const sql = require("mssql");
-const dotenv = require("dotenv");
+const mongoose = require('mongoose');
+const { configDotenv } = require('dotenv');
+configDotenv();
 
-dotenv.config();
+async function dbConnect() {
+	//  connect using the URI
+	if (mongoose.connection.readyState === 0) {
+		if (process.env.PRODUCTION === 1) {
+			await mongoose.connect(process.env.MONGODB_URI);
+			console.log("Connected to MongoDB");
+		}
+		else {
+			await mongoose.connect(process.env.MONGODB_LOCAL_URI);
+			console.log("Connected to MongoDB locally");
+		}
+	}
+}
 
-const dbConfig = {
-	user: process.env.AZURE_SQL_USERNAME,
-	password: process.env.AZURE_SQL_PASSWORD,
-	server: process.env.AZURE_SQL_SERVER,
-	database: process.env.AZURE_SQL_DATABASE,
-	options: {
-		encrypt: true, // Set to true if connecting to Azure SQL Database
-		trustServerCertificate: false, // Optional: for local dev
-	},
-	pool: {
-		max: 10,
-		min: 0,
-		idleTimeoutMillis: 30000,
-	},
-	requestTimeout: 30000, // 30 seconds for individual queries
-};
-
-const pool = new sql.ConnectionPool(dbConfig);
-const poolConnect = pool.connect();
-
-// Handling connection errors at the top level once
-poolConnect
-	.then(() => {
-		console.log("Connected to the database.");
-	})
-	.catch((err) => {
-		console.error("Database Connection Failed:", err);
-	});;
-
-module.exports = { sql, pool, poolConnect };
+module.exports = { dbConnect };
