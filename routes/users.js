@@ -1,96 +1,19 @@
 const express = require("express");
 const bcrypt = require("bcrypt"); // used for creating hash of password
-const { sql, pool, poolConnect } = require("../config/config");
+const { dbConnect } = require("../config/config"); // may not need this? could just be for security's sake
 const uuid = require("uuid"); // used for creating session ID
 const { hashPassword, postSession } = require("./sessions");
 
+const User = require("../models/user");
+
 const router = express.Router();
 
-async function checkUser(username) {
-	try {
-		await poolConnect;
-		const request = pool.request();
-		const response = await request
-			.input("username", sql.VarChar, username)
-			.query("SELECT * FROM tblUsers WHERE username = @username");
-		return response.recordset.length > 0;
-	} catch (error) {
-		console.error("Error in checkUser:", error);
-		throw error;
-	}
-}
-
-
-async function getUser(username) {
-	try {
-		await poolConnect;
-		const request = pool.request();
-		const response = await request
-			.input("username", sql.VarChar, username)
-			.query("SELECT * FROM tblUsers WHERE username = @username");
-		return response.recordset[0];
-	} catch (error) {
-		console.log(error);
-		throw error;
-	}
-}
-
-async function getUserFirstNameLastName(username) {
-	try {
-		await poolConnect;
-		const request = pool.request();
-		const response = await request
-			.input("username", sql.VarChar, username)
-			.query("SELECT firstName, lastName FROM tblUsers WHERE username = @username");
-		return response.recordset[0];
-	} catch (error) {
-		console.log(error);
-		throw error;
-	}
-}
-
-
-async function postUser(userID, firstName, lastName, username, passwordHash,
-	emailAddress, phoneNumber, companyName, country) {
-	try { // FIXME: Should I call to getuser to check if that user already exists
-		await poolConnect;
-		const request = pool.request();
-		const response = await request
-			.input("userID", sql.VarChar, userID)
-			.input("firstName", sql.VarChar, firstName)
-			.input("lastName", sql.VarChar, lastName)
-			.input("username", sql.VarChar, username)
-			.input("password", sql.VarChar, passwordHash)
-			.input("emailAddress", sql.VarChar, emailAddress)
-			.input("phoneNumber", sql.VarChar, phoneNumber)
-			.input("companyName", sql.VarChar, companyName)
-			.input("country", sql.VarChar, country)
-			.query(`INSERT INTO tblUsers (userID, firstName, lastName, username, password, emailAddress, phoneNumber, companyName, country)
-					VALUES (@userID, @firstName, @lastName, @username, @password, @emailAddress, @phoneNumber, @companyName, @country)`);
-		return response.rowsAffected[0] > 0 ? true : false;
-	} catch (error) {
-		console.log(error);
-	}
-}
-
-async function deleteUser(userID) {
-	try {
-		const request = pool.request();
-		const response = await request
-			.input("userID", sql.VarChar, userID)
-			.query("DELETE FROM tblUsers WHERE userID = @userID");
-		return response.recordset[0];
-	} catch (error) {
-		console.log(error);
-		throw error;
-	}
-}
 
 router.get("/username", async (req, res) => {
 	try {
-		const { username } = req.header("username");
-		const user = await getUser(username);
-		if (!user) { //FIXME: This does not actually check if username is available. Insomnia tests fail
+		const { username } = req.body;
+		// const result = await User.findOne({ "username": username });
+		if (!user) {
 			res.status(200).json({ message: "Username available!" });
 			return;
 		}
@@ -103,20 +26,15 @@ router.get("/username", async (req, res) => {
 
 router.get("/userinfo", async (req, res) => {
 	try {
-		const username = req.header("username");
-
+		// this needs to be redone with only a sessionID, nothing else should be stored client side
+		const { username } = req.body;
 		if (!username) {
 			return res.status(400).json({ message: "Username is required!" });
 		}
-
-		const user = await getUserFirstNameLastName(username);
-
+		const user = await User.findOne({ "username": username }).exec();
 		if (!user) {
 			return res.status(404).json({ message: "User not found!" });
 		}
-
-		console.log(`First Name: ${user.firstName}, Last Name: ${user.lastName}`);
-
 		return res.status(200).json({
 			firstName: user.firstName,
 			lastName: user.lastName,
@@ -131,7 +49,7 @@ router.get("/userinfo", async (req, res) => {
 
 router.post("/", async (req, res) => {
 	try {
-		const { username, password, firstname: firstName, lastname: lastName, emailaddress: emailAddress, phonenumber: phoneNumber, companyname: companyName, country } = req.headers;
+		const { username, password, firstName, lastName, emailAddress, phoneNumber, companyName, country } = req.body;
 
 		// Check if not null fields are empty
 		if (!username || !password || !firstName || !lastName || !emailAddress) {
@@ -171,10 +89,9 @@ router.post("/", async (req, res) => {
 			// Hash password
 			const passwordHash = await hashPassword(password);
 			// Insert new account into database
-			// FIXME: check if userID and username already exist using user var
-			const user = await postUser(userID, firstName, lastName, username,
-				passwordHash, emailAddress, phoneNumber,
-				companyName, country);
+
+			// const result = await User.insertOne({userInfo}); something like this
+
 			if (user) {
 				// Generate session ID
 				const sessionID = uuid.v4();
@@ -193,15 +110,14 @@ router.post("/", async (req, res) => {
 		}
 	} catch (e) {
 		console.error(e);
-		res.status(500).json({error: "Internal server error", e});
+		res.status(500).json({ error: "Internal server error", e });
 	}
 });
 
 
 router.delete("/", async (req, res) => {
 	try {
-		const { userID } = req.headers("userID");
-		const response = deleteUser(userID);
+		// cleanup for testing
 		if (!response) {
 			res.status(400).json({ error: "User not found" });
 		} else {
