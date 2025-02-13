@@ -43,7 +43,6 @@ const UserSchema = new mongoose.Schema({
         sessionID: {
             type: String,
             required: true,
-            default: uuid.v4(),
         },
         createdAt: {
             type: Date,
@@ -64,7 +63,7 @@ const UserSchema = new mongoose.Schema({
             type: String,
             default: "Incomplete" // maybe, depends on whatever they want it to say
         },
-        productConfiguratonInfo: {
+        productConfigurationInfo: {
             //... so much info will be here
         },
     }]

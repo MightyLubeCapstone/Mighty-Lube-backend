@@ -54,38 +54,30 @@ async function login(req, res, next) {
 	}
 }
 
-async function postSession(sessionID, userID) {
-	try {
-		await poolConnect;
-		const request = pool.request();
-		const response = await request
-			.input("sessionID", sql.VarChar, sessionID)
-			.input("userID", sql.VarChar, userID)
-			.query(`INSERT INTO tblSessions (sessionID, userID) VALUES (@sessionID, @userID)`);
-		return response.rowsAffected[0] > 0 ? true : false;
-	} catch (error) {
-		console.log(error);
-		throw error;
-	}
-}
 
-sessionsRoute.post("/", login, async (req, res) => {
+sessionsRoute.post("/", async (req, res) => {
 	try {
 		// Add new session to tblSessions
-		const sessionID = uuid.v4();
-		const sessionInsert = await postSession(sessionID, req.userID);
-		if (sessionInsert) {
-			// Return session ID
-			return res.status(201).json({
-				status: "success",
-				sessionID: sessionID,
-			});
+		const { username, password } = req.body;
+		const user = await User.findOne({ "username": username }).exec();
+		if(!user) {
+			return res.status(401).json({ error: "Unauthorized: No account found with that username!" });
 		}
-		else {
-			return res.status(400).json({
-				error: "Could not create session!"
-			})
+		console.log(user["password"]);
+		console.log();
+		if (!(await comparePassword(password, user["password"]))) {
+			return res.status(401).json({ error: "Unauthorized: Invalid credentials!" });
 		}
+		// create new session and add to user's sessions array
+		const newSessionID = uuid.v4();
+		const session = { sessionID: newSessionID }; // everything else is handled by the model :)
+		user.sessions.push(session);
+		await user.save(); // finally saves our changes into the cluster
+		// Return session ID
+		return res.status(201).json({
+			status: "success",
+			sessionID: newSessionID,
+		});
 	}
 	catch (error) {
 		res.status(500).json({ error: "Internal server error" });
