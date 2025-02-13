@@ -5,7 +5,7 @@ configDotenv();
 async function dbConnect() {
 	//  connect using the URI
 	if (mongoose.connection.readyState === 0) {
-		if (process.env.PRODUCTION === 1) {
+		if (process.env.PRODUCTION == 1) {
 			await mongoose.connect(process.env.MONGODB_URI);
 			console.log("Connected to MongoDB");
 		}
