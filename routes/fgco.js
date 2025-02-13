@@ -9,7 +9,7 @@ const router = express.Router();
 router.post("/", authenticate, async (req, res) => {
     //used for FGCO form
     try {
-        const { orderid: orderID, operatingvolttriple: operatingVoltTriple, controlvoltsingle: controlVoltSingle, orderstatus: orderStatus} = req.headers;
+        const { orderid: orderID, operatingvolttriple: operatingVoltTriple, controlvoltsingle: controlVoltSingle, orderstatus: orderStatus} = req.body;
         const operatingVoltSingle = null; // not used in FGCO form
         const proteinCustomPower = new ProteinCustomPower(
             orderID, operatingVoltSingle, operatingVoltTriple, controlVoltSingle);

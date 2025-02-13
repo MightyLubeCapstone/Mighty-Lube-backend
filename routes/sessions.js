@@ -6,28 +6,15 @@ const User = require("../models/user");
 
 const sessionsRoute = express.Router();
 
-async function getSession(sessionID) {
-	try {
-		await poolConnect;
-		const request = pool.request();
-		const response = await request
-			.input("sessionID", sql.VarChar, sessionID)
-			.query("SELECT * FROM tblSessions WHERE sessionID = @sessionID"); // this will need to be more complex later to handle expired sessions that are still in the table.
-		return response.recordset[0];
-	} catch (error) {
-		console.log(error);
-		throw error;
-	}
-}
+//######################
 
-sessionsRoute.get("/", async (req, res) => {
+// these ALL need to be touched up so that we can successfully pass the User document from authenticate (req.user)
+
+//######################
+
+sessionsRoute.get("/", authenticate, async (req, res) => {
 	try {
-		const response = await getSession(req.sessionID);
-		if (!response) {
-			res.status(400).json({ error: "Session not found" });
-		} else {
-			res.status(200).json({ status: "Valid Session" });
-		}
+		res.status(200).json({ message: "Valid Session" });
 	}
 	catch (e) {
 		res.status(500).json({ error: "Internal server error : ", e });
@@ -105,31 +92,17 @@ sessionsRoute.post("/", login, async (req, res) => {
 	}
 });
 
-async function deleteSession(sessionID) {
-	try {
-		await poolConnect;
-		const request = pool.request();
-		const response = await request
-			.input("sessionID", sql.VarChar, sessionID)
-			.query("DELETE FROM tblSessions WHERE sessionID = @sessionID");
-		return response.rowsAffected[0] > 0 ? true : false;
-	} catch (error) {
-		console.log(error);
-		throw error;
-	}
-}
-
 async function authenticate(req, res, next) {
 	const { authorization } = req.headers;
 	if (authorization && authorization.startsWith("Bearer ")) {
 		req.sessionID = authorization.slice(7); // Add token to the request object
 		const user = await User.findOne({ "sessions.sessionID": req.sessionID });
 		// FIXME: add some logic to check against expiration date eventually, shouldn't be too hard
-		if(!user) {
+		if (!user) {
 			return res.status(401).json({ error: "Invalid session!" });
 		}
 		req.user = user; // this ONE line should save on a TON of network traffic because we store the document
-						 // back inside the req body and use it in whichever function we need
+		// back inside the req body and use it in whichever function we need
 		next();
 	} else {
 		res.status(401).json({ error: "Unauthorized: Missing token" });
@@ -138,7 +111,7 @@ async function authenticate(req, res, next) {
 
 sessionsRoute.delete("/", authenticate, async (req, res) => {
 	try {
-		const response = await deleteSession(req.sessionID); // FIXME: how to handle errors
+		const user = req.user; // the same User document --dammit we should use TypeScript
 		if (!response) {
 			res.status(400).json({ error: "Session could not be deleted" });
 		} else {
@@ -150,4 +123,4 @@ sessionsRoute.delete("/", authenticate, async (req, res) => {
 	}
 });
 
-module.exports = { authenticate, hashPassword, postSession, sessionsRoute };
+module.exports = { authenticate, hashPassword, sessionsRoute };

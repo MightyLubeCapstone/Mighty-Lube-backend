@@ -1,8 +1,8 @@
 const express = require("express");
 const bcrypt = require("bcrypt"); // used for creating hash of password
-const { dbConnect } = require("../config/config"); // may not need this? could just be for security's sake
 const uuid = require("uuid"); // used for creating session ID
-const { hashPassword, postSession } = require("./sessions");
+const { dbConnect } = require("../config/config"); // may not need this? could just be for security's sake
+const { hashPassword } = require("./sessions");
 
 const User = require("../models/user");
 
@@ -84,13 +84,10 @@ router.post("/", async (req, res) => {
 		else if (country !== undefined && !country.match(/^[a-zA-Z]+$/)) {
 			return res.status(400).send("Invalid country");
 		} else {
-			// generate a unique ID for the user
-			const userID = uuid.v4();
 			// Hash password
 			const passwordHash = await hashPassword(password);
 			// Insert new account into database
 			const newUser = new User({
-				userID: userID,
 				username: username,
 				password: passwordHash,
 				firstName: firstName,

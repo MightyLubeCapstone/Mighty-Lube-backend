@@ -3,23 +3,32 @@ const { sql, pool, poolConnect } = require("../config/config");
 const { authenticate } = require("./sessions");
 const { addProteinGeneralFoodGradeLubrication } = require("./functions.js");
 const { ProteinGeneral, OrderStatus } = require("./tableclasses.js");
+const FGLM = require("../models/fglm.js");
+const User = require("../models/user.js");
 
 const router = express.Router();
 
 router.post("/", authenticate, async (req, res) => {
     // used for FGLM form
     try {
-        const { orderid: orderID, conveyorname: conveyorName, chainsizetype: chainSizeType, chainmanufacturertype: chainManufacturerType, wheelmanufacturertype: wheelManufacturerType, chainpintype: chainPinType, conveyorspeed: conveyorSpeed, speedunittype: 
+        const { conveyorName, chainSizeType, chainmanufacturertype: chainManufacturerType, wheelmanufacturertype: wheelManufacturerType, chainpintype: chainPinType, conveyorspeed: conveyorSpeed, speedunittype: 
             speedUnitType, variablespeed: variableSpeed, metaltype: metalType, conveyorstyletype: conveyorStyleType, trolleytype: trolleyType,  swingstatus: swingStatus, plantlayout: plantLayout, chainpictures: chainPictures, conveyorlength:
             conveyorLength, measurementtype: measurementUnitType, traveldirectiontype: travelDirectionType, appenvtype: appEnvType, tempsurrounding: tempSurrounding, loadedstatus: loadedStatus, 
             trolleycolortype: trolleyColorType, orderstatus: orderStatus} = req.headers;
-        const proteinGeneral = new ProteinGeneral(
-            orderID, conveyorName, chainSizeType, chainManufacturerType, wheelManufacturerType, chainPinType, conveyorSpeed, 
-            speedUnitType, variableSpeed, metalType, conveyorStyleType, trolleyType, swingStatus, plantLayout, chainPictures, 
-            conveyorLength, measurementUnitType, travelDirectionType, appEnvType, tempSurrounding, loadedStatus, 
-            trolleyColorType);
-        const classOrderStatus = new OrderStatus(orderStatus)
-        const response = await addProteinGeneralFoodGradeLubrication(proteinGeneral, classOrderStatus);
+        // const proteinGeneral = new ProteinGeneral(
+        //     orderID, conveyorName, chainSizeType, chainManufacturerType, wheelManufacturerType, chainPinType, conveyorSpeed, 
+        //     speedUnitType, variableSpeed, metalType, conveyorStyleType, trolleyType, swingStatus, plantLayout, chainPictures, 
+        //     conveyorLength, measurementUnitType, travelDirectionType, appEnvType, tempSurrounding, loadedStatus, 
+        //     trolleyColorType);
+        // const classOrderStatus = new OrderStatus(orderStatus)
+        const order = new FGLM({
+            conveyorName: conveyorName,
+            chainManufacturerType: chainManufacturerType
+        });
+        const user = await User.findOne({});//...
+        user.orders.push(order);
+
+
         if (!response) {
             res.status(400).json({ error: "FGLM entry could not be added" });
         } else {

@@ -58,6 +58,7 @@ const UserSchema = new mongoose.Schema({
         orderID: {
             type: String,
             required: true,
+            default: uuid.v4(),
         },
         orderStatus: {
             type: String,
