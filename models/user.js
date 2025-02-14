@@ -63,6 +63,12 @@ const UserSchema = new mongoose.Schema({
             type: String,
             default: "Incomplete" // maybe, depends on whatever they want it to say
         },
+        numRequested: {
+
+            type: Number,
+            required: true,
+
+        },
         productConfigurationInfo: {
             //... so much info will be here
         },
