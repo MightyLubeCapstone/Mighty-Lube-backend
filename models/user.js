@@ -63,6 +63,16 @@ const UserSchema = new mongoose.Schema({
             type: String,
             default: "Incomplete" // maybe, depends on whatever they want it to say
         },
+        numRequested: {
+
+            type: Number,
+            //removed for demo
+            //required: true,
+
+            //FGLM default for demo
+            default: 1
+
+        },
         productConfigurationInfo: {
             //... so much info will be here
         },
