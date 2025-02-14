@@ -69,6 +69,9 @@ const UserSchema = new mongoose.Schema({
             //removed for demo
             //required: true,
 
+            //FGLM default for demo
+            default: 1
+
         },
         productConfigurationInfo: {
             //... so much info will be here
