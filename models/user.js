@@ -66,7 +66,8 @@ const UserSchema = new mongoose.Schema({
         numRequested: {
 
             type: Number,
-            required: true,
+            //removed for demo
+            //required: true,
 
         },
         productConfigurationInfo: {
