@@ -71,27 +71,27 @@ const FGLMSchema = new mongoose.Schema({
         // add RegEx matching to this :D
     },
     surroundingTemp: {
-        type: Boolean,
+        type: Number,
         required: true,
         // add RegEx matching to this :D
     },
     conveyorLoaded: {
-        type: Boolean,
+        type: Number,
         required: true,
         // add RegEx matching to this :D
     },
     conveyorSwing: {
-        type: Boolean,
+        type: Number,
         required: true,
         // add RegEx matching to this :D
     },
     plantLayout: {
-        type: Boolean,
+        type: Number,
         required: true,
         // add RegEx matching to this :D
     },
     requiredPics: {
-        type: Boolean,
+        type: Number,
         required: true,
         // add RegEx matching to this :D
     },
@@ -102,49 +102,49 @@ const FGLMSchema = new mongoose.Schema({
     },
     // MonSys
     existingMonitor: {
-        type: Boolean,
+        type: Number,
         required: true,
     },
     newMonitor: {
-        type: Boolean,
+        type: Number,
         required: true,
     },
     // MonFeatures
     motorAmp: {
-        type: Boolean,
+        type: Number,
         required: true,
     },
     takeUpAir: {
-        type: Boolean,
+        type: Number,
         required: true,
     },
     takeUpDist: {
-        type: Boolean,
+        type: Number,
         required: true,
     },
     motorTemp: {
-        type: Boolean,
+        type: Number,
         required: true,
     },
     motorVib: {
-        type: Boolean,
+        type: Number,
         required: true,
     },
     detectFaultyTrolley: {
-        type: Boolean,
+        type: Number,
         required: true,
     },
     // ConveyorSpecs
     sideLube: {
-        type: Boolean,
+        type: Number,
         required: true,
     },
     topLube: {
-        type: Boolean,
+        type: Number,
         required: true,
     },
     cleanChain: {
-        type: Boolean,
+        type: Number,
         required: true,
     },
     // Wire
