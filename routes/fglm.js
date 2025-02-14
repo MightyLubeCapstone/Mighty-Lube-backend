@@ -8,7 +8,7 @@ const router = express.Router();
 router.post("/", authenticate, async (req, res) => {
     // used for FGLM form
     try {
-        const { fglmData } = req.body;
+        const { fglmData, numRequested } = req.body;
         const order = new FGLM({
             conveyorName: fglmData.conveyorName,
             chainSize: fglmData.chainSizeType,
@@ -46,8 +46,8 @@ router.post("/", authenticate, async (req, res) => {
             conductor7: fglmData.conductor7,
             conductor2: fglmData.conductor2
         });
-        req.user.orders.push({ productConfigurationInfo: order }); // should grab the req.user we set in auth...
-        await req.user.save(); // idk if this will even work
+        req.user.orders.push({ numRequested: numRequested, productConfigurationInfo: order });
+        await req.user.save();
 
         return res.status(200).json({ message: "FGLM entry added" });
 
