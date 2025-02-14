@@ -63,8 +63,6 @@ sessionsRoute.post("/", async (req, res) => {
 		if(!user) {
 			return res.status(401).json({ error: "Unauthorized: No account found with that username!" });
 		}
-		console.log(user["password"]);
-		console.log();
 		if (!(await comparePassword(password, user["password"]))) {
 			return res.status(401).json({ error: "Unauthorized: Invalid credentials!" });
 		}
