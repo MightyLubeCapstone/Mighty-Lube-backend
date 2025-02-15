@@ -60,7 +60,7 @@ sessionsRoute.post("/", async (req, res) => {
 		// Add new session to tblSessions
 		const { username, password } = req.body;
 		const user = await User.findOne({ "username": username }).exec();
-		if(!user) {
+		if (!user) {
 			return res.status(401).json({ error: "Unauthorized: No account found with that username!" });
 		}
 		if (!(await comparePassword(password, user["password"]))) {
@@ -101,12 +101,22 @@ async function authenticate(req, res, next) {
 
 sessionsRoute.delete("/", authenticate, async (req, res) => {
 	try {
-		const user = req.user; // the same User document --dammit we should use TypeScript
-		if (!response) {
-			res.status(400).json({ error: "Session could not be deleted" });
-		} else {
-			res.status(200).json({ message: "Session deleted" });
+		const user = req.user; // Assuming req.user is already populated from authentication middleware
+		// Extract sessionID from request (you might get this from req.body, req.params, or req.query)
+		const { sessionID } = req.body;
+		if (!sessionID) {
+			return res.status(400).json({ error: "Session ID is required" });
 		}
+		// Remove the session with the matching sessionID
+		const updatedUser = await User.findByIdAndUpdate(
+			user._id,
+			{ $pull: { sessions: { sessionID } } }, // Remove the session object that matches sessionID
+			{ new: true } // Return updated document
+		);
+		if (!updatedUser) {
+			return res.status(400).json({ error: "Session could not be deleted" });
+		}
+		res.status(200).json({ message: "Session deleted" });
 	}
 	catch (e) {
 		res.status(500).json({ error: "Internal server error : ", e });
