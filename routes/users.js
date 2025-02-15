@@ -81,7 +81,7 @@ router.post("/", async (req, res) => {
 		else if (companyName !== undefined && !companyName.match(/^[a-zA-Z0-9]+$/)) {
 			return res.status(400).send("Invalid company name");
 		}
-		else if (country !== undefined && !country.match(/^[a-zA-Z]+$/)) {
+		else if (country !== undefined && !country.match(/^[a-zA-Z\s]+$/)) {
 			return res.status(400).send("Invalid country");
 		} else {
 			// Hash password
