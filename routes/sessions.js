@@ -103,7 +103,7 @@ sessionsRoute.delete("/", authenticate, async (req, res) => {
 	try {
 		const user = req.user; // Assuming req.user is already populated from authentication middleware
 		// Extract sessionID from request (you might get this from req.body, req.params, or req.query)
-		const { sessionID } = req.body;
+		const sessionID = req.sessionID;
 		if (!sessionID) {
 			return res.status(400).json({ error: "Session ID is required" });
 		}
