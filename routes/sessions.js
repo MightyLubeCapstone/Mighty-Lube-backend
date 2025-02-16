@@ -55,13 +55,13 @@ sessionsRoute.post("/", async (req, res) => {
 			return res.status(401).json({ error: "Unauthorized: Invalid credentials!" });
 		}
 		// create new session and add to user's sessions array
-		const session = uuid.v4(); // everything else is handled by the model :)
-		user.sessions.push({ session });
+		const sessionID = uuid.v4(); // everything else is handled by the model :)
+		user.sessions.push({ sessionID });
 		await user.save(); // finally saves our changes into the cluster
 		// Return session ID
 		return res.status(201).json({
 			status: "success",
-			sessionID: newSessionID,
+			sessionID: sessionID,
 		});
 	}
 	catch (error) {
