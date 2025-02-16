@@ -57,32 +57,10 @@ router.post("/", authenticate, async (req, res) => {
     }
 });
 
-router.get("/", authenticate, async (req, res) => {
-    try {
-        const user = req.user;
-        ///
-        return res.status(200).json({ status: "success" });
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ error: "Internal server error" });
-    }
-});
-
 router.put("/", authenticate, async (req, res) => {
     try {
 
     } catch (error) {
-        console.log(error);
-        res.status(500).json({ error: "Internal server error" });
-    }
-});
-
-router.delete("/", authenticate, async (req, res) => {
-    try {
-        const { orderID } = req.body;
-        ///
-    }
-    catch (error) {
         console.log(error);
         res.status(500).json({ error: "Internal server error" });
     }

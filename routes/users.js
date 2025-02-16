@@ -84,12 +84,10 @@ router.post("/", async (req, res) => {
 		else if (country !== undefined && !country.match(/^[a-zA-Z\s]+$/)) {
 			return res.status(400).send("Invalid country");
 		} else {
-			// Hash password
-			const passwordHash = await hashPassword(password);
 			// Insert new account into database
 			const newUser = new User({
 				username: username,
-				password: passwordHash,
+				password: await hashPassword(password),
 				firstName: firstName,
 				lastName: lastName,
 				email: emailAddress,

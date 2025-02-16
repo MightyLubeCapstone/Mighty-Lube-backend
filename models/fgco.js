@@ -6,30 +6,25 @@ const FGCOSchema = new mongoose.Schema({
         type: String,
         required: false,
     },
-    
     chainSizeType: {
         type: Number,
-        enum: [0, 1, 2, 3, 4],
+        enum: [1, 2, 3, 4, 5],
         required: true,
     },
-
     otherChainSize: {
         type: String,
-        required: this.chainSizeType === 4
+        required: this.chainSizeType === 5,
     },
 
     chainManufacturerType: {
         type: Number,
-        enum: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+        enum: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
         required: true,
     },
 
     otherManufacturerType: {
         type: String,
-        required: function ()
-        {
-            return this.chainManufacturerType === 9;
-        }
+        required: this.chainManufacturerType === 10,
     },
 
     loadedStatus: {
@@ -58,14 +53,13 @@ const FGCOSchema = new mongoose.Schema({
     },
     enclosedShroud: {
         type: Number,
-        enum: [0],
+        enum: [0, 1],
         required: false,
     },
     additionalOtherInfo: {
-        type: Number,
+        type: String,
         required: false,
     }
-
 });
 
 const FGCO = mongoose.models.FGCO || mongoose.model('FGCO', FGCOSchema);
