@@ -63,6 +63,10 @@ const UserSchema = new mongoose.Schema({
             type: String,
             default: "Incomplete" // maybe, depends on whatever they want it to say
         },
+        orderCreated: {
+            type: Date,
+            default: Date.now(),
+        },
         numRequested: {
             type: Number,
             required: true,
