@@ -11,7 +11,7 @@ const router = express.Router();
 
 router.get("/username", async (req, res) => {
 	try {
-		const { username } = req.body;
+		const { username } = req.headers;
 		const user = await User.findOne({ "username": username });
 		if (!user) {
 			res.status(200).json({ message: "Username available!" });
@@ -27,7 +27,7 @@ router.get("/username", async (req, res) => {
 router.get("/userinfo", async (req, res) => {
 	try {
 		// this needs to be redone with only a sessionID, nothing else should be stored client side
-		const { username } = req.body;
+		const { username } = req.headers;
 		if (!username) {
 			return res.status(400).json({ message: "Username is required!" });
 		}
