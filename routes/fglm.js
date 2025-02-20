@@ -46,7 +46,7 @@ router.post("/", authenticate, async (req, res) => {
             conductor7: fglmData.conductor7,
             conductor2: fglmData.conductor2
         });
-        req.user.orders.push({ numRequested: numRequested, productConfigurationInfo: order });
+        req.user.orders.push({ numRequested: numRequested, productConfigurationInfo: order, productType: "FGLM" });
         await req.user.save();
 
         return res.status(200).json({ message: "FGLM entry added" });

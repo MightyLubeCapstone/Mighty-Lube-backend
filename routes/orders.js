@@ -24,8 +24,10 @@ router.get("/", authenticate, async (req, res) => {
         const filteredOrders = orders.map(order => ({
             orderID: order.orderID,
             orderStatus: order.orderStatus,
-            conveyorName: order.productConfigurationInfo.conveyorName,
+            quantity: order.numRequested,
+            name: order.productType,
             dateCreated: order.orderCreated,
+            details: order.productConfigurationInfo
         }));
         return res.status(200).json({ orders: filteredOrders });
     } catch (error) {

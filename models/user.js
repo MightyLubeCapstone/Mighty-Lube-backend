@@ -74,6 +74,10 @@ const UserSchema = new mongoose.Schema({
         productConfigurationInfo: {
             //... so much info will be here
         },
+        productType: {
+            type: String,
+            required: true,
+        }
     }]
 });
 
