@@ -17,6 +17,7 @@ const usersRoute = require("./routes/users");
 const fglmRoute = require("./routes/fglm");
 const fgcoRoute = require("./routes/fgco");
 const { sessionsRoute } = require("./routes/sessions");
+const ordersRoute = require("./routes/orders");
 const { dbConnect } = require("./config/config");
 
 // Use route modules
@@ -24,6 +25,8 @@ app.use("/api/users", usersRoute);
 app.use("/api/sessions", sessionsRoute);
 app.use("/api/fglm", fglmRoute);
 app.use("/api/fgco", fgcoRoute);
+app.use("/api/orders", ordersRoute);
+
 
 const port = process.env.PORT || 3030;
 app.listen(port, () => {

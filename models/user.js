@@ -63,19 +63,21 @@ const UserSchema = new mongoose.Schema({
             type: String,
             default: "Incomplete" // maybe, depends on whatever they want it to say
         },
+        orderCreated: {
+            type: Date,
+            default: Date.now(),
+        },
         numRequested: {
-
             type: Number,
-            //removed for demo
-            //required: true,
-
-            //FGLM default for demo
-            default: 1
-
+            required: true,
         },
         productConfigurationInfo: {
             //... so much info will be here
         },
+        productType: {
+            type: String,
+            required: true,
+        }
     }]
 });
 
