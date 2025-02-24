@@ -13,7 +13,7 @@ const FGLMSchema = new mongoose.Schema({
     chainSize: {
 
         type: Number,
-        enum: [0, 1, 2, 3, 4],
+        enum: [1, 2, 3, 4, 5],
         required: true,
 
     },
@@ -24,7 +24,7 @@ const FGLMSchema = new mongoose.Schema({
         required: function()
 	    {
 
-		    return this.chainSize === 4;
+		    return this.chainSize === 5;
 
 	    }
 
@@ -33,7 +33,7 @@ const FGLMSchema = new mongoose.Schema({
     chainManufacturer: {
 
         type: Number,
-        enum: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+        enum: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
         required: true,
         
     },
@@ -43,7 +43,7 @@ const FGLMSchema = new mongoose.Schema({
         type: String,
         required: function ()
         {
-            return this.chainManufacturer === 9;
+            return this.chainManufacturer === 10;
         }
 
     },
@@ -51,7 +51,7 @@ const FGLMSchema = new mongoose.Schema({
     wheelManufacturer: {
 
         type: Number,
-        enum: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+        enum: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
         required: true,
 
     },
@@ -61,7 +61,7 @@ const FGLMSchema = new mongoose.Schema({
 
         required: function ()
         {
-            return this.wheelManufacturer === 9;
+            return this.wheelManufacturer === 10;
         }
 
     },
@@ -69,7 +69,7 @@ const FGLMSchema = new mongoose.Schema({
     chainPinType: {
 
         type: Number,
-        enum: [0, 1, 2],
+        enum: [1, 2, 3],
         required: true,
         // add RegEx matching to this :D
 
@@ -86,7 +86,7 @@ const FGLMSchema = new mongoose.Schema({
     conveyorLengthUnit: {
 
         type: Number,
-        enum: [0, 1, 2, 3],
+        enum: [1, 2, 3, 4],
         required: true,
         // add RegEx matching to this :D
 
@@ -103,7 +103,7 @@ const FGLMSchema = new mongoose.Schema({
     conveyorSpeedUnit: {
 
         type: Number,
-        enum: [0, 1],
+        enum: [1, 2],
         required: true,
         // add RegEx matching to this :D
 
@@ -120,7 +120,7 @@ const FGLMSchema = new mongoose.Schema({
     travelDirection: {
 
         type: Number,
-        enum: [0, 1],
+        enum: [1, 2],
         required: true,
         // add RegEx matching to this :D
 
@@ -129,7 +129,7 @@ const FGLMSchema = new mongoose.Schema({
     metalType: {
 
         type: Number,
-        enum: [0, 1, 2, 3],
+        enum: [1, 2, 3, 4],
         required: true,
         // add RegEx matching to this :D
 
@@ -140,7 +140,7 @@ const FGLMSchema = new mongoose.Schema({
         type: String,
         required: function ()
         {
-            return this.metalType === 3;
+            return this.metalType === 4;
         }
 
     },
@@ -148,7 +148,7 @@ const FGLMSchema = new mongoose.Schema({
     conveyorStyle: {
 
         type: Number,
-        enum: [0, 1, 2, 3, 4],
+        enum: [1, 2, 3, 4, 5],
         required: true,
         // add RegEx matching to this :D
 
@@ -159,7 +159,7 @@ const FGLMSchema = new mongoose.Schema({
         type: String,
         required: function ()
         {
-            return this.conveyorStyle === 4;
+            return this.conveyorStyle === 5;
         }
 
     },
@@ -167,7 +167,7 @@ const FGLMSchema = new mongoose.Schema({
     trolleyColor: {
 
         type: Number,
-        enum: [0, 1, 2, 3],
+        enum: [1, 2, 3, 4],
         required: true,
         // add RegEx matching to this :D
 
@@ -178,7 +178,7 @@ const FGLMSchema = new mongoose.Schema({
         type: String,
         required: function ()
         {
-            return this.trolleyColor === 3;
+            return this.trolleyColor === 4;
         }
 
     },
@@ -186,7 +186,7 @@ const FGLMSchema = new mongoose.Schema({
     trolleyType: {
 
         type: Number,
-        enum: [0, 1, 2, 3, 4, 5],
+        enum: [1, 2, 3, 4, 5, 6],
         required: true,
         // add RegEx matching to this :D
 
@@ -195,7 +195,7 @@ const FGLMSchema = new mongoose.Schema({
     surroundingTemp: {
 
         type: Number,
-        enum: [0, 1],
+        enum: [1, 2],
         required: true,
         // add RegEx matching to this :D
 
@@ -204,7 +204,7 @@ const FGLMSchema = new mongoose.Schema({
     conveyorLoaded: {
 
         type: Number,
-        enum: [0, 1],
+        enum: [1, 2],
         required: true,
         // add RegEx matching to this :D
 
@@ -213,7 +213,7 @@ const FGLMSchema = new mongoose.Schema({
     conveyorSwing: {
 
         type: Number,
-        enum: [0, 1],
+        enum: [1, 2],
         required: true,
         // add RegEx matching to this :D
 
@@ -222,7 +222,7 @@ const FGLMSchema = new mongoose.Schema({
     plantLayout: {
 
         type: Number,
-        enum: [0, 1],
+        enum: [1, 2],
         required: true,
         // add RegEx matching to this :D
 
@@ -231,7 +231,7 @@ const FGLMSchema = new mongoose.Schema({
     requiredPics: {
 
         type: Number,
-        enum: [0, 1],
+        enum: [1, 2],
         required: true,
         // add RegEx matching to this :D
 
@@ -249,26 +249,30 @@ const FGLMSchema = new mongoose.Schema({
     existingMonitor: {
 
         type: Number,
-        enum: [0, 1],
+        enum: [1, 2],
         required: true,
 
     },
 
     newMonitor: {
-
         type: Number,
-        enum: [0, 1],
+        enum: [1, 2],
         required: true,
-
+        validate: {
+            validator: function (value) {
+                return !(this.existingMonitor === 1 && value === 1);
+            },
+            message: "Existing monitor and New Monitor cannot both be 1."
+        }
     },
 
     dcuStatus: {
 
         type: Number,
-        enum: [0, 1],
+        enum: [1, 2],
         required: function () 
         {
-            return this.existingMonitor === 1 || this.newMonitor === 1;
+            return this.existingMonitor === 2 || this.newMonitor === 2;
         }
         
     },
@@ -278,7 +282,7 @@ const FGLMSchema = new mongoose.Schema({
         type: Number,
         required: function () 
         {
-            return this.dcuStatus === 1;
+            return this.dcuStatus === 2;
         }
 
     },
@@ -286,10 +290,10 @@ const FGLMSchema = new mongoose.Schema({
     existingWindows: {
 
         type: Number,
-        enum: [0, 1],
+        enum: [1, 2],
         required: function () 
         {
-            return this.existingMonitor === 1;
+            return this.existingMonitor === 2;
         }
 
     },
@@ -297,10 +301,10 @@ const FGLMSchema = new mongoose.Schema({
     existingHeadUnit: {
 
         type: Number,
-        enum: [0, 1],
+        enum: [1, 2],
         required: function () 
         {
-            return this.existingMonitor === 1;
+            return this.existingMonitor === 2;
         }
 
     },
@@ -308,10 +312,10 @@ const FGLMSchema = new mongoose.Schema({
     existingDCU: {
 
         type: Number,
-        enum: [0, 1],
+        enum: [1, 2],
         required: function () 
         {
-            return this.existingMonitor === 1;
+            return this.existingMonitor === 2;
         }
 
     },
@@ -319,10 +323,10 @@ const FGLMSchema = new mongoose.Schema({
     existingPowerInterface: {
 
         type: Number,
-        enum: [0, 1],
+        enum: [1, 2],
         required: function () 
         {
-            return this.existingMonitor === 1;
+            return this.existingMonitor === 2;
         }
 
     },
@@ -330,10 +334,10 @@ const FGLMSchema = new mongoose.Schema({
     newReservoir: {
 
         type: Number,
-        enum: [0, 1],
+        enum: [1, 2],
         required: function () 
         {
-            return this.existingMonitor === 1 || this.newMonitor === 1;
+            return this.existingMonitor === 2 || this.newMonitor === 2;
         }
 
     },
@@ -341,10 +345,10 @@ const FGLMSchema = new mongoose.Schema({
     reservoirSize: {
 
         type: Number,
-        enum: [0, 1],
+        enum: [1, 2],
         required: function () 
         {
-            return this.newReservoir === 1;
+            return this.newReservoir === 2;
         }
 
     },
@@ -364,7 +368,7 @@ const FGLMSchema = new mongoose.Schema({
         type: Number,
         required: function () 
         {
-            return this.newReservoir === 1;
+            return this.newReservoir === 2;
         }
 
     },
@@ -372,10 +376,10 @@ const FGLMSchema = new mongoose.Schema({
     typeMonitor: {
 
         type: Number,
-        enum: [0, 1],
+        enum: [1, 2],
         required: function () 
         {
-            return this.existingMonitor === 1 || this.newMonitor === 1;
+            return this.existingMonitor === 2 || this.newMonitor === 2;
         }
 
     },
@@ -383,10 +387,10 @@ const FGLMSchema = new mongoose.Schema({
     driveMotorAmp: {
 
         type: Number,
-        enum: [0, 1],
+        enum: [1, 2],
         required: function () 
         {
-            return this.typeMonitor === 1;
+            return this.typeMonitor === 2;
         }
 
     },
@@ -396,7 +400,7 @@ const FGLMSchema = new mongoose.Schema({
         type: Number,
         required: function () 
         {
-            return this.driveMotorAmp === 1;
+            return this.driveMotorAmp === 2;
         }
 
     },
@@ -404,10 +408,10 @@ const FGLMSchema = new mongoose.Schema({
     driveTakeUpAir: {
 
         type: Number,
-        enum: [0, 1],
+        enum: [1, 2],
         required: function () 
         {
-            return this.typeMonitor === 1;
+            return this.typeMonitor === 2;
         }
 
     },
@@ -417,7 +421,7 @@ const FGLMSchema = new mongoose.Schema({
         type: Number,
         required: function () 
         {
-            return this.driveTakeUpAir === 1;
+            return this.driveTakeUpAir === 2;
         }
 
     },
@@ -425,10 +429,10 @@ const FGLMSchema = new mongoose.Schema({
     takeUpDistance: {
 
         type: Number,
-        enum: [0, 1],
+        enum: [1, 2],
         required: function () 
         {
-            return this.typeMonitor === 1;
+            return this.typeMonitor === 2;
         }
 
     },
@@ -438,7 +442,7 @@ const FGLMSchema = new mongoose.Schema({
         type: Number,
         required: function () 
         {
-            return this.takeUpDistance === 1;
+            return this.takeUpDistance === 2;
         }
 
     },
@@ -446,10 +450,10 @@ const FGLMSchema = new mongoose.Schema({
     driveTemp: {
 
         type: Number,
-        enum: [0, 1],
+        enum: [1, 2],
         required: function () 
         {
-            return this.typeMonitor === 1;
+            return this.typeMonitor === 2;
         }
 
     },
@@ -459,7 +463,7 @@ const FGLMSchema = new mongoose.Schema({
         type: Number,
         required: function () 
         {
-            return this.driveTemp === 1;
+            return this.driveTemp === 2;
         }
 
     },
@@ -467,10 +471,10 @@ const FGLMSchema = new mongoose.Schema({
     driveVibration: {
 
         type: Number,
-        enum: [0, 1],
+        enum: [1, 2],
         required: function () 
         {
-            return this.typeMonitor === 1;
+            return this.typeMonitor === 2;
         }
 
     },
@@ -480,7 +484,7 @@ const FGLMSchema = new mongoose.Schema({
         type: Number,
         required: function () 
         {
-            return this.driveVibration === 1;
+            return this.driveVibration === 2;
         }
 
     },
@@ -488,10 +492,10 @@ const FGLMSchema = new mongoose.Schema({
     dogPitch: {
 
         type: Number,
-        enum: [0, 1],
+        enum: [1, 2],
         required: function () 
         {
-            return this.typeMonitor === 1;
+            return this.typeMonitor === 2;
         }
 
     },
@@ -501,7 +505,7 @@ const FGLMSchema = new mongoose.Schema({
         type: Number,
         required: function () 
         {
-            return this.dogPitch === 1;
+            return this.dogPitch === 2;
         }
 
     },
@@ -509,10 +513,10 @@ const FGLMSchema = new mongoose.Schema({
     paintMarker: {
 
         type: Number,
-        enum: [0, 1],
+        enum: [1, 2],
         required: function () 
         {
-            return this.existingMonitor === 1 || this.newMonitor === 1;
+            return this.existingMonitor === 2 || this.newMonitor === 2;
         }
 
     },
@@ -522,7 +526,7 @@ const FGLMSchema = new mongoose.Schema({
         type: Number,
         required: function () 
         {
-            return this.paintMarker === 1;
+            return this.paintMarker === 2;
         }
 
     },
@@ -530,10 +534,10 @@ const FGLMSchema = new mongoose.Schema({
     chainVision: {
 
         type: Number,
-        enum: [0, 1],
+        enum: [1, 2],
         required: function () 
         {
-            return this.typeMonitor === 1;
+            return this.typeMonitor === 2;
         }
 
     },
@@ -541,10 +545,10 @@ const FGLMSchema = new mongoose.Schema({
     lubeVision: {
 
         type: Number,
-        enum: [0, 1],
+        enum: [1, 2],
         required: function () 
         {
-            return this.typeMonitor === 1;
+            return this.typeMonitor === 2;
         }
 
     },
@@ -552,10 +556,10 @@ const FGLMSchema = new mongoose.Schema({
     trolleyVision: {
 
         type: Number,
-        enum: [0, 1],
+        enum: [1, 2],
         required: function () 
         {
-            return this.typeMonitor === 1;
+            return this.typeMonitor === 2;
         }
 
     },
@@ -563,10 +567,10 @@ const FGLMSchema = new mongoose.Schema({
     trolleyDetect: {
 
         type: Number,
-        enum: [0, 1],
+        enum: [1, 2],
         required: function () 
         {
-            return this.trolleyVision === 1;
+            return this.trolleyVision === 2;
         }
 
     },
@@ -574,10 +578,10 @@ const FGLMSchema = new mongoose.Schema({
     omniView: {
 
         type: Number,
-        enum: [0, 1],
+        enum: [1, 2],
         required: function () 
         {
-            return this.typeMonitor === 1;
+            return this.typeMonitor === 2;
         }
         
     },
@@ -587,7 +591,7 @@ const FGLMSchema = new mongoose.Schema({
         type: Number,
         required: function () 
         {
-            return this.chainVision === 1 || this.omniView === 1;
+            return this.chainVision === 2 || this.omniView === 2;
         }
 
     },
@@ -732,7 +736,7 @@ const FGLMSchema = new mongoose.Schema({
         type: Number,
         required: function () 
         {
-            return this.existingMonitor === 1 || this.newMonitor === 1;
+            return this.existingMonitor === 2 || this.newMonitor === 2;
         }
 
     },
@@ -743,7 +747,7 @@ const FGLMSchema = new mongoose.Schema({
         type: Number,
         required: function () 
         {
-            return this.existingMonitor === 1 || this.newMonitor === 1;
+            return this.existingMonitor === 2 || this.newMonitor === 2;
         }
 
     },
@@ -754,7 +758,7 @@ const FGLMSchema = new mongoose.Schema({
         type: Number,
         required: function () 
         {
-            return this.existingMonitor === 1 || this.newMonitor === 1;
+            return this.existingMonitor === 2 || this.newMonitor === 2;
         }
 
     },
@@ -765,7 +769,7 @@ const FGLMSchema = new mongoose.Schema({
         type: Number,
         required: function () 
         {
-            return this.existingMonitor === 1 || this.newMonitor === 1;
+            return this.existingMonitor === 2 || this.newMonitor === 2;
         }
 
     },
@@ -774,14 +778,14 @@ const FGLMSchema = new mongoose.Schema({
     specialControllerOptions: {
 
         type: Number,
-        enum: [0, 1, 2],
+        enum: [1, 2, 3],
 
     },
     // ConveyorSpecs
     sideLube: {
 
         type: Number,
-        enum: [0, 1],
+        enum: [1, 2],
         required: true,
 
     },
@@ -789,7 +793,7 @@ const FGLMSchema = new mongoose.Schema({
     topLube: {
 
         type: Number,
-        enum: [0, 1],
+        enum: [1, 2],
         required: true,
 
     },
@@ -797,16 +801,16 @@ const FGLMSchema = new mongoose.Schema({
     cleanChain: {
 
         type: Number,
-        enum: [0, 1],
+        enum: [1, 2],
         required: true,
 
     },
     
     // Wire
-    measureUnit: {
+    wireMeasurementUnit: {
 
         type: Number,
-        enum: [0, 1],
+        enum: [1, 2],
         required: true,
 
     },
