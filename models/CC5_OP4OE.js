@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const uuid = require("uuid");
 
-const CC5_CLSchema = new mongoose.Schema({
+const CC5_OP4OEchema = new mongoose.Schema({
 
 
     conveyorName: {
@@ -701,6 +701,14 @@ const CC5_CLSchema = new mongoose.Schema({
         required: false,
 
     },
+    
+    outboardStatus: {
+
+        type: Number,
+        enum: [1, 2],
+        required: true,
+
+    },
 
     highRollerStatus: {
 
@@ -710,13 +718,6 @@ const CC5_CLSchema = new mongoose.Schema({
 
     },
 
-    outboardStatus: {
-
-        type: Number,
-        enum: [1, 2],
-        required: true,
-
-    },
 
     lubeBrand: {
 
@@ -779,85 +780,130 @@ const CC5_CLSchema = new mongoose.Schema({
     //     required: false,
     // },
 
-    wireMeasurementUnit: {
+
+    chainMaster:{
+
         type: Number,
-        enum: [1, 2, 3, 4],
+        enum: [1, 2],
         required: false,
+
     },
 
-    conductor2: {
+    timerStatus:{
+
         type: Number,
+        enum: [1, 2, 3],
         required: false,
+
     },
 
-    conductor4: {
+    electricStatus:{
+
         type: Number,
+        enum: [1, 2],
         required: false,
+
     },
 
-    conductor7: {
+    pneumaticStatus:{
+
         type: Number,
+        enum: [1, 2],
         required: false,
+
     },
 
-    conductor12: {
+
+    mightyLubeMonitoring:{
+
         type: Number,
+        enum: [1, 2],
         required: false,
+
     },
 
-    junctionBoxNum: {
+
+    plcConnection:{
+
         type: Number,
+        enum: [1, 2],
         required: false,
+
+    },
+
+    otherControllerNotes:{
+
+        type: String,
+        required: false,
+
     },
 
     cc5UnitType: {
+
         type: Number,
         enum: [1, 2, 3, 4],
         required: false,
+
     },
 
     powerRailWidth: {
+
         type: Number,
         required: false,
+
     },
 
     powerRailHeight: {
+
         type: Number,
         required: false,
+
     },
 
     rollerWheelA1: {
+
         type: Number,
         required: false,
+
     },
 
     rollerWheelB1: {
+
         type: Number,
         required: false,
+
     },
 
     linkD1: {
+
         type: Number,
         required: false,
+
     },
 
     wheelPitchM1: {
+
         type: Number,
         required: false,
+
     },
 
     rollerPinY1: {
+
         type: Number,
         required: false,
+
     },
 
     rollerPinZ1: {
+
         type: Number,
         required: false,
+        
     }
 
 
 });
 
-const CC5_CL = mongoose.models.CC5_CL || mongoose.model('CC5_CL', CC5_CLSchema);
-module.exports = CC5_CL;
+const CC5_OP4OE = mongoose.models.CC5_OP4OE || mongoose.model('CC5_OP4OE', CC5_OP4OESchema);
+module.exports = CC5_OP4OE;

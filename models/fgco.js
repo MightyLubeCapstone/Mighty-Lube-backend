@@ -2,64 +2,96 @@ const mongoose = require('mongoose');
 const uuid = require("uuid");
 
 const FGCOSchema = new mongoose.Schema({
+
     conveyorName: {
+
         type: String,
         required: false,
+
     },
-    chainSizeType: {
+
+    chainSize: {
+
         type: Number,
         enum: [1, 2, 3, 4, 5],
         required: true,
-    },
-    otherChainSize: {
-        type: String,
-        required: this.chainSizeType === 5,
+
     },
 
-    chainManufacturerType: {
+    otherChainSize: {
+        type: String,
+        required: this.chainSize === 5,
+    },
+
+    chainManufacturer: {
+
         type: Number,
         enum: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
         required: true,
+
     },
 
-    otherManufacturerType: {
+    otherChainManufacturer: {
+
         type: String,
-        required: this.chainManufacturerType === 10,
+        required: this.chainManufacturer === 10,
+
     },
 
-    loadedStatus: {
+    conveyorLoaded: {
+
         type: Number,
-        enum: [0, 1],
+        enum: [1, 2],
         required: true,
+
     },
+
     dripLineStatus: {
+
         type: Number,
-        enum: [0, 1],
+        enum: [1, 2],
         required: true,
+
     },
+
     operatingVoltTriple: {
+
         type: Number,
         required: true,
+
     },
+
     oppsSpecification: {
+
         type: Number,
-        enum: [0, 1],
+        enum: [1, 2],
         required: true,
+
     },
+
     pushButtonSwitch: {
+
         type: Number,
-        enum: [0, 1],
+        enum: [1, 2],
         required: true,
+
     },
+
     enclosedShroud: {
+
         type: Number,
-        enum: [0, 1],
+        enum: [1, 2],
         required: false,
+
     },
+    
     additionalOtherInfo: {
+
         type: String,
         required: false,
+        
     }
+
 });
 
 const FGCO = mongoose.models.FGCO || mongoose.model('FGCO', FGCOSchema);
