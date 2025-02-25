@@ -1,251 +1,74 @@
 const mongoose = require('mongoose');
-const uuid = require("uuid");
 
-const FGLMSchema = new mongoose.Schema({
-    // Gen Info
+const IFT_OP4OE_Schema = new mongoose.Schema({
     conveyorName: {
-
         type: String,
-        required: true,
-
+        required: false,
     },
-
     chainSize: {
-
         type: Number,
-        enum: [1, 2, 3, 4, 5],
-        required: true,
-
+        required: false,
     },
-
-    otherChainSize: {
-
-        type: String,
-        required: function()
-	    {
-
-		    return this.chainSize === 5;
-
-	    }
-
-    },
-
-    chainManufacturer: {
-
+    // add enum and check
+    industrialChainManufacturer: {
         type: Number,
-        enum: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-        required: true,
-        
+        enum: [1, 2, 3, 4, 5, 6, 7, 8, 9],
+        required: false,
     },
-
     otherChainManufacturer: {
-
         type: String,
-        required: function ()
-        {
-            return this.chainManufacturer === 10;
-        }
-
+        required: function () {
+            return this.industrialChainManufacturer === 9;
+        },
     },
-
     wheelManufacturer: {
-
         type: Number,
         enum: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-        required: true,
-
+        required: false,
     },
-    
-    otherWheelManufacturer: {
-        type: String,
-
-        required: function ()
-        {
-            return this.wheelManufacturer === 10;
-        }
-
-    },
-
-    chainPinType: {
-
-        type: Number,
-        enum: [1, 2, 3],
-        required: true,
-        // add RegEx matching to this :D
-
-    },
-
     conveyorLength: {
-
-        type: String,
-        required: true,
-        // add RegEx matching to this :D
-
-    },
-    
-    conveyorLengthUnit: {
-
         type: Number,
-        enum: [1, 2, 3, 4],
-        required: true,
-        // add RegEx matching to this :D
-
+        required: false,
     },
-
+    measurementUnit: {
+        type: Number,
+        required: false,
+    },
     conveyorSpeed: {
-
-        type: String,
-        required: true,
-        // add RegEx matching to this :D
-
-    },
-
-    conveyorSpeedUnit: {
-
         type: Number,
-        enum: [1, 2],
-        required: true,
-        // add RegEx matching to this :D
-
+        required: false,
     },
-
+    speedUnit: {
+        type: Number,
+        required: false,
+    },
     conveyorIndex: {
-
-        type: String,
-        required: true,
-        // add RegEx matching to this :D
-
+        type: Number,
+        required: false,
     },
-
     travelDirection: {
-
+        type: Number,
+        enum: [1, 2],
+        required: false,
+    },
+    appEnviroment: {
         type: Number,
         enum: [1, 2],
         required: true,
-        // add RegEx matching to this :D
-
     },
-
-    metalType: {
-
-        type: Number,
-        enum: [1, 2, 3, 4],
-        required: true,
-        // add RegEx matching to this :D
-
-    },
-
-    otherMetalType: {
-
-        type: String,
-        required: function ()
-        {
-            return this.metalType === 4;
-        }
-
-    },
-
-    conveyorStyle: {
-
-        type: Number,
-        enum: [1, 2, 3, 4, 5],
-        required: true,
-        // add RegEx matching to this :D
-
-    },
-
-    otherConveyorStyle: {
-
-        type: String,
-        required: function ()
-        {
-            return this.conveyorStyle === 5;
-        }
-
-    },
-
-    trolleyColor: {
-
-        type: Number,
-        enum: [1, 2, 3, 4],
-        required: true,
-        // add RegEx matching to this :D
-
-    },
-
-    otherTrolleyColor: {
-        
-        type: String,
-        required: function ()
-        {
-            return this.trolleyColor === 4;
-        }
-
-    },
-
-    trolleyType: {
-
-        type: Number,
-        enum: [1, 2, 3, 4, 5, 6],
-        required: true,
-        // add RegEx matching to this :D
-
-    },
-
-    surroundingTemp: {
-
+    ovenStatus: {
         type: Number,
         enum: [1, 2],
-        required: true,
-        // add RegEx matching to this :D
-
+        required: function () {
+            return this.appEnviroment === 1;
+        },
     },
-
-    conveyorLoaded: {
-
+    ovenTemp: {
         type: Number,
-        enum: [1, 2],
-        required: true,
-        // add RegEx matching to this :D
-
+        required: function () {
+            return this.appEnviroment === 1;
+        },
     },
-
-    conveyorSwing: {
-
-        type: Number,
-        enum: [1, 2],
-        required: true,
-        // add RegEx matching to this :D
-
-    },
-
-    plantLayout: {
-
-        type: Number,
-        enum: [1, 2],
-        required: true,
-        // add RegEx matching to this :D
-
-    },
-
-    requiredPics: {
-
-        type: Number,
-        enum: [1, 2],
-        required: true,
-        // add RegEx matching to this :D
-
-    },
-
-    // CPU
-    operatingVoltage: {
-
-        type: String,
-        required: true,
-
-    },
-
-    // MonSys
     existingMonitor: {
 
         type: Number,
@@ -781,64 +604,213 @@ const FGLMSchema = new mongoose.Schema({
         enum: [1, 2, 3],
 
     },
-    // ConveyorSpecs
-    sideLube: {
 
+    surroundingTemp: {
         type: Number,
         enum: [1, 2],
-        required: true,
-
+        required: false,
     },
-
-    topLube: {
-
+    conveyorLoaded: {
         type: Number,
         enum: [1, 2],
-        required: true,
-
+        required: false,
     },
-
-    cleanChain: {
-
+    conveyorSwing: {
         type: Number,
         enum: [1, 2],
-        required: true,
-
+        required: false,
     },
-    
-    // Wire
-    wireMeasurementUnit: {
-
+    strandStatus: {
         type: Number,
-        enum: [1, 2, 3, 4],
-        required: true,
-
+        enum: [1, 2],
+        required: false,
     },
-
-    conductor4: {
-
+    plantLayout: {
+        type: Number,
+        enum: [1, 2],
+        required: false,
+    },
+    requiredPics: {
+        type: Number,
+        enum: [1, 2],
+        required: false,
+    },
+    operatingVoltage: {
+        type: Number,
+        required: false,
+    },
+    controlVoltage: {
+        type: Number,
+        required: false,
+    },
+    wheelOpenType: {
+        type: Number,
+        enum: [1, 2, 3],
+        required: false,
+    },
+    wheelClosedType: {
+        type: Number,
+        enum: [1, 2, 3],
+        required: false,
+    },
+    openStatus: {
+        type: Number,
+        enum: [1, 2],
+        required: false,
+    },
+    freeWheelStatus: {
+        type: Number,
+        enum: [1, 2],
+        required: false,
+    },
+    guideRollerStatus: {
+        type: Number,
+        enum: [1, 2],
+        required: false,
+    },
+    openRaceStyle: {
+        type: Number,
+        enum: [1, 2, 3],
+        required: false,
+    },
+    closedRaceStyle: {
+        type: Number,
+        enum: [1, 2, 3],
+        required: false,
+    },
+    holeStatus: {
+        type: Number,
+        enum: [1, 2],
+        required: false,
+    },
+    actuatorStatus: {
+        type: Number,
+        enum: [1, 2],
+        required: false,
+    },
+    pivotStatus: {
+        type: Number,
+        enum: [1, 2],
+        required: false,
+    },
+    kingPinStatus: {
+        type: Number,
+        enum: [1, 2],
+        required: false,
+    },
+    outboardStatus: {
+        type: Number,
+        enum: [1, 2],
+        required: false,
+    },
+    railLubeStatus: {
+        type: Number,
+        enum: [1, 2],
+        required: false,
+    },
+    lubeBrand: {
         type: String,
-        required: true,
-
+        required: false,
     },
-
-    conductor7: {
-
+    lubeType: {
         type: String,
-        required: true,
-
+        required: false,
     },
-
-    conductor2: {
-
+    lubeViscosity: {
         type: String,
-        required: true,
-
+        required: false,
     },
-
+    chainMaster: {
+        type: Number,
+        enum: [1, 2],
+        required: false,
+    },
+    timerStatus: {
+        type: Number,
+        enum: [1, 2, 3],
+        required: false,
+    },
+    electricStatus: {
+        type: Number,
+        enum: [1, 2],
+        required: false,
+    },
+    pneumaticStatus: {
+        type: Number,
+        enum: [1, 2],
+        required: false,
+    },
+    mightyLubeMonitoring: {
+        type: Number,
+        enum: [1, 2],
+        required: false,
+    },
+    plcConnection: {
+        type: Number,
+        enum: [1, 2],
+        required: false,
+    },
+    otherControllerInfo: {
+        type: String,
+        required: false,
+    },
+    specialControllerOption: {
+        type: String,
+        required: false,
+    },
+    specialControllerInfo: {
+        type: String,
+        required: false,
+    },
+    iftUnitType: {
+        type: Number,
+        required: false,
+    },
+    iftPowerA: {
+        type: Number,
+        required: false,
+    },
+    iftPowerB: {
+        type: Number,
+        required: false,
+    },
+    iftPowerG: {
+        type: Number,
+        required: false,
+    },
+    iftPowerH: {
+        type: Number,
+        required: false,
+    },
+    iftPowerJ: {
+        type: Number,
+        required: false,
+    },
+    iftPowerS1: {
+        type: Number,
+        required: false,
+    },
+    iftPowerT1: {
+        type: Number,
+        required: false,
+    },
+    iftPowerU1: {
+        type: Number,
+        required: false,
+    },
+    iftPowerV1: {
+        type: Number,
+        required: false,
+    },
+    iftPowerW1: {
+        type: Number,
+        required: false,
+    },
+    iftPowerX1: {
+        type: Number,
+        required: false,
+    },
 });
 
-const FGLM = mongoose.models.FGLM || mongoose.model('FGLM', FGLMSchema);
-module.exports = FGLM;
-
-
+const IFT_OP4OE = mongoose.models.IFT_OP4OE || mongoose.model('IFT_OP4OE', IFT_OP4OE_Schema);
+module.exports = IFT_OP4OE;
