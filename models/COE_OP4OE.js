@@ -3,11 +3,11 @@ const mongoose = require('mongoose');
 const COE_OP4OE_Schema = new mongoose.Schema({
     conveyorName: {
         type: String,
-        required: false,
+        required: true,
     },
     chainSize: {
         type: Number,
-        required: false,
+        required: true,
         // add enum and check
     },
     industrialChainManufacturer: {
@@ -21,31 +21,21 @@ const COE_OP4OE_Schema = new mongoose.Schema({
             return this.industrialChainManufacturer === 9;
         },
     },
-    wheelManufacturer: {
-        type: Number,
-        required: false,
-    },
-    otherWheelManufacturer: {
-        type: String,
-        required: function () {
-            return this.wheelManufacturer === 10;
-        },
-    },
     conveyorLength: {
         type: Number,
-        required: false,
+        required: true,
     },
     conveyorLengthUnit: {
         type: Number,
-        required: false,
+        required: true,
     },
     conveyorSpeed: {
         type: Number,
-        required: false,
+        required: true,
     },
     conveyorSpeedUnit: {
         type: Number,
-        required: false,
+        required: true,
     },
     conveyorIndex: {
         type: Number,
@@ -100,7 +90,7 @@ const COE_OP4OE_Schema = new mongoose.Schema({
     },
     operatingVoltage: {
         type: Number,
-        required: false,
+        required: true,
     },
     existingMonitor: {
 
@@ -635,8 +625,22 @@ const COE_OP4OE_Schema = new mongoose.Schema({
 
         type: Number,
         enum: [1, 2, 3],
+        required: false,
 
     },
+
+
+    catDriveStatus: {
+        type: Number,
+        enum: [1, 2],
+        required: true,
+    },
+
+
+    //template C needs to be added here when we get it if they enter yes for catDriveStatus
+
+
+
     wheelOpenType: {
         type: Number,
         enum: [1, 2, 3],
