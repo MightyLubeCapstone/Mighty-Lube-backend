@@ -7,7 +7,7 @@ const COE_CEL_Schema = new mongoose.Schema({
     },
     chainSize: {
         type: Number,
-        required: false,
+        required: true,
         // add enum and check
     },
     industrialChainManufacturer: {
@@ -23,19 +23,19 @@ const COE_CEL_Schema = new mongoose.Schema({
     },
     conveyorLength: {
         type: Number,
-        required: false,
+        required: true,
     },
     conveyorLengthUnit: {
         type: Number,
-        required: false,
+        required: true,
     },
     conveyorSpeed: {
         type: Number,
-        required: false,
+        required: true,
     },
     conveyorSpeedUnit: {
         type: Number,
-        required: false,
+        required: true,
     },
     conveyorIndex: {
         type: Number,
@@ -90,7 +90,7 @@ const COE_CEL_Schema = new mongoose.Schema({
     },
     operatingVoltage: {
         type: Number,
-        required: false,
+        required: true,
     },
     existingMonitor: {
 
@@ -625,8 +625,10 @@ const COE_CEL_Schema = new mongoose.Schema({
 
         type: Number,
         enum: [1, 2, 3],
+        required: false,
 
     },
+    
     wheelOpenType: {
         type: Number,
         enum: [1, 2, 3],
@@ -645,8 +647,13 @@ const COE_CEL_Schema = new mongoose.Schema({
     catDriveStatus: {
         type: Number,
         enum: [1, 2],
-        required: false,
+        required: true,
     },
+
+
+    //template C needs to be added here when we get it if they enter yes for catDriveStatus
+
+
     railLubeStatus: {
         type: Number,
         enum: [1, 2],

@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const uuid = require("uuid");
 
-const CC5_OP4OEchema = new mongoose.Schema({
+const CC5_OP4OE_Schema = new mongoose.Schema({
 
 
     conveyorName: {
@@ -22,8 +22,10 @@ const CC5_OP4OEchema = new mongoose.Schema({
     otherChainSize: {
 
         type: String,
-        required: this.cc5ChainSize === 8
-
+        required: function ()
+        {
+            return this.cc5ChainSize === 8;
+        }
     },
 
     industrialChainManufacturer: {
@@ -905,5 +907,5 @@ const CC5_OP4OEchema = new mongoose.Schema({
 
 });
 
-const CC5_OP4OE = mongoose.models.CC5_OP4OE || mongoose.model('CC5_OP4OE', CC5_OP4OESchema);
+const CC5_OP4OE = mongoose.models.CC5_OP4OE || mongoose.model('CC5_OP4OE', CC5_OP4OE_Schema);
 module.exports = CC5_OP4OE;
