@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const uuid = require("uuid");
+const fgcoMapping = require("../models/fgcoMapping");
 
 const FGCOSchema = new mongoose.Schema({
 
@@ -86,15 +87,35 @@ const FGCOSchema = new mongoose.Schema({
         required: false,
 
     },
-    
+
     additionalOtherInfo: {
 
         type: String,
         required: false,
-        
+
     }
 
 });
+
+FGCOSchema.methods.getDecodedInfo = function () {
+    function mapValues(field, selectedValue) {
+        if (!fgcoMapping[field]) return selectedValue;
+
+        return Object.entries(fgcoMapping[field]).map(([key, value]) => ({
+            key: parseInt(key),
+            value: value,
+            isSelected: parseInt(key) === selectedValue
+        }));
+    }
+
+    let mappedInfo = { ...this.productConfigurationInfo };
+    Object.keys(fgcoMapping).forEach(field => {
+        if (mappedInfo[field] !== undefined) {
+            mappedInfo[field] = mapValues(field, mappedInfo[field]);
+        }
+    });
+    return mappedInfo;
+}
 
 const FGCO = mongoose.models.FGCO || mongoose.model('FGCO', FGCOSchema);
 module.exports = FGCO;

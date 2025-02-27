@@ -10,6 +10,7 @@ const express = require("express");
 const { dbConnect } = require("../config/config");
 const { authenticate } = require("./sessions");
 const User = require("../models/user");
+const mongoose = require("mongoose");
 
 const router = express.Router();
 
@@ -19,12 +20,12 @@ router.put("/", authenticate, async (req, res) => {
         // with the string key being the name of whichever attribute we are trying to update for whichever productType.
         const { orderID, data } = req.body;
         const user = req.user;
-        const order = user.orders.find(order => order.orderID === orderID);
+        const orderInfo = user.orders.find(order => order.orderID === orderID).productConfigurationInfo;
         Object.entries(data).forEach(([key, value]) => {
-            console.log();
-            console.log(`Key: ${key}, Value: ${value}`);
-            order[key] = value;
+            orderInfo[key] = value;
         });
+        // Ensure Mongoose knows that the `orders` array has changed
+        user.markModified("orders");
         await user.save();
         return res.status(200).json({ message: `Successfully updated the order ${orderID}` });
     } catch (error) {
@@ -46,7 +47,7 @@ router.get("/", authenticate, async (req, res) => {
             quantity: order.numRequested,
             name: order.productType,
             dateCreated: order.orderCreated,
-            details: order.productConfigurationInfo
+            //details: order.productConfigurationInfo, this only needs to be retrieved in orders/order
         }));
         return res.status(200).json({ orders: filteredOrders });
     } catch (error) {
@@ -57,11 +58,11 @@ router.get("/", authenticate, async (req, res) => {
 
 router.get("/order", authenticate, async (req, res) => {
     try {
-        const { orderID } = req.body;
-        const orderInfo = await req.user.orders.find(order => order.orderID === orderID); // grab whichever model is stored in productType
-        const model = orderInfo.productType;
+        const { orderid: orderID } = req.headers;
+        const order = await req.user.orders.find(order => order.orderID === orderID); // grab whichever model is stored in productType
+        const model = order.productType;
         const ProductModel = mongoose.model(model);
-        const mappedInfo = ProductModel.prototype.getDecodedInfo.call(orderInfo);
+        const mappedInfo = ProductModel.prototype.getDecodedInfo.call(order);
         if (!mappedInfo) {
             return res.status(400).json({ error: "No order found with that id!" });
         }
