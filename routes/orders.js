@@ -76,10 +76,10 @@ router.get("/order", authenticate, async (req, res) => {
 router.delete("/order", authenticate, async (req, res) => {
     try {
         const { orderID } = req.body;
-        // Remove the session with the matching sessionID
+        // Remove the order with the matching orderID
         await User.findByIdAndUpdate(
             req.user._id,
-            { $pull: { orders: { orderID } } }, // Remove the session object that matches sessionID
+            { $pull: { orders: { orderID } } }, // Remove the order object that matches orderID
             { new: true } // Return updated document
         );
         return res.status(200).json({ message: "Successfully deleted order!" });
