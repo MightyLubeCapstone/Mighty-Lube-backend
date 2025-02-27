@@ -1,251 +1,124 @@
 const mongoose = require('mongoose');
-const uuid = require("uuid");
 
-const FGLMSchema = new mongoose.Schema({
-    // Gen Info
+const PAF_SLS_Schema = new mongoose.Schema({
     conveyorName: {
-
         type: String,
         required: true,
-
     },
 
     chainSize: {
-
         type: Number,
-        enum: [1, 2, 3, 4, 5],
+        enum: [1, 2, 3, 4, 5, 6, 7, 8],
         required: true,
-
     },
 
     otherChainSize: {
-
         type: String,
-        required: function()
-	    {
-
-		    return this.chainSize === 5;
-
-	    }
-
+        required: function () {
+            return this.chainSize === 8;
+        },
     },
 
-    chainManufacturer: {
-
+    industrialChainManufacturer: {
         type: Number,
-        enum: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+        enum: [1, 2, 3, 4, 5, 6, 7, 8, 9],
         required: true,
-        
     },
 
     otherChainManufacturer: {
-
         type: String,
-        required: function ()
-        {
-            return this.chainManufacturer === 10;
-        }
-
-    },
-
-    wheelManufacturer: {
-
-        type: Number,
-        enum: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-        required: true,
-
-    },
-    
-    otherWheelManufacturer: {
-        type: String,
-
-        required: function ()
-        {
-            return this.wheelManufacturer === 10;
-        }
-
-    },
-
-    chainPinType: {
-
-        type: Number,
-        enum: [1, 2, 3],
-        required: true,
-        // add RegEx matching to this :D
-
+        required: function () {
+            return this.industrialChainManufacturer === 9;
+        },
     },
 
     conveyorLength: {
-
-        type: String,
+        type: Number,
         required: true,
-        // add RegEx matching to this :D
-
     },
-    
-    conveyorLengthUnit: {
 
+    conveyorLengthUnit: {
         type: Number,
         enum: [1, 2, 3, 4],
         required: true,
-        // add RegEx matching to this :D
-
     },
 
     conveyorSpeed: {
-
-        type: String,
+        type: Number,
         required: true,
-        // add RegEx matching to this :D
-
     },
 
     conveyorSpeedUnit: {
-
         type: Number,
         enum: [1, 2],
         required: true,
-        // add RegEx matching to this :D
-
     },
 
     conveyorIndex: {
-
-        type: String,
+        type: Number,
         required: true,
-        // add RegEx matching to this :D
-
     },
 
     travelDirection: {
-
         type: Number,
         enum: [1, 2],
         required: true,
-        // add RegEx matching to this :D
-
     },
 
-    metalType: {
-
+    appEnviroment: {
         type: Number,
-        enum: [1, 2, 3, 4],
+        enum: [1, 2],
         required: true,
-        // add RegEx matching to this :D
-
     },
 
-    otherMetalType: {
-
-        type: String,
-        required: function ()
-        {
-            return this.metalType === 4;
-        }
-
-    },
-
-    conveyorStyle: {
-
+    ovenStatus: {
         type: Number,
-        enum: [1, 2, 3, 4, 5],
-        required: true,
-        // add RegEx matching to this :D
-
+        enum: [1, 2],
+        required: function () {
+            return this.appEnviroment === 1;
+        },
     },
 
-    otherConveyorStyle: {
-
-        type: String,
-        required: function ()
-        {
-            return this.conveyorStyle === 5;
-        }
-
-    },
-
-    trolleyColor: {
-
+    ovenTemp: {
         type: Number,
-        enum: [1, 2, 3, 4],
-        required: true,
-        // add RegEx matching to this :D
-
-    },
-
-    otherTrolleyColor: {
-        
-        type: String,
-        required: function ()
-        {
-            return this.trolleyColor === 4;
-        }
-
-    },
-
-    trolleyType: {
-
-        type: Number,
-        enum: [1, 2, 3, 4, 5, 6],
-        required: true,
-        // add RegEx matching to this :D
-
+        required: function () {
+            return this.appEnviroment === 1;
+        },
     },
 
     surroundingTemp: {
-
         type: Number,
         enum: [1, 2],
         required: true,
-        // add RegEx matching to this :D
-
     },
 
     conveyorLoaded: {
-
         type: Number,
         enum: [1, 2],
         required: true,
-        // add RegEx matching to this :D
-
     },
 
     conveyorSwing: {
-
         type: Number,
         enum: [1, 2],
         required: true,
-        // add RegEx matching to this :D
-
     },
 
-    plantLayout: {
-
+    orientationType: {
         type: Number,
-        enum: [1, 2],
         required: true,
-        // add RegEx matching to this :D
-
     },
 
-    requiredPics: {
-
+    operatingVoltSingle: {
         type: Number,
-        enum: [1, 2],
         required: true,
-        // add RegEx matching to this :D
-
     },
 
-    // CPU
-    operatingVoltage: {
-
-        type: String,
+    controlVoltSingle: {
+        type: Number,
         required: true,
-
     },
 
-    // MonSys
     existingMonitor: {
 
         type: Number,
@@ -781,64 +654,34 @@ const FGLMSchema = new mongoose.Schema({
         enum: [1, 2, 3],
 
     },
-    // ConveyorSpecs
-    sideLube: {
-
-        type: Number,
-        enum: [1, 2],
-        required: true,
-
-    },
-
-    topLube: {
-
-        type: Number,
-        enum: [1, 2],
-        required: true,
-
-    },
 
     cleanChain: {
-
         type: Number,
         enum: [1, 2],
         required: true,
-
     },
-    
-    // Wire
-    wireMeasurementUnit: {
 
+    pfUnitType: {
         type: Number,
-        enum: [1, 2, 3, 4],
         required: true,
-
     },
 
-    conductor4: {
-
-        type: String,
+    pfInvertedA: {
+        type: Number,
         required: true,
-
     },
 
-    conductor7: {
-
-        type: String,
+    pfInvertedG: {
+        type: Number,
         required: true,
-
     },
 
-    conductor2: {
-
-        type: String,
+    pfInvertedH: {
+        type: Number,
         required: true,
-
     },
-
 });
 
-const FGLM = mongoose.models.FGLM || mongoose.model('FGLM', FGLMSchema);
-module.exports = FGLM;
+const PAF_SLS = mongoose.model('tblPAF_SLS', PAF_SLS_Schema);
 
-
+module.exports = PAF_SLS;

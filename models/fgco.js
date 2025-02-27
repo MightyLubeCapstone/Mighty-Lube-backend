@@ -20,7 +20,9 @@ const FGCOSchema = new mongoose.Schema({
 
     otherChainSize: {
         type: String,
-        required: this.chainSize === 5,
+        required: function () {
+            return this.chainSize === 5;
+        },
     },
 
     chainManufacturer: {
@@ -32,10 +34,10 @@ const FGCOSchema = new mongoose.Schema({
     },
 
     otherChainManufacturer: {
-
         type: String,
-        required: this.chainManufacturer === 10,
-
+        required: function () {
+            return this.chainManufacturer === 10;
+        },
     },
 
     conveyorLoaded: {

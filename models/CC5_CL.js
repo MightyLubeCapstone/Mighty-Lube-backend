@@ -22,8 +22,10 @@ const CC5_CLSchema = new mongoose.Schema({
     otherChainSize: {
 
         type: String,
-        required: this.cc5ChainSize === 8
-
+        required: function ()
+        {
+            return this.cc5ChainSize === 8;
+        }
     },
 
     industrialChainManufacturer: {
@@ -159,7 +161,7 @@ const CC5_CLSchema = new mongoose.Schema({
     operatingVoltage: {
 
         type: String,
-        required: false,
+        required: true,
 
     },
 
