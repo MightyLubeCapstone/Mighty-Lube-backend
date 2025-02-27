@@ -28,7 +28,7 @@ router.post("/", authenticate, async (req, res) => {
             strandStatus: CC5_CLData.strandStatus,
             ...(CC5_CLData.plantLayout && { plantLayout: CC5_CLData.plantLayout }),
             ...(CC5_CLData.requiredPics && { requiredPics: CC5_CLData.requiredPics }),
-            ...(CC5_CLData.operatingVoltage && { operatingVoltage: CC5_CLData.operatingVoltage }),
+            operatingVoltage: CC5_CLData.operatingVoltage,
             existingMonitor: CC5_CLData.existingMonitor,
             // Ensure 'Connecting to an existing monitor' and 'New Monitor' are not both selected
             newMonitor: CC5_CLData.newMonitor,
