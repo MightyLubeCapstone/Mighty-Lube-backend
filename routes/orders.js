@@ -36,19 +36,21 @@ router.put("/", authenticate, async (req, res) => {
 router.get("/", authenticate, async (req, res) => {
     //used for FGCO form
     try {
+        const { ordercategory } = req.headers; // Extract orderCategory from headers
         const orders = req.user.orders;
         if (!orders[0]) {
             return res.status(400).json({ error: "No orders found for this user!" });
         }
         // dumb order info down for cards
-        const filteredOrders = orders.map(order => ({
-            orderID: order.orderID,
-            orderStatus: order.orderStatus,
-            quantity: order.numRequested,
-            name: order.productType,
-            dateCreated: order.orderCreated,
-            //details: order.productConfigurationInfo, this only needs to be retrieved in orders/order
-        }));
+        const filteredOrders = orders
+            .filter(order => !ordercategory || order.orderCategory === ordercategory)
+            .map(order => ({
+                orderID: order.orderID,
+                orderStatus: order.orderStatus,
+                quantity: order.numRequested,
+                name: order.productType,
+                dateCreated: order.orderCreated,
+            }));
         return res.status(200).json({ orders: filteredOrders });
     } catch (error) {
         console.log(error);

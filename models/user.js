@@ -63,6 +63,11 @@ const UserSchema = new mongoose.Schema({
             type: String,
             default: "Incomplete" // maybe, depends on whatever they want it to say
         },
+        orderCategory: {
+            type: String,
+            default: "cart",
+            enum: ["cart", "saved", "finalized"],
+        },
         orderCreated: {
             type: Date,
             default: Date.now(),
