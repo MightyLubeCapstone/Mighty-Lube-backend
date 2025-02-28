@@ -18,7 +18,7 @@ router.post("/", authenticate, async (req, res) => {
             ...(COE_CDLData.ovenTemp && { ovenTemp: COE_CDLData.ovenTemp }),
             ...(COE_CDLData.controlVoltSingle && { controlVoltSingle: COE_CDLData.controlVoltSingle }),
         });
-        req.user.orders.push({ numRequested: numRequested, productConfigurationInfo: order, productType: "COE_CDL" });
+        req.user.cart.push({ numRequested: numRequested, productConfigurationInfo: order, productType: "COE_CDL" });
         await req.user.save();
 
         return res.status(200).json({ message: "COE_CDL entry added" });

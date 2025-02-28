@@ -20,12 +20,12 @@ router.put("/", authenticate, async (req, res) => {
         // with the string key being the name of whichever attribute we are trying to update for whichever productType.
         const { orderID, data } = req.body;
         const user = req.user;
-        const orderInfo = user.orders.find(order => order.orderID === orderID).productConfigurationInfo;
+        const orderInfo = user.cart.find(order => order.orderID === orderID).productConfigurationInfo;
         Object.entries(data).forEach(([key, value]) => {
             orderInfo[key] = value;
         });
         // Ensure Mongoose knows that the `orders` array has changed
-        user.markModified("orders");
+        user.markModified("cart");
         await user.save();
         return res.status(200).json({ message: `Successfully updated the order ${orderID}` });
     } catch (error) {
@@ -33,17 +33,51 @@ router.put("/", authenticate, async (req, res) => {
     }
 })
 
+router.put("/save", authenticate, async (req, res) => {
+    try {
+        const { draftTitle } = req.body;
+        const user = req.user;
+        const cart = user.cart;
+        user.drafts.push({ cart, draftTitle });
+        user.cart = []; // clear out the user's current cart
+        // Ensure Mongoose knows that the arrays have changed
+        user.markModified("drafts");
+        user.markModified("cart");
+        await user.save();
+        return res.status(200).json({ message: `Successfully updated orders` });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: `Internal server error: ${error}` });
+    }
+})
+
+router.put("/finalize", authenticate, async (req, res) => {
+    try {
+        const { configurationName } = req.body;
+        const user = req.user;
+        const cart = user.cart;
+        user.configurations.push({ configurationName, cart });
+        user.cart = []; // clear out the user's current cart
+        // Ensure Mongoose knows that the arrays have changed
+        user.markModified("configurations");
+        user.markModified("cart");
+        await user.save();
+        return res.status(200).json({ message: `Successfully updated orders` });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: `Internal server error: ${error}` });
+    }
+})
+
 router.get("/", authenticate, async (req, res) => {
     //used for FGCO form
     try {
-        const { ordercategory } = req.headers; // Extract orderCategory from headers
-        const orders = req.user.orders;
-        if (!orders[0]) {
+        const cart = req.user.cart;
+        if (!cart || !cart[0]) {
             return res.status(400).json({ error: "No orders found for this user!" });
         }
         // dumb order info down for cards
-        const filteredOrders = orders
-            .filter(order => !ordercategory || order.orderCategory === ordercategory)
+        const filteredOrders = cart
             .map(order => ({
                 orderID: order.orderID,
                 orderStatus: order.orderStatus,
@@ -58,10 +92,24 @@ router.get("/", authenticate, async (req, res) => {
     }
 });
 
+router.get("/saved", authenticate, async (req, res) => {
+    //used for FGCO form
+    try {
+        const drafts = req.user.drafts;
+        if (!drafts || !drafts[0]) {
+            return res.status(400).json({ error: "No orders found for this user!" });
+        }
+        return res.status(200).json({ drafts });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: `Internal server error: ${error}` });
+    }
+});
+
 router.get("/order", authenticate, async (req, res) => {
     try {
         const { orderid: orderID } = req.headers;
-        const order = await req.user.orders.find(order => order.orderID === orderID); // grab whichever model is stored in productType
+        const order = await req.user.cart.find(order => order.orderID === orderID); // grab whichever model is stored in productType
         const model = order.productType;
         const ProductModel = mongoose.model(model);
         const mappedInfo = ProductModel.prototype.getDecodedInfo.call(order);
@@ -81,7 +129,7 @@ router.delete("/order", authenticate, async (req, res) => {
         // Remove the order with the matching orderID
         await User.findByIdAndUpdate(
             req.user._id,
-            { $pull: { orders: { orderID } } }, // Remove the order object that matches orderID
+            { $pull: { cart: { orderID } } }, // Remove the order object that matches orderID
             { new: true } // Return updated document
         );
         return res.status(200).json({ message: "Successfully deleted order!" });

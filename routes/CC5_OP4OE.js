@@ -110,7 +110,7 @@ router.post("/", authenticate, async (req, res) => {
             ...(CC5_OP4OEData.rollerPinZ1 && { rollerPinZ1: CC5_OP4OEData.rollerPinZ1 }),
 
         });
-        req.user.orders.push({ numRequested: numRequested, productConfigurationInfo: order, productType: "CC5_OP4OE" });
+        req.user.cart.push({ numRequested: numRequested, productConfigurationInfo: order, productType: "CC5_OP4OE" });
         await req.user.save();
 
         return res.status(200).json({ message: "CC5_OP4OE entry added" });
