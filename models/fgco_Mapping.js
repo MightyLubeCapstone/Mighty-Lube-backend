@@ -1,4 +1,4 @@
-const fgcoMapping = {
+const fgco_Mapping = {
 
     chainSize: { 1: "X348 Chain (3\")", 2: "X458 Chain (4\")", 3: "X678 Chain (6\")", 4: "3/8\" Log Chain", 5: "Other" },
 
@@ -16,4 +16,4 @@ const fgcoMapping = {
 
 };
 
-module.exports = fgcoMapping;
+module.exports = fgco_Mapping;
