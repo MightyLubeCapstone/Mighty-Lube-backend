@@ -1,7 +1,7 @@
 const express = require("express");
 const { dbConnect } = require("../config/config");
 const { authenticate } = require("./sessions");
-const FGLM = require("../models/fglm.js");
+const FGLM = require("../models/fglm");
 
 const router = express.Router();
 

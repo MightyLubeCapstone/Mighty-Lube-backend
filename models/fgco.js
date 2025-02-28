@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
-const uuid = require("uuid");
-const fgcoMapping = require("../models/fgcoMapping");
+const getDecodedInfo = require("./getDecodedInfo.js"); //have to add this for the dynamic mapping, required in every model
 
 const FGCOSchema = new mongoose.Schema({
 
@@ -97,25 +96,8 @@ const FGCOSchema = new mongoose.Schema({
 
 });
 
-FGCOSchema.methods.getDecodedInfo = function () {
-    function mapValues(field, selectedValue) {
-        if (!fgcoMapping[field]) return selectedValue;
 
-        return Object.entries(fgcoMapping[field]).map(([key, value]) => ({
-            key: parseInt(key),
-            value: value,
-            isSelected: parseInt(key) === selectedValue
-        }));
-    }
 
-    let mappedInfo = { ...this.productConfigurationInfo };
-    Object.keys(fgcoMapping).forEach(field => {
-        if (mappedInfo[field] !== undefined) {
-            mappedInfo[field] = mapValues(field, mappedInfo[field]);
-        }
-    });
-    return mappedInfo;
-}
-
+FGCOSchema.methods.getDecodedInfo = getDecodedInfo; //have to add this for the dynamic mapping
 const FGCO = mongoose.models.FGCO || mongoose.model('FGCO', FGCOSchema);
 module.exports = FGCO;

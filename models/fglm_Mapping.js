@@ -1,4 +1,4 @@
-const fglmMapping = {
+const fglm_Mapping = {
 
     chainSize: { 1: "X348 Chain (3\")", 2: "X458 Chain (4\")", 3: "X678 Chain (6\")", 4: "3/8\" Log Chain", 5: "Other" },
 
@@ -82,4 +82,4 @@ const fglmMapping = {
 
 };
 
-module.exports = fglmMapping;
+module.exports = fglm_Mapping;
