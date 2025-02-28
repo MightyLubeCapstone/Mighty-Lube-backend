@@ -33,16 +33,34 @@ router.put("/", authenticate, async (req, res) => {
     }
 })
 
-router.put("/order", authenticate, async (req, res) => {
+router.put("/save", authenticate, async (req, res) => {
     try {
-        const { orders, updatedCategory } = req.body;
+        const { draftTitle } = req.body;
         const user = req.user;
-        orders.forEach((updatedID) => {
-            const orderInfo = user.orders.find(order => order.orderID === updatedID);
-            orderInfo["orderCategory"] = updatedCategory;
-        })
-        // Ensure Mongoose knows that the `orders` array has changed
-        user.markModified("orders");
+        const cart = user.cart;
+        user.drafts.push({cart, draftTitle});
+        user.cart = []; // clear out the user's current cart
+        // Ensure Mongoose knows that the arrays have changed
+        user.markModified("drafts");
+        user.markModified("cart");
+        await user.save();
+        return res.status(200).json({ message: `Successfully updated orders` });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: `Internal server error: ${error}` });
+    }
+})
+
+router.put("/finalize", authenticate, async (req, res) => {
+    try {
+        const { configurationName } = req.body;
+        const user = req.user;
+        const cart = user.cart;
+        user.configurations.push({ configurationName, cart });
+        user.cart = []; // clear out the user's current cart
+        // Ensure Mongoose knows that the arrays have changed
+        user.markModified("configurations");
+        user.markModified("cart");
         await user.save();
         return res.status(200).json({ message: `Successfully updated orders` });
     } catch (error) {

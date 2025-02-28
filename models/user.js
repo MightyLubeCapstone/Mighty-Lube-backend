@@ -93,7 +93,7 @@ const UserSchema = new mongoose.Schema({
         // potentially price??
     }],
     configurations: [{
-        orderStatus: {
+        orderStatus: { // this will not be used until the dashboard is able to modify it
             type: String,
             default: "Incomplete" // maybe, depends on whatever they want it to say
         },
