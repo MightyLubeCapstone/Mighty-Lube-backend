@@ -22,7 +22,7 @@ router.post("/", authenticate, async (req, res) => {
             ...(fgcoData.enclosedShroud && { enclosedShroud: fgcoData.enclosedShroud }),
             ...(fgcoData.additionalOtherInfo && { additionalOtherInfo: fgcoData.additionalOtherInfo }),
         });
-        req.user.orders.push({ numRequested: numRequested, productConfigurationInfo: order, productType: "FGCO" });
+        req.user.cart.push({ numRequested: numRequested, productConfigurationInfo: order, productType: "FGCO" });
         await req.user.save();
 
         return res.status(200).json({ message: "FGCO entry added" });

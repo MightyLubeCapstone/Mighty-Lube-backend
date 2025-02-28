@@ -33,12 +33,30 @@ router.put("/", authenticate, async (req, res) => {
     }
 })
 
+router.put("/order", authenticate, async (req, res) => {
+    try {
+        const { orders, updatedCategory } = req.body;
+        const user = req.user;
+        orders.forEach((updatedID) => {
+            const orderInfo = user.orders.find(order => order.orderID === updatedID);
+            orderInfo["orderCategory"] = updatedCategory;
+        })
+        // Ensure Mongoose knows that the `orders` array has changed
+        user.markModified("orders");
+        await user.save();
+        return res.status(200).json({ message: `Successfully updated orders` });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: `Internal server error: ${error}` });
+    }
+})
+
 router.get("/", authenticate, async (req, res) => {
     //used for FGCO form
     try {
         const { ordercategory } = req.headers; // Extract orderCategory from headers
         const orders = req.user.orders;
-        if (!orders[0]) {
+        if (!orders || !orders[0]) {
             return res.status(400).json({ error: "No orders found for this user!" });
         }
         // dumb order info down for cards

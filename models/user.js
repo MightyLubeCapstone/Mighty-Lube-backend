@@ -53,20 +53,12 @@ const UserSchema = new mongoose.Schema({
             default: Date.now() + 1000 * 60 * 60 * 12, // 12 hour session window
         },
     }],
-    orders: [{
+    // it's data-ing timeeee...
+    cart: [{
         orderID: {
             type: String,
             required: true,
             default: uuid.v4(),
-        },
-        orderStatus: {
-            type: String,
-            default: "Incomplete" // maybe, depends on whatever they want it to say
-        },
-        orderCategory: {
-            type: String,
-            default: "cart",
-            enum: ["cart", "saved", "finalized"],
         },
         orderCreated: {
             type: Date,
@@ -83,7 +75,38 @@ const UserSchema = new mongoose.Schema({
             type: String,
             required: true,
         }
-    }]
+    }],
+    drafts: [{
+        cartID: {
+            type: String,
+            default: uuid.v4(), // figure out how to change to auto-increment
+        },
+        cart: [], // array of however many order objects...
+        dateSaved: {
+            type: Date,
+            default: Date.now(),
+        },
+        draftTitle: {
+            type: String,
+            required: true,
+        },
+        // potentially price??
+    }],
+    configurations: [{
+        orderStatus: {
+            type: String,
+            default: "Incomplete" // maybe, depends on whatever they want it to say
+        },
+        dateOrdered: {
+            type: Date,
+            default: Date.now(),
+        },
+        configurationName : {
+            type: String,
+            required: true,
+        },
+        cart: [],
+    }],
 });
 
 const User = mongoose.models.User || mongoose.model('User', UserSchema);
