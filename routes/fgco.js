@@ -15,7 +15,7 @@ router.post("/", authenticate, async (req, res) => {
             chainManufacturer: fgcoData.chainManufacturer,
             ...(fgcoData.otherManufacturerSize && { otherManufacturerSize: fgcoData.otherManufacturerSize }),
             conveyorLoaded: fgcoData.conveyorLoaded,
-            dripLineStatus: fgcoData.dripLine,
+            ...(fgcoData.dripLine && { dripLineStatus: fgcoData.dripLine }),
             operatingVoltTriple: fgcoData.operatingVoltTriple,
             oppsSpecification: fgcoData.installationClearance,
             pushButtonSwitch: fgcoData.pushButton,
@@ -45,7 +45,7 @@ router.post("/", authenticate, async (req, res) => {
 //             return res.status(400).json({ error: "No order found with that ID!" });
 //         }
 
-        
+
 
 //         return res.status(200).json({
 //             mappedDetails: mappedInfo
