@@ -5,7 +5,7 @@ const UserSchema = new mongoose.Schema({
     userID: {
         type: String,
         required: true,
-        default: uuid.v4(),
+        default: uuid.v4,
     },
     username: {
         type: String,
@@ -46,11 +46,11 @@ const UserSchema = new mongoose.Schema({
         },
         createdAt: {
             type: Date,
-            default: Date.now(),
+            default: Date.now,
         },
         expiresAt: {
             type: Date,
-            default: Date.now() + 1000 * 60 * 60 * 12, // 12 hour session window
+            default: () => Date.now() + 1000 * 60 * 60 * 12, // 12-hour expiration per session
         },
     }],
     // it's data-ing timeeee...
@@ -58,11 +58,11 @@ const UserSchema = new mongoose.Schema({
         orderID: {
             type: String,
             required: true,
-            default: uuid.v4(),
+            default: uuid.v4,
         },
         orderCreated: {
             type: Date,
-            default: Date.now(),
+            default: Date.now,
         },
         numRequested: {
             type: Number,
@@ -79,12 +79,12 @@ const UserSchema = new mongoose.Schema({
     drafts: [{
         cartID: {
             type: String,
-            default: uuid.v4(), // figure out how to change to auto-increment
+            default: uuid.v4, // figure out how to change to auto-increment
         },
         cart: [], // array of however many order objects...
         dateSaved: {
             type: Date,
-            default: Date.now(),
+            default: Date.now,
         },
         draftTitle: {
             type: String,
@@ -99,7 +99,7 @@ const UserSchema = new mongoose.Schema({
         },
         dateOrdered: {
             type: Date,
-            default: Date.now(),
+            default: Date.now,
         },
         configurationName : {
             type: String,

@@ -1,7 +1,7 @@
 const mappings = require("./mappings.js"); // Import mappings
 
-const getDecodedInfo = function () {
-    const modelName = this.productType ? this.productType.toLowerCase() : null;
+const getDecodedInfo = function (order) {
+    const modelName = order.productType ? order.productType.toLowerCase() : null;
 
     const modelMapping = mappings[`${modelName}_Mapping`]; 
 
@@ -15,7 +15,7 @@ const getDecodedInfo = function () {
         }));
     }
 
-    let mappedInfo = { ...this.productConfigurationInfo };
+    let mappedInfo = { ...order.productConfigurationInfo };
     Object.keys(modelMapping).forEach(field => {
         if (mappedInfo[field] !== undefined) {
             mappedInfo[field] = mapValues(field, mappedInfo[field]);

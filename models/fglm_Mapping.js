@@ -20,7 +20,7 @@ const fglm_Mapping = {
     
     trolleyColor: { 1: "Blue", 2: "Green", 3: "Gray", 4: "Other" },
     
-    trolleyType: { 1: "Meyn Trolley Halve Green Wheel Bolt Version", 2: "Meyn Plastic Click Version", 3: "Meyn Stainless Steel Halve with Green Wheel", 4: "Meyn Stainless Steel Halve Gray Wheel", 5: "Stork Halve Bolt Version Blue Wheel", 6: "Linco Plastic Halve Blue Wheel" },
+    trolleyType: { 1: "Meyn Trolley Halve Green Wheel", 2: "Meyn Plastic Click Version", 3: "Meyn SS Halve with Green Wheel", 4: "Meyn SS Halve Gray Wheel", 5: "Stork Halve Bolt Version Blue Wheel", 6: "Linco Plastic Halve Blue Wheel" },
     
     surroundingTemp: { 1: "Yes", 2: "No" },
     
