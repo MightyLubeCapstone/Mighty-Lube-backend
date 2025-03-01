@@ -10,7 +10,6 @@ const express = require("express");
 const { authenticate } = require("./sessions");
 const User = require("../models/user");
 const getDecodedInfo = require("../models/getDecodedInfo");
-const uuid = require("uuid"); // used for creating session ID
 
 const router = express.Router();
 
@@ -117,6 +116,20 @@ router.get("/saved", authenticate, async (req, res) => {
             return res.status(400).json({ error: "No orders found for this user!" });
         }
         return res.status(200).json({ drafts });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: `Internal server error: ${error}` });
+    }
+});
+
+router.get("/configurations", authenticate, async (req, res) => {
+    //used for FGCO form
+    try {
+        const configurations = req.user.configurations;
+        if (!configurations || !configurations[0]) {
+            return res.status(400).json({ error: "No orders found for this user!" });
+        }
+        return res.status(200).json({ configurations });
     } catch (error) {
         console.log(error);
         res.status(500).json({ error: `Internal server error: ${error}` });
