@@ -1,6 +1,6 @@
-const fgco_Mapping = {
+const FGCO_Mapping = {
 
-    chainSize: { 1: "X348 Chain (3\")", 2: "X458 Chain (4\")", 3: "X678 Chain (6\")", 4: "3/8\" Log Chain", 5: "Other" },
+    chainSize: { 1: "X348 Chain (3\")", 2: "X458 Chain (4\")", 3: "X678 Chain (6\")", 4: "3/8\" Log Chain", 5: "Other", },
 
     chainManufacturer: { 1: "Green Line", 2: "Frost", 3: "M&M", 4: "Stork", 5: "Meyn", 6: "Linco", 7: "DC", 8: "Merel", 9: "D&F", 10: "Other" },
 
@@ -16,4 +16,4 @@ const fgco_Mapping = {
 
 };
 
-module.exports = fgco_Mapping;
+module.exports = FGCO_Mapping;

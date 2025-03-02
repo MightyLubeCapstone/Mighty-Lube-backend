@@ -1,6 +1,6 @@
 const express = require("express");
 const { authenticate } = require("./sessions");
-const FGCO = require("../models/fgco");
+const FGCO = require("../models/FGCO");
 
 const router = express.Router();
 

@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const getDecodedInfo = require("./getDecodedInfo.js"); //have to add this for the dynamic mapping, required in every model
 
 const FGCOSchema = new mongoose.Schema({
 
@@ -96,8 +95,5 @@ const FGCOSchema = new mongoose.Schema({
 
 });
 
-
-
-FGCOSchema.methods.getDecodedInfo = getDecodedInfo; //have to add this for the dynamic mapping
 const FGCO = mongoose.models.FGCO || mongoose.model('FGCO', FGCOSchema);
 module.exports = FGCO;

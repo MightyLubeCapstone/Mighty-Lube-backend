@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const getDecodedInfo = require("./getDecodedInfo.js");  //have to add this for the dynamic mapping, required in every model
 
 const FGLMSchema = new mongoose.Schema({
     // Gen Info
@@ -838,11 +837,5 @@ const FGLMSchema = new mongoose.Schema({
 
 });
 
-
-
-
-FGLMSchema.methods.getDecodedInfo = getDecodedInfo; //have to add this for the dynamic mapping
 const FGLM = mongoose.models.FGLM || mongoose.model('FGLM', FGLMSchema);
 module.exports = FGLM;
-
-
