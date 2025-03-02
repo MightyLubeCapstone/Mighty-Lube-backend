@@ -41,7 +41,7 @@ router.post("/", authenticate, async (req, res) => {
             sideLube: fglmData.sideLube,
             topLube: fglmData.topLube,
             cleanChain: fglmData.cleanChain,
-            measureUnit: fglmData.measureUnit,
+            wireMeasurementUnit: fglmData.wireMeasurementUnit,
             conductor4: fglmData.conductor4,
             conductor7: fglmData.conductor7,
             conductor2: fglmData.conductor2

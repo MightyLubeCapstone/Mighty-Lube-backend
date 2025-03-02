@@ -78,6 +78,12 @@ const fglm_Mapping = {
     
     specialControllerOptions: { 1: "I/O Link", 2: "Plug and Play", 3: "Dry Contacts" },
 
+    sideLube: { 1: "Yes", 2: "No" },
+
+    topLube: { 1: "Yes", 2: "No" },
+
+    cleanChain: { 1: "Yes", 2: "No" },
+
     wireMeasurementUnit: { 1: "Feet", 2: "Inches", 3: "Meters", 4: "Millimeters" }
 
 };
