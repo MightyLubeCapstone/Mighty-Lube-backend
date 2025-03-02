@@ -28,6 +28,7 @@ router.get("/", authenticate, async (req, res) => {
                 quantity: order.numRequested,
                 name: order.productType,
                 dateCreated: order.orderCreated,
+                numRequested: order.numRequested,
             }));
         return res.status(200).json({ orders: filteredOrders });
     } catch (error) {
