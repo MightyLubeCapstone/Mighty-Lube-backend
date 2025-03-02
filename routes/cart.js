@@ -28,7 +28,6 @@ router.get("/", authenticate, async (req, res) => {
                 quantity: order.numRequested,
                 name: order.productType,
                 dateCreated: order.orderCreated,
-                numRequested: order.numRequested,
             }));
         return res.status(200).json({ orders: filteredOrders });
     } catch (error) {
@@ -58,12 +57,15 @@ router.put("/order", authenticate, async (req, res) => {
     try {
         // data will be an entire Map object of String, dynamic pairs (dynamic being either a string or integer)
         // with the string key being the name of whichever attribute we are trying to update for whichever productType.
-        const { orderID, data } = req.body;
+        const { orderID, data, numRequested } = req.body;
         const user = req.user;
-        const orderInfo = user.cart.find(order => order.orderID === orderID).productConfigurationInfo;
+        const orderInfo = user.cart.find(order => order.orderID === orderID);
         Object.entries(data).forEach(([key, value]) => {
-            orderInfo[key] = value;
+            orderInfo.productConfigurationInfo[key] = value;
         });
+        if(numRequested != 0) {
+            orderInfo["numRequested"] = numRequested;
+        }
         // Ensure Mongoose knows that the `orders` array has changed
         user.markModified("cart");
         await user.save();
