@@ -154,14 +154,6 @@ const ETI_OP48E_Schema = new mongoose.Schema({
         type: String,
         required: false,
     },
-    specialControllerOptions: {
-        type: String,
-        required: false,
-    },
-    specialControllerInfo: {
-        type: String,
-        required: false,
-    },
     enclosedUnitType: {
         type: Number,
         required: false,

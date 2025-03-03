@@ -94,6 +94,8 @@ const COE_OP4OE_Schema = new mongoose.Schema({
         type: Number,
         required: true,
     },
+
+
     monitorData: templateB,
 
 
@@ -179,14 +181,6 @@ const COE_OP4OE_Schema = new mongoose.Schema({
         required: false,
     },
     otherControllerInfo: {
-        type: String,
-        required: false,
-    },
-    specialControllerOptions: {
-        type: String,
-        required: false,
-    },
-    specialControllerInfo: {
         type: String,
         required: false,
     },

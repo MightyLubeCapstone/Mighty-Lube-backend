@@ -225,14 +225,7 @@ const IBR_OP4OE_Schema = new mongoose.Schema({
         type: String,
         required: false,
     },
-    specialControllerOption: {
-        type: String,
-        required: false,
-    },
-    specialControllerInfo: {
-        type: String,
-        required: false,
-    },
+
     ibrUnitType: {
         type: Number,
         required: false,

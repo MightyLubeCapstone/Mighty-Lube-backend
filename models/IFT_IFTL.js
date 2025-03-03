@@ -201,27 +201,13 @@ const IFT_IFTL_Schema = new mongoose.Schema({
         enum: [1, 2],
         required: false,
     },
-    reservoirSize: {
-        type: Number,
-        required: false,
-    },
-    reservoirSizeQuantity: {
-        type: Number,
-        required: false,
-    },
+    
     chainCleanStatus: {
         type: Number,
         enum: [1, 2],
         required: false,
     },
-    specialControllerOption: {
-        type: String,
-        required: false,
-    },
-    specialControllerInfo: {
-        type: String,
-        required: false,
-    },
+
     washdownStatus: {
         type: Number,
         enum: [1, 2],

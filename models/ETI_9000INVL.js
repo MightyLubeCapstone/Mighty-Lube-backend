@@ -121,20 +121,6 @@ const ETI_9000INVL_Schema = new mongoose.Schema({
         enum: [1, 2],
         required: false,
     },
-    reservoirSize: {
-        type: Number,
-        required: false,
-    },
-    otherReservoirSize: {
-        type: String,
-        required: function () {
-            return this.reservoirSize === 2;
-        },
-    },
-    newReservoirNum: {
-        type: Number,
-        required: false,
-    },
     chainCleanStatus: {
         type: Number,
         enum: [1, 2],
@@ -161,14 +147,6 @@ const ETI_9000INVL_Schema = new mongoose.Schema({
         required: false,
     },
     otherControllerInfo: {
-        type: String,
-        required: false,
-    },
-    specialControllerOptions: {
-        type: String,
-        required: false,
-    },
-    specialControllerInfo: {
         type: String,
         required: false,
     },

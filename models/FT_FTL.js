@@ -147,14 +147,7 @@ const FT_FTL_Schema = new mongoose.Schema({
         type: String,
         required: false,
     },
-    reservoirSize: {
-        type: Number,
-        required: false,
-    },
-    reservoirSizeQuantity: {
-        type: Number,
-        required: false,
-    },
+    
     chainCleanStatus: {
         type: Number,
         enum: [1, 2],
@@ -184,14 +177,7 @@ const FT_FTL_Schema = new mongoose.Schema({
         type: String,
         required: false,
     },
-    specialControllerOption: {
-        type: String,
-        required: false,
-    },
-    specialControllerInfo: {
-        type: String,
-        required: false,
-    },
+
     ftUnitType: {
         type: Number,
         required: false,

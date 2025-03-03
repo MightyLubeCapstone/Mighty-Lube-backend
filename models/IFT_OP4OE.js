@@ -223,14 +223,7 @@ const IFT_OP4OE_Schema = new mongoose.Schema({
         type: String,
         required: false,
     },
-    specialControllerOption: {
-        type: String,
-        required: false,
-    },
-    specialControllerInfo: {
-        type: String,
-        required: false,
-    },
+
     iftUnitType: {
         type: Number,
         required: false,

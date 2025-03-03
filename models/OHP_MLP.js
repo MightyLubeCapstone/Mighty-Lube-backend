@@ -191,29 +191,9 @@ const OHP_MLPSchema = new mongoose.Schema({
         required: true,
     },
 
-    reservoirSizeType: {
-        type: Number, // Converted to simple type instead of ref
-        required: true,
-    },
-
-    reservoirSizeQuanity: {
-        type: Number,
-        required: true,
-    },
-
     chainCleanStatus: {
         type: Number,
         enum: [1, 2],
-        required: true,
-    },
-
-    specialControllerOption: {
-        type: String,
-        required: true,
-    },
-
-    specialControllerInfo: {
-        type: String,
         required: true,
     },
 

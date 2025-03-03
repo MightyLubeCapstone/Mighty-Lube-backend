@@ -253,15 +253,6 @@ const PAF_ES_Schema = new mongoose.Schema({
         required: true,
     },
 
-    specialControllerOption: {
-        type: String,
-        required: true,
-    },
-
-    specialControllerInfo: {
-        type: String,
-        required: true,
-    },
 
     pfUnitType: {
         type: Number, // Using simple type instead of ref

@@ -36,37 +36,41 @@ const enumMappingsCC5_CL = {
 
     existingPowerInterface: { 1: "Yes", 2: "No" },
 
-    newReservoir: { 1: "Yes", 2: "No" },
+    monitorData: {
 
-    reservoirSize: { 1: "10 Gallon", 2: "65 Gallon" },
+        newReservoir: { 1: "Yes", 2: "No" },
 
-    typeMonitor: { 1: "Permanent", 2: "Portable" },
+        reservoirSize: { 1: "10 Gallon", 2: "65 Gallon" },
 
-    driveMotorAmp: { 1: "Yes", 2: "No" },
+        typeMonitor: { 1: "Permanent", 2: "Portable" },
 
-    driveTakeUpAir: { 1: "Yes", 2: "No" },
+        driveMotorAmp: { 1: "Yes", 2: "No" },
 
-    takeUpDistance: { 1: "Yes", 2: "No" },
+        driveTakeUpAir: { 1: "Yes", 2: "No" },
 
-    driveTemp: { 1: "Yes", 2: "No" },
+        takeUpDistance: { 1: "Yes", 2: "No" },
 
-    driveVibration: { 1: "Yes", 2: "No" },
+        driveTemp: { 1: "Yes", 2: "No" },
 
-    dogPitch: { 1: "Yes", 2: "No" },
+        driveVibration: { 1: "Yes", 2: "No" },
 
-    paintMarker: { 1: "Yes", 2: "No" },
+        dogPitch: { 1: "Yes", 2: "No" },
 
-    chainVision: { 1: "Yes", 2: "No" },
+        paintMarker: { 1: "Yes", 2: "No" },
 
-    lubeVision: { 1: "Yes", 2: "No" },
+        chainVision: { 1: "Yes", 2: "No" },
 
-    trolleyVision: { 1: "Yes", 2: "No" },
+        lubeVision: { 1: "Yes", 2: "No" },
 
-    trolleyDetect: { 1: "Yes", 2: "No" },
+        trolleyVision: { 1: "Yes", 2: "No" },
 
-    omniView: { 1: "Yes", 2: "No" },
+        trolleyDetect: { 1: "Yes", 2: "No" },
 
-    specialControllerOptions: { 1: "I/O Link", 2: "Plug and Play", 3: "Dry Contacts" },
+        omniView: { 1: "Yes", 2: "No" },
+
+        specialControllerOptions: { 1: "I/O Link", 2: "Plug and Play", 3: "Dry Contacts" },
+        
+    }, 
 
     highRollerStatus: { 1: "Yes", 2: "No" },
 

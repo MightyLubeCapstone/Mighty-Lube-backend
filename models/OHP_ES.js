@@ -261,15 +261,6 @@ const OHP_ESSchema = new mongoose.Schema({
         required: true,
     },
 
-    specialControllerOption: {
-        type: String,
-        required: true,
-    },
-
-    specialControllerInfo: {
-        type: String,
-        required: true,
-    },
 
     ohpUnitType: {
         type: Number, // Converted to simple type instead of ref

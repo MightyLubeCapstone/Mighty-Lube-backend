@@ -183,29 +183,9 @@ const PAF_MLP_Schema = new mongoose.Schema({
         required: true,
     },
 
-    reservoirSizeType: {
-        type: Number,
-        required: true,
-    },
-
-    reservoirSizeQuanity: {
-        type: Number,
-        required: true,
-    },
-
     chainCleanStatus: {
         type: Number,
         enum: [1, 2],
-        required: true,
-    },
-
-    specialControllerOption: {
-        type: String,
-        required: true,
-    },
-
-    specialControllerInfo: {
-        type: String,
         required: true,
     },
 

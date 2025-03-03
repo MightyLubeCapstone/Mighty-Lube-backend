@@ -216,14 +216,7 @@ const FT_OP4OE_Schema = new mongoose.Schema({
         type: String,
         required: false,
     },
-    specialControllerOption: {
-        type: String,
-        required: false,
-    },
-    specialControllerInfo: {
-        type: String,
-        required: false,
-    },
+
     ftUnitType: {
         type: Number,
         required: false,

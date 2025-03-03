@@ -215,14 +215,7 @@ const FRO_OP139A_Schema = new mongoose.Schema({
         type: String,
         required: false,
     },
-    specialControllerOption: {
-        type: String,
-        required: false,
-    },
-    specialControllerInfo: {
-        type: String,
-        required: false,
-    },
+
     frUnitType: {
         type: Number,
         required: false,

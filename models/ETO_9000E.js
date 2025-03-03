@@ -150,14 +150,6 @@ const ETO_9000E_Schema = new mongoose.Schema({
         type: String,
         required: false,
     },
-    specialControllerOptions: {
-        type: String,
-        required: false,
-    },
-    specialControllerInfo: {
-        type: String,
-        required: false,
-    },
     wireMeasurementUnit: {
         type: Number,
         required: false,

@@ -29,13 +29,6 @@ const OHP_PMMSchema = new mongoose.Schema({
 
     monitorData: templateB,
 
-
-    
-
-    dcuNum: {
-        type: Number,
-        required: true,
-    },
 });
 
 const OHP_PMM = mongoose.model('tblOHP_PMM', OHP_PMMSchema);

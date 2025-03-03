@@ -26,7 +26,10 @@ app.use("/api/users", usersRoute);
 app.use("/api/sessions", sessionsRoute);
 app.use("/api/fglm", fglmRoute);
 app.use("/api/fgco", fgcoRoute);
-app.use("/api/orders", ordersRoute);
+app.use("/api/cart", cartRoute);
+app.use("/api/drafts", draftsRoute);
+app.use("/api/configurations", configurationsRoute);
+app.use("/api/email", emailRoute);
 
 
 const port = process.env.PORT || 3030;

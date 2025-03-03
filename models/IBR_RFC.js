@@ -163,27 +163,13 @@ const IBR_RFC_Schema = new mongoose.Schema({
         type: String,
         required: false,
     },
-    reservoirSize: {
-        type: Number,
-        required: false,
-    },
-    reservoirQuantity: {
-        type: Number,
-        required: false,
-    },
+    
     chainCleanStatus: {
         type: Number,
         enum: [1, 2],
         required: false,
     },
-    specialControllerOption: {
-        type: String,
-        required: false,
-    },
-    specialControllerInfo: {
-        type: String,
-        required: false,
-    },
+
     ibrUnitType: {
         type: Number,
         required: false,

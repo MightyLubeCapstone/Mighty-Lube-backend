@@ -207,15 +207,6 @@ const PAF_OP139A_Schema = new mongoose.Schema({
         required: true,
     },
 
-    specialControllerOption: {
-        type: String,
-        required: true,
-    },
-
-    specialControllerInfo: {
-        type: String,
-        required: true,
-    },
 
     pfUnitType: {
         type: Number,

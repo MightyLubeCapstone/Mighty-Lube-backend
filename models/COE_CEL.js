@@ -147,31 +147,9 @@ const COE_CEL_Schema = new mongoose.Schema({
         type: String,
         required: false,
     },
-    reservoirSize: {
-        type: Number,
-        required: false,
-    },
-    otherReservoirSize: {
-        type: String,
-        required: function () {
-            return this.reservoirSize === 2;
-        },
-    },
-    newReservoirNum: {
-        type: Number,
-        required: false,
-    },
     chainCleanStatus: {
         type: Number,
         enum: [1, 2],
-        required: false,
-    },
-    specialControllerOptions: {
-        type: String,
-        required: false,
-    },
-    specialControllerInfo: {
-        type: String,
         required: false,
     },
     wireMeasurementUnit: {
