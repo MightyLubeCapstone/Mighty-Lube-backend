@@ -1,4 +1,6 @@
 const mongoose = require('mongoose');
+const templateB = require("./templateB.js");
+
 
 const COE_OP4OE_Schema = new mongoose.Schema({
     conveyorName: {
@@ -92,8 +94,6 @@ const COE_OP4OE_Schema = new mongoose.Schema({
         type: Number,
         required: true,
     },
-
-
     monitorData: templateB,
 
 

@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-
+const templateB = require("./templateB.js");
 const OHPCBSSchema = new mongoose.Schema({
 
     conveyorName: {
