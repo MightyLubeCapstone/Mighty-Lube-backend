@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-
+const templateB = require("./templateB.js");
 const OHP_OP13Schema = new mongoose.Schema({
 
     conveyorName: {

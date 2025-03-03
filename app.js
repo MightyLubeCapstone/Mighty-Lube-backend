@@ -18,6 +18,7 @@ const fgcoRoute = require("./routes/fgco");
 const { sessionsRoute } = require("./routes/sessions");
 const cartRoute = require("./routes/cart");
 const draftsRoute = require("./routes/drafts");
+const emailRoute = require("./routes/email");
 const configurationsRoute = require("./routes/configurations");
 
 // Use route modules
@@ -25,9 +26,8 @@ app.use("/api/users", usersRoute);
 app.use("/api/sessions", sessionsRoute);
 app.use("/api/fglm", fglmRoute);
 app.use("/api/fgco", fgcoRoute);
-app.use("/api/cart", cartRoute);
-app.use("/api/drafts", draftsRoute);
-app.use("/api/configurations", configurationsRoute);
+app.use("/api/orders", ordersRoute);
+
 
 const port = process.env.PORT || 3030;
 app.listen(port, () => {

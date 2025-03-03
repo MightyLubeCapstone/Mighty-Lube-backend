@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-
+const templateB = require("./templateB.js");
 const PAF_PMM_Schema = new mongoose.Schema({
 
     conveyorName: {
