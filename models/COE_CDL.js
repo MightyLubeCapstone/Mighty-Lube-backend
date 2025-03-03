@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const templateB = require("./templateB.js");
+
 const COE_CDL_Schema = new mongoose.Schema({
     conveyorName: {
         type: String,

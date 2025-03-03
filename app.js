@@ -18,7 +18,6 @@ const fgcoRoute = require("./routes/fgco");
 const { sessionsRoute } = require("./routes/sessions");
 const cartRoute = require("./routes/cart");
 const draftsRoute = require("./routes/drafts");
-const emailRoute = require("./routes/email");
 const configurationsRoute = require("./routes/configurations");
 
 // Use route modules

@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const getDecodedInfo = require("./getDecodedInfo.js"); //have to add this for the dynamic mapping, required in every model
 
 const FGCOSchema = new mongoose.Schema({
 
