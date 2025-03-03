@@ -31,7 +31,7 @@ const getDecodedInfo = function (order) {
         if (isString) {
             mappedInfo[field] = {
                 value: mappedInfo[field],
-                required: true,
+                required: isRequired,
             };
         }
     });

@@ -1,9 +1,6 @@
 const express = require("express");
-const bcrypt = require("bcrypt"); // used for creating hash of password
 const uuid = require("uuid"); // used for creating session ID
-const { dbConnect } = require("../config/config"); // may not need this? could just be for security's sake
-const { hashPassword } = require("./sessions");
-
+const { hashPassword, authenticate } = require("./sessions");
 const User = require("../models/user");
 
 const router = express.Router();
@@ -24,28 +21,22 @@ router.get("/username", async (req, res) => {
 });
 
 
-router.get("/userinfo", async (req, res) => {
+router.get("/userinfo", authenticate, async (req, res) => {
 	try {
-		// this needs to be redone with only a sessionID, nothing else should be stored client side
-		const { username } = req.headers;
-		if (!username) {
-			return res.status(400).json({ message: "Username is required!" });
-		}
-		const user = await User.findOne({ "username": username }).exec();
+		const user = req.user;
 		if (!user) {
 			return res.status(404).json({ message: "User not found!" });
 		}
 		return res.status(200).json({
 			firstName: user.firstName,
 			lastName: user.lastName,
+			username: user.username,
 		});
 	} catch (error) {
 		console.error("Error getting users first name, last name:", error);
 		return res.status(500).json({ message: "Internal server error" });
 	}
 });
-
-
 
 router.post("/", async (req, res) => {
 	try {

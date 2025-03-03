@@ -19,20 +19,35 @@ async function comparePassword(password, hash) {
 
 async function authenticate(req, res, next) {
 	const { authorization } = req.headers;
-	if (authorization && authorization.startsWith("Bearer ")) {
-		req.sessionID = authorization.slice(7); // Add token to the request object
+	if (!authorization || !authorization.startsWith("Bearer ")) {
+		return res.status(401).json({ error: "Unauthorized: Missing token" });
+	}
+	req.sessionID = authorization.slice(7); // Extract token
+	try {
 		const user = await User.findOne({ "sessions.sessionID": req.sessionID });
-		// FIXME: add some logic to check against expiration date eventually, shouldn't be too hard
 		if (!user) {
 			return res.status(401).json({ error: "Invalid session!" });
 		}
-		req.user = user; // this ONE line should save on a TON of network traffic because we store the document
-		// back inside the req body and use it in whichever function we need
+		// Check session expiration
+		const session = user.sessions.find(s => s.sessionID === req.sessionID);
+		if (session && session.expiresAt && new Date(session.expiresAt) < new Date()) {
+			// Remove the session with the matching sessionID
+			const sessionID = session.sessionID;
+			await User.findByIdAndUpdate(
+				user._id,
+				{ $pull: { sessions: { sessionID } } }, // Remove the session object that matches sessionID
+				{ new: true } // Return updated document
+			);
+			return res.status(401).json({ error: "Session expired!" });
+		}
+		req.user = user; // Store user in request for further use
 		next();
-	} else {
-		res.status(401).json({ error: "Unauthorized: Missing token" });
+	} catch (error) {
+		console.error("Authentication error:", error);
+		res.status(500).json({ error: "Internal Server Error" });
 	}
 }
+
 
 sessionsRoute.get("/", authenticate, async (req, res) => {
 	try {
