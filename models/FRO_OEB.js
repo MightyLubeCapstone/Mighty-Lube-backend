@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const templateB = require("./templateB.js");
+
 const FRO_OEB_Schema = new mongoose.Schema({
     conveyorName: {
         type: String,

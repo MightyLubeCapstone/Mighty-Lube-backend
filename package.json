@@ -15,7 +15,6 @@
 		"express-session": "^1.18.1",
 		"mongodb": "^6.13.0",
 		"mongoose": "^8.10.2",
-		"nodemailer": "^6.10.0",
 		"nodemon": "^3.1.7",
 		"npm": "^11.1.0",
 		"uuid": "^10.0.0"
