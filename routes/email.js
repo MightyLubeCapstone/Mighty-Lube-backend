@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const nodemailer = require('nodemailer');
-
+const { authenticate } = require("../routes/sessions")
 
 const router = express.Router();
 
@@ -13,9 +13,9 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-router.post('/send-email', async (req, res) => {
+router.post('/send-email', authenticate, async (req, res) => {
   try {
-    const { email } = req.body;
+    const email = req.user.email;
     if (!email) {
       return res.status(400).json({ error: 'Invalid email address' });
     }
@@ -28,7 +28,7 @@ router.post('/send-email', async (req, res) => {
     };
 
     await transporter.sendMail(mailOptions);
-    res.json({ message: 'Email sent successfully' });
+    res.status(201).json({ message: 'Email sent successfully' });
   } catch (error) {
     console.error('Email error:', error.message);
     res.status(500).json({ error: error.message });
