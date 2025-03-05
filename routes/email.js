@@ -3,7 +3,8 @@ const express = require('express');
 const nodemailer = require('nodemailer');
 const { authenticate } = require("../routes/sessions")
 const mappings = require("../models/mappings")
-const mongoose = require("mongoose")
+const mongoose = require("mongoose");
+const User = require('../models/user');
 
 const router = express.Router();
 
@@ -83,12 +84,18 @@ router.post('/forgot', async (req, res) => {
     if (!email) {
       return res.status(400).json({ error: 'Invalid email address' });
     }
-    
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ error: 'No user found with that email!' });
+    }
+    console.log(user);
+
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: email,
       subject: "Mighty Lube Password Reset",
-      text: "Your temporary password is 123456",
+      text: `Your One-time passcode is `,
     };
 
     await transporter.sendMail(mailOptions);
