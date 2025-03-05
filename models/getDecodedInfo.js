@@ -57,12 +57,6 @@ const getDecodedInfo = function (order) {
                     required: isRequired,
                 };
             }
-            else {
-                mappedObject[field] = {
-                    value: mappedObject[field],
-                    // add required prop to numbers later...
-                }
-            }
         });
     }
 
