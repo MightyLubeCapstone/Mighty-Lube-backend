@@ -51,6 +51,7 @@ const getDecodedInfo = function (order) {
             const isRequired = schemaPath ? schemaPath.isRequired || false : false;
             const isString = schemaPath && schemaPath.instance === "String";
 
+            // Modify this to send requirements for number fields as well (i.e., voltage numbers...)
             if (isString) {
                 mappedObject[field] = {
                     value: mappedObject[field],
