@@ -16,7 +16,7 @@ const UserSchema = new mongoose.Schema({
         required: true,
     },
     resetCode: {
-        type: Number,
+        type: String,
         default: null,
     },
     firstName: {

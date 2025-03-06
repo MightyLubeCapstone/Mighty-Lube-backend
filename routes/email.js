@@ -1,9 +1,8 @@
 require('dotenv').config();
 const express = require('express');
 const nodemailer = require('nodemailer');
-const { authenticate } = require("../routes/sessions")
+const { authenticate, comparePassword, hashPassword } = require("../routes/sessions")
 const mappings = require("../models/mappings")
-const mongoose = require("mongoose");
 const User = require('../models/user');
 
 const router = express.Router();
@@ -89,21 +88,72 @@ router.post('/forgot', async (req, res) => {
     if (!user) {
       return res.status(404).json({ error: 'No user found with that email!' });
     }
-    console.log(user);
+    // randomize the code....
+    let randNum = Math.floor(100000 + Math.random() * 900000);
+    user.resetCode = randNum;
+    await user.save();
 
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: email,
       subject: "Mighty Lube Password Reset",
-      text: `Your One-time passcode is `,
+      text: `Your One-time passcode is ${user.resetCode}`,
     };
 
     await transporter.sendMail(mailOptions);
     res.status(201).json({ message: 'Email sent successfully' });
   } catch (error) {
-    console.error('Email error:', error.message);
-    res.status(500).json({ error: error.message });
+    console.error('Email error: ', error);
+    res.status(500).json({ error: error });
   }
 });
+
+// route for validating the passcode
+router.get("/forgot", async (req, res) => {
+  try {
+    const { email, passcode } = req.headers;
+    if (!email || !passcode) {
+      return res.status(400).json({ error: 'Empty email or passcode' });
+    }
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ error: 'No user found with that email!' });
+    }
+    // compare passcode to the one in document...
+    if (passcode == user.resetCode) {
+      user.resetCode = null;
+      return res.status(200).json({ message: "Validated passcode!" });
+    }
+    res.status(401).json({ error: "Invalid passcode!" });
+  } catch (error) {
+    console.log('Error matching passcodes: ', error);
+    res.status(500).json({ error: error });
+  }
+})
+
+router.put("/forgot", async (req, res) => {
+  try {
+    const { email, password } = req.headers;
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Empty email or password' });
+    }
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ error: 'No user found with that email!' });
+    }
+    // compare password to the one in document...
+    if (await comparePassword(password, user.password)) {
+      return res.status(400).json({ error: "Password must be different than previous password!" });
+    }
+    // change password :D
+    let passwordHash = await hashPassword(password);
+    user.password = passwordHash;
+    await user.save();
+    res.status(200).json({ message: "Successfully changed password!" });
+  } catch (error) {
+    console.log('Error matching passcodes: ', error);
+    res.status(500).json({ error: error });
+  }
+})
 
 module.exports = router;

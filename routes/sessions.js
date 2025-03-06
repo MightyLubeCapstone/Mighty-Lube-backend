@@ -1,6 +1,5 @@
 const express = require("express");
 const bcrypt = require("bcrypt"); // used for creating hash of password
-const { dbConnect } = require("../config/config");
 const uuid = require("uuid"); // used for creating session ID
 const User = require("../models/user");
 
@@ -110,4 +109,4 @@ sessionsRoute.delete("/", authenticate, async (req, res) => {
 	}
 });
 
-module.exports = { authenticate, hashPassword, sessionsRoute };
+module.exports = { authenticate, hashPassword, comparePassword, sessionsRoute };
