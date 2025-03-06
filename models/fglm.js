@@ -22,12 +22,11 @@ const FGLMSchema = new mongoose.Schema({
     otherChainSize: {
 
         type: String,
-        required: function()
-	    {
+        required: function () {
 
-		    return this.chainSize === 5;
+            return this.chainSize === 5;
 
-	    }
+        }
 
     },
 
@@ -36,14 +35,13 @@ const FGLMSchema = new mongoose.Schema({
         type: Number,
         enum: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
         required: true,
-        
+
     },
 
     otherChainManufacturer: {
 
         type: String,
-        required: function ()
-        {
+        required: function () {
             return this.chainManufacturer === 10;
         }
 
@@ -56,12 +54,11 @@ const FGLMSchema = new mongoose.Schema({
         required: true,
 
     },
-    
+
     otherWheelManufacturer: {
         type: String,
 
-        required: function ()
-        {
+        required: function () {
             return this.wheelManufacturer === 10;
         }
 
@@ -78,12 +75,12 @@ const FGLMSchema = new mongoose.Schema({
 
     conveyorLength: {
 
-        type: String,
+        type: Number,
         required: true,
         // add RegEx matching to this :D
 
     },
-    
+
     conveyorLengthUnit: {
 
         type: Number,
@@ -95,7 +92,7 @@ const FGLMSchema = new mongoose.Schema({
 
     conveyorSpeed: {
 
-        type: String,
+        type: Number,
         required: true,
         // add RegEx matching to this :D
 
@@ -139,8 +136,7 @@ const FGLMSchema = new mongoose.Schema({
     otherMetalType: {
 
         type: String,
-        required: function ()
-        {
+        required: function () {
             return this.metalType === 4;
         }
 
@@ -158,8 +154,7 @@ const FGLMSchema = new mongoose.Schema({
     otherConveyorStyle: {
 
         type: String,
-        required: function ()
-        {
+        required: function () {
             return this.conveyorStyle === 5;
         }
 
@@ -175,10 +170,9 @@ const FGLMSchema = new mongoose.Schema({
     },
 
     otherTrolleyColor: {
-        
+
         type: String,
-        required: function ()
-        {
+        required: function () {
             return this.trolleyColor === 4;
         }
 
@@ -241,7 +235,7 @@ const FGLMSchema = new mongoose.Schema({
     // CPU
     operatingVoltage: {
 
-        type: String,
+        type: Number,
         required: true,
 
     },
@@ -274,7 +268,7 @@ const FGLMSchema = new mongoose.Schema({
         required: true,
 
     },
-    
+
     // Wire
     wireMeasurementUnit: {
 
@@ -286,21 +280,21 @@ const FGLMSchema = new mongoose.Schema({
 
     conductor4: {
 
-        type: String,
+        type: Number,
         required: true,
 
     },
 
     conductor7: {
 
-        type: String,
+        type: Number,
         required: true,
 
     },
 
     conductor2: {
 
-        type: String,
+        type: Number,
         required: true,
 
     },
