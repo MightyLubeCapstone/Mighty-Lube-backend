@@ -50,11 +50,17 @@ const getDecodedInfo = function (order) {
             const schemaPath = schema.path(field);
             const isRequired = schemaPath ? schemaPath.isRequired || false : false;
             const isString = schemaPath && schemaPath.instance === "String";
+            const isNum = schemaPath &&
+                schemaPath.instance === "Number" &&
+                (!schemaPath.options.enum); // this filters out all the dropdown info stuff :D
 
-            if (isString) {
+            // Modify this to send requirements for number fields as well (i.e., voltage numbers...)
+            if (isString || isNum) {
                 mappedObject[field] = {
                     value: mappedObject[field],
                     required: isRequired,
+                    isString: isString,
+                    isNum: isNum,
                 };
             }
         });

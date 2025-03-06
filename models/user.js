@@ -15,6 +15,10 @@ const UserSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    resetCode: {
+        type: String,
+        default: null,
+    },
     firstName: {
         type: String,
         required: true,
@@ -101,7 +105,7 @@ const UserSchema = new mongoose.Schema({
             type: Date,
             default: Date.now,
         },
-        configurationName : {
+        configurationName: {
             type: String,
             required: true,
         },
