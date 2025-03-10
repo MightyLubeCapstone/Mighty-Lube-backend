@@ -42,7 +42,7 @@ router.put("/", authenticate, async (req, res) => {
         const { cartID } = req.body;
         const user = req.user;
         const draft = user.drafts.find(draft => draft.cartID === cartID);
-        user.cart += draft.cart;
+        user.cart.push(...draft.cart); // Correctly restore items to cart
         // Ensure Mongoose knows that the array has changed
         user.markModified("cart");
         await user.save();
