@@ -52,7 +52,7 @@ router.post('/send-email', authenticate, async (req, res) => {
     if (!email) {
       return res.status(400).json({ error: 'Invalid email address' });
     }
-    let emailContent = "";
+    let emailContent = `Contact Information:\n\tName: ${req.user["firstName"]} ${req.user["lastName"]}\nPhone: ${req.user["phoneNumber"]}\nCompany: ${req.user["companyName"]}\nCountry: ${req.user["country"]}`;
     configuration.cart.forEach((order) => {
       emailContent += `\n\n\n#################################################\n${order.productType}\n\nRequested number of this item: ${order.numRequested}\n`;
       order = getMappedInfo(order);
