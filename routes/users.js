@@ -1,6 +1,6 @@
 const express = require("express");
 const uuid = require("uuid"); // used for creating session ID
-const { hashPassword, authenticate } = require("./sessions");
+const { hashPassword, authenticate, comparePassword } = require("./sessions");
 const User = require("../models/user");
 
 const router = express.Router();
@@ -110,11 +110,14 @@ router.post("/", async (req, res) => {
 });
 
 
-router.delete("/", async (req, res) => {
+router.delete("/", authenticate, async (req, res) => {
 	try {
 		// cleanup for testing
-		const { sessionID } = req.body;
-		const result = await User.deleteOne({ "sessions.sessionID": sessionID });
+		const { password } = req.body;
+		if (!await comparePassword(password, req.user.password)) {
+			return res.status(401).json({ error: "Invalid password!" });
+		}
+		const result = await User.deleteOne({ "userID": req.user.userID });
 		if (result.deletedCount === 0) {
 			res.status(400).json({ error: "User not found" });
 		} else {
