@@ -1,34 +1,32 @@
 const express = require("express");
 const { dbConnect } = require("../config/config");
 const { authenticate } = require("./sessions");
-const FRO_317 = require("../models/FRO_317");
+const ETI_OP48E = require("../models/ETI_OP48E");
 const templateB = require("../models/templateB");
+
 
 const router = express.Router();
 
 router.post("/", authenticate, async (req, res) => {
-    //used for FRO_317 form
     try {
-        const { FRO_317Data, numRequested } = req.body;
-        const order = new FRO_317({
-            ...(FRO_317Data.conveyorName && { conveyorName: FRO_317Data.conveyorName }),
-            ...(FRO_317Data.wheelManufacturer && { wheelManufacturer: FRO_317Data.wheelManufacturer }),
-            ...(FRO_317Data.otherWheelManufacturer && { otherWheelManufacturer: FRO_317Data.otherWheelManufacturer }),
-            ...(FRO_317Data.conveyorLength && { conveyorLength: FRO_317Data.conveyorLength }),
-            ...(FRO_317Data.conveyorLengthUnit && { conveyorLengthUnit: FRO_317Data.conveyorLengthUnit }),
-            ...(FRO_317Data.conveyorSpeed && { conveyorSpeed: FRO_317Data.conveyorSpeed }),
-            ...(FRO_317Data.conveyorSpeedUnit && { conveyorSpeedUnit: FRO_317Data.conveyorSpeedUnit }),
-            ...(FRO_317Data.travelDirection && { travelDirection: FRO_317Data.travelDirection }),
-            appEnviroment: FRO_317Data.appEnviroment,
-            ...(FRO_317Data.ovenStatus && { ovenStatus: FRO_317Data.ovenStatus }),
-            ...(FRO_317Data.ovenTemp && { ovenTemp: FRO_317Data.ovenTemp }),
-            ...(FRO_317Data.surroundingTemp && { surroundingTemp: FRO_317Data.surroundingTemp }),
-            ...(FRO_317Data.conveyorSwing && { conveyorSwing: FRO_317Data.conveyorSwing }),
-            ...(FRO_317Data.orientation && { orientation: FRO_317Data.orientation }),
-            ...(FRO_317Data.operatingVoltage && { operatingVoltage: FRO_317Data.operatingVoltage }),
-            ...(FRO_317Data.controlVoltage && { controlVoltage: FRO_317Data.controlVoltage }),
-            ...(FRO_317Data.compressedAir && { compressedAir: FRO_317Data.compressedAir }),
-            ...(FRO_317Data.airSupply && { airSupply: FRO_317Data.airSupply }),
+        const { ETI_OP48EData, numRequested } = req.body;
+        const order = new ETI_OP48E({
+            ...(ETI_OP48EData.chainSize && { chainSize: ETI_OP48EData.chainSize }),
+            industrialChainManufacturer: ETI_OP48EData.industrialChainManufacturer,
+            ...(ETI_OP48EData.otherIndustrialChainManufacturer && { otherIndustrialChainManufacturer: ETI_OP48EData.otherIndustrialChainManufacturer }),
+            ...(ETI_OP48EData.conveyorLength && { conveyorLength: ETI_OP48EData.conveyorLength }),
+            ...(ETI_OP48EData.conveyorLengthUnit && { conveyorLengthUnit: ETI_OP48EData.conveyorLengthUnit }),
+            ...(ETI_OP48EData.conveyorSpeed && { conveyorSpeed: ETI_OP48EData.conveyorSpeed }),
+            ...(ETI_OP48EData.conveyorSpeedUnit && { conveyorSpeedUnit: ETI_OP48EData.conveyorSpeedUnit }),
+            ...(ETI_OP48EData.conveyorIndex && { conveyorIndex: ETI_OP48EData.conveyorIndex }),
+            ...(ETI_OP48EData.travelDirection && { travelDirection: ETI_OP48EData.travelDirection }),
+            appEnviroment: ETI_OP48EData.appEnviroment,
+            ...(ETI_OP48EData.ovenStatus && { ovenStatus: ETI_OP48EData.ovenStatus }),
+            ...(ETI_OP48EData.ovenTemp && { ovenTemp: ETI_OP48EData.ovenTemp }),
+            ...(ETI_OP48EData.surroundingTemp && { surroundingTemp: ETI_OP48EData.surroundingTemp }),
+            ...(ETI_OP48EData.conveyorLoaded && { conveyorLoaded: ETI_OP48EData.conveyorLoaded }),
+            ...(ETI_OP48EData.conveyorSwing && { conveyorSwing: ETI_OP48EData.conveyorSwing }),
+            ...(ETI_OP48EData.operatingVoltage && { operatingVoltage: ETI_OP48EData.operatingVoltage }),
 
             monitorData: new templateB({
                 existingMonitor: ETI_OP48EData.templateB.existingMonitor,
@@ -88,44 +86,45 @@ router.post("/", authenticate, async (req, res) => {
                 ...(ETI_OP48EData.templateB.ampPickup && { ampPickup: ETI_OP48EData.templateB.ampPickup }),
                 ...(ETI_OP48EData.templateB.fromAirTakeUpDistance && { fromAirTakeUpDistance: ETI_OP48EData.templateB.fromAirTakeUpDistance }),
                 ...(ETI_OP48EData.templateB.specialControllerOptions && { specialControllerOptions: ETI_OP48EData.templateB.specialControllerOptions })
-            }),            
-            ...(FRO_317Data.freeWheelStatus && { freeWheelStatus: FRO_317Data.freeWheelStatus }),
-            ...(FRO_317Data.guideRollerStatus && { guideRollerStatus: FRO_317Data.guideRollerStatus }),
-            ...(FRO_317Data.openRaceStyle && { openRaceStyle: FRO_317Data.openRaceStyle }),
-            ...(FRO_317Data.closedRaceStyle && { closedRaceStyle: FRO_317Data.closedRaceStyle }),
-            ...(FRO_317Data.openStatus && { openStatus: FRO_317Data.openStatus }),
-            ...(FRO_317Data.lubeBrand && { lubeBrand: FRO_317Data.lubeBrand }),
-            ...(FRO_317Data.lubeType && { lubeType: FRO_317Data.lubeType }),
-            ...(FRO_317Data.lubeViscosity && { lubeViscosity: FRO_317Data.lubeViscosity }),
-            ...(FRO_317Data.currentGrease && { currentGrease: FRO_317Data.currentGrease }),
-            ...(FRO_317Data.currentGreaseGrade && { currentGreaseGrade: FRO_317Data.currentGreaseGrade }),
-            ...(FRO_317Data.zerkDirection && { zerkDirection: FRO_317Data.zerkDirection }),
-            ...(FRO_317Data.zerkLocation && { zerkLocation: FRO_317Data.zerkLocation }),
-            ...(FRO_317Data.chainMaster && { chainMaster: FRO_317Data.chainMaster }),
-            ...(FRO_317Data.remoteStatus && { remoteStatus: FRO_317Data.remoteStatus }),
-            ...(FRO_317Data.mountStatus && { mountStatus: FRO_317Data.mountStatus }),
-            ...(FRO_317Data.otherUnitStatus && { otherUnitStatus: FRO_317Data.otherUnitStatus }),
-            ...(FRO_317Data.timerStatus && { timerStatus: FRO_317Data.timerStatus }),
-            ...(FRO_317Data.electricStatus && { electricStatus: FRO_317Data.electricStatus }),
-            ...(FRO_317Data.mightyLubeMonitoring && { mightyLubeMonitoring: FRO_317Data.mightyLubeMonitoring }),
-            ...(FRO_317Data.preMountType && { preMountType: FRO_317Data.preMountType }),
-            ...(FRO_317Data.plcConnection && { plcConnection: FRO_317Data.plcConnection }),
-            ...(FRO_317Data.otherControllerInfo && { otherControllerInfo: FRO_317Data.otherControllerInfo }),
-            ...(FRO_317Data.frUnitType && { frUnitType: FRO_317Data.frUnitType }),
-            ...(FRO_317Data.frInvertedA && { frInvertedA: FRO_317Data.frInvertedA }),
-            ...(FRO_317Data.frInvertedB && { frInvertedB: FRO_317Data.frInvertedB }),
-            ...(FRO_317Data.frInvertedE && { frInvertedE: FRO_317Data.frInvertedE }),
-            ...(FRO_317Data.frInvertedG && { frInvertedG: FRO_317Data.frInvertedG }),
-            ...(FRO_317Data.frInvertedH && { frInvertedH: FRO_317Data.frInvertedH }),
-            ...(FRO_317Data.frInvertedS && { frInvertedS: FRO_317Data.frInvertedS }),
+            }),
+            
+            ...(ETI_OP48EData.freeCarrierSystem && { freeCarrierSystem: ETI_OP48EData.freeCarrierSystem }),
+            ...(ETI_OP48EData.catDriveStatus && { catDriveStatus: ETI_OP48EData.catDriveStatus }),
+            ...(ETI_OP48EData.catDriveNum && { catDriveNum: ETI_OP48EData.catDriveNum }),
+            ...(ETI_OP48EData.externalLubeStatus && { externalLubeStatus: ETI_OP48EData.externalLubeStatus }),
+            ...(ETI_OP48EData.lubeBrand && { lubeBrand: ETI_OP48EData.lubeBrand }),
+            ...(ETI_OP48EData.lubeType && { lubeType: ETI_OP48EData.lubeType }),
+            ...(ETI_OP48EData.lubeViscosity && { lubeViscosity: ETI_OP48EData.lubeViscosity }),
+            ...(ETI_OP48EData.sideLubeStatus && { sideLubeStatus: ETI_OP48EData.sideLubeStatus }),
+            ...(ETI_OP48EData.chainMaster && { chainMaster: ETI_OP48EData.chainMaster }),
+            ...(ETI_OP48EData.timerStatus && { timerStatus: ETI_OP48EData.timerStatus }),
+            ...(ETI_OP48EData.electricStatus && { electricStatus: ETI_OP48EData.electricStatus }),
+            ...(ETI_OP48EData.pneumaticStatus && { pneumaticStatus: ETI_OP48EData.pneumaticStatus }),
+            ...(ETI_OP48EData.mightyLubeMonitoring && { mightyLubeMonitoring: ETI_OP48EData.mightyLubeMonitoring }),
+            ...(ETI_OP48EData.plcConnection && { plcConnection: ETI_OP48EData.plcConnection }),
+            ...(ETI_OP48EData.otherControllerInfo && { otherControllerInfo: ETI_OP48EData.otherControllerInfo }),
+            ...(ETI_OP48EData.enclosedUnitType && { enclosedUnitType: ETI_OP48EData.enclosedUnitType }),
+            ...(ETI_OP48EData.enclosedTrackB && { enclosedTrackB: ETI_OP48EData.enclosedTrackB }),
+            ...(ETI_OP48EData.enclosedTrackG && { enclosedTrackG: ETI_OP48EData.enclosedTrackG }),
+            ...(ETI_OP48EData.enclosedTrackH && { enclosedTrackH: ETI_OP48EData.enclosedTrackH }),
+            ...(ETI_OP48EData.enclosedTrackS && { enclosedTrackS: ETI_OP48EData.enclosedTrackS }),
+            ...(ETI_OP48EData.enclosedTrackK2 && { enclosedTrackK2: ETI_OP48EData.enclosedTrackK2 }),
+            ...(ETI_OP48EData.enclosedTrackL2 && { enclosedTrackL2: ETI_OP48EData.enclosedTrackL2 }),
+            ...(ETI_OP48EData.enclosedTrackM2 && { enclosedTrackM2: ETI_OP48EData.enclosedTrackM2 }),
+            ...(ETI_OP48EData.enclosedTrackN2 && { enclosedTrackN2: ETI_OP48EData.enclosedTrackN2 }),
+            ...(ETI_OP48EData.enclosedTrackS2 && { enclosedTrackS2: ETI_OP48EData.enclosedTrackS2 })
         });
-        req.user.cart.push({ numRequested: numRequested, productConfigurationInfo: order, productType: "FRO_317" });
+
+        req.user.cart.push({
+            numRequested,
+            productConfigurationInfo: order,
+            productType: "ETI_OP48E"
+        });
         await req.user.save();
 
-        return res.status(200).json({ message: "FRO_317 entry added" });
-
+        return res.status(200).json({ message: "ETI_OP48E entry added" });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         res.status(500).json({ error: "Internal server error" });
     }
 });
