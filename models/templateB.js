@@ -539,4 +539,5 @@ const templateB = new mongoose.Schema({
     },
 });
 
-module.exports = templateB;
+const TemplateB = mongoose.models.TemplateB || mongoose.model('TemplateB', templateB);
+module.exports = TemplateB;
