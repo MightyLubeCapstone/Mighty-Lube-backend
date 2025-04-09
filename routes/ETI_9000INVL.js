@@ -2,6 +2,8 @@ const express = require("express");
 const { dbConnect } = require("../config/config");
 const { authenticate } = require("./sessions");
 const ETI_9000INVL = require("../models/ETI_9000INVL");
+const templateB = require("../models/templateB");
+
 
 const router = express.Router();
 
@@ -27,7 +29,65 @@ router.post("/", authenticate, async (req, res) => {
             ...(ETI_9000INVLData.conveyorSwing && { conveyorSwing: ETI_9000INVLData.conveyorSwing }),
             ...(ETI_9000INVLData.operatingVoltage && { operatingVoltage: ETI_9000INVLData.operatingVoltage }),
 
-            // TODO: Implement monitorData: templateB when complete on frontend
+            monitorData: new templateB({
+                existingMonitor: ETI_9000INVLData.templateB.existingMonitor,
+                newMonitor: ETI_9000INVLData.templateB.newMonitor,
+                ...(ETI_9000INVLData.templateB.dcuStatus && { dcuStatus: ETI_9000INVLData.templateB.dcuStatus }),
+                ...(ETI_9000INVLData.templateB.dcuNum && { dcuNum: ETI_9000INVLData.templateB.dcuNum }),
+                ...(ETI_9000INVLData.templateB.existingWindows && { existingWindows: ETI_9000INVLData.templateB.existingWindows }),
+                ...(ETI_9000INVLData.templateB.existingHeadUnit && { existingHeadUnit: ETI_9000INVLData.templateB.existingHeadUnit }),
+                ...(ETI_9000INVLData.templateB.existingDCU && { existingDCU: ETI_9000INVLData.templateB.existingDCU }),
+                ...(ETI_9000INVLData.templateB.existingPowerInterface && { existingPowerInterface: ETI_9000INVLData.templateB.existingPowerInterface }),
+                ...(ETI_9000INVLData.templateB.newReservoir && { newReservoir: ETI_9000INVLData.templateB.newReservoir }),
+                ...(ETI_9000INVLData.templateB.reservoirSize && { reservoirSize: ETI_9000INVLData.templateB.reservoirSize }),
+                ...(ETI_9000INVLData.templateB.otherReservoirSize && { otherReservoirSize: ETI_9000INVLData.templateB.otherReservoirSize }),
+                ...(ETI_9000INVLData.templateB.newReservoirNum && { newReservoirNum: ETI_9000INVLData.templateB.newReservoirNum }),
+                ...(ETI_9000INVLData.templateB.typeMonitor && { typeMonitor: ETI_9000INVLData.templateB.typeMonitor }),
+                ...(ETI_9000INVLData.templateB.driveMotorAmp && { driveMotorAmp: ETI_9000INVLData.templateB.driveMotorAmp }),
+                ...(ETI_9000INVLData.templateB.driveMotorAmpNum && { driveMotorAmpNum: ETI_9000INVLData.templateB.driveMotorAmpNum }),
+                ...(ETI_9000INVLData.templateB.driveTakeUpAir && { driveTakeUpAir: ETI_9000INVLData.templateB.driveTakeUpAir }),
+                ...(ETI_9000INVLData.templateB.driveTakeUpAirNum && { driveTakeUpAirNum: ETI_9000INVLData.templateB.driveTakeUpAirNum }),
+                ...(ETI_9000INVLData.templateB.takeUpDistance && { takeUpDistance: ETI_9000INVLData.templateB.takeUpDistance }),
+                ...(ETI_9000INVLData.templateB.takeUpDistanceNum && { takeUpDistanceNum: ETI_9000INVLData.templateB.takeUpDistanceNum }),
+                ...(ETI_9000INVLData.templateB.driveTemp && { driveTemp: ETI_9000INVLData.templateB.driveTemp }),
+                ...(ETI_9000INVLData.templateB.driveTempNum && { driveTempNum: ETI_9000INVLData.templateB.driveTempNum }),
+                ...(ETI_9000INVLData.templateB.driveVibration && { driveVibration: ETI_9000INVLData.templateB.driveVibration }),
+                ...(ETI_9000INVLData.templateB.driveVibrationNum && { driveVibrationNum: ETI_9000INVLData.templateB.driveVibrationNum }),
+                ...(ETI_9000INVLData.templateB.dogPitch && { dogPitch: ETI_9000INVLData.templateB.dogPitch }),
+                ...(ETI_9000INVLData.templateB.dogPitchNum && { dogPitchNum: ETI_9000INVLData.templateB.dogPitchNum }),
+                ...(ETI_9000INVLData.templateB.paintMarker && { paintMarker: ETI_9000INVLData.templateB.paintMarker }),
+                ...(ETI_9000INVLData.templateB.paintMarkerNum && { paintMarkerNum: ETI_9000INVLData.templateB.paintMarkerNum }),
+                ...(ETI_9000INVLData.templateB.chainVision && { chainVision: ETI_9000INVLData.templateB.chainVision }),
+                ...(ETI_9000INVLData.templateB.lubeVision && { lubeVision: ETI_9000INVLData.templateB.lubeVision }),
+                ...(ETI_9000INVLData.templateB.trolleyVision && { trolleyVision: ETI_9000INVLData.templateB.trolleyVision }),
+                ...(ETI_9000INVLData.templateB.trolleyDetect && { trolleyDetect: ETI_9000INVLData.templateB.trolleyDetect }),
+                ...(ETI_9000INVLData.templateB.omniView && { omniView: ETI_9000INVLData.templateB.omniView }),
+                ...(ETI_9000INVLData.templateB.dcuUpgradeNum && { dcuUpgradeNum: ETI_9000INVLData.templateB.dcuUpgradeNum }),
+                ...(ETI_9000INVLData.templateB.itNameOne && { itNameOne: ETI_9000INVLData.templateB.itNameOne }),
+                ...(ETI_9000INVLData.templateB.itIPOne && { itIPOne: ETI_9000INVLData.templateB.itIPOne }),
+                ...(ETI_9000INVLData.templateB.itGatewayOne && { itGatewayOne: ETI_9000INVLData.templateB.itGatewayOne }),
+                ...(ETI_9000INVLData.templateB.itSubnetOne && { itSubnetOne: ETI_9000INVLData.templateB.itSubnetOne }),
+                ...(ETI_9000INVLData.templateB.itDNSOne && { itDNSOne: ETI_9000INVLData.templateB.itDNSOne }),
+                ...(ETI_9000INVLData.templateB.itSMTPOne && { itSMTPOne: ETI_9000INVLData.templateB.itSMTPOne }),
+                ...(ETI_9000INVLData.templateB.itNameTwo && { itNameTwo: ETI_9000INVLData.templateB.itNameTwo }),
+                ...(ETI_9000INVLData.templateB.itIPTwo && { itIPTwo: ETI_9000INVLData.templateB.itIPTwo }),
+                ...(ETI_9000INVLData.templateB.itGatewayTwo && { itGatewayTwo: ETI_9000INVLData.templateB.itGatewayTwo }),
+                ...(ETI_9000INVLData.templateB.itSubnetTwo && { itSubnetTwo: ETI_9000INVLData.templateB.itSubnetTwo }),
+                ...(ETI_9000INVLData.templateB.itDNSTwo && { itDNSTwo: ETI_9000INVLData.templateB.itDNSTwo }),
+                ...(ETI_9000INVLData.templateB.itSMTPTwo && { itSMTPTwo: ETI_9000INVLData.templateB.itSMTPTwo }),
+                ...(ETI_9000INVLData.templateB.itNameThree && { itNameThree: ETI_9000INVLData.templateB.itNameThree }),
+                ...(ETI_9000INVLData.templateB.itIPThree && { itIPThree: ETI_9000INVLData.templateB.itIPThree }),
+                ...(ETI_9000INVLData.templateB.itGatewayThree && { itGatewayThree: ETI_9000INVLData.templateB.itGatewayThree }),
+                ...(ETI_9000INVLData.templateB.itSubnetThree && { itSubnetThree: ETI_9000INVLData.templateB.itSubnetThree }),
+                ...(ETI_9000INVLData.templateB.itDNSThree && { itDNSThree: ETI_9000INVLData.templateB.itDNSThree }),
+                ...(ETI_9000INVLData.templateB.itSMTPThree && { itSMTPThree: ETI_9000INVLData.templateB.itSMTPThree }),
+                ...(ETI_9000INVLData.templateB.itAdditionalNotes && { itAdditionalNotes: ETI_9000INVLData.templateB.itAdditionalNotes }),
+                ...(ETI_9000INVLData.templateB.piuDistance && { piuDistance: ETI_9000INVLData.templateB.piuDistance }),
+                ...(ETI_9000INVLData.templateB.switchDistance && { switchDistance: ETI_9000INVLData.templateB.switchDistance }),
+                ...(ETI_9000INVLData.templateB.ampPickup && { ampPickup: ETI_9000INVLData.templateB.ampPickup }),
+                ...(ETI_9000INVLData.templateB.fromAirTakeUpDistance && { fromAirTakeUpDistance: ETI_9000INVLData.templateB.fromAirTakeUpDistance }),
+                ...(ETI_9000INVLData.templateB.specialControllerOptions && { specialControllerOptions: ETI_9000INVLData.templateB.specialControllerOptions })
+            }),
             
             ...(ETI_9000INVLData.freeCarrierSystem && { freeCarrierSystem: ETI_9000INVLData.freeCarrierSystem }),
             ...(ETI_9000INVLData.catDriveStatus && { catDriveStatus: ETI_9000INVLData.catDriveStatus }),

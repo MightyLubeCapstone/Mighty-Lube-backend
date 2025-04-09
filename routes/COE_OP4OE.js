@@ -3,6 +3,8 @@ const express = require("express");
 const { dbConnect } = require("../config/config");
 const { authenticate } = require("./sessions");
 const COE_OP4OE = require("../models/COE_OP4OE");
+const templateB = require("../models/templateB");
+
 
 const router = express.Router();
 
@@ -31,7 +33,65 @@ router.post("/", authenticate, async (req, res) => {
             ...(COE_OP4OEData.requiredPics && { requiredPics: COE_OP4OEData.requiredPics }),
             operatingVoltage: COE_OP4OEData.operatingVoltage,
 
-            // TODO: Implement monitorData: templateB when complete on frontend
+            monitorData: new templateB({
+                existingMonitor: COE_OP4OEData.templateB.existingMonitor,
+                newMonitor: COE_OP4OEData.templateB.newMonitor,
+                ...(COE_OP4OEData.templateB.dcuStatus && { dcuStatus: COE_OP4OEData.templateB.dcuStatus }),
+                ...(COE_OP4OEData.templateB.dcuNum && { dcuNum: COE_OP4OEData.templateB.dcuNum }),
+                ...(COE_OP4OEData.templateB.existingWindows && { existingWindows: COE_OP4OEData.templateB.existingWindows }),
+                ...(COE_OP4OEData.templateB.existingHeadUnit && { existingHeadUnit: COE_OP4OEData.templateB.existingHeadUnit }),
+                ...(COE_OP4OEData.templateB.existingDCU && { existingDCU: COE_OP4OEData.templateB.existingDCU }),
+                ...(COE_OP4OEData.templateB.existingPowerInterface && { existingPowerInterface: COE_OP4OEData.templateB.existingPowerInterface }),
+                ...(COE_OP4OEData.templateB.newReservoir && { newReservoir: COE_OP4OEData.templateB.newReservoir }),
+                ...(COE_OP4OEData.templateB.reservoirSize && { reservoirSize: COE_OP4OEData.templateB.reservoirSize }),
+                ...(COE_OP4OEData.templateB.otherReservoirSize && { otherReservoirSize: COE_OP4OEData.templateB.otherReservoirSize }),
+                ...(COE_OP4OEData.templateB.newReservoirNum && { newReservoirNum: COE_OP4OEData.templateB.newReservoirNum }),
+                ...(COE_OP4OEData.templateB.typeMonitor && { typeMonitor: COE_OP4OEData.templateB.typeMonitor }),
+                ...(COE_OP4OEData.templateB.driveMotorAmp && { driveMotorAmp: COE_OP4OEData.templateB.driveMotorAmp }),
+                ...(COE_OP4OEData.templateB.driveMotorAmpNum && { driveMotorAmpNum: COE_OP4OEData.templateB.driveMotorAmpNum }),
+                ...(COE_OP4OEData.templateB.driveTakeUpAir && { driveTakeUpAir: COE_OP4OEData.templateB.driveTakeUpAir }),
+                ...(COE_OP4OEData.templateB.driveTakeUpAirNum && { driveTakeUpAirNum: COE_OP4OEData.templateB.driveTakeUpAirNum }),
+                ...(COE_OP4OEData.templateB.takeUpDistance && { takeUpDistance: COE_OP4OEData.templateB.takeUpDistance }),
+                ...(COE_OP4OEData.templateB.takeUpDistanceNum && { takeUpDistanceNum: COE_OP4OEData.templateB.takeUpDistanceNum }),
+                ...(COE_OP4OEData.templateB.driveTemp && { driveTemp: COE_OP4OEData.templateB.driveTemp }),
+                ...(COE_OP4OEData.templateB.driveTempNum && { driveTempNum: COE_OP4OEData.templateB.driveTempNum }),
+                ...(COE_OP4OEData.templateB.driveVibration && { driveVibration: COE_OP4OEData.templateB.driveVibration }),
+                ...(COE_OP4OEData.templateB.driveVibrationNum && { driveVibrationNum: COE_OP4OEData.templateB.driveVibrationNum }),
+                ...(COE_OP4OEData.templateB.dogPitch && { dogPitch: COE_OP4OEData.templateB.dogPitch }),
+                ...(COE_OP4OEData.templateB.dogPitchNum && { dogPitchNum: COE_OP4OEData.templateB.dogPitchNum }),
+                ...(COE_OP4OEData.templateB.paintMarker && { paintMarker: COE_OP4OEData.templateB.paintMarker }),
+                ...(COE_OP4OEData.templateB.paintMarkerNum && { paintMarkerNum: COE_OP4OEData.templateB.paintMarkerNum }),
+                ...(COE_OP4OEData.templateB.chainVision && { chainVision: COE_OP4OEData.templateB.chainVision }),
+                ...(COE_OP4OEData.templateB.lubeVision && { lubeVision: COE_OP4OEData.templateB.lubeVision }),
+                ...(COE_OP4OEData.templateB.trolleyVision && { trolleyVision: COE_OP4OEData.templateB.trolleyVision }),
+                ...(COE_OP4OEData.templateB.trolleyDetect && { trolleyDetect: COE_OP4OEData.templateB.trolleyDetect }),
+                ...(COE_OP4OEData.templateB.omniView && { omniView: COE_OP4OEData.templateB.omniView }),
+                ...(COE_OP4OEData.templateB.dcuUpgradeNum && { dcuUpgradeNum: COE_OP4OEData.templateB.dcuUpgradeNum }),
+                ...(COE_OP4OEData.templateB.itNameOne && { itNameOne: COE_OP4OEData.templateB.itNameOne }),
+                ...(COE_OP4OEData.templateB.itIPOne && { itIPOne: COE_OP4OEData.templateB.itIPOne }),
+                ...(COE_OP4OEData.templateB.itGatewayOne && { itGatewayOne: COE_OP4OEData.templateB.itGatewayOne }),
+                ...(COE_OP4OEData.templateB.itSubnetOne && { itSubnetOne: COE_OP4OEData.templateB.itSubnetOne }),
+                ...(COE_OP4OEData.templateB.itDNSOne && { itDNSOne: COE_OP4OEData.templateB.itDNSOne }),
+                ...(COE_OP4OEData.templateB.itSMTPOne && { itSMTPOne: COE_OP4OEData.templateB.itSMTPOne }),
+                ...(COE_OP4OEData.templateB.itNameTwo && { itNameTwo: COE_OP4OEData.templateB.itNameTwo }),
+                ...(COE_OP4OEData.templateB.itIPTwo && { itIPTwo: COE_OP4OEData.templateB.itIPTwo }),
+                ...(COE_OP4OEData.templateB.itGatewayTwo && { itGatewayTwo: COE_OP4OEData.templateB.itGatewayTwo }),
+                ...(COE_OP4OEData.templateB.itSubnetTwo && { itSubnetTwo: COE_OP4OEData.templateB.itSubnetTwo }),
+                ...(COE_OP4OEData.templateB.itDNSTwo && { itDNSTwo: COE_OP4OEData.templateB.itDNSTwo }),
+                ...(COE_OP4OEData.templateB.itSMTPTwo && { itSMTPTwo: COE_OP4OEData.templateB.itSMTPTwo }),
+                ...(COE_OP4OEData.templateB.itNameThree && { itNameThree: COE_OP4OEData.templateB.itNameThree }),
+                ...(COE_OP4OEData.templateB.itIPThree && { itIPThree: COE_OP4OEData.templateB.itIPThree }),
+                ...(COE_OP4OEData.templateB.itGatewayThree && { itGatewayThree: COE_OP4OEData.templateB.itGatewayThree }),
+                ...(COE_OP4OEData.templateB.itSubnetThree && { itSubnetThree: COE_OP4OEData.templateB.itSubnetThree }),
+                ...(COE_OP4OEData.templateB.itDNSThree && { itDNSThree: COE_OP4OEData.templateB.itDNSThree }),
+                ...(COE_OP4OEData.templateB.itSMTPThree && { itSMTPThree: COE_OP4OEData.templateB.itSMTPThree }),
+                ...(COE_OP4OEData.templateB.itAdditionalNotes && { itAdditionalNotes: COE_OP4OEData.templateB.itAdditionalNotes }),
+                ...(COE_OP4OEData.templateB.piuDistance && { piuDistance: COE_OP4OEData.templateB.piuDistance }),
+                ...(COE_OP4OEData.templateB.switchDistance && { switchDistance: COE_OP4OEData.templateB.switchDistance }),
+                ...(COE_OP4OEData.templateB.ampPickup && { ampPickup: COE_OP4OEData.templateB.ampPickup }),
+                ...(COE_OP4OEData.templateB.fromAirTakeUpDistance && { fromAirTakeUpDistance: COE_OP4OEData.templateB.fromAirTakeUpDistance }),
+                ...(COE_OP4OEData.templateB.specialControllerOptions && { specialControllerOptions: COE_OP4OEData.templateB.specialControllerOptions })
+            }),
             
             catDriveStatus: COE_OP4OEData.catDriveStatus,
             
