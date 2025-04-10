@@ -242,7 +242,7 @@ const FGLMSchema = new mongoose.Schema({
 
     // MonSys
 
-    monitorData: templateB,
+    //monitorData: templateB, | UNCOMMENT THIS LATER ONCE WE ADD THE TEMPLATES TO THE FRONTEND
 
     // ConveyorSpecs
     sideLube: {
