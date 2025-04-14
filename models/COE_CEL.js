@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const templateB = require("./templateB.js");
+const getDecodedInfo = require("./getDecodedInfo.js");  
 
 
 const COE_CEL_Schema = new mongoose.Schema({
@@ -9,62 +10,73 @@ const COE_CEL_Schema = new mongoose.Schema({
     },
     chainSize: {
         type: Number,
+        enum: [1, 2, 3, 4, 5],
         required: true,
-        // add enum and check
     },
     industrialChainManufacturer: {
         type: Number,
         enum: [1, 2, 3, 4, 5, 6, 7, 8, 9],
         required: true,
     },
-    otherIndustrialChainManufacturer: {
-        type: String,
-        required: function () {
-            return this.industrialChainManufacturer === 9;
-        },
-    },
+    // otherIndustrialChainManufacturer: {
+    //     type: String,
+    //     required: function () {
+    //         return this.industrialChainManufacturer === 9;
+    //     },
+    // },
     conveyorLength: {
         type: Number,
         required: true,
     },
     conveyorLengthUnit: {
+
         type: Number,
+        enum: [1, 2, 3, 4],
         required: true,
+
     },
     conveyorSpeed: {
         type: Number,
         required: true,
     },
     conveyorSpeedUnit: {
+
         type: Number,
+        enum: [1, 2],
         required: true,
+
     },
     conveyorIndex: {
         type: Number,
         required: false,
     },
     travelDirection: {
+
         type: Number,
+        enum: [1, 2],
         required: false,
+
     },
     appEnviroment: {
+
         type: Number,
-        enum: [1, 2],
+        enum: [1, 2, 3, 4, 5, 6, 7],
         required: true,
+
     },
-    ovenStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: function () {
-            return this.appEnviroment === 1;
-        },
-    },
-    ovenTemp: {
-        type: Number,
-        required: function () {
-            return this.appEnviroment === 1;
-        },
-    },
+    // ovenStatus: {
+    //     type: Number,
+    //     enum: [1, 2],
+    //     required: function () {
+    //         return this.appEnviroment === 1;
+    //     },
+    // },
+    // ovenTemp: {
+    //     type: Number,
+    //     required: function () {
+    //         return this.appEnviroment === 1;
+    //     },
+    // },
     surroundingTemp: {
         type: Number,
         enum: [1, 2],
@@ -95,7 +107,22 @@ const COE_CEL_Schema = new mongoose.Schema({
         required: true,
     },
     
-    monitorData: templateB,
+    existingMonitor: {
+
+        type: Number,
+        enum: [1, 2],
+        required: false,
+
+    },
+
+    newMonitor: {
+        type: Number,
+        enum: [1, 2],
+        required: false,
+    
+    },
+   // monitorData: templateB,
+
 
 
 
@@ -118,7 +145,7 @@ const COE_CEL_Schema = new mongoose.Schema({
     catDriveStatus: {
         type: Number,
         enum: [1, 2],
-        required: true,
+        required: false,
     },
 
 

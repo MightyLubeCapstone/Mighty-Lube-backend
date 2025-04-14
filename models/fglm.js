@@ -19,16 +19,16 @@ const FGLMSchema = new mongoose.Schema({
 
     },
 
-    otherChainSize: {
+    // otherChainSize: {
 
-        type: String,
-        required: function () {
+    //     type: String,
+    //     required: function () {
 
-            return this.chainSize === 5;
+    //         return this.chainSize === 5;
 
-        }
+    //     }
 
-    },
+    // },
 
     chainManufacturer: {
 
@@ -38,31 +38,31 @@ const FGLMSchema = new mongoose.Schema({
 
     },
 
-    otherChainManufacturer: {
+    // otherChainManufacturer: {
 
-        type: String,
-        required: function () {
-            return this.chainManufacturer === 10;
-        }
+    //     type: String,
+    //     required: function () {
+    //         return this.chainManufacturer === 10;
+    //     }
 
-    },
+    // },
 
-    wheelManufacturer: {
+    // wheelManufacturer: {
 
-        type: Number,
-        enum: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-        required: true,
+    //     type: Number,
+    //     enum: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    //     required: true,
 
-    },
+    // },
 
-    otherWheelManufacturer: {
-        type: String,
+    // otherWheelManufacturer: {
+    //     type: String,
 
-        required: function () {
-            return this.wheelManufacturer === 10;
-        }
+    //     required: function () {
+    //         return this.wheelManufacturer === 10;
+    //     }
 
-    },
+    // },
 
     chainPinType: {
 
@@ -133,14 +133,14 @@ const FGLMSchema = new mongoose.Schema({
 
     },
 
-    otherMetalType: {
+    // otherMetalType: {
 
-        type: String,
-        required: function () {
-            return this.metalType === 4;
-        }
+    //     type: String,
+    //     required: function () {
+    //         return this.metalType === 4;
+    //     }
 
-    },
+    // },
 
     conveyorStyle: {
 
@@ -151,14 +151,14 @@ const FGLMSchema = new mongoose.Schema({
 
     },
 
-    otherConveyorStyle: {
+    // otherConveyorStyle: {
 
-        type: String,
-        required: function () {
-            return this.conveyorStyle === 5;
-        }
+    //     type: String,
+    //     required: function () {
+    //         return this.conveyorStyle === 5;
+    //     }
 
-    },
+    // },
 
     trolleyColor: {
 
@@ -169,14 +169,14 @@ const FGLMSchema = new mongoose.Schema({
 
     },
 
-    otherTrolleyColor: {
+    // otherTrolleyColor: {
 
-        type: String,
-        required: function () {
-            return this.trolleyColor === 4;
-        }
+    //     type: String,
+    //     required: function () {
+    //         return this.trolleyColor === 4;
+    //     }
 
-    },
+    // },
 
     trolleyType: {
 
@@ -241,6 +241,22 @@ const FGLMSchema = new mongoose.Schema({
     },
 
     // MonSys
+
+    // existingMonitor: {
+
+    //     type: Number,
+    //     enum: [1, 2],
+    //     required: true,
+
+    // },
+
+    // newMonitor: {
+    //     type: Number,
+    //     enum: [1, 2],
+    //     required: true,
+    
+    // },
+
 
     //monitorData: templateB, | UNCOMMENT THIS LATER ONCE WE ADD THE TEMPLATES TO THE FRONTEND
 

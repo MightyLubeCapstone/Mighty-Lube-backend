@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 const templateB = require("./templateB.js");
+const getDecodedInfo = require("./getDecodedInfo.js");  
+
 const OHP_001Schema = new mongoose.Schema({
 
     conveyorName: {
@@ -13,12 +15,12 @@ const OHP_001Schema = new mongoose.Schema({
         required: true,
     },
 
-    otherChainSize: {
-        type: String,
-        required: function () {
-            return this.chainSize === 8;
-        },
-    },
+    // otherChainSize: {
+    //     type: String,
+    //     required: function () {
+    //         return this.chainSize === 8;
+    //     },
+    // },
 
     industrialChainManufacturer: {
         type: Number,
@@ -26,12 +28,12 @@ const OHP_001Schema = new mongoose.Schema({
         required: true,
     },
 
-    otherChainManufacturer: {
-        type: String,
-        required: function () {
-            return this.industrialChainManufacturer === 9;
-        },
-    },
+    // otherChainManufacturer: {
+    //     type: String,
+    //     required: function () {
+    //         return this.industrialChainManufacturer === 9;
+    //     },
+    // },
 
     conveyorLength: {
         type: Number,
@@ -39,8 +41,11 @@ const OHP_001Schema = new mongoose.Schema({
     },
 
     measurementUnit: {
+
         type: Number,
+        enum: [1, 2, 3, 4],
         required: true,
+
     },
 
     conveyorSpeed: {
@@ -49,14 +54,19 @@ const OHP_001Schema = new mongoose.Schema({
     },
 
     speedUnit: {
-        type: Number,
-        required: true,
-    },
 
-    appEnviroment: {
         type: Number,
         enum: [1, 2],
         required: true,
+
+    },
+
+    appEnviroment: {
+
+        type: Number,
+        enum: [1, 2, 3, 4, 5, 6, 7],
+        required: true,
+
     },
 
     // Required if appEnviroment === 1
@@ -83,6 +93,7 @@ const OHP_001Schema = new mongoose.Schema({
 
     ohpUnit: {
         type: Number,
+        enum: [1, 2, 3, 4],
         required: true,
     },
 
