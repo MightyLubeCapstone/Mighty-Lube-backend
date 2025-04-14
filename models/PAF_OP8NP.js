@@ -37,49 +37,59 @@ const PAF_OP8NPSchema = new mongoose.Schema({
         required: true,
     },
 
-    conveyorLengthUnit: {
-        type: Number, // Converted to simple type instead of ref
-        required: true,
-    },
+  conveyorLengthUnit: {
+    type: Number,
+    enum: [1, 2, 3, 4],
+    required: false,
+  },
 
     conveyorSpeed: {
         type: Number,
         required: true,
     },
 
-    conveyorSpeedUnit: {
-        type: Number, // Converted to simple type instead of ref
-        required: true,
-    },
+  conveyorSpeedUnit: {
+    type: Number,
+    enum: [1, 2],
+    required: false,
+  },
 
     appEnviroment: {
         type: Number,
-        enum: [1, 2],
+        enum: [1, 2, 3, 4, 5, 6, 7],
         required: true,
+    },
+
+    otherAppEnviroment: {
+        type: String,
+        required: function () {
+            return this.appEnviroment === 7;
+        },
+
     },
 
     ovenStatus: {
         type: Number,
         enum: [1, 2],
         required: function () {
-            return this.appEnviroment === 1;
+            return this.appEnviroment === 3;
         },
     },
 
     ovenTemp: {
         type: Number,
         required: function () {
-            return this.appEnviroment === 1;
+            return this.appEnviroment === 3;
         },
     },
 
     orientationType: {
-        type: Number, // Converted to simple type instead of ref
+        type: Number, 
         required: true,
     },
 
     pfUnitType: {
-        type: Number, // Converted to simple type instead of ref
+        type: Number, 
         required: true,
     },
 

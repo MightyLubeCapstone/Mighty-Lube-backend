@@ -38,10 +38,11 @@ const OHP_001Schema = new mongoose.Schema({
         required: true,
     },
 
-    measurementUnit: {
-        type: Number,
-        required: true,
-    },
+  conveyorLengthUnit: {
+    type: Number,
+    enum: [1, 2, 3, 4],
+    required: false,
+  },
 
     conveyorSpeed: {
         type: Number,
@@ -55,7 +56,7 @@ const OHP_001Schema = new mongoose.Schema({
 
     appEnviroment: {
         type: Number,
-        enum: [1, 2],
+        enum: [1, 2, 3, 4, 5, 6, 7],
         required: true,
     },
 

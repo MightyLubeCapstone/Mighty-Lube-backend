@@ -9,7 +9,7 @@ const enumMappingsCC5_OP4OE = {
 
     travelDirection: { 1: "Right to Left", 2: "Left to Right" },
 
-    appEnviroment: { 1: "Yes", 2: "No" },
+    appEnviroment: { 1: "Ambient", 2: "Caustic (i.e. Phosphate / E-Coat, etc.)", 3:"Oven", 4:"Wash Down", 5:"Intrinsic", 6:"Food Grade", 7:"Other" },
 
     ovenStatus: { 1: "Yes", 2: "No" },
 

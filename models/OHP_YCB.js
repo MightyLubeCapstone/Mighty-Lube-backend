@@ -37,36 +37,46 @@ const OHP_YCBSchema = new mongoose.Schema({
         required: true,
     },
 
-    conveyorLengthUnit: {
-        type: Number, // Converted to simple type instead of ref
-        required: true,
-    },
+  conveyorLengthUnit: {
+    type: Number,
+    enum: [1, 2, 3, 4],
+    required: false,
+  },
 
     appEnviroment: {
         type: Number,
-        enum: [1, 2],
+        enum: [1, 2, 3, 4, 5, 6, 7],
         required: true,
+    },
+
+    otherAppEnviroment: {
+        type: String,
+        required: function () {
+            return this.appEnviroment === 7;
+        },
+
     },
 
     ovenStatus: {
         type: Number,
         enum: [1, 2],
         required: function () {
-            return this.appEnviroment === 1;
+            return this.appEnviroment === 3;
         },
     },
 
     ovenTemp: {
         type: Number,
         required: function () {
-            return this.appEnviroment === 1;
+            return this.appEnviroment === 3;
         },
     },
 
-    ohpUnitType: {
-        type: Number, // Converted to simple type instead of ref
-        required: true,
-    },
+  ohpUnitType: {
+    type: Number,
+    enum: [1, 2, 3, 4],
+    required: false,
+  },
 
     ohpHeight: {
         type: Number,

@@ -7,7 +7,7 @@ const PAF_314Schema = new mongoose.Schema({
     },
 
     wheelManufacturer: {
-        type: Number, // Converted to simple type instead of ref
+        type: Number, 
         required: true,
     },
 
@@ -16,20 +16,22 @@ const PAF_314Schema = new mongoose.Schema({
         required: true,
     },
 
-    conveyorLengthUnit: {
-        type: Number, // Converted to simple type instead of ref
-        required: true,
-    },
+  conveyorLengthUnit: {
+    type: Number,
+    enum: [1, 2, 3, 4],
+    required: false,
+  },
 
     conveyorSpeed: {
         type: Number,
         required: true,
     },
 
-    conveyorSpeedUnit: {
-        type: Number, // Converted to simple type instead of ref
-        required: true,
-    },
+  conveyorSpeedUnit: {
+    type: Number,
+    enum: [1, 2],
+    required: false,
+  },
 
     conveyorIndex: {
         type: Number,
@@ -44,22 +46,30 @@ const PAF_314Schema = new mongoose.Schema({
 
     appEnviroment: {
         type: Number,
-        enum: [1, 2],
+        enum: [1, 2, 3, 4, 5, 6, 7],
         required: true,
+    },
+
+    otherAppEnviroment: {
+        type: String,
+        required: function () {
+            return this.appEnviroment === 7;
+        },
+
     },
 
     ovenStatus: {
         type: Number,
         enum: [1, 2],
         required: function () {
-            return this.appEnviroment === 1;
+            return this.appEnviroment === 3;
         },
     },
 
     ovenTemp: {
         type: Number,
         required: function () {
-            return this.appEnviroment === 1;
+            return this.appEnviroment === 3;
         },
     },
 
@@ -76,7 +86,7 @@ const PAF_314Schema = new mongoose.Schema({
     },
 
     orientationType: {
-        type: Number, // Converted to simple type instead of ref
+        type: Number, 
         required: true,
     },
 
@@ -96,7 +106,7 @@ const PAF_314Schema = new mongoose.Schema({
     },
 
     airSupplyType: {
-        type: Number, // Converted to simple type instead of ref
+        type: Number, 
         required: true,
     },
 
@@ -161,7 +171,7 @@ const PAF_314Schema = new mongoose.Schema({
     },
 
     zerkLocationType: {
-        type: Number, // Converted to simple type instead of ref
+        type: Number, 
         required: true,
     },
 
@@ -208,7 +218,7 @@ const PAF_314Schema = new mongoose.Schema({
     },
 
     preMountType: {
-        type: Number, // Converted to simple type instead of ref
+        type: Number, 
         required: true,
     },
 
@@ -224,7 +234,7 @@ const PAF_314Schema = new mongoose.Schema({
     },
 
     pfUnitType: {
-        type: Number, // Converted to simple type instead of ref
+        type: Number, 
         required: true,
     },
 

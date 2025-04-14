@@ -5,10 +5,19 @@ const FT_FTL_Schema = new mongoose.Schema({
         type: String,
         required: false,
     },
-    chainSize: {
+        chainSize: {
         type: Number,
+        enum: [1, 2, 3, 4, 5],
         required: false,
         // add enum and check
+    },
+
+    otherChainSize: {
+
+        type: String,
+        required: function () {
+            return this.chainSize === 5;
+        },
     },
     industrialChainManufacturer: {
         type: Number,
@@ -26,41 +35,59 @@ const FT_FTL_Schema = new mongoose.Schema({
         required: false,
     },
     conveyorLengthUnit: {
-        type: Number,
-        required: false,
-    },
+
+    type: Number,
+    enum: [1, 2, 3, 4],
+    required: true,
+
+},
     conveyorSpeed: {
         type: Number,
         required: false,
     },
     conveyorSpeedUnit: {
+
         type: Number,
+        enum: [1, 2],
         required: false,
+
     },
+
     conveyorIndex: {
         type: Number,
         required: false,
     },
     travelDirection: {
+
         type: Number,
+        enum: [1, 2],
         required: false,
+
     },
     appEnviroment: {
         type: Number,
-        enum: [1, 2],
+        enum: [1, 2, 3, 4, 5, 6, 7],
         required: true,
     },
+    otherAppEnviroment: {
+        type: String,
+        required: function () {
+            return this.appEnviroment === 7;
+        },
+
+    },
+
     ovenStatus: {
         type: Number,
         enum: [1, 2],
         required: function () {
-            return this.appEnviroment === 1;
+            return this.appEnviroment === 3;
         },
     },
     ovenTemp: {
         type: Number,
         required: function () {
-            return this.appEnviroment === 1;
+            return this.appEnviroment === 3;
         },
     },
     surroundingTemp: {
@@ -228,6 +255,7 @@ const FT_FTL_Schema = new mongoose.Schema({
     },
     wireMeasurementUnit: {
         type: Number,
+        enum: [1, 2, 3, 4],
         required: false,
     },
     conductor2: {

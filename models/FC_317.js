@@ -1,212 +1,308 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const templateB = require("./templateB.js");
 const FC_317_Schema = new mongoose.Schema({
-    conveyorName: {
-        type: String,
-        required: false,
-    },
-    wheelManufacturer: {
-        type: Number,
-        enum: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-        required: true,
-    },
-    otherWheelManufacturer: {
-        type: String,
-        required: function () {
-            return this.wheelManufacturer === 10;
-        },
-    },
-    conveyorSpeed: {
-        type: Number,
-        required: false,
-    },
-    conveyorSpeedUnit: {
-        type: Number,
-        required: false,
-    },
-    conveyorIndex: {
-        type: Number,
-        required: false,
-    },
-    travelDirection: {
-        type: Number,
-        required: false,
-    },
-    appEnviroment: {
-        type: Number,
-        enum: [1, 2],
-        required: true,
-    },
-    ovenStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: function () {
-            return this.appEnviroment === 1;
-        },
-    },
-    ovenTemp: {
-        type: Number,
-        required: function () {
-            return this.appEnviroment === 1;
-        },
-    },
-    surroundingTemp: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
-    },
-    orientationType: {
-        type: Number,
-        required: false,
-    },
-    evenGuideWheelStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
-    },
-    operatingVoltage: {
-        type: Number,
-        required: false,
-    },
-    monitorData: templateB,
+  conveyorName: {
+    type: String,
+    required: true,
+  },
 
+  industrialChainManufacturer: {
+    type: Number,
+    enum: [1, 2, 3, 4, 5, 6, 7, 8, 9],
+    required: true,
+  },
 
-    
-    carrierWheelStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
+  otherChainManufacturer: {
+    type: String,
+    required: function () {
+      return this.industrialChainManufacturer === 9;
     },
-    kingPinStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
+  },
+
+  wheelManufacturer: {
+    type: Number,
+    enum: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    required: true,
+  },
+
+  otherWheelManufacturer: {
+    type: String,
+    required: function () {
+      return this.wheelManufacturer === 10;
     },
-    freeWheelStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
+  },
+
+  conveyorSpeed: {
+    type: Number,
+    required: true,
+  },
+
+  conveyorSpeedUnit: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },
+
+  conveyorIndex: {
+    type: Number,
+    required: true,
+  },
+
+  travelDirection: {
+    type: Number,
+    enum: [1, 2],
+    required: false,
+  },
+  appEnviroment: {
+    type: Number,
+    enum: [1, 2, 3, 4, 5, 6, 7],
+    required: true,
+  },
+  otherAppEnviroment: {
+    type: String,
+    required: function () {
+      return this.appEnviroment === 7;
     },
-    guideRollerStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
+  },
+
+  ovenStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: function () {
+      return this.appEnviroment === 3;
     },
-    openRaceStyleType: {
-        type: Number,
-        required: false,
+  },
+  ovenTemp: {
+    type: Number,
+    required: function () {
+      return this.appEnviroment === 3;
     },
-    closedRaceStyleType: {
-        type: Number,
-        required: false,
+  },
+  surroundingTemp: {
+    type: Number,
+    enum: [1, 2],
+    required: false,
+  },
+
+  orientationType: {
+    type: Number,
+    enum: [1, 2, 3],
+    required: true,
+  },
+
+  evenGuideWheelStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },
+
+  operatingVoltage: {
+    type: Number,
+    required: true,
+  },
+
+  controlVoltage: {
+    type: Number,
+    required: true,
+  },
+
+  compressedAir: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },
+
+  airSupplyType: {
+    type: Number,
+    enum: [1, 2, 3],
+    required: function () {
+      return this.compressedAir === 1;
     },
-    holeStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
+  },
+
+  monitorData: templateB,
+
+  freeWheelStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: false,
+  },
+  actuatorStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },
+  kingPinStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },
+  guideRollerStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: false,
+  },
+  openRaceStyleType: {
+    type: Number,
+    enum: [1, 2, 3],
+    required: false,
+  },
+  closedRaceStyleType: {
+    type: Number,
+    enum: [1, 2, 3],
+    required: false,
+  },
+  holeStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: false,
+  },
+  lubeBrand: {
+    type: String,
+    required: true,
+  },
+  lubeType: {
+    type: String,
+    required: true,
+  },
+
+  currentLubeGrade: {
+    type: String,
+    required: false,
+  },
+
+  currentGrease: {
+    type: String,
+    required: true,
+  },
+  currentGreaseGrade: {
+    type: Number,
+    required: true,
+  },
+  zerkDirection: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },
+  zerkLocationType: {
+    type: Number,
+    enum: [1, 2, 3, 4, 5],
+    required: true,
+  },
+
+  wheelDiameter: {
+    type: Number,
+    required: true,
+  },
+
+  conveyorSwing: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },
+
+  chainMaster: {
+    type: Number,
+    enum: [1, 2],
+    required: function () {
+      return this.lubeBrand && this.lubeBrand.toLowerCase() === "mighty lube";
     },
-    lubeBrand: {
-        type: String,
-        required: false,
+  },
+  remoteStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: function () {
+      return this.lubeBrand && this.lubeBrand.toLowerCase() === "mighty lube";
     },
-    lubeType: {
-        type: String,
-        required: false,
+  },
+  mountStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: function () {
+      return this.lubeBrand && this.lubeBrand.toLowerCase() === "mighty lube";
     },
-    currentGrease: {
-        type: String,
-        required: false,
+  },
+  otherUnitStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: function () {
+      return this.lubeBrand && this.lubeBrand.toLowerCase() === "mighty lube";
     },
-    currentGreaseGrade: {
-        type: Number,
-        required: false,
+  },
+  timerStatus: {
+    type: Number,
+    enum: [1, 2, 3],
+    required: function () {
+      return this.lubeBrand && this.lubeBrand.toLowerCase() === "mighty lube";
     },
-    currentOil: {
-        type: String,
-        required: false,
+  },
+  electricStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: function () {
+      return this.lubeBrand && this.lubeBrand.toLowerCase() === "mighty lube";
     },
-    oilViscosity: {
-        type: String,
-        required: false,
+  },
+  mightyLubeMonitoring: {
+    type: Number,
+    enum: [1, 2],
+    required: function () {
+      return this.lubeBrand && this.lubeBrand.toLowerCase() === "mighty lube";
     },
-    zerkDirection: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
+  },
+  preMountType: {
+    type: Number,
+    enum: [1, 2, 3],
+    required: function () {
+      return this.lubeBrand && this.lubeBrand.toLowerCase() === "mighty lube";
     },
-    zerkLocationType: {
-        type: Number,
-        required: false,
+  },
+
+  otherPreMountType: {
+    type: String,
+    required: function () {
+      return this.preMountType === 3;
     },
-    chainMaster: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
+  },
+
+  plcConnection: {
+    type: Number,
+    enum: [1, 2],
+    required: function () {
+      return this.lubeBrand && this.lubeBrand.toLowerCase() === "mighty lube";
     },
-    remoteStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
+  },
+  otherControllerInfo: {
+    type: String,
+    required: function () {
+      return this.lubeBrand && this.lubeBrand.toLowerCase() === "mighty lube";
     },
-    mountStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
-    },
-    otherUnitStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
-    },
-    timerStatus: {
-        type: Number,
-        enum: [1, 2, 3],
-        required: false,
-    },
-    electricStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
-    },
-    mightyLubeMonitoring: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
-    },
-    preMountType: {
-        type: Number,
-        required: false,
-    },
-    plcConnection: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
-    },
-    otherControllerInfo: {
-        type: String,
-        required: false,
-    },
-    fcUnitType: {
-        type: Number,
-        required: false,
-    },
-    fcGreaserE: {
-        type: Number,
-        required: false,
-    },
-    fcGreaserF: {
-        type: Number,
-        required: false,
-    },
-    fcGreaserG: {
-        type: Number,
-        required: false,
-    },
-    fcGreaserH: {
-        type: Number,
-        required: false,
-    },
+  },
+
+  fcUnitType: {
+    type: Number,
+    enum: [1, 2, 3, 4],
+    required: false,
+  },
+
+  fcGreaserE: {
+    type: Number,
+    required: false,
+  },
+  fcGreaserF: {
+    type: Number,
+    required: false,
+  },
+  fcGreaserG: {
+    type: Number,
+    required: false,
+  },
+  fcGreaserH: {
+    type: Number,
+    required: false,
+  },
 });
 
-const FC_317 = mongoose.models.FC_317 || mongoose.model('FC_317', FC_317_Schema);
+const FC_317 =
+  mongoose.models.FC_317 || mongoose.model("FC_317", FC_317_Schema);
 module.exports = FC_317;

@@ -37,10 +37,11 @@ const PAF_OP8Schema = new mongoose.Schema({
         required: true,
     },
 
-    conveyorLengthUnit: {
-        type: Number, // Converted to simple type instead of ref
-        required: true,
-    },
+  conveyorLengthUnit: {
+    type: Number,
+    enum: [1, 2, 3, 4],
+    required: false,
+  },
 
     travelDirection: {
         type: Number,
@@ -50,22 +51,30 @@ const PAF_OP8Schema = new mongoose.Schema({
 
     appEnviroment: {
         type: Number,
-        enum: [1, 2],
+        enum: [1, 2, 3, 4, 5, 6, 7],
         required: true,
+    },
+
+    otherAppEnviroment: {
+        type: String,
+        required: function () {
+            return this.appEnviroment === 7;
+        },
+
     },
 
     ovenStatus: {
         type: Number,
         enum: [1, 2],
         required: function () {
-            return this.appEnviroment === 1;
+            return this.appEnviroment === 3;
         },
     },
 
     ovenTemp: {
         type: Number,
         required: function () {
-            return this.appEnviroment === 1;
+            return this.appEnviroment === 3;
         },
     },
 
@@ -75,7 +84,7 @@ const PAF_OP8Schema = new mongoose.Schema({
     
 
     orientationType: {
-        type: Number, // Converted to simple type instead of ref
+        type: Number, 
         required: true,
     },
 
@@ -96,7 +105,7 @@ const PAF_OP8Schema = new mongoose.Schema({
     },
 
     brushMaterialType: {
-        type: Number, // Converted to simple type instead of ref
+        type: Number, 
         required: true,
     },
 
@@ -119,17 +128,17 @@ const PAF_OP8Schema = new mongoose.Schema({
     },
 
     powerPanelType: {
-        type: Number, // Converted to simple type instead of ref
+        type: Number, 
         required: true,
     },
 
     threeStationType: {
-        type: Number, // Converted to simple type instead of ref
+        type: Number, 
         required: true,
     },
 
     shroudType: {
-        type: Number, // Converted to simple type instead of ref
+        type: Number, 
         required: true,
     },
 
@@ -139,7 +148,7 @@ const PAF_OP8Schema = new mongoose.Schema({
     },
 
     pfUnitType: {
-        type: Number, // Converted to simple type instead of ref
+        type: Number, 
         required: true,
     },
 
