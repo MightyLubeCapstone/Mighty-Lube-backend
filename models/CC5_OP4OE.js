@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
-const templateB = require("./templateB.js");const uuid = require("uuid");
-const templateB = require("./templateB.js")
+const templateB = require("./templateB.js");
+const uuid = require("uuid");
+const getDecodedInfo = require("./getDecodedInfo.js");  
+
 
 
 const CC5_OP4OE_Schema = new mongoose.Schema({
@@ -21,14 +23,14 @@ const CC5_OP4OE_Schema = new mongoose.Schema({
 
     },
 
-    otherChainSize: {
+    // otherChainSize: {
 
-        type: String,
-        required: function ()
-        {
-            return this.cc5ChainSize === 8;
-        }
-    },
+    //     type: String,
+    //     required: function ()
+    //     {
+    //         return this.cc5ChainSize === 8;
+    //     }
+    // },
 
     industrialChainManufacturer: {
 
@@ -38,15 +40,15 @@ const CC5_OP4OE_Schema = new mongoose.Schema({
 
     },
 
-    otherChainManufacturer: {
+    // otherChainManufacturer: {
 
-        type: String,
-        required: function ()
-        {
-            return this.industrialChainManufacturer === 9;
-        }
+    //     type: String,
+    //     required: function ()
+    //     {
+    //         return this.industrialChainManufacturer === 9;
+    //     }
 
-    },
+    // },
 
     conveyorLength: {
 
@@ -101,29 +103,29 @@ const CC5_OP4OE_Schema = new mongoose.Schema({
     appEnviroment: {
 
         type: Number,
-        enum: [1, 2],
+        enum: [1, 2, 3, 4, 5, 6, 7],
         required: true,
 
     },
 
     //This says that if they enter yes (or 1/true) then we require these two fields to be entered too. 
     //If it's no/0 then we pretend that these don't even exist
-    ovenStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: function ()
-        {
-            return this.appEnviroment === 1;
-        }
-    },
+    // ovenStatus: {
+    //     type: Number,
+    //     enum: [1, 2],
+    //     required: function ()
+    //     {
+    //         return this.appEnviroment === 1;
+    //     }
+    // },
 
-    ovenTemp: {
-        type: Number,
-        required: function ()
-        {
-            return this.appEnviroment === 1;
-        }
-    },
+    // ovenTemp: {
+    //     type: Number,
+    //     required: function ()
+    //     {
+    //         return this.appEnviroment === 1;
+    //     }
+    // },
 
     surroundingTemp: {
 
@@ -168,7 +170,22 @@ const CC5_OP4OE_Schema = new mongoose.Schema({
     },
 
     // MonSys
-    monitorData: templateB,
+    existingMonitor: {
+
+        type: Number,
+        enum: [1, 2],
+        required: false,
+
+    },
+
+    // newMonitor: {
+    //     type: Number,
+    //     enum: [1, 2],
+    //     required: true,
+    
+    // },
+   // monitorData: templateB,
+
 
 
     

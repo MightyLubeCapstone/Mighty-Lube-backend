@@ -7,12 +7,12 @@ const OHP_PMMSchema = new mongoose.Schema({
         required: true,
     },
 
-    otherChainSize: {
-        type: String,
-        required: function () {
-            return this.chainSize === 8;
-        },
-    },
+    // otherChainSize: {
+    //     type: String,
+    //     required: function () {
+    //         return this.chainSize === 8;
+    //     },
+    // },
 
     industrialChainManufacturer: {
         type: Number,
@@ -20,14 +20,29 @@ const OHP_PMMSchema = new mongoose.Schema({
         required: true,
     },
 
-    otherChainManufacturer: {
-        type: String,
-        required: function () {
-            return this.industrialChainManufacturer === 9;
-        },
+    // otherChainManufacturer: {
+    //     type: String,
+    //     required: function () {
+    //         return this.industrialChainManufacturer === 9;
+    //     },
+    // },
+
+    existingMonitor: {
+
+        type: Number,
+        enum: [1, 2],
+        required: false,
+
     },
 
-    monitorData: templateB,
+    newMonitor: {
+        type: Number,
+        enum: [1, 2],
+        required: false,
+    
+    },
+   // monitorData: templateB,
+
 
 
 

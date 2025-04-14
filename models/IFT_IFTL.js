@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 const templateB = require("./templateB.js");
+const getDecodedInfo = require("./getDecodedInfo.js");  
+
 const IFT_IFTL_Schema = new mongoose.Schema({
     conveyorName: {
         type: String,
@@ -7,6 +9,7 @@ const IFT_IFTL_Schema = new mongoose.Schema({
     },
     chainSize: {
         type: Number,
+        enum: [1, 2, 3, 4, 5],
         required: false,
     },
     // add enum and check
@@ -15,15 +18,18 @@ const IFT_IFTL_Schema = new mongoose.Schema({
         enum: [1, 2, 3, 4, 5, 6, 7, 8, 9],
         required: false,
     },
-    otherChainManufacturer: {
-        type: String,
-        required: function () {
-            return this.industrialChainManufacturer === 9;
-        },
-    },
+    // otherChainManufacturer: {
+    //     type: String,
+    //     required: function () {
+    //         return this.industrialChainManufacturer === 9;
+    //     },
+    // },
     speedUnit: {
+
         type: Number,
+        enum: [1, 2],
         required: false,
+
     },
     conveyorIndex: {
         type: Number,
@@ -35,24 +41,41 @@ const IFT_IFTL_Schema = new mongoose.Schema({
         required: false,
     },
     appEnviroment: {
+
         type: Number,
-        enum: [1, 2],
+        enum: [1, 2, 3, 4, 5, 6, 7],
         required: true,
+
     },
-    ovenStatus: {
+    // ovenStatus: {
+    //     type: Number,
+    //     enum: [1, 2],
+    //     required: function () {
+    //         return this.appEnviroment === 1;
+    //     },
+    // },
+    // ovenTemp: {
+    //     type: Number,
+    //     required: function () {
+    //         return this.appEnviroment === 1;
+    //     },
+    // },
+    existingMonitor: {
+
         type: Number,
         enum: [1, 2],
-        required: function () {
-            return this.appEnviroment === 1;
-        },
+        required: false,
+
     },
-    ovenTemp: {
+
+    newMonitor: {
         type: Number,
-        required: function () {
-            return this.appEnviroment === 1;
-        },
+        enum: [1, 2],
+        required: false,
+    
     },
-    monitorData: templateB,
+   // monitorData: templateB,
+
 
 
     

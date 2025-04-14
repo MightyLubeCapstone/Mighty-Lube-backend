@@ -13,12 +13,12 @@ const PAF_PMM_Schema = new mongoose.Schema({
         required: true,
     },
 
-    otherChainSize: {
-        type: String,
-        required: function () {
-            return this.chainSize === 8;
-        },
-    },
+    // otherChainSize: {
+    //     type: String,
+    //     required: function () {
+    //         return this.chainSize === 8;
+    //     },
+    // },
 
     orientationType: {
         type: Number,

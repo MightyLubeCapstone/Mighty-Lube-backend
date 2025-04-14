@@ -1,4 +1,6 @@
 const mongoose = require('mongoose');
+const getDecodedInfo = require("./getDecodedInfo.js");  
+
 
 const FGCOSchema = new mongoose.Schema({
 
@@ -17,12 +19,12 @@ const FGCOSchema = new mongoose.Schema({
 
     },
 
-    otherChainSize: {
-        type: String,
-        required: function () {
-            return this.chainSize === 5;
-        },
-    },
+    // otherChainSize: {
+    //     type: String,
+    //     required: function () {
+    //         return this.chainSize === 5;
+    //     },
+    // },
 
     chainManufacturer: {
 
@@ -32,12 +34,12 @@ const FGCOSchema = new mongoose.Schema({
 
     },
 
-    otherChainManufacturer: {
-        type: String,
-        required: function () {
-            return this.chainManufacturer === 10;
-        },
-    },
+    // otherChainManufacturer: {
+    //     type: String,
+    //     required: function () {
+    //         return this.chainManufacturer === 10;
+    //     },
+    // },
 
     conveyorLoaded: {
 

@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 const templateB = require("./templateB.js");
+const getDecodedInfo = require("./getDecodedInfo.js");  
+
 const FRO_314_Schema = new mongoose.Schema({
     conveyorName: {
         type: String,
@@ -10,19 +12,22 @@ const FRO_314_Schema = new mongoose.Schema({
         enum: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
         required: false,
     },
-    otherWheelManufacturer: {
-        type: String,
-        required: function () {
-            return this.wheelManufacturer === 10;
-        },
-    },
+    // otherWheelManufacturer: {
+    //     type: String,
+    //     required: function () {
+    //         return this.wheelManufacturer === 10;
+    //     },
+    // },
     conveyorLength: {
         type: Number,
         required: false,
     },
     conveyorLengthUnit: {
+
         type: Number,
+        enum: [1, 2, 3, 4],
         required: false,
+
     },
     conveyorSpeed: {
         type: Number,
@@ -39,23 +44,25 @@ const FRO_314_Schema = new mongoose.Schema({
         required: false,
     },
     appEnviroment: {
+
         type: Number,
-        enum: [1, 2],
+        enum: [1, 2, 3, 4, 5, 6, 7],
         required: true,
+
     },
-    ovenStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: function () {
-            return this.appEnviroment === 1;
-        },
-    },
-    ovenTemp: {
-        type: Number,
-        required: function () {
-            return this.appEnviroment === 1;
-        },
-    },
+    // ovenStatus: {
+    //     type: Number,
+    //     enum: [1, 2],
+    //     required: function () {
+    //         return this.appEnviroment === 1;
+    //     },
+    // },
+    // ovenTemp: {
+    //     type: Number,
+    //     required: function () {
+    //         return this.appEnviroment === 1;
+    //     },
+    // },
     surroundingTemp: {
         type: Number,
         enum: [1, 2],
@@ -86,7 +93,22 @@ const FRO_314_Schema = new mongoose.Schema({
         type: Number,
         required: false,
     },
-    monitorData: templateB,
+    existingMonitor: {
+
+        type: Number,
+        enum: [1, 2],
+        required: false,
+
+    },
+
+    newMonitor: {
+        type: Number,
+        enum: [1, 2],
+        required: false,
+    
+    },
+   // monitorData: templateB,
+
 
 
     

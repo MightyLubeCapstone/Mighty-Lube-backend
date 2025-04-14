@@ -6,7 +6,7 @@ const templateB = new mongoose.Schema({
 
         type: Number,
         enum: [1, 2],
-        required: true,
+        required: false,
 
     },
 

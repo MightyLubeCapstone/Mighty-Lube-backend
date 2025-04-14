@@ -1,66 +1,79 @@
 const mongoose = require('mongoose');
 const templateB = require("./templateB.js");
+const getDecodedInfo = require("./getDecodedInfo.js");  
+
 
 
 const ETI_OP48E_Schema = new mongoose.Schema({
     chainSize: {
         type: Number,
+        enum: [1, 2, 3, 4, 5],
         required: false,
-        // add enum and check
     },
     industrialChainManufacturer: {
         type: Number,
         enum: [1, 2, 3, 4, 5, 6, 7, 8, 9],
         required: true,
     },
-    otherIndustrialChainManufacturer: {
-        type: String,
-        required: function () {
-            return this.industrialChainManufacturer === 9;
-        },
-    },
+    // otherIndustrialChainManufacturer: {
+    //     type: String,
+    //     required: function () {
+    //         return this.industrialChainManufacturer === 9;
+    //     },
+    // },
     conveyorLength: {
         type: Number,
         required: false,
     },
     conveyorLengthUnit: {
+
         type: Number,
+        enum: [1, 2, 3, 4],
         required: false,
+
     },
     conveyorSpeed: {
         type: Number,
         required: false,
     },
     conveyorSpeedUnit: {
+
         type: Number,
+        enum: [1, 2],
         required: false,
+
     },
     conveyorIndex: {
         type: Number,
         required: false,
     },
     travelDirection: {
+
         type: Number,
+        enum: [1, 2],
         required: false,
+
     },
     appEnviroment: {
+
         type: Number,
-        enum: [1, 2],
+        enum: [1, 2, 3, 4, 5, 6, 7],
         required: true,
+
     },
-    ovenStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: function () {
-            return this.appEnviroment === 1;
-        },
-    },
-    ovenTemp: {
-        type: Number,
-        required: function () {
-            return this.appEnviroment === 1;
-        },
-    },
+    // ovenStatus: {
+    //     type: Number,
+    //     enum: [1, 2],
+    //     required: function () {
+    //         return this.appEnviroment === 1;
+    //     },
+    // },
+    // ovenTemp: {
+    //     type: Number,
+    //     required: function () {
+    //         return this.appEnviroment === 1;
+    //     },
+    // },
     surroundingTemp: {
         type: Number,
         enum: [1, 2],
@@ -80,7 +93,23 @@ const ETI_OP48E_Schema = new mongoose.Schema({
         type: Number,
         required: false,
     },
-    monitorData: templateB,
+    
+    existingMonitor: {
+
+        type: Number,
+        enum: [1, 2],
+        required: false,
+
+    },
+
+    newMonitor: {
+        type: Number,
+        enum: [1, 2],
+        required: false,
+    
+    },
+   // monitorData: templateB,
+
 
 
     

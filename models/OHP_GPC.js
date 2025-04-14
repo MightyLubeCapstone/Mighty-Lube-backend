@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 const templateB = require("./templateB.js");
+const getDecodedInfo = require("./getDecodedInfo.js");  
+
 const OHP_GPCSchema = new mongoose.Schema({
     conveyorName: {
         type: String,
@@ -12,12 +14,12 @@ const OHP_GPCSchema = new mongoose.Schema({
         required: true,
     },
 
-    otherChainSize: {
-        type: String,
-        required: function () {
-            return this.chainSize === 8;
-        },
-    },
+    // otherChainSize: {
+    //     type: String,
+    //     required: function () {
+    //         return this.chainSize === 8;
+    //     },
+    // },
 
     industrialChainManufacturer: {
         type: Number,
@@ -25,12 +27,12 @@ const OHP_GPCSchema = new mongoose.Schema({
         required: true,
     },
 
-    otherChainManufacturer: {
-        type: String,
-        required: function () {
-            return this.industrialChainManufacturer === 9;
-        },
-    },
+    // otherChainManufacturer: {
+    //     type: String,
+    //     required: function () {
+    //         return this.industrialChainManufacturer === 9;
+    //     },
+    // },
 
     wheelManufacturer: {
         type: Number,
@@ -38,12 +40,12 @@ const OHP_GPCSchema = new mongoose.Schema({
         required: true,
     },
 
-    otherWheelManufacturer: {
-        type: String,
-        required: function () {
-            return this.wheelManufacturer === 10;
-        },
-    },
+    // otherWheelManufacturer: {
+    //     type: String,
+    //     required: function () {
+    //         return this.wheelManufacturer === 10;
+    //     },
+    // },
 
     conveyorLength: {
         type: Number,
@@ -51,8 +53,11 @@ const OHP_GPCSchema = new mongoose.Schema({
     },
 
     conveyorLengthUnit: {
-        type: Number, // Converted to simple type instead of ref
+
+        type: Number,
+        enum: [1, 2, 3, 4],
         required: true,
+
     },
 
     conveyorSpeed: {
@@ -61,8 +66,12 @@ const OHP_GPCSchema = new mongoose.Schema({
     },
 
     conveyorSpeedUnit: {
-        type: Number, // Converted to simple type instead of ref
+
+        type: Number,
+        enum: [1, 2],
         required: true,
+        // add RegEx matching to this :D
+
     },
 
     conveyorIndex: {
@@ -77,25 +86,27 @@ const OHP_GPCSchema = new mongoose.Schema({
     },
 
     appEnviroment: {
+
         type: Number,
-        enum: [1, 2],
+        enum: [1, 2, 3, 4, 5, 6, 7],
         required: true,
+
     },
 
-    ovenStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: function () {
-            return this.appEnviroment === 1;
-        },
-    },
+    // ovenStatus: {
+    //     type: Number,
+    //     enum: [1, 2],
+    //     required: function () {
+    //         return this.appEnviroment === 1;
+    //     },
+    // },
 
-    ovenTemp: {
-        type: Number,
-        required: function () {
-            return this.appEnviroment === 1;
-        },
-    },
+    // ovenTemp: {
+    //     type: Number,
+    //     required: function () {
+    //         return this.appEnviroment === 1;
+    //     },
+    // },
 
     surroundingTemp: {
         type: Number,
@@ -125,7 +136,22 @@ const OHP_GPCSchema = new mongoose.Schema({
         required: true,
     },
 
-    monitorData: templateB,
+    existingMonitor: {
+
+        type: Number,
+        enum: [1, 2],
+        required: false,
+
+    },
+
+    newMonitor: {
+        type: Number,
+        enum: [1, 2],
+        required: false,
+    
+    },
+   // monitorData: templateB,
+
 
 
     
