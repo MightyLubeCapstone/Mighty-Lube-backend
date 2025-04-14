@@ -13,12 +13,12 @@ const OHP_OP8NPSchema = new mongoose.Schema({
         required: true,
     },
 
-    otherChainSize: {
-        type: String,
-        required: function () {
-            return this.chainSize === 8;
-        },
-    },
+    // otherChainSize: {
+    //     type: String,
+    //     required: function () {
+    //         return this.chainSize === 8;
+    //     },
+    // },
 
     industrialChainManufacturer: {
         type: Number,
@@ -26,12 +26,12 @@ const OHP_OP8NPSchema = new mongoose.Schema({
         required: true,
     },
 
-    otherChainManufacturer: {
-        type: String,
-        required: function () {
-            return this.industrialChainManufacturer === 9;
-        },
-    },
+    // otherChainManufacturer: {
+    //     type: String,
+    //     required: function () {
+    //         return this.industrialChainManufacturer === 9;
+    //     },
+    // },
 
     conveyorLength: {
         type: Number,
@@ -39,14 +39,19 @@ const OHP_OP8NPSchema = new mongoose.Schema({
     },
 
     measurementUnit: {
+
         type: Number,
+        enum: [1, 2, 3, 4],
         required: true,
+
     },
 
     appEnviroment: {
+
         type: Number,
-        enum: [1, 2],
+        enum: [1, 2, 3, 4, 5, 6, 7],
         required: true,
+
     },
 
     // Required if appEnviroment === 1
