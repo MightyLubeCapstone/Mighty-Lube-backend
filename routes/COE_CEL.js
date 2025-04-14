@@ -33,7 +33,7 @@ router.post("/", authenticate, async (req, res) => {
             operatingVoltage: COE_CELData.operatingVoltage,
             monitorData: new templateB({
                 existingMonitor: COE_CELData.templateB.existingMonitor,
-                newMonitor: COE_CELData.templateB.newMonitor,
+                //newMonitor: COE_CELData.templateB.newMonitor,
                 ...(COE_CELData.templateB.dcuStatus && { dcuStatus: COE_CELData.templateB.dcuStatus }),
                 ...(COE_CELData.templateB.dcuNum && { dcuNum: COE_CELData.templateB.dcuNum }),
                 ...(COE_CELData.templateB.existingWindows && { existingWindows: COE_CELData.templateB.existingWindows }),
@@ -94,7 +94,7 @@ router.post("/", authenticate, async (req, res) => {
             ...(COE_CELData.wheelOpenType && { wheelOpenType: COE_CELData.wheelOpenType }),
             ...(COE_CELData.wheelClosedType && { wheelClosedType: COE_CELData.wheelClosedType }),
             ...(COE_CELData.openStatus && { openStatus: COE_CELData.openStatus }),
-            catDriveStatus: COE_CELData.catDriveStatus,
+            //catDriveStatus: COE_CELData.catDriveStatus,
 
             // TODO: Implement template C when updated on frontend
 

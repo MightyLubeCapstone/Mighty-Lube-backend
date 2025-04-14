@@ -32,7 +32,7 @@ router.post("/", authenticate, async (req, res) => {
             operatingVoltage: CC5_CLData.operatingVoltage,
             monitorData: new templateB({
                 existingMonitor: CC5_CLData.templateB.existingMonitor,
-                newMonitor: CC5_CLData.templateB.newMonitor,
+                //newMonitor: CC5_CLData.templateB.newMonitor,
                 ...(CC5_CLData.templateB.dcuStatus && { dcuStatus: CC5_CLData.templateB.dcuStatus }),
                 ...(CC5_CLData.templateB.dcuNum && { dcuNum: CC5_CLData.templateB.dcuNum }),
                 ...(CC5_CLData.templateB.existingWindows && { existingWindows: CC5_CLData.templateB.existingWindows }),
