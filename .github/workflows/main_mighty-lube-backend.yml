@@ -21,6 +21,9 @@ jobs:
         chmod 600 ~/.ssh/id_ed25519
         ssh-keyscan -H ${{ secrets.GCP_VM_HOST }} >> ~/.ssh/known_hosts
 
+    - name: TEST
+      run: ssh ${{ secrets.GCP_VM_USER }}@${{ secrets.GCP_VM_HOST }} "echo Hello from VM"
+      
     - name: Deploy to VM
       run: |
         ssh ${{ secrets.GCP_VM_USER }}@${{ secrets.GCP_VM_HOST }} << 'EOF'
