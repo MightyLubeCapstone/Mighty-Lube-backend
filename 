@@ -1,0 +1,1600 @@
+[1mdiff --git a/config/config.js b/config/config.js[m
+[1mindex e128132..76c2b37 100644[m
+[1m--- a/config/config.js[m
+[1m+++ b/config/config.js[m
+[36m@@ -5,8 +5,14 @@[m [mconfigDotenv();[m
+ async function dbConnect() {[m
+ 	//  connect using the URI[m
+ 	if (mongoose.connection.readyState === 0) {[m
+[31m-		await mongoose.connect(process.env.MONGODB_URI);[m
+[31m-		console.log("Connected to MongoDB");[m
+[32m+[m		[32mif (process.env.PRODUCTION == 1) {[m
+[32m+[m			[32mawait mongoose.connect(process.env.MONGODB_URI);[m
+[32m+[m			[32mconsole.log("Connected to MongoDB");[m
+[32m+[m		[32m}[m
+[32m+[m		[32melse {[m
+[32m+[m			[32mawait mongoose.connect(process.env.MONGODB_LOCAL_URI);[m
+[32m+[m			[32mconsole.log("Connected to MongoDB locally");[m
+[32m+[m		[32m}[m
+ 	}[m
+ }[m
+ [m
+[1mdiff --git a/models/CC5_CL.js b/models/CC5_CL.js[m
+[1mindex f958648..ef6f85e 100644[m
+[1m--- a/models/CC5_CL.js[m
+[1m+++ b/models/CC5_CL.js[m
+[36m@@ -1,320 +1,244 @@[m
+[31m-const mongoose = require('mongoose');[m
+[32m+[m[32mconst mongoose = require("mongoose");[m
+ const templateB = require("./templateB.js");[m
+[31m-const uuid = require("uuid");[m
+[31m-const getDecodedInfo = require("./getDecodedInfo.js");  [m
+[31m-[m
+[31m-[m
+ [m
+ const CC5_CLSchema = new mongoose.Schema({[m
+[31m-[m
+[31m-[m
+[31m-    conveyorName: {[m
+[31m-[m
+[31m-        type: String,[m
+[31m-        required: true,[m
+[31m-    },[m
+[31m-[m
+[31m-[m
+[31m-    cc5ChainSize: {[m
+[31m-[m
+[31m-        type: Number,[m
+[31m-        enum: [1, 2, 3, 4, 5, 6, 7, 8],[m
+[31m-        required: true,[m
+[31m-[m
+[31m-    },[m
+[31m-[m
+[31m-    // otherChainSize: {[m
+[31m-[m
+[31m-    //     type: String,[m
+[31m-    //     required: function ()[m
+[31m-    //     {[m
+[31m-    //         return this.cc5ChainSize === 8;[m
+[31m-    //     }[m
+[31m-    // },[m
+[31m-[m
+[31m-    industrialChainManufacturer: {[m
+[31m-[m
+[31m-        type: Number,[m
+[31m-        enum: [1, 2, 3, 4, 5, 6, 7, 8, 9],[m
+[31m-        required: true,[m
+[31m-[m
+[31m-    },[m
+[31m-[m
+[31m-    // otherChainManufacturer: {[m
+[31m-[m
+[31m-    //     type: String,[m
+[31m-    //     required: function ()[m
+[31m-    //     {[m
+[31m-    //         return this.industrialChainManufacturer === 9;[m
+[31m-    //     }[m
+[31m-[m
+[31m-    // },[m
+[31m-[m
+[31m-    conveyorLength: {[m
+[31m-[m
+[31m-        type: Number,[m
+[31m-        required: false,[m
+[31m-[m
+[31m-    },[m
+[31m-[m
+[31m-    conveyorLengthUnit: {[m
+[31m-[m
+[31m-        type: Number,[m
+[31m-        enum: [1, 2, 3, 4],[m
+[31m-        required: false,[m
+[31m-[m
+[31m-    },[m
+[31m-[m
+[31m-    conveyorSpeed: {[m
+[31m-[m
+[31m-        type: String,[m
+[31m-        required: false,[m
+[31m-        // add RegEx matching to this :D[m
+[31m-[m
+[31m-    },[m
+[31m-    [m
+[31m-    conveyorSpeedUnit: {[m
+[31m-[m
+[31m-        type: Number,[m
+[31m-        enum: [1, 2],[m
+[31m-        required: false,[m
+[31m-        // add RegEx matching to this :D[m
+[31m-[m
+[31m-    },[m
+[31m-[m
+[31m-    conveyorIndex: {[m
+[31m-[m
+[31m-        type: String,[m
+[31m-        required: false,[m
+[31m-        // add RegEx matching to this :D[m
+[31m-[m
+[31m-    },[m
+[31m-[m
+[31m-    travelDirection: {[m
+[31m-[m
+[31m-        type: Number,[m
+[31m-        enum: [1, 2],[m
+[31m-        required: false,[m
+[31m-        // add RegEx matching to this :D[m
+[31m-[m
+[31m-    },[m
+[31m-[m
+[31m-    appEnviroment: {[m
+[31m-[m
+[31m-        type: Number,[m
+[31m-        enum: [1, 2, 3, 4, 5, 6, 7],[m
+[31m-        required: true,[m
+[31m-[m
+[31m-    },[m
+[31m-[m
+[31m-    //This says that if they enter yes (or 1/true) then we require these two fields to be entered too. [m
+[31m-    //If it's no/0 then we pretend that these don't even exist[m
+[31m-[m
+[31m-    // ovenStatus: {[m
+[31m-    //     type: Number,[m
+[31m-    //     enum: [1, 2],[m
+[31m-    //     required: function ()[m
+[31m-    //     {[m
+[31m-    //         return this.appEnviroment === 1;[m
+[31m-    //     }[m
+[31m-    // },[m
+[31m-[m
+[31m-    // ovenTemp: {[m
+[31m-    //     type: Number,[m
+[31m-    //     required: function ()[m
+[31m-    //     {[m
+[31m-    //         return this.appEnviroment === 1;[m
+[31m-    //     }[m
+[31m-    // },[m
+[31m-[m
+[31m-    surroundingTemp: {[m
+[31m-[m
+[31m-        type: Number,[m
+[31m-        enum: [1, 2],[m
+[31m-        required: false,[m
+[31m-        // add RegEx matching to this :D[m
+[31m-[m
+[31m-    },[m
+[31m-[m
+[31m-    strandStatus: {[m
+[31m-        [m
+[31m-        type: Number,[m
+[31m-        enum: [1, 2],[m
+[31m-        required: true,[m
+[31m-[m
+[31m-    },[m
+[31m-[m
+[31m-    plantLayout: {[m
+[31m-[m
+[31m-        type: Number,[m
+[31m-        enum: [1, 2],[m
+[31m-        required: false,[m
+[31m-        // add RegEx matching to this :D[m
+[31m-[m
+[31m-    },[m
+[31m-[m
+[31m-    requiredPics: {[m
+[31m-[m
+[31m-        type: Number,[m
+[31m-        enum: [1, 2],[m
+[31m-        required: false,[m
+[31m-        // add RegEx matching to this :D[m
+[31m-[m
+[31m-    },[m
+[31m-[m
+[31m-    operatingVoltage: {[m
+[31m-[m
+[31m-        type: String,[m
+[31m-        required: true,[m
+[31m-[m
+[31m-    },[m
+[31m-[m
+[31m-[m
+[31m-    // MonSys[m
+[31m-    existingMonitor: {[m
+[31m-[m
+[31m-        type: Number,[m
+[31m-        enum: [1, 2],[m
+[31m-        required: false,[m
+[31m-[m
+[31m-    },[m
+[31m-[m
+[31m-    // newMonitor: {[m
+[31m-    //     type: Number,[m
+[31m-    //     enum: [1, 2],[m
+[31m-    //     required: true,[m
+[31m-    [m
+[31m-    // },[m
+[31m-   // monitorData: templateB,[m
+[31m-[m
+[31m-[m
+[31m-[m
+[31m-[m
+[31m-    highRollerStatus: {[m
+[31m-[m
+[31m-        type: Number,[m
+[31m-        enum: [1, 2],[m
+[31m-        required: true,[m
+[31m-[m
+[31m-    },[m
+[31m-[m
+[31m-    outboardStatus: {[m
+[31m-[m
+[31m-        type: Number,[m
+[31m-        enum: [1, 2],[m
+[31m-        required: true,[m
+[31m-[m
+[31m-    },[m
+[31m-[m
+[31m-    lubeBrand: {[m
+[31m-[m
+[31m-        type: String,[m
+[31m-        required: false,[m
+[31m-[m
+[31m-    },[m
+[31m-[m
+[31m-    lubeType: {[m
+[31m-[m
+[31m-        type: String,[m
+[31m-        required: false,[m
+[31m-[m
+[31m-    },[m
+[31m-[m
+[31m-    lubeViscosity: {[m
+[31m-[m
+[31m-        type: String,[m
+[31m-        required: false,[m
+[31m-[m
+[31m-    },[m
+[31m-[m
+[31m-[m
+[31m-    cleanChain: {[m
+[31m-[m
+[31m-        type: Number,[m
+[31m-        enum: [1, 2],[m
+[31m-        required: false,[m
+[31m-[m
+[31m-    },[m
+[31m-[m
+[31m-    wireMeasurementUnit: {[m
+[31m-        type: Number,[m
+[31m-        enum: [1, 2, 3, 4],[m
+[31m-        required: false,[m
+[31m-    },[m
+[31m-[m
+[31m-    conductor2: {[m
+[31m-        type: Number,[m
+[31m-        required: false,[m
+[31m-    },[m
+[31m-[m
+[31m-    conductor4: {[m
+[31m-        type: Number,[m
+[31m-        required: false,[m
+[31m-    },[m
+[31m-[m
+[31m-    conductor7: {[m
+[31m-        type: Number,[m
+[31m-        required: false,[m
+[31m-    },[m
+[31m-[m
+[31m-    conductor12: {[m
+[31m-        type: Number,[m
+[31m-        required: false,[m
+[31m-    },[m
+[31m-[m
+[31m-    junctionBoxNum: {[m
+[31m-        type: Number,[m
+[31m-        required: false,[m
+[31m-    },[m
+[31m-[m
+[31m-    cc5UnitType: {[m
+[31m-        type: Number,[m
+[31m-        enum: [1, 2, 3, 4],[m
+[31m-        required: false,[m
+[31m-    },[m
+[31m-[m
+[31m-    powerRailWidth: {[m
+[31m-        type: Number,[m
+[31m-        required: false,[m
+[31m-    },[m
+[31m-[m
+[31m-    powerRailHeight: {[m
+[31m-        type: Number,[m
+[31m-        required: false,[m
+[31m-    },[m
+[31m-[m
+[31m-    rollerWheelA1: {[m
+[31m-        type: Number,[m
+[31m-        required: false,[m
+[31m-    },[m
+[31m-[m
+[31m-    rollerWheelB1: {[m
+[31m-        type: Number,[m
+[31m-        required: false,[m
+[31m-    },[m
+[31m-[m
+[31m-    linkD1: {[m
+[31m-        type: Number,[m
+[31m-        required: false,[m
+[31m-    },[m
+[31m-[m
+[31m-    wheelPitchM1: {[m
+[31m-        type: Number,[m
+[31m-        required: false,[m
+[31m-    },[m
+[31m-[m
+[31m-    rollerPinY1: {[m
+[31m-        type: Number,[m
+[31m-        required: false,[m
+[31m-    },[m
+[31m-[m
+[31m-    rollerPinZ1: {[m
+[31m-        type: Number,[m
+[31m-        required: false,[m
+[31m-    }[m
+[31m-[m
+[31m-[m
+[32m+[m[32m  conveyorName: {[m
+[32m+[m[32m    type: String,[m
+[32m+[m[32m    required: true,[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  cc5ChainSize: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    enum: [1, 2, 3, 4, 5, 6, 7, 8],[m
+[32m+[m[32m    required: true,[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  otherChainSize: {[m
+[32m+[m[32m    type: String,[m
+[32m+[m[32m    required: function () {[m
+[32m+[m[32m      return this.cc5ChainSize === 8;[m
+[32m+[m[32m    },[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  industrialChainManufacturer: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    enum: [1, 2, 3, 4, 5, 6, 7, 8, 9],[m
+[32m+[m[32m    required: true,[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  otherChainManufacturer: {[m
+[32m+[m[32m    type: String,[m
+[32m+[m[32m    required: function () {[m
+[32m+[m[32m      return this.industrialChainManufacturer === 9;[m
+[32m+[m[32m    },[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  conveyorLength: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    required: true,[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  conveyorLengthUnit: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    enum: [1, 2, 3, 4],[m
+[32m+[m[32m    required: true,[m
+[32m+[m[32m    // add RegEx matching to this :D[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  conveyorSpeed: {[m
+[32m+[m[32m    type: String,[m
+[32m+[m[32m    required: true,[m
+[32m+[m[32m    // add RegEx matching to this :D[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  conveyorSpeedUnit: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    enum: [1, 2],[m
+[32m+[m[32m    required: true,[m
+[32m+[m[32m    // add RegEx matching to this :D[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  conveyorIndex: {[m
+[32m+[m[32m    type: String,[m
+[32m+[m[32m    required: false,[m
+[32m+[m[32m    // add RegEx matching to this :D[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  travelDirection: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    enum: [1, 2],[m
+[32m+[m[32m    required: false,[m
+[32m+[m[32m    // add RegEx matching to this :D[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  appEnviroment: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    enum: [1, 2],[m
+[32m+[m[32m    required: true,[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  //This says that if they enter yes (or 1/true) then we require these two fields to be entered too.[m
+[32m+[m[32m  //If it's no/0 then we pretend that these don't even exist[m
+[32m+[m[32m  ovenStatus: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    enum: [1, 2],[m
+[32m+[m[32m    required: function () {[m
+[32m+[m[32m      return this.appEnviroment === 1;[m
+[32m+[m[32m    },[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  ovenTemp: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    required: function () {[m
+[32m+[m[32m      return this.appEnviroment === 1;[m
+[32m+[m[32m    },[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  surroundingTemp: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    enum: [1, 2],[m
+[32m+[m[32m    required: false,[m
+[32m+[m[32m    // add RegEx matching to this :D[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  strandStatus: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    enum: [1, 2],[m
+[32m+[m[32m    required: true,[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  plantLayout: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    enum: [1, 2],[m
+[32m+[m[32m    required: false,[m
+[32m+[m[32m    // add RegEx matching to this :D[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  requiredPics: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    enum: [1, 2],[m
+[32m+[m[32m    required: false,[m
+[32m+[m[32m    // add RegEx matching to this :D[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  operatingVoltage: {[m
+[32m+[m[32m    type: String,[m
+[32m+[m[32m    required: true,[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  // MonSys[m
+[32m+[m[32m  monitorData: templateB,[m
+[32m+[m
+[32m+[m[32m  highRollerStatus: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    enum: [1, 2],[m
+[32m+[m[32m    required: true,[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  outboardStatus: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    enum: [1, 2],[m
+[32m+[m[32m    required: true,[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  lubeBrand: {[m
+[32m+[m[32m    type: String,[m
+[32m+[m[32m    required: false,[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  lubeType: {[m
+[32m+[m[32m    type: String,[m
+[32m+[m[32m    required: false,[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  lubeViscosity: {[m
+[32m+[m[32m    type: String,[m
+[32m+[m[32m    required: false,[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  cleanChain: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    enum: [1, 2],[m
+[32m+[m[32m    required: false,[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  wireMeasurementUnit: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    enum: [1, 2, 3, 4],[m
+[32m+[m[32m    required: false,[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  conductor2: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    required: false,[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  conductor4: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    required: false,[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  conductor7: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    required: false,[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  conductor12: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    required: false,[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  junctionBoxNum: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    required: false,[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  cc5UnitType: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    enum: [1, 2, 3, 4],[m
+[32m+[m[32m    required: false,[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  powerRailWidth: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    required: false,[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  powerRailHeight: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    required: false,[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  rollerWheelA1: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    required: false,[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  rollerWheelB1: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    required: false,[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  linkD1: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    required: false,[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  wheelPitchM1: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    required: false,[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  rollerPinY1: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    required: false,[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  rollerPinZ1: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    required: false,[m
+[32m+[m[32m  },[m
+ });[m
+ [m
+[31m-const CC5_CL = mongoose.models.CC5_CL || mongoose.model('CC5_CL', CC5_CLSchema);[m
+[31m-module.exports = CC5_CL;[m
+\ No newline at end of file[m
+[32m+[m[32mconst CC5_CL = mongoose.models.CC5_CL || mongoose.model("CC5_CL", CC5_CLSchema);[m
+[32m+[m[32mmodule.exports = CC5_CL;[m
+[1mdiff --git a/models/CC5_CL_Mapping.js b/models/CC5_CL_Mapping.js[m
+[1mindex 8d6fca7..49047cc 100644[m
+[1m--- a/models/CC5_CL_Mapping.js[m
+[1m+++ b/models/CC5_CL_Mapping.js[m
+[36m@@ -10,7 +10,7 @@[m [mconst enumMappingsCC5_CL = {[m
+ [m
+     travelDirection: { 1: "Right to Left", 2: "Left to Right" },[m
+ [m
+[31m-    appEnviroment: { 1: "Yes", 2: "No" },[m
+[32m+[m[32m    appEnviroment: { 1: "Ambient", 2: "Caustic (i.e. Phosphate / E-Coat, etc.)", 3:"Oven", 4:"Wash Down", 5:"Intrinsic", 6:"Food Grade", 7:"Other" },[m
+ [m
+     ovenStatus: { 1: "Yes", 2: "No" },[m
+ [m
+[1mdiff --git a/models/CC5_OP4OE.js b/models/CC5_OP4OE.js[m
+[1mindex ab3dfca..9c554a9 100644[m
+[1m--- a/models/CC5_OP4OE.js[m
+[1m+++ b/models/CC5_OP4OE.js[m
+[36m@@ -1,396 +1,291 @@[m
+[31m-const mongoose = require('mongoose');[m
+[32m+[m[32mconst mongoose = require("mongoose");[m
+ const templateB = require("./templateB.js");[m
+ const uuid = require("uuid");[m
+[31m-const getDecodedInfo = require("./getDecodedInfo.js");  [m
+[31m-[m
+[31m-[m
+[32m+[m[32mconst templateB = require("./templateB.js");[m
+ [m
+ const CC5_OP4OE_Schema = new mongoose.Schema({[m
+[31m-[m
+[31m-[m
+[31m-    conveyorName: {[m
+[31m-[m
+[31m-        type: String,[m
+[31m-        required: true,[m
+[31m-    },[m
+[31m-[m
+[31m-[m
+[31m-    cc5ChainSize: {[m
+[31m-[m
+[31m-        type: Number,[m
+[31m-        enum: [1, 2, 3, 4, 5, 6, 7, 8],[m
+[31m-        required: true,[m
+[31m-[m
+[31m-    },[m
+[31m-[m
+[31m-    // otherChainSize: {[m
+[31m-[m
+[31m-    //     type: String,[m
+[31m-    //     required: function ()[m
+[31m-    //     {[m
+[31m-    //         return this.cc5ChainSize === 8;[m
+[31m-    //     }[m
+[31m-    // },[m
+[31m-[m
+[31m-    industrialChainManufacturer: {[m
+[31m-[m
+[31m-        type: Number,[m
+[31m-        enum: [1, 2, 3, 4, 5, 6, 7, 8, 9],[m
+[31m-        required: true,[m
+[31m-[m
+[31m-    },[m
+[31m-[m
+[31m-    // otherChainManufacturer: {[m
+[31m-[m
+[31m-    //     type: String,[m
+[31m-    //     required: function ()[m
+[31m-    //     {[m
+[31m-    //         return this.industrialChainManufacturer === 9;[m
+[31m-    //     }[m
+[31m-[m
+[31m-    // },[m
+[31m-[m
+[31m-    conveyorLength: {[m
+[31m-[m
+[31m-        type: Number,[m
+[31m-        required: true,[m
+[31m-[m
+[31m-    },[m
+[31m-[m
+[31m-    conveyorLengthUnit: {[m
+[31m-[m
+[31m-        type: Number,[m
+[31m-        enum: [1, 2, 3, 4],[m
+[31m-        required: true,[m
+[31m-        // add RegEx matching to this :D[m
+[31m-[m
+[31m-    },[m
+[31m-[m
+[31m-    conveyorSpeed: {[m
+[31m-[m
+[31m-        type: String,[m
+[31m-        required: true,[m
+[31m-        // add RegEx matching to this :D[m
+[31m-[m
+[31m-    },[m
+[31m-    [m
+[31m-    conveyorSpeedUnit: {[m
+[31m-[m
+[31m-        type: Number,[m
+[31m-        enum: [1, 2],[m
+[31m-        required: true,[m
+[31m-        // add RegEx matching to this :D[m
+[31m-[m
+[31m-    },[m
+[31m-[m
+[31m-    conveyorIndex: {[m
+[31m-[m
+[31m-        type: String,[m
+[31m-        required: false,[m
+[31m-        // add RegEx matching to this :D[m
+[31m-[m
+[31m-    },[m
+[31m-[m
+[31m-    travelDirection: {[m
+[31m-[m
+[31m-        type: Number,[m
+[31m-        enum: [1, 2],[m
+[31m-        required: false,[m
+[31m-        // add RegEx matching to this :D[m
+[31m-[m
+[31m-    },[m
+[31m-[m
+[31m-    appEnviroment: {[m
+[31m-[m
+[31m-        type: Number,[m
+[31m-        enum: [1, 2, 3, 4, 5, 6, 7],[m
+[31m-        required: true,[m
+[31m-[m
+[31m-    },[m
+[31m-[m
+[31m-    //This says that if they enter yes (or 1/true) then we require these two fields to be entered too. [m
+[31m-    //If it's no/0 then we pretend that these don't even exist[m
+[31m-    // ovenStatus: {[m
+[31m-    //     type: Number,[m
+[31m-    //     enum: [1, 2],[m
+[31m-    //     required: function ()[m
+[31m-    //     {[m
+[31m-    //         return this.appEnviroment === 1;[m
+[31m-    //     }[m
+[31m-    // },[m
+[31m-[m
+[31m-    // ovenTemp: {[m
+[31m-    //     type: Number,[m
+[31m-    //     required: function ()[m
+[31m-    //     {[m
+[31m-    //         return this.appEnviroment === 1;[m
+[31m-    //     }[m
+[31m-    // },[m
+[31m-[m
+[31m-    surroundingTemp: {[m
+[31m-[m
+[31m-        type: Number,[m
+[31m-        enum: [1, 2],[m
+[31m-        required: false,[m
+[31m-        // add RegEx matching to this :D[m
+[31m-[m
+[31m-    },[m
+[31m-[m
+[31m-    strandStatus: {[m
+[31m-        [m
+[31m-        type: Number,[m
+[31m-        enum: [1, 2],[m
+[31m-        required: true,[m
+[31m-[m
+[31m-    },[m
+[31m-[m
+[31m-    plantLayout: {[m
+[31m-[m
+[31m-        type: Number,[m
+[31m-        enum: [1, 2],[m
+[31m-        required: false,[m
+[31m-        // add RegEx matching to this :D[m
+[31m-[m
+[31m-    },[m
+[31m-[m
+[31m-    requiredPics: {[m
+[31m-[m
+[31m-        type: Number,[m
+[31m-        enum: [1, 2],[m
+[31m-        required: false,[m
+[31m-        // add RegEx matching to this :D[m
+[31m-[m
+[31m-    },[m
+[31m-[m
+[31m-    operatingVoltage: {[m
+[31m-[m
+[31m-        type: String,[m
+[31m-        required: false,[m
+[31m-[m
+[31m-    },[m
+[31m-[m
+[31m-    // MonSys[m
+[31m-    existingMonitor: {[m
+[31m-[m
+[31m-        type: Number,[m
+[31m-        enum: [1, 2],[m
+[31m-        required: false,[m
+[31m-[m
+[31m-    },[m
+[31m-[m
+[31m-    // newMonitor: {[m
+[31m-    //     type: Number,[m
+[31m-    //     enum: [1, 2],[m
+[31m-    //     required: true,[m
+[31m-    [m
+[31m-    // },[m
+[31m-   // monitorData: templateB,[m
+[31m-[m
+[31m-[m
+[31m-[m
+[31m-    [m
+[31m-    outboardStatus: {[m
+[31m-[m
+[31m-        type: Number,[m
+[31m-        enum: [1, 2],[m
+[31m-        required: true,[m
+[31m-[m
+[31m-    },[m
+[31m-[m
+[31m-    highRollerStatus: {[m
+[31m-[m
+[31m-        type: Number,[m
+[31m-        enum: [1, 2],[m
+[31m-        required: true,[m
+[31m-[m
+[31m-    },[m
+[31m-[m
+[31m-[m
+[31m-    lubeBrand: {[m
+[31m-[m
+[31m-        type: String,[m
+[31m-        required: false,[m
+[31m-[m
+[31m-    },[m
+[31m-[m
+[31m-    lubeType: {[m
+[31m-[m
+[31m-        type: String,[m
+[31m-        required: false,[m
+[31m-[m
+[31m-    },[m
+[31m-[m
+[31m-    lubeViscosity: {[m
+[31m-[m
+[31m-        type: String,[m
+[31m-        required: false,[m
+[31m-[m
+[31m-    },[m
+[31m-[m
+[31m-    //Dont think this is needed since it's an option in the template B[m
+[31m-[m
+[31m-[m
+[31m-    // reservoirSizeType: {[m
+[31m-[m
+[31m-    //     type: Number,[m
+[31m-    //     enum: [1, 2],[m
+[31m-    //     required: false,[m
+[31m-[m
+[31m-    // },[m
+[31m-[m
+[31m-    // reservoirSizeQuanity: {[m
+[31m-[m
+[31m-    //     type: Number,[m
+[31m-    //     required: false,[m
+[31m-[m
+[31m-    // },[m
+[31m-[m
+[31m-    cleanChain: {[m
+[31m-[m
+[31m-        type: Number,[m
+[31m-        enum: [1, 2],[m
+[31m-        required: false,[m
+[31m-[m
+[31m-    },[m
+[31m-[m
+[31m-    //Dont think this is needed since it's an option in the template B[m
+[31m-[m
+[31m-    // specialControllerOption: {[m
+[31m-[m
+[31m-    //     type: String,[m
+[31m-    //     required: false,[m
+[31m-[m
+[31m-    // },[m
+[31m-[m
+[31m-    // specialControllerInfo: {[m
+[31m-    //     type: String,[m
+[31m-    //     required: false,[m
+[31m-    // },[m
+[31m-[m
+[31m-[m
+[31m-    chainMaster:{[m
+[31m-[m
+[31m-        type: Number,[m
+[31m-        enum: [1, 2],[m
+[31m-        required: false,[m
+[31m-[m
+[31m-    },[m
+[31m-[m
+[31m-    timerStatus:{[m
+[31m-[m
+[31m-        type: Number,[m
+[31m-        enum: [1, 2, 3],[m
+[31m-        required: false,[m
+[31m-[m
+[31m-    },[m
+[31m-[m
+[31m-    electricStatus:{[m
+[31m-[m
+[31m-        type: Number,[m
+[31m-        enum: [1, 2],[m
+[31m-        required: false,[m
+[31m-[m
+[31m-    },[m
+[31m-[m
+[31m-    pneumaticStatus:{[m
+[31m-[m
+[31m-        type: Number,[m
+[31m-        enum: [1, 2],[m
+[31m-        required: false,[m
+[31m-[m
+[31m-    },[m
+[31m-[m
+[31m-[m
+[31m-    mightyLubeMonitoring:{[m
+[31m-[m
+[31m-        type: Number,[m
+[31m-        enum: [1, 2],[m
+[31m-        required: false,[m
+[31m-[m
+[31m-    },[m
+[31m-[m
+[31m-[m
+[31m-    plcConnection:{[m
+[31m-[m
+[31m-        type: Number,[m
+[31m-        enum: [1, 2],[m
+[31m-        required: false,[m
+[31m-[m
+[31m-    },[m
+[31m-[m
+[31m-    otherControllerNotes:{[m
+[31m-[m
+[31m-        type: String,[m
+[31m-        required: false,[m
+[31m-[m
+[31m-    },[m
+[31m-[m
+[31m-    cc5UnitType: {[m
+[31m-[m
+[31m-        type: Number,[m
+[31m-        enum: [1, 2, 3, 4],[m
+[31m-        required: false,[m
+[31m-[m
+[31m-    },[m
+[31m-[m
+[31m-    powerRailWidth: {[m
+[31m-[m
+[31m-        type: Number,[m
+[31m-        required: false,[m
+[31m-[m
+[31m-    },[m
+[31m-[m
+[31m-    powerRailHeight: {[m
+[31m-[m
+[31m-        type: Number,[m
+[31m-        required: false,[m
+[31m-[m
+[31m-    },[m
+[31m-[m
+[31m-    rollerWheelA1: {[m
+[31m-[m
+[31m-        type: Number,[m
+[31m-        required: false,[m
+[31m-[m
+[31m-    },[m
+[31m-[m
+[31m-    rollerWheelB1: {[m
+[31m-[m
+[31m-        type: Number,[m
+[31m-        required: false,[m
+[31m-[m
+[31m-    },[m
+[31m-[m
+[31m-    linkD1: {[m
+[31m-[m
+[31m-        type: Number,[m
+[31m-        required: false,[m
+[31m-[m
+[31m-    },[m
+[31m-[m
+[31m-    wheelPitchM1: {[m
+[31m-[m
+[31m-        type: Number,[m
+[31m-        required: false,[m
+[31m-[m
+[31m-    },[m
+[31m-[m
+[31m-    rollerPinY1: {[m
+[31m-[m
+[31m-        type: Number,[m
+[31m-        required: false,[m
+[31m-[m
+[31m-    },[m
+[31m-[m
+[31m-    rollerPinZ1: {[m
+[31m-[m
+[31m-        type: Number,[m
+[31m-        required: false,[m
+[31m-        [m
+[31m-    }[m
+[31m-[m
+[31m-[m
+[32m+[m[32m  conveyorName: {[m
+[32m+[m[32m    type: String,[m
+[32m+[m[32m    required: true,[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  cc5ChainSize: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    enum: [1, 2, 3, 4, 5, 6, 7, 8],[m
+[32m+[m[32m    required: true,[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  otherChainSize: {[m
+[32m+[m[32m    type: String,[m
+[32m+[m[32m    required: function () {[m
+[32m+[m[32m      return this.cc5ChainSize === 8;[m
+[32m+[m[32m    },[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  industrialChainManufacturer: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    enum: [1, 2, 3, 4, 5, 6, 7, 8, 9],[m
+[32m+[m[32m    required: true,[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  otherChainManufacturer: {[m
+[32m+[m[32m    type: String,[m
+[32m+[m[32m    required: function () {[m
+[32m+[m[32m      return this.industrialChainManufacturer === 9;[m
+[32m+[m[32m    },[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  conveyorLength: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    required: true,[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  conveyorLengthUnit: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    enum: [1, 2, 3, 4],[m
+[32m+[m[32m    required: true,[m
+[32m+[m[32m    // add RegEx matching to this :D[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  conveyorSpeed: {[m
+[32m+[m[32m    type: String,[m
+[32m+[m[32m    required: true,[m
+[32m+[m[32m    // add RegEx matching to this :D[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  conveyorSpeedUnit: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    enum: [1, 2],[m
+[32m+[m[32m    required: true,[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  conveyorIndex: {[m
+[32m+[m[32m    type: String,[m
+[32m+[m[32m    required: false,[m
+[32m+[m[32m    // add RegEx matching to this :D[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  travelDirection: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    enum: [1, 2],[m
+[32m+[m[32m    required: false,[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  appEnviroment: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    enum: [1, 2],[m
+[32m+[m[32m    required: true,[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  //This says that if they enter yes (or 1/true) then we require these two fields to be entered too.[m
+[32m+[m[32m  //If it's no/0 then we pretend that these don't even exist[m
+[32m+[m[32m  ovenStatus: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    enum: [1, 2],[m
+[32m+[m[32m    required: function () {[m
+[32m+[m[32m      return this.appEnviroment === 1;[m
+[32m+[m[32m    },[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  ovenTemp: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    required: function () {[m
+[32m+[m[32m      return this.appEnviroment === 1;[m
+[32m+[m[32m    },[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  surroundingTemp: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    enum: [1, 2],[m
+[32m+[m[32m    required: false,[m
+[32m+[m[32m    // add RegEx matching to this :D[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  strandStatus: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    enum: [1, 2],[m
+[32m+[m[32m    required: true,[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  plantLayout: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    enum: [1, 2],[m
+[32m+[m[32m    required: false,[m
+[32m+[m[32m    // add RegEx matching to this :D[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  requiredPics: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    enum: [1, 2],[m
+[32m+[m[32m    required: false,[m
+[32m+[m[32m    // add RegEx matching to this :D[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  operatingVoltage: {[m
+[32m+[m[32m    type: String,[m
+[32m+[m[32m    required: false,[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  controlVoltage: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    required: true,[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  // MonSys[m
+[32m+[m[32m  monitorData: templateB,[m
+[32m+[m
+[32m+[m[32m  outboardStatus: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    enum: [1, 2],[m
+[32m+[m[32m    required: true,[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  highRollerStatus: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    enum: [1, 2],[m
+[32m+[m[32m    required: true,[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  lubeBrand: {[m
+[32m+[m[32m    type: String,[m
+[32m+[m[32m    required: false,[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  lubeType: {[m
+[32m+[m[32m    type: String,[m
+[32m+[m[32m    required: false,[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  lubeViscosity: {[m
+[32m+[m[32m    type: String,[m
+[32m+[m[32m    required: false,[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  cleanChain: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    enum: [1, 2],[m
+[32m+[m[32m    required: false,[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  chainMaster: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    enum: [1, 2],[m
+[32m+[m[32m    required: false,[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  timerStatus: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    enum: [1, 2, 3],[m
+[32m+[m[32m    required: false,[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  electricStatus: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    enum: [1, 2],[m
+[32m+[m[32m    required: false,[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  pneumaticStatus: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    enum: [1, 2],[m
+[32m+[m[32m    required: false,[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  mightyLubeMonitoring: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    enum: [1, 2],[m
+[32m+[m[32m    required: false,[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  plcConnection: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    enum: [1, 2],[m
+[32m+[m[32m    required: false,[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  otherControllerNotes: {[m
+[32m+[m[32m    type: String,[m
+[32m+[m[32m    required: false,[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  wireMeasurementUnit: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    enum: [1, 2, 3, 4],[m
+[32m+[m[32m    required: false,[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  conductor2: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    required: false,[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  conductor4: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    required: false,[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  conductor7: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    required: false,[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  conductor12: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    required: false,[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  junctionBoxNum: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    required: false,[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  cc5UnitType: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    enum: [1, 2, 3, 4],[m
+[32m+[m[32m    required: false,[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  powerRailWidth: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    required: false,[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  powerRailHeight: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    required: false,[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  rollerWheelA1: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    required: false,[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  rollerWheelB1: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    required: false,[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  linkD1: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    required: false,[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  wheelPitchM1: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    required: false,[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  rollerPinY1: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    required: false,[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  rollerPinZ1: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    required: false,[m
+[32m+[m[32m  },[m
+ });[m
+ [m
+[31m-const CC5_OP4OE = mongoose.models.CC5_OP4OE || mongoose.model('CC5_OP4OE', CC5_OP4OE_Schema);[m
+[31m-module.exports = CC5_OP4OE;[m
+\ No newline at end of file[m
+[32m+[m[32mconst CC5_OP4OE =[m
+[32m+[m[32m  mongoose.models.CC5_OP4OE || mongoose.model("CC5_OP4OE", CC5_OP4OE_Schema);[m
+[32m+[m[32mmodule.exports = CC5_OP4OE;[m
+[1mdiff --git a/models/CC5_OP4OE_Mapping.js b/models/CC5_OP4OE_Mapping.js[m
+[1mindex 0e85e89..24b8c89 100644[m
+[1m--- a/models/CC5_OP4OE_Mapping.js[m
+[1m+++ b/models/CC5_OP4OE_Mapping.js[m
+[36m@@ -9,7 +9,7 @@[m [mconst enumMappingsCC5_OP4OE = {[m
+ [m
+     travelDirection: { 1: "Right to Left", 2: "Left to Right" },[m
+ [m
+[31m-    appEnviroment: { 1: "Yes", 2: "No" },[m
+[32m+[m[32m    appEnviroment: { 1: "Ambient", 2: "Caustic (i.e. Phosphate / E-Coat, etc.)", 3:"Oven", 4:"Wash Down", 5:"Intrinsic", 6:"Food Grade", 7:"Other" },[m
+ [m
+     ovenStatus: { 1: "Yes", 2: "No" },[m
+ [m
+[1mdiff --git a/models/COE_CDL.js b/models/COE_CDL.js[m
+[1mindex 73d8cd5..d356429 100644[m
+[1m--- a/models/COE_CDL.js[m
+[1m+++ b/models/COE_CDL.js[m
+[36m@@ -1,42 +1,54 @@[m
+[31m-const mongoose = require('mongoose');[m
+[32m+[m[32mconst mongoose = require("mongoose");[m
+ const templateB = require("./templateB.js");[m
+[31m-const getDecodedInfo = require("./getDecodedInfo.js");  [m
+[31m-[m
+ const COE_CDL_Schema = new mongoose.Schema({[m
+[31m-    conveyorName: {[m
+[31m-        type: String,[m
+[31m-        required: false,[m
+[32m+[m[32m  conveyorName: {[m
+[32m+[m[32m    type: String,[m
+[32m+[m[32m    required: false,[m
+[32m+[m[32m  },[m
+[32m+[m[32m  chainSize: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    enum: [1, 2, 3, 4, 5],[m
+[32m+[m[32m    required: false,[m
+[32m+[m[32m    // add enum and check[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  otherChainSize: {[m
+[32m+[m[32m    type: String,[m
+[32m+[m[32m    required: function () {[m
+[32m+[m[32m      return this.chainSize === 5;[m
+     },[m
+[31m-    chainSize: {[m
+[31m-        type: Number,[m
+[31m-        enum: [1, 2, 3, 4, 5],[m
+[31m-        required: false,[m
+[32m+[m[32m  },[m
+[32m+[m[32m  appEnviroment: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    enum: [1, 2, 3, 4, 5, 6, 7],[m
+[32m+[m[32m    required: true,[m
+[32m+[m[32m  },[m
+[32m+[m[32m  otherAppEnviroment: {[m
+[32m+[m[32m    type: String,[m
+[32m+[m[32m    required: function () {[m
+[32m+[m[32m      return this.appEnviroment === 7;[m
+     },[m
+[31m-    appEnviroment: {[m
+[31m-[m
+[31m-        type: Number,[m
+[31m-        enum: [1, 2, 3, 4, 5, 6, 7],[m
+[31m-        required: true,[m
+[32m+[m[32m  },[m
+ [m
+[32m+[m[32m  ovenStatus: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    enum: [1, 2],[m
+[32m+[m[32m    required: function () {[m
+[32m+[m[32m      return this.appEnviroment === 3;[m
+[32m+[m[32m    },[m
+[32m+[m[32m  },[m
+[32m+[m[32m  ovenTemp: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    required: function () {[m
+[32m+[m[32m      return this.appEnviroment === 3;[m
+     },[m
+[31m-    // ovenStatus: {[m
+[31m-    //     type: Number,[m
+[31m-    //     enum: [1, 2],[m
+[31m-    //     required: function () {[m
+[31m-    //         return this.appEnviroment === 1;[m
+[31m-    //     },[m
+[31m-    // },[m
+[31m-    // ovenTemp: {[m
+[31m-    //     type: Number,[m
+[31m-    //     required: function () {[m
+[31m-    //         return this.appEnviroment === 1;[m
+[31m-    //     },[m
+[31m-    // },[m
+[31m-    controlVoltSingle: {[m
+[31m-        type: Number,[m
+[31m-        required: false,[m
+[31m-    }[m
+[32m+[m[32m  },[m
+[32m+[m[32m  controlVoltSingle: {[m
+[32m+[m[32m    type: Number,[m
+[32m+[m[32m    required: false,[m
+[32m+[m[32m  },[m
+ });[m
+ [m
+[31m-const COE_CDL = mongoose.models.COE_CDL || mongoose.model('COE_CDL', COE_CDL_Schema);[m
+[32m+[m[32mconst COE_CDL =[m
+[32m+[m[32m  mongoose.models.COE_CDL || mongoose.model("COE_CDL", COE_CDL_Schema);[m
+ module.exports = COE_CDL;[m
+[1mdiff --git a/models/COE_CEL.js b/models/COE_CEL.js[m
+[1mindex 752fb7d..95d0cf3 100644[m
+[1m--- a/models/COE_CEL.js[m
+[1m+++ b/models/COE_CEL.js[m
+[36m@@ -1,237 +1,214 @@[m
+[31m-const mongoose = require('mongoose');[m
+[32m+[m[32mconst mongoose = require("mongoose");[m
+ const templateB = require("./templateB.js");[m
+[31m-const getDecodedInfo = require("./getDecodedInfo.js");  [m
+[31m-[m
+ [m
+ const COE_CEL_Schema = new mongoose.Schema({[m
+[31m-    conveyorName: {[m
+[31m-        type: String,[m
+[31m-        required: false,[m
+[31m-    },[m
+[31m-    chainSize: {[m
+[31m-        type: Number,[m
+[31m-        enum: [1, 2, 3, 4, 5],[m
+[31m-        required: true,[m
+[31m-    },[m
+[31m-    industrialChainManufacturer: {[m
+[31m-        type: Number,[m
+[31m-        enum: [1, 2, 3, 4, 5, 6, 7, 8, 9],[m
+[31m-        required: true,[m
+[31m-    },[m
+[31m-    // otherIndustrialChainManufacturer: {[m
+[31m-    //     type: String,[m
+[31m-    //     required: function () {[m
+[31m-    //         return this.industrialChainManufacturer === 9;[m
+[31m-    //     },[m
+[31m-    // },[m
+[31m-    conveyorLength: {[m
+[31m-        type: Number,[m
+[31m-        required: true,[m
+[31m-    },[m
+[31m-    conveyorLengthUnit: {[m
+[31m-[m
+[31m-        type: Number,[m
+[31m-        enum: [1, 2, 3, 4],[m
+[31m-        required: true,[m
+[31m-[m
+[31m-    },[m
+[31m-    conveyorSpeed: {[m
+[31m-        type: Number,[m
+[31m-        required: true,[m
+[31m-    },[m
+[31m-    conveyorSpeedUnit: {[m
+[31m-[m
+[31m-        type: Number,[m
+[31m-        enum: [1, 2],[m
+[31m-        required: true,[m
+[31m-[m
+[31m-    },[m
+[31m-    conveyorIndex: {[m
+[31m-        type: Number,[m
+[31m-        required: false,[m
+[31m-    },[m
+[31m-    travelDirection: {[m
+[31m-[m
+[31m-        type: Number,[m
+[31m-        enum: [1, 2],[m
+[31m-        required: false,[m
+[31m-[m
+[31m-    },[m
+[31m-    appEnviroment: {[m
+[31m-[m
+[31m-        type: Number,[m
+[31m-        enum: [1, 2, 3, 4, 5, 6, 7],[m
+[31m-        required: true,[m
+[31m-[m
+[31m-    },[m
+[31m-    // ovenStatus: {[m
+[31m-    //     type: Number,[m
+[31m-    //     enum: [1, 2],[m
+[31m-    //     required: function () {[m
+[31m-    //         return this.appEnviroment === 1;[m
+[31m-    //     },[m
+[31m-    // },[m
+[31m-    // ovenTemp: {[m
+[31m-    //     type: Number,[m
+[31m-    //     required: function () {[m
+[31m-    //         return this.appEnviroment === 1;[m
+[31m-    //     },[m
+[31m-    // },[m
+[31m-    surroundingTemp: {[m
+[31m-        type: Number,[m
+[31m-        enum: [1, 2],[m
+[31m-        required: false,[m
+[31m-    },[m
+[31m-    conveyorLoaded: {[m
+[31m-        type: Number,[m
+[31m-        enum: [1, 2],[m
+[31m-        required: false,[m
+[31m-    },[m
+[31m-    conveyorSwing: {[m
+[31m-        type: Number,[m
+[31m-        enum: [1, 2],[m
+[31m-        required: false,[m
+[31m-    },[m
+[31m-    plantLayout: {[m
+[31m-        type: Number,[m
+[31m-        enum: [1, 2],[m
+[31m-        required: false,[m
+[31m-    },[m
+[31m-    requiredPics: {[m
+[31m-        type: Number,[m
+[31m-        enum: [1, 2],[m
+[31m-        required: false,[m
+[31m-    },[m
+[31m-    operatingVoltage: {[m
+[31m-        type: Number,[m
+[31m-        required: true,[m
+[31m-    },[m
+[31m-    [m
+[31m-    existingMonitor: {[m
+[31m-[m
+[31m-        type: Number,[m
+[31m-        enum: [1, 2],[m
+[31m-        required: false,[m
+[31m-[m
+[31m-    },[m
+[31m-[m
+[31m-    newMonitor: {[m
+[31m-        type: Number,[m
+[31m-        enum: [1, 2],[m
+[31m-        required: false,[m
+[31m-    [m
+[31m-    },[m
+[31m-   // monitorData: templateB,[m
+[31m-[m
+[31m-[m
+[31m-[m
+[31m-[m
+[31m-    [m
+[31m-    wheelOpenType: {[m
+[31m-        type: Number,[m
+[31m-        enum: [1, 2, 3],[m
+[31m-        required: false,[m
+[31m-    },[m
+[31m-    wheelClosedType: {[m
+[31m-        type: Number,[m
+[31m-        enum: [1, 2, 3],[m
+[31m-        required: false,[m
+[31m-    },[m
+[31m-    openStatus: {[m
+[31m-        type: Number,[m
+[31m-        enum: [1, 2],[m
+[31m-        required: false,[m
+[31m-    },[m
+[31m-    catDriveStatus: {[m
+[31m-        type: Number,[m
+[31m-        enum: [1, 2],[m
+[31m-        required: false,[m
+[31m-    },[m
+[31m-[m
+[31m-[m
+[31m-    //template C needs to be added here when we get it if they enter yes for catDriveStatus[m
+[31m-[m
+[31m-[m
+[31m-    railLubeStatus: {[m
+[31m-        type: Number,[m
+[31m-        enum: [1, 2],[m
+[31m-        required: false,[m
+[31m-    },[m
+[31m-    externalLubeStatus: {[m
+[31m-        type: Number,[m
+[31m-        enum: [1, 2],[m
+[31m-        required: false,[m
+[31m-    },[m
+[31m-    lubeBrand: {[m
+[31m-        type: String,[m
+[31m-        required: false,[m
+[31m-    },[m
+[31m-    lubeType: {[m
+[31m-        type: String,[m
+[31m-        required: false,[m
+[31m-    },[m
+[31m-    lubeViscosity: {[m
+[31m-        type: String,[m
+[31m-        required: false,[m
+[31m-    },[m
+[31m-    chainCleanStatus: {[m
+[31m-        type: Number,[m
+[31m-        enum: [1, 2],[m
+[31m-        required: false,[m
+[31m-    },[m
+[31m-    wireMeasurementUnit: {[m
+[31m-        type: Number,[m
+[31m-        required: false,[m
+[31m-    },[m
+[31m-    conductor2: {[m
+[31m-        type: Number,[m
+[31m-        required: false,[m
+[31m-    },[m
+[31m-    conductor4: {[m
+[31m-        type: Number,[m
+[31m-        required: false,[m
+[31m-    },[m
+[31m-    conductor7: {[m
+[31m-        type: Number,[m
+[31m-        required: false,[m
+[31m-    },[m
+[31m-    conductor12: {[m
+[31m-        type: Number,[m
+[31m-        required: false,[m
+[31m-    },[m
+[31m-    junctionBoxNum: {[m
+[
