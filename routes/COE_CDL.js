@@ -13,7 +13,7 @@ router.post("/", authenticate, async (req, res) => {
         const order = new COE_CDL({
             ...(COE_CDLData.conveyorName && { conveyorName: COE_CDLData.conveyorName }),
             ...(COE_CDLData.chainSize && { chainSize: COE_CDLData.chainSize }),
-            appEnviroment: COE_CDLData.appEnviroment,
+            //appEnviroment: COE_CDLData.appEnviroment,
             ...(COE_CDLData.ovenStatus && { ovenStatus: COE_CDLData.ovenStatus }),
             ...(COE_CDLData.ovenTemp && { ovenTemp: COE_CDLData.ovenTemp }),
             ...(COE_CDLData.controlVoltSingle && { controlVoltSingle: COE_CDLData.controlVoltSingle }),

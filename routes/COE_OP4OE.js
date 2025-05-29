@@ -35,7 +35,7 @@ router.post("/", authenticate, async (req, res) => {
 
             monitorData: new templateB({
                 existingMonitor: COE_OP4OEData.templateB.existingMonitor,
-                newMonitor: COE_OP4OEData.templateB.newMonitor,
+                //newMonitor: COE_OP4OEData.templateB.newMonitor,
                 ...(COE_OP4OEData.templateB.dcuStatus && { dcuStatus: COE_OP4OEData.templateB.dcuStatus }),
                 ...(COE_OP4OEData.templateB.dcuNum && { dcuNum: COE_OP4OEData.templateB.dcuNum }),
                 ...(COE_OP4OEData.templateB.existingWindows && { existingWindows: COE_OP4OEData.templateB.existingWindows }),
@@ -93,7 +93,7 @@ router.post("/", authenticate, async (req, res) => {
                 ...(COE_OP4OEData.templateB.specialControllerOptions && { specialControllerOptions: COE_OP4OEData.templateB.specialControllerOptions })
             }),
             
-            catDriveStatus: COE_OP4OEData.catDriveStatus,
+            //catDriveStatus: COE_OP4OEData.catDriveStatus,
             
             // TODO: Implement template C when updated on frontend
 
