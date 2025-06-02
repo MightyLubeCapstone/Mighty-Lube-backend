@@ -32,8 +32,8 @@ app.use("/api/configurations", configurationsRoute);
 app.use("/api/email", emailRoute);
 
 
-const port = process.env.PORT || 3030;
-app.listen(8080, '0.0.0.0', () => {
+const port = process.env.PORT || 8080;
+app.listen(port, '0.0.0.0', () => {
 	dbConnect();
 	console.log(`Listening on port ${port}...`);
 });
