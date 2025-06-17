@@ -10,7 +10,7 @@ const enumMappingsCC5_CL = {
 
     travelDirection: { 1: "Right to Left", 2: "Left to Right" },
 
-    appEnviroment: { 1: "Yes", 2: "No" },
+    appEnviroment: { 1: "Ambient", 2: "Caustic", 3: "Oven", 4: "Wash Down", 5: "Intrinsic", 6: "Food Grade", 7: "Other" },
 
     ovenStatus: { 1: "Yes", 2: "No" },
 
@@ -26,55 +26,51 @@ const enumMappingsCC5_CL = {
 
     newMonitor: { 1: "Yes", 2: "No" },
 
-    dcuStatus: { 1: "Yes", 2: "No" },
+monitorData: {
 
-    existingWindows: { 1: "Yes", 2: "No" },
+	dcuStatus: { 1: "Yes", 2: "No" },
 
-    existingHeadUnit: { 1: "Yes", 2: "No" },
+	newReservoir: { 1: "Yes", 2: "No" },
 
-    existingDCU: { 1: "Yes", 2: "No" },
+	reservoirSize: { 1: "10 Gallon", 2: "65 Gallon", 3: "Other" },
 
-    existingPowerInterface: { 1: "Yes", 2: "No" },
+	newReservoirNum: { 1: "1", 2: "2", 3: "3", 4: "4", 5: "5", 6: "6", 7: "7", 8: "8", 9: "9", 10: "10" },
 
-    monitorData: {
+	typeMonitor: { 1: "Permanent", 2: "Portable" },
 
-        newReservoir: { 1: "Yes", 2: "No" },
+    driveMotorAmp: { 1: "Yes", 2: "No" },
 
-        reservoirSize: { 1: "10 Gallon", 2: "65 Gallon" },
+    driveTakeUpAir: { 1: "Yes", 2: "No" },
 
-        typeMonitor: { 1: "Permanent", 2: "Portable" },
+    takeUpDistance: { 1: "Yes", 2: "No" },
 
-        driveMotorAmp: { 1: "Yes", 2: "No" },
+    driveTemp: { 1: "Yes", 2: "No" },
 
-        driveTakeUpAir: { 1: "Yes", 2: "No" },
+    driveVibration: { 1: "Yes", 2: "No" },
 
-        takeUpDistance: { 1: "Yes", 2: "No" },
+    dogPitch: { 1: "Yes", 2: "No" },
 
-        driveTemp: { 1: "Yes", 2: "No" },
+    paintMarker: { 1: "Yes", 2: "No" },
 
-        driveVibration: { 1: "Yes", 2: "No" },
+    chainVision: { 1: "Yes", 2: "No" },
 
-        dogPitch: { 1: "Yes", 2: "No" },
+    lubeVision: { 1: "Yes", 2: "No" },
 
-        paintMarker: { 1: "Yes", 2: "No" },
+    trolleyVision: { 1: "Yes", 2: "No" },
 
-        chainVision: { 1: "Yes", 2: "No" },
+    trolleyDetect: { 1: "Yes", 2: "No" },
 
-        lubeVision: { 1: "Yes", 2: "No" },
+    omniView: { 1: "Yes", 2: "No" },
 
-        trolleyVision: { 1: "Yes", 2: "No" },
-
-        trolleyDetect: { 1: "Yes", 2: "No" },
-
-        omniView: { 1: "Yes", 2: "No" },
-
-        specialControllerOptions: { 1: "I/O Link", 2: "Plug and Play", 3: "Dry Contacts" },
+    specialControllerOptions: { 1: "I/O Link", 2: "Plug and Play", 3: "Dry Contacts" },
         
-    }, 
+    },
+    
+    outboardStatus: { 1: "Yes", 2: "No" },
 
     highRollerStatus: { 1: "Yes", 2: "No" },
-
-    outboardStatus: { 1: "Yes", 2: "No" },
+    
+    cleanChain: { 1: "Yes", 2: "No" },
 
     wireMeasurementUnit: { 1: "Feet", 2: "Inches", 3: "Meters", 4: "Millimeters" },
 

@@ -9,11 +9,13 @@ const enumMappingsCC5_OP4OE = {
 
     travelDirection: { 1: "Right to Left", 2: "Left to Right" },
 
-    appEnviroment: { 1: "Yes", 2: "No" },
+    appEnviroment: { 1: "Ambient", 2: "Caustic", 3: "Oven", 4: "Wash Down", 5: "Intrinsic", 6: "Food Grade", 7: "Other" },
 
     ovenStatus: { 1: "Yes", 2: "No" },
 
     surroundingTemp: { 1: "Yes", 2: "No" },
+
+    swingStatus: { 1: "Yes", 2: "No" },
 
     strandStatus: { 1: "Yes", 2: "No" },
 
@@ -21,11 +23,19 @@ const enumMappingsCC5_OP4OE = {
 
     requiredPics: { 1: "Yes", 2: "No" },
 
+    existingMonitor: { 1: "Yes", 2: "No" },
+
+    newMonitor: { 1: "Yes", 2: "No" },
+
     monitorData: {
+
+        dcuStatus: { 1: "Yes", 2: "No" },
 
         newReservoir: { 1: "Yes", 2: "No" },
 
-        reservoirSize: { 1: "10 Gallon", 2: "65 Gallon" },
+        reservoirSize: { 1: "10 Gallon", 2: "65 Gallon", 3: "Other" },
+
+        newReservoirNum: { 1: "1", 2: "2", 3: "3", 4: "4", 5: "5", 6: "6", 7: "7", 8: "8", 9: "9", 10: "10" },
 
         typeMonitor: { 1: "Permanent", 2: "Portable" },
 
@@ -57,9 +67,9 @@ const enumMappingsCC5_OP4OE = {
         
     },
     
-    highRollerStatus: { 1: "Yes", 2: "No" },
-
     outboardStatus: { 1: "Yes", 2: "No" },
+
+    highRollerStatus: { 1: "Yes", 2: "No" },
 
     wireMeasurementUnit: { 1: "Feet", 2: "Inches", 3: "Meters", 4: "Millimeters" },
 

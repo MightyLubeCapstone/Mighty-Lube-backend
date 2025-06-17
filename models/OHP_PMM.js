@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const templateB = require("./templateB.js");
+const templateA = require("./templateA.js");
 const OHP_PMMSchema = new mongoose.Schema({
     chainSize: {
         type: Number,
@@ -41,7 +41,7 @@ const OHP_PMMSchema = new mongoose.Schema({
         required: false,
     
     },
-   // monitorData: templateB,
+   // monitorData: templateA,
 
 
 

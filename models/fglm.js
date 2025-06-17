@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const templateB = require("./templateB.js");
+const templateA = require("./templateA.js");
 const getDecodedInfo = require("./getDecodedInfo.js");  //have to add this for the dynamic mapping, required in every model
 
 const FGLMSchema = new mongoose.Schema({
@@ -69,7 +69,7 @@ const FGLMSchema = new mongoose.Schema({
         type: Number,
         enum: [1, 2, 3],
         required: true,
-        // add RegEx matching to this :D
+        
 
     },
 
@@ -77,7 +77,7 @@ const FGLMSchema = new mongoose.Schema({
 
         type: Number,
         required: true,
-        // add RegEx matching to this :D
+        
 
     },
 
@@ -86,7 +86,7 @@ const FGLMSchema = new mongoose.Schema({
         type: Number,
         enum: [1, 2, 3, 4],
         required: true,
-        // add RegEx matching to this :D
+        
 
     },
 
@@ -94,7 +94,7 @@ const FGLMSchema = new mongoose.Schema({
 
         type: Number,
         required: true,
-        // add RegEx matching to this :D
+        
 
     },
 
@@ -103,7 +103,7 @@ const FGLMSchema = new mongoose.Schema({
         type: Number,
         enum: [1, 2],
         required: true,
-        // add RegEx matching to this :D
+        
 
     },
 
@@ -111,7 +111,7 @@ const FGLMSchema = new mongoose.Schema({
 
         type: String,
         required: true,
-        // add RegEx matching to this :D
+        
 
     },
 
@@ -120,7 +120,7 @@ const FGLMSchema = new mongoose.Schema({
         type: Number,
         enum: [1, 2],
         required: true,
-        // add RegEx matching to this :D
+        
 
     },
 
@@ -129,7 +129,7 @@ const FGLMSchema = new mongoose.Schema({
         type: Number,
         enum: [1, 2, 3, 4],
         required: true,
-        // add RegEx matching to this :D
+        
 
     },
 
@@ -147,7 +147,7 @@ const FGLMSchema = new mongoose.Schema({
         type: Number,
         enum: [1, 2, 3, 4, 5],
         required: true,
-        // add RegEx matching to this :D
+        
 
     },
 
@@ -165,7 +165,7 @@ const FGLMSchema = new mongoose.Schema({
         type: Number,
         enum: [1, 2, 3, 4],
         required: true,
-        // add RegEx matching to this :D
+        
 
     },
 
@@ -183,7 +183,7 @@ const FGLMSchema = new mongoose.Schema({
         type: Number,
         enum: [1, 2, 3, 4, 5, 6],
         required: true,
-        // add RegEx matching to this :D
+        
 
     },
 
@@ -192,7 +192,7 @@ const FGLMSchema = new mongoose.Schema({
         type: Number,
         enum: [1, 2],
         required: true,
-        // add RegEx matching to this :D
+        
 
     },
 
@@ -201,7 +201,7 @@ const FGLMSchema = new mongoose.Schema({
         type: Number,
         enum: [1, 2],
         required: true,
-        // add RegEx matching to this :D
+        
 
     },
 
@@ -210,7 +210,7 @@ const FGLMSchema = new mongoose.Schema({
         type: Number,
         enum: [1, 2],
         required: true,
-        // add RegEx matching to this :D
+        
 
     },
 
@@ -219,7 +219,7 @@ const FGLMSchema = new mongoose.Schema({
         type: Number,
         enum: [1, 2],
         required: true,
-        // add RegEx matching to this :D
+        
 
     },
 
@@ -228,7 +228,7 @@ const FGLMSchema = new mongoose.Schema({
         type: Number,
         enum: [1, 2],
         required: true,
-        // add RegEx matching to this :D
+        
 
     },
 
@@ -258,7 +258,7 @@ const FGLMSchema = new mongoose.Schema({
     // },
 
 
-    //monitorData: templateB, | UNCOMMENT THIS LATER ONCE WE ADD THE TEMPLATES TO THE FRONTEND
+    //monitorData: templateA, | UNCOMMENT THIS LATER ONCE WE ADD THE TEMPLATES TO THE FRONTEND
 
     // ConveyorSpecs
     sideLube: {

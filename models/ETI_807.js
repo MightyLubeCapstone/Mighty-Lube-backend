@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const templateB = require("./templateB.js");
+const templateA = require("./templateA.js");
 const getDecodedInfo = require("./getDecodedInfo.js");  
 
 const ETI_807_Schema = new mongoose.Schema({

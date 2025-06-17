@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const templateB = require("./templateB.js");
+const templateA = require("./templateA.js");
 const OHP_YCBSchema = new mongoose.Schema({
     conveyorName: {
         type: String,
