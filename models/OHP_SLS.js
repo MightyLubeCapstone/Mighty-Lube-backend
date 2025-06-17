@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const templateB = require("./templateB.js");
+const templateA = require("./templateA.js");
 const OHP_SLSSchema = new mongoose.Schema({
     conveyorName: {
         type: String,
@@ -55,7 +55,7 @@ const OHP_SLSSchema = new mongoose.Schema({
         type: Number,
         enum: [1, 2],
         required: true,
-        // add RegEx matching to this :D
+        
 
     },
 

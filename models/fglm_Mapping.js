@@ -32,7 +32,7 @@ const fglm_Mapping = {
     
     requiredPics: { 1: "Yes", 2: "No" },
 
-    monitorData: {
+    monitorData: { 
 
         newReservoir: { 1: "Yes", 2: "No" },
 

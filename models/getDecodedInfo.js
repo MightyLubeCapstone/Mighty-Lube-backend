@@ -28,7 +28,7 @@ const getDecodedInfo = function (order) {
         });
     }
 
-    // ✅ Handle `monitorData` (templateB fields)
+    // ✅ Handle `monitorData` (templateA fields)
     if (order.monitorData) {
         mappedInfo.monitorData = { ...order.monitorData };
 

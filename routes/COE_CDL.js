@@ -2,7 +2,7 @@ const express = require("express");
 const { dbConnect } = require("../config/config");
 const { authenticate } = require("./sessions");
 const COE_CDL = require("../models/COE_CDL");
-
+ 
 
 const router = express.Router();
 
@@ -13,9 +13,11 @@ router.post("/", authenticate, async (req, res) => {
         const order = new COE_CDL({
             ...(COE_CDLData.conveyorName && { conveyorName: COE_CDLData.conveyorName }),
             ...(COE_CDLData.chainSize && { chainSize: COE_CDLData.chainSize }),
-            //appEnviroment: COE_CDLData.appEnviroment,
+            ...(COE_CDLData.otherChainSize && { otherChainSize: COE_CDLData.otherChainSize }),
+            appEnviroment: COE_CDLData.appEnviroment,
             ...(COE_CDLData.ovenStatus && { ovenStatus: COE_CDLData.ovenStatus }),
             ...(COE_CDLData.ovenTemp && { ovenTemp: COE_CDLData.ovenTemp }),
+            ...(COE_CDLData.otherAppEnviroment && { otherAppEnviroment: COE_CDLData.otherAppEnviroment }),
             ...(COE_CDLData.controlVoltSingle && { controlVoltSingle: COE_CDLData.controlVoltSingle }),
         });
         req.user.cart.push({ numRequested: numRequested, productConfigurationInfo: order, productType: "COE_CDL" });

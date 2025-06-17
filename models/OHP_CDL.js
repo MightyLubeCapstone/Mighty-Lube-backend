@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const templateB = require("./templateB.js");
+const templateA = require("./templateA.js");
 const getDecodedInfo = require("./getDecodedInfo.js");  
 
 const OHP_CDLSchema = new mongoose.Schema({

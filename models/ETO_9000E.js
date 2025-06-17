@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const templateB = require("./templateB.js");
+const templateA = require("./templateA.js");
 const getDecodedInfo = require("./getDecodedInfo.js");  
 
 
@@ -53,26 +53,33 @@ const ETO_9000E_Schema = new mongoose.Schema({
         required: false,
 
     },
-    appEnviroment: {
+  appEnviroment: {
+    type: Number,
+    enum: [1, 2, 3, 4, 5, 6, 7],
+    required: true,
+  },
 
-        type: Number,
-        enum: [1, 2, 3, 4, 5, 6, 7],
-        required: true,
-
+  ovenStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: function () {
+      return this.appEnviroment === 3;
     },
-    // ovenStatus: {
-    //     type: Number,
-    //     enum: [1, 2],
-    //     required: function () {
-    //         return this.appEnviroment === 1;
-    //     },
-    // },
-    // ovenTemp: {
-    //     type: Number,
-    //     required: function () {
-    //         return this.appEnviroment === 1;
-    //     },
-    // },
+  },
+
+  ovenTemp: {
+    type: Number,
+    required: function () {
+      return this.appEnviroment === 3;
+    },
+  },
+
+  otherAppEnviroment: {
+    type: String,
+    required: function () {
+      return this.appEnviroment === 7;
+    },
+  },
     surroundingTemp: {
         type: Number,
         enum: [1, 2],
@@ -106,7 +113,7 @@ const ETO_9000E_Schema = new mongoose.Schema({
         required: false,
     
     },
-   // monitorData: templateB,
+   // monitorData: templateA,
 
 
 

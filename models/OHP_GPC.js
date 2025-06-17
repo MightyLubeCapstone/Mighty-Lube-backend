@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const templateB = require("./templateB.js");
+const templateA = require("./templateA.js");
 const getDecodedInfo = require("./getDecodedInfo.js");  
 
 const OHP_GPCSchema = new mongoose.Schema({
@@ -70,7 +70,7 @@ const OHP_GPCSchema = new mongoose.Schema({
         type: Number,
         enum: [1, 2],
         required: true,
-        // add RegEx matching to this :D
+        
 
     },
 
@@ -150,7 +150,7 @@ const OHP_GPCSchema = new mongoose.Schema({
         required: false,
     
     },
-   // monitorData: templateB,
+   // monitorData: templateA,
 
 
 

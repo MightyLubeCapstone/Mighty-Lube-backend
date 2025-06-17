@@ -1,329 +1,462 @@
-const mongoose = require('mongoose');
-const templateB = require("./templateB.js");
-const getDecodedInfo = require("./getDecodedInfo.js");  
+const mongoose = require("mongoose");
+const templateA = require("./templateA.js");
+const getDecodedInfo = require("./getDecodedInfo.js");
 
 const FT_OPCO_Schema = new mongoose.Schema({
-    conveyorName: {
-        type: String,
-        required: false,
-    },
-    chainSize: {
-        type: Number,
-        enum: [1, 2, 3, 4, 5],
-        required: false,
-    },
-    industrialChainManufacturer: {
-        type: Number,
-        enum: [1, 2, 3, 4, 5, 6, 7, 8, 9],
-        required: true,
-    },
-    // otherIndustrialChainManufacturer: {
-    //     type: String,
-    //     required: function () {
-    //         return this.industrialChainManufacturer === 9;
-    //     },
-    // },
-    wheelManufacturer: {
-        type: Number,
-        enum: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-        required: true,
-    },
-    // otherWheelManufacturer: {
-    //     type: String,
-    //     required: function () {
-    //         return this.wheelManufacturer === 10;
-    //     },
-    // },
-    conveyorLength: {
-        type: Number,
-        required: false,
-    },
-    conveyorLengthUnit: {
+  conveyorName: {
+    type: String,
+    required: true,
+  },
+  chainSize: {
+    type: Number,
+    enum: [1, 2, 3, 4, 5],
+    required: true,
+  },
 
-        type: Number,
-        enum: [1, 2, 3, 4],
-        required: false,
+  otherChainSize: {
+    type: String,
+    required: function () {
+      return this.chainSize === 5;
+    },
+  },
+  industrialChainManufacturer: {
+    type: Number,
+    enum: [1, 2, 3, 4, 5, 6, 7, 8, 9],
+    required: true,
+  },
+  otherIndustrialChainManufacturer: {
+    type: String,
+    required: function () {
+      return this.industrialChainManufacturer === 9;
+    },
+  },
+  wheelManufacturer: {
+    type: Number,
+    enum: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    required: true,
+  },
+  otherWheelManufacturer: {
+    type: String,
+    required: function () {
+      return this.wheelManufacturer === 10;
+    },
+  },
+  conveyorLength: {
+    type: Number,
+    required: true,
+  },
+  conveyorLengthUnit: {
+    type: Number,
+    enum: [1, 2, 3, 4],
+    required: true,
+  },
+  conveyorSpeed: {
+    type: Number,
+    required: true,
+  },
+  conveyorSpeedUnit: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },
+  conveyorIndex: {
+    type: Number,
+    required: false,
+  },
+  travelDirection: {
+    type: Number,
+    enum: [1, 2],
+    required: false,
+  },
+  appEnviroment: {
+    type: Number,
+    enum: [1, 2, 3, 4, 5, 6, 7],
+    required: true,
+  },
 
+  ovenStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: function () {
+      return this.appEnviroment === 3;
     },
-    conveyorSpeed: {
-        type: Number,
-        required: false,
-    },
-    conveyorSpeedUnit: {
+  },
 
-        type: Number,
-        enum: [1, 2],
-        required: false,
+  ovenTemp: {
+    type: Number,
+    required: function () {
+      return this.appEnviroment === 3;
+    },
+  },
 
+  otherAppEnviroment: {
+    type: String,
+    required: function () {
+      return this.appEnviroment === 7;
     },
-    conveyorIndex: {
-        type: Number,
-        required: false,
-    },
-    travelDirection: {
+  },
+  surroundingTemp: {
+    type: Number,
+    enum: [1, 2],
+    required: false,
+  },
+  conveyorLoaded: {
+    type: Number,
+    enum: [1, 2],
+    required: false,
+  },
+  strandStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },
+  conveyorSwing: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },
 
-        type: Number,
-        enum: [1, 2],
-        required: false,
+  wearStrips: {
+    type: Number,
+    enum: [1, 2],
+    required: function () {
+      return this.conveyorSwing === 1;
+    },
+  },
 
+  skiBars: {
+    type: Number,
+    enum: [1, 2],
+    required: function () {
+      return this.conveyorSwing === 1;
     },
-    appEnviroment: {
+  },
 
-        type: Number,
-        enum: [1, 2, 3, 4, 5, 6, 7],
-        required: true,
+  relayStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: function () {
+      return this.conveyorSwing === 1;
+    },
+  },
 
-    },
-    // ovenStatus: {
-    //     type: Number,
-    //     enum: [1, 2],
-    //     required: function () {
-    //         return this.appEnviroment === 1;
-    //     },
-    // },
-    // ovenTemp: {
-    //     type: Number,
-    //     required: function () {
-    //         return this.appEnviroment === 1;
-    //     },
-    // },
-    surroundingTemp: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
-    },
-    conveyorLoaded: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
-    },
-    conveyorSwing: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
-    },
-    strandStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
-    },
-    plantLayout: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
-    },
-    requiredPics: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
-    },
-    existingMonitor: {
+  plantLayout: {
+    type: Number,
+    enum: [1, 2],
+    required: false,
+  },
+  requiredPics: {
+    type: Number,
+    enum: [1, 2],
+    required: false,
+  },
 
-        type: Number,
-        enum: [1, 2],
-        required: false,
+  operatingVoltage: {
+    type: Number,
+    required: true,
+  },
+  controlVoltage: {
+    type: Number,
+    required: true,
+  },
+  compressedAir: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },
 
-    },
+  existingMonitor: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },
 
-    newMonitor: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
-    
+  newMonitor: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+    validate: {
+      validator: function (value) {
+        return !(this.existingMonitor === 1 && value === 1);
+      },
+      message: "Existing monitor and New Monitor cannot both be 1.",
     },
-   // monitorData: templateB,
+  },
 
+  monitorData: templateA,
 
+  wheelOpenType: {
+    type: Number,
+    enum: [1, 2, 3],
+    required: false,
+  },
+  wheelClosedType: {
+    type: Number,
+    enum: [1, 2, 3],
+    required: false,
+  },
+  openStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: false,
+  },
+  freeWheelStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },
 
-    
-    wheelOpenType: {
-        type: Number,
-        enum: [1, 2, 3],
-        required: false,
+  actuatorStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },
+
+  kingPinStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: false,
+  },
+
+  guideRollerStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: false,
+  },
+  openRaceStyleType: {
+    type: Number,
+    required: false,
+  },
+  closedRaceStyleType: {
+    type: Number,
+    required: false,
+  },
+  holeStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: false,
+  },
+  rollerChainStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: false,
+  },
+  brushStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: false,
+  },
+  outboardStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: false,
+  },
+  lubeBrand: {
+    type: String,
+    required: true,
+  },
+  lubeViscosity: {
+    type: String,
+    required: true,
+  },
+
+  currentGrease: {
+    type: String,
+    required: true,
+  },
+
+  currentLube: {
+    type: String,
+    required: true,
+  },
+  oilOrGrease: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },
+
+  oilViscosity: {
+    type: Number,
+    required: function () {
+      return this.oilOrGrease === 1;
     },
-    wheelClosedType: {
-        type: Number,
-        enum: [1, 2, 3],
-        required: false,
+  },
+
+  greaseNGLIGrade: {
+    type: Number,
+    required: function () {
+      return this.oilOrGrease === 2;
     },
-    openStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
+  },
+
+  zerkDirection: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },
+  zerkLocationType: {
+    type: Number,
+    enum: [1, 2, 3, 4, 5],
+    required: true,
+  },
+
+  //says to have swing status here too idek :(
+  swingStatusAgain: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },
+
+  wheelDiameter: {
+    type: Number,
+    required: true,
+  },
+
+  chainMaster: {
+    type: Number,
+    enum: [1, 2],
+    required: function () {
+      return this.lubeBrand === "Mighty Lube";
     },
-    freeWheelStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
+  },
+
+  remoteStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: function () {
+      return this.lubeBrand === "Mighty Lube";
     },
-    guideRollerStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
+  },
+
+  mountStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: function () {
+      return this.lubeBrand === "Mighty Lube";
     },
-    openRaceStyleType: {
-        type: Number,
-        required: false,
+  },
+
+  otherUnitStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: function () {
+      return this.lubeBrand === "Mighty Lube";
     },
-    closedRaceStyleType: {
-        type: Number,
-        required: false,
+  },
+
+  timerStatus: {
+    type: Number,
+    enum: [1, 2, 3],
+    required: function () {
+      return this.lubeBrand === "Mighty Lube";
     },
-    holeStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
+  },
+
+  electricStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: function () {
+      return this.lubeBrand === "Mighty Lube";
     },
-    rollerChainStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
+  },
+
+  mightyLubeMonitoring: {
+    type: Number,
+    enum: [1, 2],
+    required: function () {
+      return this.lubeBrand === "Mighty Lube";
     },
-    brushStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
+  },
+
+  preMountType: {
+    type: Number,
+    enum: [1, 2, 3],
+    required: function () {
+      return this.lubeBrand === "Mighty Lube";
     },
-    outboardStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
+  },
+
+  otherPreMountType: {
+    type: String,
+    required: function () {
+      return this.preMountType === 3;
     },
-    lubeBrand: {
-        type: String,
-        required: false,
+  },
+
+  plcConnection: {
+    type: Number,
+    enum: [1, 2],
+    required: function () {
+      return this.lubeBrand === "Mighty Lube";
     },
-    currentLube: {
-        type: String,
-        required: false,
+  },
+
+  otherControllerNotes: {
+    type: String,
+    required: function () {
+      return this.lubeBrand === "Mighty Lube";
     },
-    oilOrGrease: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
-    },
-    lubeViscosity: {
-        type: String,
-        required: false,
-    },
-    greaseNGLIGrade: {
-        type: Number,
-        required: false,
-    },
-    zerkDirection: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
-    },
-    zerkLocationType: {
-        type: Number,
-        required: false,
-    },
-    chainMaster: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
-    },
-    remoteStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
-    },
-    mountStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
-    },
-    otherUnitStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
-    },
-    timerStatus: {
-        type: Number,
-        enum: [1, 2, 3],
-        required: false,
-    },
-    electricStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
-    },
-    mightyLubeMonitoring: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
-    },
-    preMountType: {
-        type: Number,
-        required: false,
-    },
-    plcConnection: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
-    },
-    otherControllerInfo: {
-        type: String,
-        required: false,
-    },
-    ftUnitType: {
-        type: Number,
-        required: false,
-    },
-    ftTopF: {
-        type: Number,
-        required: false,
-    },
-    ftTopG: {
-        type: Number,
-        required: false,
-    },
-    ftTopH: {
-        type: Number,
-        required: false,
-    },
-    ftTopA1: {
-        type: Number,
-        required: false,
-    },
-    ftTopB1: {
-        type: Number,
-        required: false,
-    },
-    ftTopH1: {
-        type: Number,
-        required: false,
-    },
-    ftTopJ1: {
-        type: Number,
-        required: false,
-    },
-    ftTopK1: {
-        type: Number,
-        required: false,
-    },
-    ftTopL1: {
-        type: Number,
-        required: false,
-    },
-    ftTopM1: {
-        type: Number,
-        required: false,
-    },
-    ftTopN1: {
-        type: Number,
-        required: false,
-    },
-    ftTopP1: {
-        type: Number,
-        required: false,
-    },
-    ftTopR1: {
-        type: Number,
-        required: false,
-    },
+  },
+
+  ftUnitType: {
+    type: Number,
+    enum: [1, 2, 3, 4],
+    required: false,
+  },
+  ftTopF: {
+    type: Number,
+    required: false,
+  },
+  ftTopG: {
+    type: Number,
+    required: false,
+  },
+  ftTopH: {
+    type: Number,
+    required: false,
+  },
+  ftTopA1: {
+    type: Number,
+    required: false,
+  },
+  ftTopB1: {
+    type: Number,
+    required: false,
+  },
+  ftTopH1: {
+    type: Number,
+    required: false,
+  },
+  ftTopJ1: {
+    type: Number,
+    required: false,
+  },
+  ftTopK1: {
+    type: Number,
+    required: false,
+  },
+  ftTopL1: {
+    type: Number,
+    required: false,
+  },
+  ftTopM1: {
+    type: Number,
+    required: false,
+  },
+  ftTopN1: {
+    type: Number,
+    required: false,
+  },
+  ftTopP1: {
+    type: Number,
+    required: false,
+  },
+  ftTopR1: {
+    type: Number,
+    required: false,
+  },
 });
 
-const FT_OPCO = mongoose.models.FT_OPCO || mongoose.model('FT_OPCO', FT_OPCO_Schema);
+const FT_OPCO =
+  mongoose.models.FT_OPCO || mongoose.model("FT_OPCO", FT_OPCO_Schema);
 module.exports = FT_OPCO;
