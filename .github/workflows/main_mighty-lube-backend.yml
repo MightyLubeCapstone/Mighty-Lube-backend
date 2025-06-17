@@ -11,24 +11,24 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Setup SSH key
-      run: |
-        mkdir -p ~/.ssh
-        echo "${{ secrets.GCP_SSH_KEY }}" > ~/.ssh/id_ed25519
-        chmod 600 ~/.ssh/id_ed25519
-        ssh-keyscan -H ${{ secrets.GCP_VM_HOST }} >> ~/.ssh/known_hosts
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.GCP_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H ${{ secrets.GCP_VM_HOST }} >> ~/.ssh/known_hosts
 
-    - name: TEST
-      run: ssh ${{ secrets.GCP_VM_USER }}@${{ secrets.GCP_VM_HOST }} "echo Hello from VM"
-      
-    - name: Deploy to VM
-      run: |
-        ssh ${{ secrets.GCP_VM_USER }}@${{ secrets.GCP_VM_HOST }} << 'EOF'
-          cd ~/apps/Mighty-Lube-backend
-          git pull origin main
-          npm install
-          /run/user/1000/fnm_multishells/933_1748467027661/bin/pm2 restart all || /run/user/1000/fnm_multishells/933_1748467027661/bin/pm2 start app.js --name "mighty-lube"
-        EOF
+      - name: TEST
+        run: ssh ${{ secrets.GCP_VM_USER }}@${{ secrets.GCP_VM_HOST }} "echo Hello from VM"
+
+      - name: Deploy to VM
+        run: |
+          ssh ${{ secrets.GCP_VM_USER }}@${{ secrets.GCP_VM_HOST }} << 'EOF'
+            cd ~/Mighty-Lube-backend
+            git pull origin main
+            npm install
+            pm2 restart all || pm2 start app.js --name "mighty-lube"
+          EOF
