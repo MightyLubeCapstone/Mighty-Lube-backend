@@ -31,7 +31,7 @@ app.use("/api/drafts", draftsRoute);
 app.use("/api/configurations", configurationsRoute);
 app.use("/api/email", emailRoute);
 
-// run app
+// run app without .env vars
 app.listen(8080, '0.0.0.0', () => {
 	dbConnect();
 	console.log(`Listening on port ${port}...`);
