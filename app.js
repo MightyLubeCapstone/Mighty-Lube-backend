@@ -34,5 +34,5 @@ app.use("/api/email", emailRoute);
 // run app without .env vars
 app.listen(8080, '0.0.0.0', () => {
 	dbConnect();
-	console.log(`Listening on port ${port}...`);
+	console.log(`Listening on port 8080...`);
 });
