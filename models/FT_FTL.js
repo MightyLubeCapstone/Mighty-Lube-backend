@@ -2,7 +2,6 @@ const mongoose = require("mongoose");
 const templateA = require("./templateA.js");
 const templateE = require("./templateE.js");
 
-
 const FT_FTL_Schema = new mongoose.Schema({
   conveyorName: {
     type: String,
@@ -183,7 +182,6 @@ const FT_FTL_Schema = new mongoose.Schema({
   },
 
   templateEData: templateE,
-
 
   externalLubeStatus: {
     type: Number,
