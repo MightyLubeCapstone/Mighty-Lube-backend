@@ -1,4 +1,4 @@
-const enumMappingsFC_317 = {
+const enumMappingsFC_TCG = {
 
 	industrialChainManufacturer: { 1: "Daifuku", 2: "Frost", 3: "NKC", 4: "Pacline", 5: "Rapid", 6: "WEBB", 7: "Webb-Stiles", 8: "Wilkie Brothers", 9: "Other" },
 	
@@ -91,4 +91,4 @@ const enumMappingsFC_317 = {
 
 };
 
-module.exports = enumMappingsFC_317;
+module.exports = enumMappingsFC_TCG;
