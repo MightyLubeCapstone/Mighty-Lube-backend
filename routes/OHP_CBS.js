@@ -12,16 +12,15 @@ router.post("/", authenticate, async (req, res) => {
             conveyorName: OHP_CBSData.conveyorName,
             chainSize: OHP_CBSData.chainSize,
             ...(OHP_CBSData.otherChainSize && { otherChainSize: OHP_CBSData.otherChainSize }),
+            railSize: OHP_CBSData.railSize,
             industrialChainManufacturer: OHP_CBSData.industrialChainManufacturer,
             ...(OHP_CBSData.otherChainManufacturer && { otherChainManufacturer: OHP_CBSData.otherChainManufacturer }),
-            conveyorLength: OHP_CBSData.conveyorLength,
-            measurementUnit: OHP_CBSData.measurementUnit,
-            appEnviroment: OHP_CBSData.appEnviroment,
+            ...(OHP_CBSData.conveyorLength && { conveyorLength: OHP_CBSData.conveyorLength }),
+            ...(OHP_CBSData.measurementUnit && { measurementUnit: OHP_CBSData.measurementUnit }),
+            ...(OHP_CBSData.appEnviroment && { appEnviroment: OHP_CBSData.appEnviroment }),
             ...(OHP_CBSData.ovenStatus && { ovenStatus: OHP_CBSData.ovenStatus }),
             ...(OHP_CBSData.ovenTemp && { ovenTemp: OHP_CBSData.ovenTemp }),
-            ohpUnit: OHP_CBSData.ohpUnit,
-            ohpDiameter: OHP_CBSData.ohpDiameter,
-            ohpHeight: OHP_CBSData.ohpHeight
+            ...(OHP_CBSData.otherAppEnviroment && { otherAppEnviroment: OHP_CBSData.otherAppEnviroment }),
         });
         req.user.cart.push({
             numRequested,

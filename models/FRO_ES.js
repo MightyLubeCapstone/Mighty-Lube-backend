@@ -18,13 +18,12 @@ const FRO_ES_Schema = new mongoose.Schema({
         enum: [1, 2, 3, 4, 5, 6, 7, 8, 9],
         required: false,
     },
-    // otherChainManufacturer: {
-    //     type: String,
-    //     required: function () {
-    //         return this.industrialChainManufacturer === 9;
-    //     },
-    // },
-    conveyorLength: {
+    otherChainManufacturer: {
+        type: String,
+        required: function () {
+            return this.industrialChainManufacturer === 9;
+        },
+    },    conveyorLength: {
         type: Number,
         required: false,
     },

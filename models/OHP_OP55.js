@@ -26,13 +26,12 @@ const OHP_OP55Schema = new mongoose.Schema({
         required: true,
     },
 
-    // otherChainManufacturer: {
-    //     type: String,
-    //     required: function () {
-    //         return this.industrialChainManufacturer === 9;
-    //     },
-    // },
-
+    otherChainManufacturer: {
+        type: String,
+        required: function () {
+            return this.industrialChainManufacturer === 9;
+        },
+    },
     conveyorLength: {
         type: Number,
         required: true,
@@ -139,10 +138,11 @@ const OHP_OP55Schema = new mongoose.Schema({
         required: false,
     },
 
-    ohpUnit: {
-        type: Number,
-        required: true,
-    },
+  ohpUnitType: {
+    type: Number,
+    enum: [1, 2, 3, 4],
+    required: false,
+  },
 
     chainDrop: {
         type: Number,

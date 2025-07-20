@@ -7,8 +7,14 @@ module.exports = {
     COE_CEL_Mapping: require("./COE_CEL_Mappings.js"),
     COE_OP4OE_Mapping: require("./COE_OP4OE_Mappings.js"), 
     FT_FTL_Mapping: require("./FT_FTL_Mappings.js"),
-    FT_OP4OE_Mapping :require("./FT_OP4OE_Mappings.js"),
+    FT_OP4OE_Mapping: require("./FT_OP4OE_Mappings.js"),
     FT_OPCO_Mapping: require("./FT_OPCO_Mappings.js"),
     IBR_OP4OE_Mapping: require("./IBR_OP4OE_Mappings.js"),
-    IBR_RFC_Mapping: require("./IBR_RFC_Mappings.js")
-};
+    IBR_RFC_Mapping: require("./IBR_RFC_Mappings.js"),
+    OHP_001_Mapping: require("./OHP_001_Mappings.js"),
+    OHP_2100I_Mapping: require("./OHP_2100I_Mappings.js"),
+    OHP_9000I_Mapping: require("./OHP_9000I_Mappings.js"),
+    OHP_CBS_Mapping: require("./OHP_CBS_Mappings.js"),
+    OHP_CDL_Mapping: require("./OHP_CDL_Mappings.js"),
+    OHP_ES_Mapping: require("./OHP_ES_Mappings.js")
+}; 

@@ -18,13 +18,12 @@ const IFT_OP4OE_Schema = new mongoose.Schema({
         enum: [1, 2, 3, 4, 5, 6, 7, 8, 9],
         required: false,
     },
-    // otherChainManufacturer: {
-    //     type: String,
-    //     required: function () {
-    //         return this.industrialChainManufacturer === 9;
-    //     },
-    // },
-    wheelManufacturer: {
+    otherChainManufacturer: {
+        type: String,
+        required: function () {
+            return this.industrialChainManufacturer === 9;
+        },
+    },    wheelManufacturer: {
         type: Number,
         enum: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
         required: false,
