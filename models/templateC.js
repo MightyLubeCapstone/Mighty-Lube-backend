@@ -6,7 +6,7 @@ const templateC = new mongoose.Schema({
     type: String,
     required: true,
   },
-
+ 
   industrialChainManufacturer: {
     type: Number,
     enum: [1, 2, 3, 4, 5, 6, 7, 8, 9],

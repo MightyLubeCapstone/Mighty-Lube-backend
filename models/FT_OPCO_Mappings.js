@@ -18,8 +18,7 @@ const enumMappingsFT_OPCO = {
 
   surroundingTemp: { 1: "Yes", 2: "No" },
 
-  conveyorLoaded: { 1: "Yes", 2: "No" },
-
+  conveyorLoaded: {1:"Loaded", 2:"Unloaded"},
   strandStatus: { 1: "Yes", 2: "No" },
 
   conveyorSwing: { 1: "Yes", 2: "No" },

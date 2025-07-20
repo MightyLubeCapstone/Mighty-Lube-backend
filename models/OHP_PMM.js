@@ -20,13 +20,12 @@ const OHP_PMMSchema = new mongoose.Schema({
         required: true,
     },
 
-    // otherChainManufacturer: {
-    //     type: String,
-    //     required: function () {
-    //         return this.industrialChainManufacturer === 9;
-    //     },
-    // },
-
+    otherChainManufacturer: {
+        type: String,
+        required: function () {
+            return this.industrialChainManufacturer === 9;
+        },
+    },
     existingMonitor: {
 
         type: Number,

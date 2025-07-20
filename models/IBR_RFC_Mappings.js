@@ -16,8 +16,7 @@ const enumMappingsIBR_RFC = {
 
   surroundingTemp: { 1: "Yes", 2: "No" },
 
-  conveyorLoaded: { 1: "Yes", 2: "No" },
-
+  conveyorLoaded: {1:"Loaded", 2:"Unloaded"},
   conveyorSwing: { 1: "Yes", 2: "No" },
 
   plantLayout: { 1: "Yes", 2: "No" },

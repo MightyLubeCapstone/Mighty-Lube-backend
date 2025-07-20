@@ -1,123 +1,109 @@
-const mongoose = require('mongoose');
-const templateA = require("./templateA.js");
-const getDecodedInfo = require("./getDecodedInfo.js");  
+const mongoose = require("mongoose");
 
 const OHP_001Schema = new mongoose.Schema({
+  conveyorName: {
+    type: String,
+    required: true,
+  },
 
-    conveyorName: {
-        type: String,
-        required: true,
+  chainSize: {
+    type: Number,
+    enum: [1, 2, 3, 4, 5],
+    required: true,
+  },
+
+  otherChainSize: {
+    type: String,
+    required: function () {
+      return this.chainSize === 5;
     },
+  },
 
-    chainSize: {
-        type: Number,
-        enum: [1, 2, 3, 4, 5, 6, 7, 8],
-        required: true,
+  industrialChainManufacturer: {
+    type: Number,
+    enum: [1, 2, 3, 4, 5, 6, 7, 8, 9],
+    required: true,
+  },
+
+  otherChainManufacturer: {
+    type: String,
+    required: function () {
+      return this.industrialChainManufacturer === 9;
     },
+  },
 
-    // otherChainSize: {
-    //     type: String,
-    //     required: function () {
-    //         return this.chainSize === 8;
-    //     },
-    // },
+  railSize: {
+    type: Number,
+    enum: [1, 2, 3],
+    require: true,
+  },
 
-    industrialChainManufacturer: {
-        type: Number,
-        enum: [1, 2, 3, 4, 5, 6, 7, 8, 9],
-        required: true,
+  appEnviroment: {
+    type: Number,
+    enum: [1, 2, 3, 4, 5, 6, 7],
+    required: false,
+  },
+
+  ovenStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: function () {
+      return this.appEnviroment === 3;
     },
+  },
 
-    // otherChainManufacturer: {
-    //     type: String,
-    //     required: function () {
-    //         return this.industrialChainManufacturer === 9;
-    //     },
-    // },
-
-    conveyorLength: {
-        type: Number,
-        required: true,
+  ovenTemp: {
+    type: Number,
+    required: function () {
+      return this.appEnviroment === 3;
     },
+  },
 
-    measurementUnit: {
-
-        type: Number,
-        enum: [1, 2, 3, 4],
-        required: true,
-
+  otherAppEnviroment: {
+    type: String,
+    required: function () {
+      return this.appEnviroment === 7;
     },
+  },
 
-    conveyorSpeed: {
-        type: Number,
-        required: true,
-    },
+  operatingVoltage: {
+    type: Number,
+    required: true,
+  },
+  
+  surroundingTemp: {
+    type: Number,
+    enum: [1, 2],
+    required: false,
+  },
 
-    speedUnit: {
+  ohpUnit: {
+    type: Number,
+    enum: [1, 2, 3, 4],
+    required: false,
+  },
 
-        type: Number,
-        enum: [1, 2],
-        required: true,
+  chainDrop: {
+    type: Number,
+    required: false,
+  },
 
-    },
+  ohpDiameter: {
+    type: Number,
+    required: true,
+  },
 
-    appEnviroment: {
+  ohpWidth: {
+    type: Number,
+    required: true,
+  },
 
-        type: Number,
-        enum: [1, 2, 3, 4, 5, 6, 7],
-        required: true,
-
-    },
-
-    // Required if appEnviroment === 1
-    ovenStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: function () {
-            return this.appEnviroment === 1;
-        }
-    },
-
-    ovenTemp: {
-        type: Number,
-        required: function () {
-            return this.appEnviroment === 1;
-        }
-    },
-
-    surroundingTemp: {
-        type: Number,
-        enum: [1, 2],
-        required: true,
-    },
-
-    ohpUnit: {
-        type: Number,
-        enum: [1, 2, 3, 4],
-        required: true,
-    },
-
-    chainDrop: {
-        type: Number,
-        required: false,
-    },
-
-    ohpDiameter: {
-        type: Number,
-        required: true,
-    },
-
-    ohpWidth: {
-        type: Number,
-        required: true,
-    },
-
-    ohpHeight: {
-        type: Number,
-        required: true,
-    },
-
+  ohpHeight: {
+    type: Number,
+    required: true,
+  },
 });
 
-const OHP_001 = mongoose.models.OHP_001 || mongoose.model('OHP_001', OHP_001Schema);
+const OHP_001 =
+  mongoose.models.OHP_001 || mongoose.model("OHP_001", OHP_001Schema);
 module.exports = OHP_001;
