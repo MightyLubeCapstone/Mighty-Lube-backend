@@ -16,5 +16,15 @@ module.exports = {
     OHP_9000I_Mapping: require("./OHP_9000I_Mappings.js"),
     OHP_CBS_Mapping: require("./OHP_CBS_Mappings.js"),
     OHP_CDL_Mapping: require("./OHP_CDL_Mappings.js"),
-    OHP_ES_Mapping: require("./OHP_ES_Mappings.js")
+    OHP_ES_Mapping: require("./OHP_ES_Mappings.js"), 
+    OHP_139A_Mapping: require("./OHP_139A_Mappings.js"),
+    OHP_OEB_Mapping: require("./OHP_OEB_Mappings.js"),
+    OHP_YCB_Mapping: require("./OHP_YCB_Mappings.js"),
+    OHP_PMM_Mapping: require("./OHP_PMM_Mappings.js"),
+    OHP_OP55_Mapping: require("./OHP_OP55_Mappings.js"),
+    OHP_OP8NP_Mapping: require("./OHP_OP8NP_Mappings.js"),
+    OHP_OP13_Mapping: require("./OHP_OP13_Mappings.js"),
+    OHP_PML_Mapping: require("./OHP_PML_Mappings.js"),
+    OHP_OP8_Mapping: require("./OHP_OP8_Mappings.js"),
+    
 }; 

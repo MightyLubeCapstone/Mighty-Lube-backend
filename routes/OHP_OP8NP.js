@@ -14,17 +14,17 @@ router.post("/", authenticate, async (req, res) => {
             ...(OHP_OP8NPData.otherChainSize && { otherChainSize: OHP_OP8NPData.otherChainSize }),
             industrialChainManufacturer: OHP_OP8NPData.industrialChainManufacturer,
             ...(OHP_OP8NPData.otherChainManufacturer && { otherChainManufacturer: OHP_OP8NPData.otherChainManufacturer }),
-            conveyorLength: OHP_OP8NPData.conveyorLength,
-            measurementUnit: OHP_OP8NPData.measurementUnit,
-            appEnviroment: OHP_OP8NPData.appEnviroment,
+            ...(OHP_OP8NPData.appEnviroment && { appEnviroment: OHP_OP8NPData.appEnviroment }),
             ...(OHP_OP8NPData.ovenStatus && { ovenStatus: OHP_OP8NPData.ovenStatus }),
             ...(OHP_OP8NPData.ovenTemp && { ovenTemp: OHP_OP8NPData.ovenTemp }),
-            conveyorLoaded: OHP_OP8NPData.conveyorLoaded,
-            ohpUnit: OHP_OP8NPData.ohpUnit,
+            ...(OHP_OP8NPData.otherAppEnviroment && { otherAppEnviroment: OHP_OP8NPData.otherAppEnviroment }),
+            brushStatus: OHP_OP8NPData.brushStatus,
+            ...(OHP_OP8NPData.conveyorLoaded && { conveyorLoaded: OHP_OP8NPData.conveyorLoaded }),
+            ...(OHP_OP8NPData.ohpUnit && { ohpUnit: OHP_OP8NPData.ohpUnit }),
             ...(OHP_OP8NPData.chainDrop && { chainDrop: OHP_OP8NPData.chainDrop }),
-            ohpDiameter: OHP_OP8NPData.ohpDiameter,
-            ohpWidth: OHP_OP8NPData.ohpWidth,
-            ohpHeight: OHP_OP8NPData.ohpHeight
+            ...(OHP_OP8NPData.ohpDiameter && { ohpDiameter: OHP_OP8NPData.ohpDiameter }),
+            ...(OHP_OP8NPData.ohpWidth && { ohpWidth: OHP_OP8NPData.ohpWidth }),
+            ...(OHP_OP8NPData.ohpHeight && { ohpHeight: OHP_OP8NPData.ohpHeight }),
         });
         req.user.cart.push({
             numRequested,
@@ -39,4 +39,4 @@ router.post("/", authenticate, async (req, res) => {
     }
 });
 
-module.exports = router;
+module.exports = router; 

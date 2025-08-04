@@ -35,6 +35,10 @@
     op201Controller: { 1: "Yes", 2: "No" },
     
     op201Order: { 1: "Yes", 2: "No" },
+
+    existingMonitor: { 1: "Yes", 2: "No" },
+
+    newMonitor: { 1: "Yes", 2: "No" },
     
     monitorData: {
 
