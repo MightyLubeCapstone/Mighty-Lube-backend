@@ -14,17 +14,17 @@ router.post("/", authenticate, async (req, res) => {
             ...(OHP_OEBData.otherChainSize && { otherChainSize: OHP_OEBData.otherChainSize }),
             industrialChainManufacturer: OHP_OEBData.industrialChainManufacturer,
             ...(OHP_OEBData.otherChainManufacturer && { otherChainManufacturer: OHP_OEBData.otherChainManufacturer }),
-            conveyorLength: OHP_OEBData.conveyorLength,
-            conveyorLengthUnit: OHP_OEBData.conveyorLengthUnit,
-            appEnviroment: OHP_OEBData.appEnviroment,
+            ...(OHP_OEBData.appEnviroment && { appEnviroment: OHP_OEBData.appEnviroment }),
             ...(OHP_OEBData.ovenStatus && { ovenStatus: OHP_OEBData.ovenStatus }),
             ...(OHP_OEBData.ovenTemp && { ovenTemp: OHP_OEBData.ovenTemp }),
-            surroundingTemp: OHP_OEBData.surroundingTemp,
-            ohpUnitType: OHP_OEBData.ohpUnitType,
+            ...(OHP_OEBData.otherAppEnviroment && { otherAppEnviroment: OHP_OEBData.otherAppEnviroment }),
+            ...(OHP_OEBData.surroundingTemp && { surroundingTemp: OHP_OEBData.surroundingTemp }),
+            ...(OHP_OEBData.ohpUnitType && { ohpUnitType: OHP_OEBData.ohpUnitType }),
             chainDrop: OHP_OEBData.chainDrop,
-            ohpDiameter: OHP_OEBData.ohpDiameter,
-            ohpWidth: OHP_OEBData.ohpWidth,
-            ohpHeight: OHP_OEBData.ohpHeight
+            ...(OHP_OEBData.ohpDiameter && { ohpDiameter: OHP_OEBData.ohpDiameter }),
+            ...(OHP_OEBData.ohpWidth && { ohpWidth: OHP_OEBData.ohpWidth }),
+            ...(OHP_OEBData.ohpHeight && { ohpHeight: OHP_OEBData.ohpHeight }),
+
         });
         req.user.cart.push({
             numRequested,

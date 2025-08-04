@@ -14,13 +14,15 @@ router.post("/", authenticate, async (req, res) => {
             ...(OHP_YCBData.otherChainSize && { otherChainSize: OHP_YCBData.otherChainSize }),
             industrialChainManufacturer: OHP_YCBData.industrialChainManufacturer,
             ...(OHP_YCBData.otherChainManufacturer && { otherChainManufacturer: OHP_YCBData.otherChainManufacturer }),
-            conveyorLength: OHP_YCBData.conveyorLength,
-            conveyorLengthUnit: OHP_YCBData.conveyorLengthUnit,
-            appEnviroment: OHP_YCBData.appEnviroment,
+            ...(OHP_YCBData.conveyorLength && { conveyorLength: OHP_YCBData.conveyorLength }),
+            ...(OHP_YCBData.conveyorLengthUnit && { conveyorLengthUnit: OHP_YCBData.conveyorLengthUnit }),
+            ...(OHP_YCBData.appEnviroment && { appEnviroment: OHP_YCBData.appEnviroment }),
             ...(OHP_YCBData.ovenStatus && { ovenStatus: OHP_YCBData.ovenStatus }),
             ...(OHP_YCBData.ovenTemp && { ovenTemp: OHP_YCBData.ovenTemp }),
-            ohpUnitType: OHP_YCBData.ohpUnitType,
-            ohpHeight: OHP_YCBData.ohpHeight
+            ...(OHP_YCBData.otherAppEnviroment && { otherAppEnviroment: OHP_YCBData.otherAppEnviroment }),
+            ...(OHP_YCBData.ohpUnitType && { ohpUnitType: OHP_YCBData.ohpUnitType }),
+            ...(OHP_YCBData.ohpHeight && { ohpHeight: OHP_YCBData.ohpHeight }),
+
         });
         req.user.cart.push({
             numRequested,

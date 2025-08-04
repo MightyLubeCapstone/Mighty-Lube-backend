@@ -1,5 +1,8 @@
 const mongoose = require("mongoose");
 const templateA = require("./templateA.js");
+const templateB = require("./templateB.js");
+const templateC = require("./templateC.js");
+
 
 const OHP_ESSchema = new mongoose.Schema({
   conveyorName: {
