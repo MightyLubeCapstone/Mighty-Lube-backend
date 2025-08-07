@@ -2,7 +2,6 @@ const express = require("express");
 const { dbConnect } = require("../config/config");
 const { authenticate } = require("./sessions");
 const COE_CDL = require("../models/COE_CDL");
- 
 
 const router = express.Router();
 
@@ -30,3 +29,5 @@ router.post("/", authenticate, async (req, res) => {
         res.status(500).json({ error: "Internal server error" });
     }
 });
+
+module.exports = router;
