@@ -11,21 +11,28 @@ const app = express();
 app.use(bodyParser.json());
 app.use(cors());
 
-// Import route modules
+
+// base routes
 const usersRoute = require("./routes/users");
-const fglmRoute = require("./routes/fglm");
-const fgcoRoute = require("./routes/fgco");
 const { sessionsRoute } = require("./routes/sessions");
 const cartRoute = require("./routes/cart");
 const draftsRoute = require("./routes/drafts");
 const emailRoute = require("./routes/email");
 const configurationsRoute = require("./routes/configurations");
 
+// page routes
+const fglmRoute = require("./routes/fglm");
+const fgcoRoute = require("./routes/fgco");
+const cc5clRoute = require("./routes/CC5_CL");
+const cc5op4OeRoute = require("./routes/CC5_OP4OE");
+
 // Use route modules
 app.use("/api/users", usersRoute);
 app.use("/api/sessions", sessionsRoute);
 app.use("/api/fglm", fglmRoute);
 app.use("/api/fgco", fgcoRoute);
+app.use("/api/cc5_cl", cc5clRoute);
+app.use("/api/cc5_op40e", cc5op4OeRoute);
 app.use("/api/cart", cartRoute);
 app.use("/api/drafts", draftsRoute);
 app.use("/api/configurations", configurationsRoute);
