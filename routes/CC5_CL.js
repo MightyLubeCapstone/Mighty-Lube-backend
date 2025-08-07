@@ -33,7 +33,7 @@ router.post("/", authenticate, async (req, res) => {
             operatingVoltage: CC5_CLData.operatingVoltage,
             existingMonitor: CC5_CLData.existingMonitor,
             newMonitor: CC5_CLData.newMonitor,
-            monitorData: new templateA({
+            monitorData: {
                 ...(CC5_CLData.templateA.dcuStatus && { dcuStatus: CC5_CLData.templateA.dcuStatus }),
                 ...(CC5_CLData.templateA.dcuNum && { dcuNum: CC5_CLData.templateA.dcuNum }),
                 ...(CC5_CLData.templateA.existingWindows && { existingWindows: CC5_CLData.templateA.existingWindows }),
@@ -91,7 +91,7 @@ router.post("/", authenticate, async (req, res) => {
                 ...(CC5_CLData.templateA.specialControllerOptions && { specialControllerOptions: CC5_CLData.templateA.specialControllerOptions }),
                 ...(CC5_CLData.templateA.operatingVoltage && { operatingVoltage: CC5_CLData.templateA.operatingVoltage })
 
-            }),
+            },
             outboardStatus: CC5_CLData.outboardStatus,
             highRollerStatus: CC5_CLData.highRollerStatus,
             ...(CC5_CLData.lubeBrand && { lubeBrand: CC5_CLData.lubeBrand }),
