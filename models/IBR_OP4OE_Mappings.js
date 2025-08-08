@@ -14,7 +14,7 @@ const enumMappingsIBR_OP4OE = {
 
   ovenStatus: { 1: "Yes", 2: "No" },
 
-  strandStatus: { 1: "Yes", 2: "No" },
+  strandStatus: { 1: "Single", 2: "Double" },
 
   pointsOfLube: { 1: "8", 2: "10", 3: "12", 4: "14", 5: "16" },
 
@@ -23,6 +23,7 @@ const enumMappingsIBR_OP4OE = {
   surroundingTemp: { 1: "Yes", 2: "No" },
 
   conveyorLoaded: {1:"Loaded", 2:"Unloaded"},
+  
   conveyorSwing: { 1: "Yes", 2: "No" },
 
   plantLayout: { 1: "Yes", 2: "No" },
@@ -97,9 +98,9 @@ const enumMappingsIBR_OP4OE = {
 
   timerStatus: { 1: "Not Required", 2: "12 Hour", 3: "1000 Hour" },
 
-  electricStatus: { 1: "Yes", 2: "No" },
+  electricStatus: { 1: "On", 2: "Off" },
 
-  pneumaticStatus: { 1: "Yes", 2: "No" },
+  pneumaticStatus: { 1: "On", 2: "Off" },
 
   mightyLubeMonitoring: { 1: "Yes", 2: "No" },
 

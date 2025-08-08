@@ -2,7 +2,6 @@ const enumMappingsCOE_OP4OE = {
 
     chainSize: {1: "X348 Chain (3\")", 2: "X458 Chain (4\")", 3: "X678 Chain (6\")", 4: "3/8\" Log Chain", 5: "Other"},
 
-
     industrialChainManufacturer: { 1: "Daifuku", 2: "Frost", 3: "NKC", 4: "Pacline", 5: "Rapid", 6: "WEBB", 7: "Webb-Stiles", 8: "Wilkie Brothers", 9: "Other" },
 
     conveyorLengthUnit: { 1: "Feet", 2: "Inches", 3: "Meters", 4: "Millimeters" },
@@ -15,10 +14,10 @@ const enumMappingsCOE_OP4OE = {
 
     ovenStatus: { 1: "Yes", 2: "No" },
 
-
     surroundingTemp: { 1: "Yes", 2: "No" },
 
     conveyorLoaded: {1:"Loaded", 2:"Unloaded"},
+
     conveyorSwing: { 1: "Yes", 2: "No" },
 
     plantLayout: { 1: "Yes", 2: "No" },
@@ -188,7 +187,7 @@ const enumMappingsCOE_OP4OE = {
 	
 	electricStatus: { 1: "On", 2: "Off" },
 
-    pneumaticStatus: { 1: "Yes", 2: "No" },
+    pneumaticStatus: { 1: "On", 2: "Off" },
 	
 	mightyLubeMonitoring: { 1: "Yes", 2: "No" },
 	

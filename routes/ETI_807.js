@@ -13,9 +13,7 @@ router.post("/", authenticate, async (req, res) => {
         const order = new ETI_807({
             conveyorName: ETI_807Data.conveyorName,
             industrialChainManufacturer: ETI_807Data.industrialChainManufacturer,
-            ...(ETI_807Data.otherIndustrialChainManufacturer && { 
-                otherIndustrialChainManufacturer: ETI_807Data.otherIndustrialChainManufacturer 
-            }),
+            ...(ETI_807Data.otherIndustrialChainManufacturer && { otherIndustrialChainManufacturer: ETI_807Data.otherIndustrialChainManufacturer }),
             conveyorLength: ETI_807Data.conveyorLength,
             conveyorLengthUnit: ETI_807Data.conveyorLengthUnit,
         });

@@ -16,7 +16,7 @@ const enumMappingsCC5_CL = {
 
     surroundingTemp: { 1: "Yes", 2: "No" },
 
-    strandStatus: { 1: "Yes", 2: "No" },
+    strandStatus: { 1: "Single", 2: "Double" },
 
     plantLayout: { 1: "Yes", 2: "No" },
 

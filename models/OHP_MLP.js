@@ -5,7 +5,6 @@ const OHP_MLPSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-
   chainSize: {
     type: Number,
     enum: [1, 2, 3, 4, 5],
@@ -18,13 +17,11 @@ const OHP_MLPSchema = new mongoose.Schema({
       return this.chainSize === 5;
     },
   },
-
   industrialChainManufacturer: {
     type: Number,
     enum: [1, 2, 3, 4, 5, 6, 7, 8, 9],
     required: true,
   },
-
   otherChainManufacturer: {
     type: String,
     required: function () {
@@ -35,35 +32,29 @@ const OHP_MLPSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
-
   conveyorLengthUnit: {
     type: Number,
     enum: [1, 2, 3, 4],
     required: true,
   },
-
   conveyorSpeed: {
     type: Number,
     required: true,
   },
-
-  conveyorSpeedUnit: {
+  speedUnit: {
     type: Number,
     enum: [1, 2],
     required: true,
   },
-
   conveyorIndex: {
     type: Number,
     required: true,
   },
-
   travelDirection: {
     type: Number,
     enum: [1, 2],
     required: true,
   },
-
   appEnviroment: {
     type: Number,
     enum: [1, 2, 3, 4, 5, 6, 7],
@@ -91,6 +82,7 @@ const OHP_MLPSchema = new mongoose.Schema({
       return this.appEnviroment === 7;
     },
   },
+
   surroundingTemp: {
     type: Number,
     enum: [1, 2],
@@ -109,6 +101,12 @@ const OHP_MLPSchema = new mongoose.Schema({
     required: true,
   },
 
+  orientationType: {
+    type: Number,
+    enum: [1, 2, 3],
+    required: true,
+  },
+
   operatingVoltSingle: {
     type: Number,
     required: true,
@@ -122,15 +120,22 @@ const OHP_MLPSchema = new mongoose.Schema({
   existingMonitor: {
     type: Number,
     enum: [1, 2],
-    required: false,
+    required: true,
   },
 
   newMonitor: {
     type: Number,
     enum: [1, 2],
-    required: false,
+    required: true,
+    validate: {
+      validator: function (value) {
+        return !(this.existingMonitor === 1 && value === 1);
+      },
+      message: "Existing monitor and New Monitor cannot both be 1.",
+    },
   },
-  // monitorData: templateA,
+
+  monitorData: templateA,
 
   wheelOpenType: {
     type: Number,
@@ -206,23 +211,43 @@ const OHP_MLPSchema = new mongoose.Schema({
     required: true,
   },
 
+  reservoirSize: {
+    type: Number,
+    enum: [1, 2, 3],
+    required: true,
+  },
+
+  otherReservoirSize: {
+    type: String,
+    required: function () {
+      return this.reservoirSize === 3;
+    },
+  },
+
+  reservoirSizeNum: {
+    type: Number,
+    required: true,
+  },
+
   chainCleanStatus: {
     type: Number,
     enum: [1, 2],
     required: true,
   },
 
-  ohpUnitType: {
-    type: Number, // Converted to simple type instead of ref
-    required: true,
-  },
-
-  chainDrop: {
+  specialControllerOptions: {
     type: Number,
     required: true,
+    enum: [1, 2, 3],
   },
 
-  ohpDiameter: {
+  ohpUnitType: {
+    type: Number,
+    enum: [1, 2, 3, 4],
+    required: true,
+  },
+
+  ohpVertical: {
     type: Number,
     required: true,
   },
@@ -236,6 +261,29 @@ const OHP_MLPSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+
+  ohpDiameter: {
+    type: Number,
+    required: true,
+  },
+
+  ohpWidthInverted: {
+    type: Number,
+    required: true,
+  },
+
+
+  distanceFromReservouir: {
+    type: Number,
+    required: true,
+  },
+
+  overSprayBrushStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },
+
 });
 
 const OHP_MLP = mongoose.model("tblOHP_MLP", OHP_MLPSchema);

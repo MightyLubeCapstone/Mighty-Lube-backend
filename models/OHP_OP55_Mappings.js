@@ -20,7 +20,7 @@
 
     electricStatus: { 1: "On", 2: "Off" },
 
-    pneumaticStatus: { 1: "Yes", 2: "No" },
+    pneumaticStatus: { 1: "On", 2: "Off" },
 
     plcConnection: { 1: "Yes", 2: "No" },
 

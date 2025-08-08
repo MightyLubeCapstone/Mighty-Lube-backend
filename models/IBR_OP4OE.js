@@ -37,7 +37,7 @@ const IBR_OP4OE_Schema = new mongoose.Schema({
   conveyorLengthUnit: {
     type: Number,
     enum: [1, 2, 3, 4],
-    required: true,
+    required: false,
   },
   conveyorSpeed: {
     type: Number,
@@ -46,7 +46,7 @@ const IBR_OP4OE_Schema = new mongoose.Schema({
   speedUnit: {
     type: Number,
     enum: [1, 2],
-    required: true,
+    required: false,
   },
   conveyorIndex: {
     type: Number,

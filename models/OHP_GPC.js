@@ -118,6 +118,12 @@ const OHP_GPCSchema = new mongoose.Schema({
     required: true,
   },
 
+  swingStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },
+
   conveyorLoaded: {
     type: Number,
     enum: [1, 2],
@@ -127,7 +133,7 @@ const OHP_GPCSchema = new mongoose.Schema({
   plantLayout: {
     type: Number,
     enum: [1, 2],
-    required: true,
+    required: false,
   },
 
   operatingVoltSingle: {
@@ -135,18 +141,36 @@ const OHP_GPCSchema = new mongoose.Schema({
     required: true,
   },
 
+  controlVoltSingle: {
+    type: Number,
+    required: true,
+  },
+
+  compressedAir: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },
+
   existingMonitor: {
     type: Number,
     enum: [1, 2],
-    required: false,
+    required: true,
   },
 
   newMonitor: {
     type: Number,
     enum: [1, 2],
-    required: false,
+    required: true,
+    validate: {
+      validator: function (value) {
+        return !(this.existingMonitor === 1 && value === 1);
+      },
+      message: "Existing monitor and New Monitor cannot both be 1.",
+    },
   },
-  // monitorData: templateA,
+
+  monitorData: templateA,
 
   currentGrease: {
     type: String,
@@ -158,100 +182,150 @@ const OHP_GPCSchema = new mongoose.Schema({
     required: true,
   },
 
+  wheelDiameter: {
+    type: Number,
+    required: true,
+  },
+
+  lubeBrand: {
+    type: String,
+    required: true,
+  },
+
   chainMaster: {
     type: Number,
     enum: [1, 2],
-    required: true,
+    required: function () {
+      return this.lubeBrand === "Mighty Lube";
+    },
   },
 
   remoteStatus: {
     type: Number,
     enum: [1, 2],
-    required: true,
+    required: function () {
+      return this.lubeBrand === "Mighty Lube";
+    },
   },
 
   mountStatus: {
     type: Number,
     enum: [1, 2],
-    required: true,
+    required: function () {
+      return this.lubeBrand === "Mighty Lube";
+    },
   },
 
   otherUnitStatus: {
     type: Number,
     enum: [1, 2],
-    required: true,
+    required: function () {
+      return this.lubeBrand === "Mighty Lube";
+    },
   },
 
   timerStatus: {
     type: Number,
     enum: [1, 2, 3],
-    required: false,
+    required: function () {
+      return this.lubeBrand === "Mighty Lube";
+    },
+  },
+
+  electricStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: function () {
+      return this.lubeBrand === "Mighty Lube";
+    },
   },
 
   mightyLubeMonitoring: {
     type: Number,
     enum: [1, 2],
-    required: true,
+    required: function () {
+      return this.lubeBrand === "Mighty Lube";
+    },
   },
 
   preMountType: {
     type: Number,
-    required: true,
+    enum: [1, 2, 3],
+    required: function () {
+      return this.lubeBrand === "Mighty Lube";
+    },
+  },
+
+  otherPreMountType: {
+    type: String,
+    required: function () {
+      return this.preMountType === 3;
+    },
+  },
+
+  plcConnection: {
+    type: Number,
+    enum: [1, 2],
+    required: function () {
+      return this.lubeBrand === "Mighty Lube";
+    },
   },
 
   otherControllerNotes: {
     type: String,
-    required: true,
+    required: function () {
+      return this.lubeBrand === "Mighty Lube";
+    },
   },
-
   gpcUnitType: {
-    type: Number, // Converted to simple type instead of ref
-    required: true,
+    type: Number,
+    enum: [1, 2, 3, 4],
+    required: false,
   },
 
   chainDrop: {
     type: Number,
-    required: true,
+    required: false,
   },
 
   gpcDiameter: {
     type: Number,
-    required: true,
+    required: false,
   },
 
   gpcWheelC: {
     type: Number,
-    required: true,
+    required: false,
   },
 
   gpcWheelD: {
     type: Number,
-    required: true,
+    required: false,
   },
 
   gpcWheelE: {
     type: Number,
-    required: true,
+    required: false,
   },
 
   gpcWheelF: {
     type: Number,
-    required: true,
+    required: false,
   },
 
   gpcWheelG: {
     type: Number,
-    required: true,
+    required: false,
   },
 
   gpcWheelH: {
     type: Number,
-    required: true,
+    required: false,
   },
 
   gpcWheelS: {
     type: Number,
-    required: true,
+    required: false,
   },
 });
 
