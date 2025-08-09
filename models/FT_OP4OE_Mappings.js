@@ -19,9 +19,10 @@ const enumMappingsFT_OP4OE = {
   surroundingTemp: { 1: "Yes", 2: "No" },
 
   conveyorLoaded: {1:"Loaded", 2:"Unloaded"},
+  
   conveyorSwing: { 1: "Yes", 2: "No" },
 
-  strandStatus: { 1: "Yes", 2: "No" },
+  strandStatus: { 1: "Single", 2: "Double" },
 
   plantLayout: { 1: "Yes", 2: "No" },
 
@@ -113,7 +114,7 @@ const enumMappingsFT_OP4OE = {
 
   electricStatus: { 1: "On", 2: "Off" },
 
-  pneumaticStatus: { 1: "Yes", 2: "No" },
+  pneumaticStatus: { 1: "On", 2: "Off" },
 
   mightyLubeMonitoring: { 1: "Yes", 2: "No" },
 

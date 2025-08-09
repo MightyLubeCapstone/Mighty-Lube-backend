@@ -70,7 +70,7 @@
 
     },
 
-    addFreeCarrier: { 1: "Yes", 2: "No" },
+    addFreeCarrier: { 1: "Load Wheels", 2: "Guide Wheels", 3: "Both" },
 
 
     templateBData: {

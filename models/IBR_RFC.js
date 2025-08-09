@@ -95,7 +95,7 @@ const IBR_RFC_Schema = new mongoose.Schema({
     enum: [1, 2],
     required: true,
   },
-  conveyorSwing: {
+  strandStatus: {
     type: Number,
     enum: [1, 2],
     required: true,
@@ -201,8 +201,16 @@ const IBR_RFC_Schema = new mongoose.Schema({
   },
 
   reservoirSize: {
-    type: String,
+    type: Number,
+    enum: [1, 2, 3],
     required: true,
+  },
+
+  otherReservoirSize: {
+    type: String,
+    required: function () {
+      return this.reservoirSize === 3;
+    },
   },
 
   reservoirSizeNum: {

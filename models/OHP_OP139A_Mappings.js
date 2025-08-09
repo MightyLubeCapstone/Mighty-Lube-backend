@@ -75,7 +75,7 @@
 
     },
 
-    addFreeCarrier: { 1: "Yes", 2: "No" },
+    addFreeCarrier: { 1: "Load Wheels", 2: "Guide Wheels", 3: "Both" },
 
     templateBData: {
 
@@ -295,7 +295,7 @@
 
     electricStatus: { 1: "On", 2: "Off", 3: "1k Hour Timer" },
 
-    pneumaticStatus: { 1: "Yes", 2: "No" },
+    pneumaticStatus: { 1: "On", 2: "Off" },
 
     mightyLubeMonitoring: { 1: "Yes", 2: "No" },
 

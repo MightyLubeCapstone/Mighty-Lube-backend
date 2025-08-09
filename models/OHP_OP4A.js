@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const templateA = require("./templateA.js");
+
 const OHP_OP4ASchema = new mongoose.Schema({
   conveyorName: {
     type: String,
@@ -31,6 +32,20 @@ const OHP_OP4ASchema = new mongoose.Schema({
       return this.industrialChainManufacturer === 9;
     },
   },
+
+  wheelManufacturer: {
+    type: Number,
+    enum: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    required: true,
+  },
+
+  otherWheelManufacturer: {
+    type: String,
+    required: function () {
+      return this.wheelManufacturer === 10;
+    },
+  },
+
   conveyorLength: {
     type: Number,
     required: true,
@@ -39,7 +54,7 @@ const OHP_OP4ASchema = new mongoose.Schema({
   conveyorLengthUnit: {
     type: Number,
     enum: [1, 2, 3, 4],
-    required: true,
+    required: false,
   },
 
   conveyorSpeed: {
@@ -50,7 +65,7 @@ const OHP_OP4ASchema = new mongoose.Schema({
   conveyorSpeedUnit: {
     type: Number,
     enum: [1, 2],
-    required: true,
+    required: false,
   },
 
   conveyorIndex: {
@@ -61,7 +76,7 @@ const OHP_OP4ASchema = new mongoose.Schema({
   travelDirection: {
     type: Number,
     enum: [1, 2],
-    required: true,
+    required: false,
   },
 
   appEnviroment: {
@@ -92,21 +107,32 @@ const OHP_OP4ASchema = new mongoose.Schema({
     },
   },
 
-  surroundingTemp: {
+  airOrElectric: {
     type: Number,
     enum: [1, 2],
     required: true,
+  },
+
+  surroundingTemp: {
+    type: Number,
+    enum: [1, 2],
+    required: false,
   },
 
   conveyorLoaded: {
     type: Number,
     enum: [1, 2],
-    required: true,
+    required: false,
   },
 
   conveyorSwing: {
     type: Number,
     enum: [1, 2],
+    required: false,
+  },
+
+  operatingVoltage: {
+    type: Number,
     required: true,
   },
 
@@ -117,12 +143,13 @@ const OHP_OP4ASchema = new mongoose.Schema({
 
   compressedAir: {
     type: Number,
-    required: true,
+    required: false,
   },
 
   airSupplyType: {
-    type: Number, // Converted to simple type instead of ref
-    required: true,
+    type: Number,
+    enum: [1, 2, 3],
+    required: false,
   },
 
   existingMonitor: {
@@ -135,64 +162,72 @@ const OHP_OP4ASchema = new mongoose.Schema({
     type: Number,
     enum: [1, 2],
     required: false,
+    validate: {
+      validator: function (value) {
+        return !(this.existingMonitor === 1 && value === 1);
+      },
+      message: "Existing monitor and New Monitor cannot both be 1.",
+    },
   },
-  // monitorData: templateA,
+
+  monitorData: templateA,
+
 
   railLubeStatus: {
     type: Number,
     enum: [1, 2],
-    required: true,
+    required: false,
   },
 
   lubeBrand: {
     type: String,
-    required: true,
+    required: false,
   },
 
   lubeType: {
     type: String,
-    required: true,
+    required: false,
   },
 
   lubeViscosity: {
     type: String,
-    required: true,
+    required: false,
   },
 
   sideLubeStatus: {
     type: Number,
     enum: [1, 2],
-    required: true,
+    required: false,
   },
 
   topLubeStatus: {
     type: Number,
     enum: [1, 2],
-    required: true,
+    required: false,
   },
 
   fiveGallonStatus: {
     type: Number,
     enum: [1, 2],
-    required: true,
+    required: false,
   },
 
   chainCleanStatus: {
     type: Number,
     enum: [1, 2],
-    required: true,
+    required: false,
   },
 
   chainMaster: {
     type: Number,
     enum: [1, 2],
-    required: true,
+    required: false,
   },
 
   otherUnitStatus: {
     type: Number,
     enum: [1, 2],
-    required: true,
+    required: false,
   },
 
   timerStatus: {
@@ -210,49 +245,51 @@ const OHP_OP4ASchema = new mongoose.Schema({
   pneumaticStatus: {
     type: Number,
     enum: [1, 2],
-    required: true,
+    required: false,
   },
 
   mightyLubeMonitoring: {
     type: Number,
     enum: [1, 2],
-    required: true,
+    required: false,
   },
 
   plcConnection: {
     type: Number,
     enum: [1, 2],
-    required: true,
+    required: false,
   },
 
   otherControllerNotes: {
     type: String,
-    required: true,
+    required: false,
   },
 
   ohpUnitType: {
-    type: Number, // Converted to simple type instead of ref
-    required: true,
+    type: Number,
+    enum: [1, 2, 3, 4],
+    required: false,
   },
 
   chainDrop: {
     type: Number,
-    required: true,
+    required: false,
   },
 
   ohpWidth: {
     type: Number,
-    required: true,
+    required: false,
   },
 
   ohpHeight: {
     type: Number,
-    required: true,
+    required: false,
   },
 
   radioButtonType: {
-    type: Number, // Converted to simple type instead of ref
-    required: true,
+    type: Number,
+    enum: [1],
+    required: false,
   },
 });
 

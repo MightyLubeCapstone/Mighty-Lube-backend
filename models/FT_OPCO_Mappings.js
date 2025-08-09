@@ -19,7 +19,8 @@ const enumMappingsFT_OPCO = {
   surroundingTemp: { 1: "Yes", 2: "No" },
 
   conveyorLoaded: {1:"Loaded", 2:"Unloaded"},
-  strandStatus: { 1: "Yes", 2: "No" },
+  
+  strandStatus: { 1: "Single", 2: "Double" },
 
   conveyorSwing: { 1: "Yes", 2: "No" },
 
@@ -117,7 +118,7 @@ const enumMappingsFT_OPCO = {
 
   timerStatus: { 1: "Not Required", 2: "12 Hour", 3: "1000 Hour" },
 
-  electricStatus: { 1: "Yes", 2: "No" },
+  electricStatus: { 1: "On", 2: "Off" },
 
   mightyLubeMonitoring: { 1: "Yes", 2: "No" },
 

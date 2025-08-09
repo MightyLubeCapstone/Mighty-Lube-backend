@@ -17,7 +17,7 @@ const enumMappingsCC5_OP4OE = {
 
     swingStatus: { 1: "Yes", 2: "No" },
 
-    strandStatus: { 1: "Yes", 2: "No" },
+    strandStatus: { 1: "Single", 2: "Double" },
 
     plantLayout: { 1: "Yes", 2: "No" },
 

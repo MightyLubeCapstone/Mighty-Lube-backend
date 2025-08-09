@@ -9,15 +9,15 @@ const ETI_807_Schema = new mongoose.Schema({
     },
     industrialChainManufacturer: {
         type: Number,
-        enum: [1, 2, 3, 4, 5, 6, 7, 8, 9],
+        enum: [1, 2, 3, 4, 5],
         required: true,
     },
-    // otherIndustrialChainManufacturer: {
-    //     type: String,
-    //     required: function () {
-    //         return this.industrialChainManufacturer === 9;
-    //     },
-    // },
+    otherIndustrialChainManufacturer: {
+        type: String,
+        required: function () {
+            return this.industrialChainManufacturer === 5;
+        },
+    },
     conveyorLength: {
         type: Number,
         required: true,
@@ -28,7 +28,7 @@ const ETI_807_Schema = new mongoose.Schema({
         enum: [1, 2, 3, 4],
         required: true,
 
-    },
+    }
 });
 
 const ETI_807 = mongoose.models.ETI_807 || mongoose.model('ETI_807', ETI_807_Schema);
