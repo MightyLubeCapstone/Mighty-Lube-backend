@@ -10,8 +10,8 @@ const router = express.Router();
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
+    user: "mightylubeemailtest@gmail.com",
+    pass: "fbsu upww fefd kytb",
   },
 });
 
@@ -62,7 +62,7 @@ router.post('/send-email', authenticate, async (req, res) => {
       });
     })
     const mailOptions = {
-      from: process.env.EMAIL_USER,
+      from: "mightylubeemailtest@gmail.com",
       to: email,
       subject: configuration.configurationName,
       text: emailContent,
@@ -94,7 +94,7 @@ router.post('/forgot', async (req, res) => {
     await user.save();
 
     const mailOptions = {
-      from: process.env.EMAIL_USER,
+      from: "mightylubeemailtest@gmail.com",
       to: email,
       subject: "Mighty Lube Password Reset",
       text: `Your One-time passcode is ${user.resetCode}`,
