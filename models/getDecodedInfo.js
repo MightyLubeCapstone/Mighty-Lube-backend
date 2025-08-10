@@ -17,6 +17,16 @@ const getDecodedInfo = function (order) {
         }));
     }
 
+    function mapTemplateValues(field, selectedValue) {
+        if (!modelMapping || !modelMapping.monitorData[field]) return selectedValue;
+
+        return Object.entries(modelMapping.monitorData[field]).map(([key, value]) => ({
+            key: parseInt(key),
+            value: value,
+            isSelected: parseInt(key) === selectedValue,
+        }));
+    }
+
     let mappedInfo = { ...order.productConfigurationInfo };
 
     // ✅ Map top-level fields
@@ -29,13 +39,12 @@ const getDecodedInfo = function (order) {
     }
 
     // ✅ Handle `monitorData` (templateA fields)
-    if (order.monitorData) {
-        mappedInfo.monitorData = { ...order.monitorData };
-
+    if (mappedInfo.monitorData) {
+        mappedInfo.monitorData = { ...order.productConfigurationInfo.monitorData };
         if (modelMapping && modelMapping.monitorData) {
             Object.keys(modelMapping.monitorData).forEach(field => {
                 if (mappedInfo.monitorData[field] !== undefined) {
-                    mappedInfo.monitorData[field] = mapValues(
+                    mappedInfo.monitorData[field] = mapTemplateValues(
                         field,
                         mappedInfo.monitorData[field]
                     );
@@ -71,7 +80,6 @@ const getDecodedInfo = function (order) {
     if (mappedInfo.monitorData) {
         addRequiredMetadata(mappedInfo.monitorData, model.schema.path("monitorData").schema); // Apply to `monitorData`
     }
-
     return mappedInfo;
 };
 

@@ -61,9 +61,25 @@ router.put("/order", authenticate, async (req, res) => {
         const user = req.user;
         const orderInfo = user.cart.find(order => order.orderID === orderID);
         Object.entries(data).forEach(([key, value]) => {
-            orderInfo.productConfigurationInfo[key] = value;
+            console.log(key, orderInfo.productConfigurationInfo);
+            if (orderInfo.productConfigurationInfo[key] === undefined) {
+                if (orderInfo.productConfigurationInfo.monitorData !== undefined)
+                    orderInfo.productConfigurationInfo.monitorData[key] = value;
+                if (orderInfo.productConfigurationInfo.templateBData !== undefined)
+                    orderInfo.productConfigurationInfo.templateBData[key] = value;
+                if (orderInfo.productConfigurationInfo.templateCData !== undefined)
+                    orderInfo.productConfigurationInfo.templateCData[key] = value;
+                if (orderInfo.productConfigurationInfo.templateDData !== undefined)
+                    orderInfo.productConfigurationInfo.templateDData[key] = value;
+                if (orderInfo.productConfigurationInfo.templateEData !== undefined)
+                    orderInfo.productConfigurationInfo.templateEData[key] = value;
+                if (orderInfo.productConfigurationInfo.templateFData !== undefined)
+                    orderInfo.productConfigurationInfo.templateFData[key] = value;
+            }
+            else
+                orderInfo.productConfigurationInfo[key] = value;
         });
-        if(numRequested != 0) {
+        if (numRequested != 0) {
             orderInfo["numRequested"] = numRequested;
         }
         // Ensure Mongoose knows that the `orders` array has changed
