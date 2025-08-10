@@ -47,33 +47,9 @@ router.post("/", async (req, res) => {
 			return res.status(400).send("Missing fields");
 		}
 		// Username/password verification
-		// FIXME: What are the username/password min requirements?
 		else if (username.length < 6 || username.length > 24 ||
 			password.length < 8 || password.length > 50) {
 			return res.status(400).send("Invalid username/password");
-		}
-		else if (!username.match(/^[a-zA-Z0-9]+$/)) {
-			return res.status(400).send("Invalid username");
-		}
-		else if (!firstName.match(/^[a-zA-Z]+$/)) {
-			return res.status(400).send("Invalid first name");
-		}
-		else if (!lastName.match(/^[a-zA-Z]+$/)) {
-			return res.status(400).send("Invalid last name");
-		}
-		else if (!emailAddress.match(/^[a-zA-Z0-9]+@[a-zA-Z0-9]+\.[a-zA-Z0-9]+$/)) {
-			return res.status(400).send("Invalid email address");
-		}
-		else if (phoneNumber !== undefined &&
-			!phoneNumber.match(/^\(?\d{3}\)?[\d -]?\d{3}[\d -]?\d{4}$/)) {
-			return res.status(400).send("Invalid phone number");
-		}
-		// Handle non-required fields
-		else if (companyName !== undefined && !companyName.match(/^[a-zA-Z0-9]+$/)) {
-			return res.status(400).send("Invalid company name");
-		}
-		else if (country !== undefined && !country.match(/^[a-zA-Z\s]+$/)) {
-			return res.status(400).send("Invalid country");
 		} else {
 			// Insert new account into database
 			const newUser = new User({
