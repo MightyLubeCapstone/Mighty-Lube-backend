@@ -52,6 +52,71 @@ const getDecodedInfo = function (order) {
             });
         }
     }
+    if (mappedInfo.templateBData) {
+        mappedInfo.templateBData = { ...order.productConfigurationInfo.templateBData };
+        if (modelMapping && modelMapping.templateBData) {
+            Object.keys(modelMapping.templateBData).forEach(field => {
+                if (mappedInfo.templateBData[field] !== undefined) {
+                    mappedInfo.templateBData[field] = mapTemplateValues(
+                        field,
+                        mappedInfo.templateBData[field]
+                    );
+                }
+            });
+        }
+    }
+    if (mappedInfo.templateCData) {
+        mappedInfo.templateCData = { ...order.productConfigurationInfo.templateCData };
+        if (modelMapping && modelMapping.templateCData) {
+            Object.keys(modelMapping.templateCData).forEach(field => {
+                if (mappedInfo.templateCData[field] !== undefined) {
+                    mappedInfo.templateCData[field] = mapTemplateValues(
+                        field,
+                        mappedInfo.templateCData[field]
+                    );
+                }
+            });
+        }
+    }
+    if (mappedInfo.templateDData) {
+        mappedInfo.templateDData = { ...order.productConfigurationInfo.templateDData };
+        if (modelMapping && modelMapping.templateDData) {
+            Object.keys(modelMapping.templateDData).forEach(field => {
+                if (mappedInfo.templateDData[field] !== undefined) {
+                    mappedInfo.templateDData[field] = mapTemplateValues(
+                        field,
+                        mappedInfo.templateDData[field]
+                    );
+                }
+            });
+        }
+    }
+    if (mappedInfo.templateEData) {
+        mappedInfo.templateEData = { ...order.productConfigurationInfo.templateEData };
+        if (modelMapping && modelMapping.templateEData) {
+            Object.keys(modelMapping.templateEData).forEach(field => {
+                if (mappedInfo.templateEData[field] !== undefined) {
+                    mappedInfo.templateEData[field] = mapTemplateValues(
+                        field,
+                        mappedInfo.templateEData[field]
+                    );
+                }
+            });
+        }
+    }
+    if (mappedInfo.templateFData) {
+        mappedInfo.templateFData = { ...order.productConfigurationInfo.templateFData };
+        if (modelMapping && modelMapping.templateFData) {
+            Object.keys(modelMapping.templateFData).forEach(field => {
+                if (mappedInfo.templateFData[field] !== undefined) {
+                    mappedInfo.templateFData[field] = mapTemplateValues(
+                        field,
+                        mappedInfo.templateFData[field]
+                    );
+                }
+            });
+        }
+    }
 
     // ✅ Add `required` metadata for both top-level and `monitorData` fields
     function addRequiredMetadata(mappedObject, schema) {

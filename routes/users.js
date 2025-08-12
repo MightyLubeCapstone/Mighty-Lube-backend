@@ -31,6 +31,9 @@ router.get("/userinfo", authenticate, async (req, res) => {
 			firstName: user.firstName,
 			lastName: user.lastName,
 			username: user.username,
+			companyName: user.companyName,
+			phoneNumber: user.phoneNumber,
+			emailAddress: user.email
 		});
 	} catch (error) {
 		console.error("Error getting users first name, last name:", error);
@@ -85,6 +88,25 @@ router.post("/", async (req, res) => {
 	}
 });
 
+router.put("/", authenticate, async (req, res) => {
+	try {
+		// cleanup for testing
+		const { firstName, lastName, username, companyName, phoneNumber, email } = req.body;
+		const result = await User.updateOne({ "userID": req.user.userID }, {
+			$set: {
+				firstName,
+				lastName,
+				username,
+				companyName,
+				phoneNumber,
+				email
+			}
+		});
+		res.status(201).json({ message: `User updated: ${result.modifiedCount}` });
+	} catch (error) {
+		res.status(500).json({ error: "Internal server error" });
+	}
+});
 
 router.delete("/", authenticate, async (req, res) => {
 	try {
