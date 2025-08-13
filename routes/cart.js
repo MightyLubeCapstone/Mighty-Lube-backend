@@ -61,7 +61,6 @@ router.put("/order", authenticate, async (req, res) => {
         const user = req.user;
         const orderInfo = user.cart.find(order => order.orderID === orderID);
         Object.entries(data).forEach(([key, value]) => {
-            console.log(key, orderInfo.productConfigurationInfo);
             if (orderInfo.productConfigurationInfo[key] === undefined) {
                 if (orderInfo.productConfigurationInfo.monitorData !== undefined)
                     orderInfo.productConfigurationInfo.monitorData[key] = value;
