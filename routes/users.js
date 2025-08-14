@@ -31,6 +31,9 @@ router.get("/userinfo", authenticate, async (req, res) => {
 			firstName: user.firstName,
 			lastName: user.lastName,
 			username: user.username,
+			companyName: user.companyName,
+			phoneNumber: user.phoneNumber,
+			emailAddress: user.email
 		});
 	} catch (error) {
 		console.error("Error getting users first name, last name:", error);
@@ -47,33 +50,9 @@ router.post("/", async (req, res) => {
 			return res.status(400).send("Missing fields");
 		}
 		// Username/password verification
-		// FIXME: What are the username/password min requirements?
 		else if (username.length < 6 || username.length > 24 ||
 			password.length < 8 || password.length > 50) {
 			return res.status(400).send("Invalid username/password");
-		}
-		else if (!username.match(/^[a-zA-Z0-9]+$/)) {
-			return res.status(400).send("Invalid username");
-		}
-		else if (!firstName.match(/^[a-zA-Z]+$/)) {
-			return res.status(400).send("Invalid first name");
-		}
-		else if (!lastName.match(/^[a-zA-Z]+$/)) {
-			return res.status(400).send("Invalid last name");
-		}
-		else if (!emailAddress.match(/^[a-zA-Z0-9]+@[a-zA-Z0-9]+\.[a-zA-Z0-9]+$/)) {
-			return res.status(400).send("Invalid email address");
-		}
-		else if (phoneNumber !== undefined &&
-			!phoneNumber.match(/^\(?\d{3}\)?[\d -]?\d{3}[\d -]?\d{4}$/)) {
-			return res.status(400).send("Invalid phone number");
-		}
-		// Handle non-required fields
-		else if (companyName !== undefined && !companyName.match(/^[a-zA-Z0-9]+$/)) {
-			return res.status(400).send("Invalid company name");
-		}
-		else if (country !== undefined && !country.match(/^[a-zA-Z\s]+$/)) {
-			return res.status(400).send("Invalid country");
 		} else {
 			// Insert new account into database
 			const newUser = new User({
@@ -109,6 +88,25 @@ router.post("/", async (req, res) => {
 	}
 });
 
+router.put("/", authenticate, async (req, res) => {
+	try {
+		// cleanup for testing
+		const { firstName, lastName, username, companyName, phoneNumber, email } = req.body;
+		const result = await User.updateOne({ "userID": req.user.userID }, {
+			$set: {
+				firstName,
+				lastName,
+				username,
+				companyName,
+				phoneNumber,
+				email
+			}
+		});
+		res.status(201).json({ message: `User updated: ${result.modifiedCount}` });
+	} catch (error) {
+		res.status(500).json({ error: "Internal server error" });
+	}
+});
 
 router.delete("/", authenticate, async (req, res) => {
 	try {

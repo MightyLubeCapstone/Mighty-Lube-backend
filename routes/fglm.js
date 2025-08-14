@@ -1,7 +1,6 @@
 const express = require("express");
 const { authenticate } = require("./sessions");
 const FGLM = require("../models/fglm");
-const templateA = require("../models/templateA");
 
 const router = express.Router();
 
