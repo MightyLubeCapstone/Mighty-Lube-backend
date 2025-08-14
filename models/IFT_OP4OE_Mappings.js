@@ -32,11 +32,12 @@ const enumMappingsIFT_OP4OE = {
 
     m12Plugs: { 1: "Yes", 2: "No" },
 
-    existingMonitor: { 1: "Yes", 2: "No" },
-
-    newMonitor: { 1: "Yes", 2: "No" },
-
-        monitorData: {
+    
+    monitorData: {
+        
+            existingMonitor: { 1: "Yes", 2: "No" },
+        
+            newMonitor: { 1: "Yes", 2: "No" },
 
             dcuStatus: { 1: "Yes", 2: "No" },
 

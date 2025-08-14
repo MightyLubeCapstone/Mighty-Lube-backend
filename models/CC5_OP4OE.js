@@ -136,19 +136,6 @@ const CC5_OP4OE_Schema = new mongoose.Schema({
     required: true,
   },
 
-  // MonSys
-  existingMonitor: {
-    type: Number,
-    enum: [1, 2],
-    required: false,
-  },
-
-  newMonitor: {
-      type: Number,
-      enum: [1, 2],
-      required: true,
-
-  },
   monitorData: templateA,
 
   outboardStatus: {

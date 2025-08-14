@@ -1,10 +1,11 @@
 const mongoose = require("mongoose");
-const OHP_YCBSchema = new mongoose.Schema({
+const getDecodedInfo = require("./getDecodedInfo.js");
+
+const COE_OP52_Schema = new mongoose.Schema({
   conveyorName: {
     type: String,
     required: true,
   },
-
   chainSize: {
     type: Number,
     enum: [1, 2, 3, 4, 5],
@@ -14,37 +15,18 @@ const OHP_YCBSchema = new mongoose.Schema({
   otherChainSize: {
     type: String,
     required: function () {
-      return this.chainSize === 5;
+      return this.cc5ChainSize === 5;
     },
   },
-
-  industrialChainManufacturer: {
+  travelDirection: {
     type: Number,
-    enum: [1, 2, 3, 4, 5, 6, 7, 8, 9],
+    enum: [1, 2],
     required: true,
   },
-
-  otherChainManufacturer: {
-    type: String,
-    required: function () {
-      return this.industrialChainManufacturer === 9;
-    },
-  },
-  conveyorLength: {
-    type: Number,
-    required: false,
-  },
-
-  conveyorLengthUnit: {
-    type: Number,
-    enum: [1, 2, 3, 4],
-    required: false,
-  },
-
   appEnviroment: {
     type: Number,
     enum: [1, 2, 3, 4, 5, 6, 7],
-    required: false,
+    required: true,
   },
 
   ovenStatus: {
@@ -68,19 +50,35 @@ const OHP_YCBSchema = new mongoose.Schema({
       return this.appEnviroment === 7;
     },
   },
-
-  ohpUnitType: {
+  brushApplicators: {
     type: Number,
-    enum: [1, 2, 3, 4],
-    required: false,
+    enum: [1, 2],
+    required: true,
   },
 
-  ohpHeight: {
+  m12Plugs: {
     type: Number,
-    required: false,
+    enum: [1, 2],
+    required: true,
+  },
+
+  oilBackupCat: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },
+
+  operatingVoltage: {
+    type: Number,
+    required: true,
+  },
+
+  controlVoltSingle: {
+    type: Number,
+    required: true,
   },
 });
 
-const OHP_YCB = mongoose.model("tblOHP_YCB", OHP_YCBSchema);
-
-module.exports = OHP_YCB;
+const COE_OP52 =
+  mongoose.models.COE_OP52 || mongoose.model("COE_OP52", COE_OP52_Schema);
+module.exports = COE_OP52;

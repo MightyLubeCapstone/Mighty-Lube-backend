@@ -137,24 +137,6 @@ const IBR_OP4OE_Schema = new mongoose.Schema({
     required: false,
   },
 
-  existingMonitor: {
-    type: Number,
-    enum: [1, 2],
-    required: false,
-  },
-
-  newMonitor: {
-    type: Number,
-    enum: [1, 2],
-    required: false,
-    validate: {
-      validator: function (value) {
-        return !(this.existingMonitor === 1 && value === 1);
-      },
-      message: "Existing monitor and New Monitor cannot both be 1.",
-    },
-  },
-
   monitorData: templateA,
 
   wheelOpenType: {

@@ -24,11 +24,11 @@ const enumMappingsCOE_OP4OE = {
 
     requiredPics: { 1: "Yes", 2: "No" },
 
-    existingMonitor: { 1: "Yes", 2: "No" },
+        monitorData: {
+        
+        existingMonitor: { 1: "Yes", 2: "No" },
 
-    newMonitor: { 1: "Yes", 2: "No" },
-
-    monitorData: {
+        newMonitor: { 1: "Yes", 2: "No" },
 
         dcuStatus: { 1: "Yes", 2: "No" },
 
@@ -67,6 +67,7 @@ const enumMappingsCOE_OP4OE = {
         specialControllerOptions: { 1: "I/O Link", 2: "Plug and Play", 3: "Dry Contacts" },
         
     },
+
 
 
     wheelSealedChain: { 1: "Yes", 2: "No" },

@@ -43,25 +43,8 @@ const OHP_PMMSchema = new mongoose.Schema({
     required: true,
   },
 
-  existingMonitor: {
-    type: Number,
-    enum: [1, 2],
-    required: false,
-  },
+    monitorData: templateA,
 
-  newMonitor: {
-    type: Number,
-    enum: [1, 2],
-    required: false,
-    validate: {
-      validator: function (value) {
-        return !(this.existingMonitor === 1 && value === 1);
-      },
-      message: "Existing monitor and New Monitor cannot both be 1.",
-    },
-  },
-
-  monitorData: templateA,
 
   dcuNum: {
     type: Number,

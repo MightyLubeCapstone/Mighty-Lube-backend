@@ -1,4 +1,4 @@
-const enumMappingsFT_FTL = {
+  const enumMappingsFT_FTL = {
 
   chainSize: { 1: "X348 Chain (3\")", 2: "X458 Chain (4\")", 3: "X678 Chain (6\")", 4: "3/8\" Log Chain", 5: "Other" },
 
@@ -21,18 +21,18 @@ const enumMappingsFT_FTL = {
   surroundingTemp: { 1: "Yes", 2: "No" },
 
   conveyorLoaded: {1:"Loaded", 2:"Unloaded"},
-  
+
   conveyorSwing: { 1: "Yes", 2: "No" },
 
   plantLayout: { 1: "Yes", 2: "No" },
 
   requiredPics: { 1: "Yes", 2: "No" },
 
-  existingMonitor: { 1: "Yes", 2: "No" },
-
-  newMonitor: { 1: "Yes", 2: "No" },
-
   monitorData: {
+
+    existingMonitor: { 1: "Yes", 2: "No" },
+
+    newMonitor: { 1: "Yes", 2: "No" },
 
     dcuStatus: { 1: "Yes", 2: "No" },
 
@@ -68,9 +68,10 @@ const enumMappingsFT_FTL = {
 
     omniView: { 1: "Yes", 2: "No" },
 
-    specialControllerOptions: { 1: "I/O Link", 2: "Plug and Play", 3: "Dry Contacts" }
-
+    specialControllerOptions: { 1: "I/O Link", 2: "Plug and Play", 3: "Dry Contacts" },
+    
   },
+
 
   wheelOpenType: { 1: "No Applicable", 2: "Open Inside", 3: "Open Outside" },
 
@@ -114,6 +115,6 @@ const enumMappingsFT_FTL = {
 
   wireMeasurementUnit: { 1: "Feet", 2: "Inches", 3: "Meters", 4: "Millimeters" }
 
-};
+  };
 
-module.exports = enumMappingsFT_FTL;
+  module.exports = enumMappingsFT_FTL;
