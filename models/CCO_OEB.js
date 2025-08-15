@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-const templateA = require("./templateA.js");
 const CCO_OEBSchema = new mongoose.Schema({
   conveyorName: {
     type: String,
@@ -77,22 +76,50 @@ const CCO_OEBSchema = new mongoose.Schema({
     required: true,
   },
 
-  ohpDiameter: {
+  freeRailDiameter: {
     type: Number,
     required: false,
   },
 
-  ohpWidth: {
+  freeRailWidth: {
     type: Number,
     required: false,
   },
 
-  ohpHeight: {
+  freeRaiHeight: {
     type: Number,
     required: false,
   },
+  freeRaiVerticle: {
+    type: Number,
+    required: false,
+  },
+
+  freeRailInvertedChain: {
+    type: Number,
+    required: false,
+  },
+
+  freeRailInvertedDiameter: {
+    type: Number,
+    required: false,
+  },
+  freeRailInvertedWidth: {
+    type: Number,
+    required: false,
+  },
+
+    freeRailInvertedHeight: {
+    type: Number,
+    required: false,
+  },
+
+    freeRailInvertedPitch: {
+    type: Number,
+    required: false,
+  },
+
 });
 
 const CCO_OEB = mongoose.model("tblOHP_OEB", CCO_OEBSchema);
 module.exports = CCO_OEB;
-

@@ -6,7 +6,7 @@ const OHP_PML = require("../models/OHP_PML");
 const router = express.Router();
 
 router.post("/", authenticate, async (req, res) => {
-    try {
+    try { 
         const { OHP_PMLData, numRequested } = req.body;
         const order = new OHP_PML({
             conveyorName: OHP_PMLData.conveyorName,
@@ -27,11 +27,11 @@ router.post("/", authenticate, async (req, res) => {
             surroundingTemp: OHP_PMLData.surroundingTemp,
             conveyorLoaded: OHP_PMLData.conveyorLoaded,
             conveyorSwing: OHP_PMLData.conveyorSwing,
-            orientationType: OHP_PMLData.orientationType,
+            ...(OHP_PMLData.orientationType && { orientationType: OHP_PMLData.orientationType }),
             paintMakerStatus: OHP_PMLData.paintMakerStatus,
             ...(OHP_PMLData.paintMarketNum && { paintMarketNum: OHP_PMLData.paintMarketNum }),
             chainCleanStatus: OHP_PMLData.chainCleanStatus,
-            ohpUnitType: OHP_PMLData.ohpUnitType,
+            ...(OHP_PMLData.ohpUnitType && { ohpUnitType: OHP_PMLData.ohpUnitType }),
             chainDrop: OHP_PMLData.chainDrop,
             ...(OHP_PMLData.ohpDiameter && { ohpDiameter: OHP_PMLData.ohpDiameter }),
             ohpWidth: OHP_PMLData.ohpWidth,

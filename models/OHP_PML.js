@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-const templateA = require("./templateA.js");
 const OHP_PMLSchema = new mongoose.Schema({
   conveyorName: {
     type: String,

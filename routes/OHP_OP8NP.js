@@ -20,7 +20,7 @@ router.post("/", authenticate, async (req, res) => {
             ...(OHP_OP8NPData.otherAppEnviroment && { otherAppEnviroment: OHP_OP8NPData.otherAppEnviroment }),
             brushStatus: OHP_OP8NPData.brushStatus,
             ...(OHP_OP8NPData.conveyorLoaded && { conveyorLoaded: OHP_OP8NPData.conveyorLoaded }),
-            ...(OHP_OP8NPData.ohpUnit && { ohpUnit: OHP_OP8NPData.ohpUnit }),
+            ...(OHP_OP8NPData.ohpUnitType && { ohpUnitType: OHP_OP8NPData.ohpUnitType }),
             ...(OHP_OP8NPData.chainDrop && { chainDrop: OHP_OP8NPData.chainDrop }),
             ...(OHP_OP8NPData.ohpDiameter && { ohpDiameter: OHP_OP8NPData.ohpDiameter }),
             ...(OHP_OP8NPData.ohpWidth && { ohpWidth: OHP_OP8NPData.ohpWidth }),

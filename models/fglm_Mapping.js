@@ -24,18 +24,27 @@ const fglm_Mapping = {
     
     surroundingTemp: { 1: "Yes", 2: "No" },
     
-    conveyorLoaded: {1:"Loaded", 2:"Unloaded"},    
+    conveyorLoaded: {1:"Loaded", 2:"Unloaded"},  
+      
     conveyorSwing: { 1: "Yes", 2: "No" },
     
     plantLayout: { 1: "Yes", 2: "No" },
     
     requiredPics: { 1: "Yes", 2: "No" },
 
-    monitorData: { 
+	monitorData: {
+
+        existingMonitor: { 1: "Yes", 2: "No" },
+	
+        newMonitor: { 1: "Yes", 2: "No" },
+
+        dcuStatus: { 1: "Yes", 2: "No" },
 
         newReservoir: { 1: "Yes", 2: "No" },
 
-        reservoirSize: { 1: "10 Gallon", 2: "65 Gallon" },
+        reservoirSize: { 1: "10 Gallon", 2: "65 Gallon", 3: "Other" },
+
+        newReservoirNum: { 1: "1", 2: "2", 3: "3", 4: "4", 5: "5", 6: "6", 7: "7", 8: "8", 9: "9", 10: "10" },
 
         typeMonitor: { 1: "Permanent", 2: "Portable" },
 
@@ -64,8 +73,8 @@ const fglm_Mapping = {
         omniView: { 1: "Yes", 2: "No" },
 
         specialControllerOptions: { 1: "I/O Link", 2: "Plug and Play", 3: "Dry Contacts" },
-        
-    },
+    
+    	},
     
     sideLube: { 1: "Yes", 2: "No" },
 

@@ -1,6 +1,23 @@
 const mongoose = require("mongoose");
 
 const templateA = new mongoose.Schema({
+  existingMonitor: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },
+
+  newMonitor: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+    validate: {
+      validator: function (value) {
+        return !(this.existingMonitor === 1 && value === 1);
+      },
+      message: "Existing monitor and New Monitor cannot both be 1.",
+    },
+  },
 
   dcuStatus: {
     type: Number,
@@ -195,7 +212,7 @@ const templateA = new mongoose.Schema({
     required: function () {
       return this.typeMonitor === 1;
     },
-  },   
+  },
 
   lubeVision: {
     type: Number,
@@ -236,101 +253,6 @@ const templateA = new mongoose.Schema({
     },
   },
 
-  itNameOne: {
-    type: String,
-    required: false,
-  },
-
-  itIPOne: {
-    type: Number,
-    required: false,
-  },
-
-  itGatewayOne: {
-    type: Number,
-    required: false,
-  },
-
-  itSubnetOne: {
-    type: Number,
-    required: false,
-  },
-
-  itDNSOne: {
-    type: Number,
-    required: false,
-  },
-
-  itSMTPOne: {
-    type: Number,
-    required: false,
-  },
-
-  itNameTwo: {
-    type: String,
-    required: false,
-  },
-
-  itIPTwo: {
-    type: Number,
-    required: false,
-  },
-
-  itGatewayTwo: {
-    type: Number,
-    required: false,
-  },
-
-  itSubnetTwo: {
-    type: Number,
-    required: false,
-  },
-
-  itDNSTwo: {
-    type: Number,
-    required: false,
-  },
-
-  itSMTPTwo: {
-    type: Number,
-    required: false,
-  },
-
-  itNameThree: {
-    type: String,
-    required: false,
-  },
-
-  itIPThree: {
-    type: Number,
-    required: false,
-  },
-
-  itGatewayThree: {
-    type: Number,
-    required: false,
-  },
-
-  itSubnetThree: {
-    type: Number,
-    required: false,
-  },
-
-  itDNSThree: {
-    type: Number,
-    required: false,
-  },
-
-  itSMTPThree: {
-    type: Number,
-    required: false,
-  },
-
-  itAdditionalNotes: {
-    type: String,
-    required: false,
-  },
-
   piuDistance: {
     type: Number,
     required: function () {
@@ -365,12 +287,12 @@ const templateA = new mongoose.Schema({
     enum: [1, 2, 3],
   },
 
-    operatingVoltage: {
+  operatingVoltage: {
     type: Number,
     required: function () {
       return this.existingMonitor === 1 || this.newMonitor === 1;
     },
-  }
+  },
 });
 
 module.exports = templateA;

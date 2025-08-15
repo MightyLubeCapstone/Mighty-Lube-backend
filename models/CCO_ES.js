@@ -111,6 +111,12 @@ const CCO_ESSchema = new mongoose.Schema({
     },
   },
 
+  surroundingTemp: {
+    type: Number,
+    enum: [1, 2],
+    required: false,
+  },
+
   conveyorLoaded: {
     type: Number,
     enum: [1, 2],
@@ -173,24 +179,6 @@ const CCO_ESSchema = new mongoose.Schema({
   controlVoltSingle: {
     type: Number,
     required: true,
-  },
-
-  existingMonitor: {
-    type: Number,
-    enum: [1, 2],
-    required: true,
-  },
-
-  newMonitor: {
-    type: Number,
-    enum: [1, 2],
-    required: true,
-    validate: {
-      validator: function (value) {
-        return !(this.existingMonitor === 1 && value === 1);
-      },
-      message: "Existing monitor and New Monitor cannot both be 1.",
-    },
   },
 
   monitorData: templateA,

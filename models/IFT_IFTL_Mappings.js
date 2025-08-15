@@ -24,11 +24,11 @@ const enumMappingsIDT_IFTL = {
 
   requiredPics: { 1: "Yes", 2: "No" },
 
-    existingMonitor: { 1: "Yes", 2: "No" },
+        monitorData: {
+        
+        existingMonitor: { 1: "Yes", 2: "No" },
 
-    newMonitor: { 1: "Yes", 2: "No" },
-
-    monitorData: {
+        newMonitor: { 1: "Yes", 2: "No" },
 
         dcuStatus: { 1: "Yes", 2: "No" },
 
@@ -67,6 +67,7 @@ const enumMappingsIDT_IFTL = {
         specialControllerOptions: { 1: "I/O Link", 2: "Plug and Play", 3: "Dry Contacts" },
         
     },
+
 
     wheelOpenType: { 1: "Not Applicable", 2: "Open Inside", 3: "Open Outside" },
 
