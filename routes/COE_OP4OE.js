@@ -36,6 +36,7 @@ router.post("/", authenticate, async (req, res) => {
             ...(COE_OP4OEData.plantLayout && { plantLayout: COE_OP4OEData.plantLayout }),
             ...(COE_OP4OEData.requiredPics && { requiredPics: COE_OP4OEData.requiredPics }),
             operatingVoltage: COE_OP4OEData.operatingVoltage,
+            controlVoltage: COE_OP4OEData.controlVoltage,
             monitorData: 
             {
                 existingMonitor: COE_OP4OEData.templateA.existingMonitor,
@@ -182,9 +183,6 @@ router.post("/", authenticate, async (req, res) => {
                 operatingVoltage: COE_OP4OEData.templateF.operatingVoltage,
                 controlVoltSingle: COE_OP4OEData.templateF.controlVoltSingle,
             },
-            
-
-
     
             ...(COE_OP4OEData.catDriveStatus && { catDriveStatus: COE_OP4OEData.catDriveStatus }),
             ...(COE_OP4OEData.wheelOpenType && { wheelOpenType: COE_OP4OEData.wheelOpenType }),

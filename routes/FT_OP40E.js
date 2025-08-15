@@ -9,27 +9,27 @@ const router = express.Router();
 router.post("/", authenticate, async (req, res) => {
   try {
     const { FT_OP4OEData, numRequested } = req.body;
-
+ 
     const order = new FT_OP4OE({
-      conveyorName: FT_OP4OEData.conveyorName,
+      ...(FT_OP4OEData.conveyorName && { conveyorName: FT_OP4OEData.conveyorName }),
       chainSize: FT_OP4OEData.chainSize,
       ...(FT_OP4OEData.otherChainSize && { otherChainSize: FT_OP4OEData.otherChainSize }),
       industrialChainManufacturer: FT_OP4OEData.industrialChainManufacturer,
-      ...(FT_OP4OEData.otherIndustrialChainManufacturer && { otherIndustrialChainManufacturer: FT_OP4OEData.otherIndustrialChainManufacturer }),
+      ...(FT_OP4OEData.otherChainManufacturer && { otherChainManufacturer: FT_OP4OEData.otherChainManufacturer }),
       wheelManufacturer: FT_OP4OEData.wheelManufacturer,
       ...(FT_OP4OEData.otherWheelManufacturer && { otherWheelManufacturer: FT_OP4OEData.otherWheelManufacturer }),
       conveyorLength: FT_OP4OEData.conveyorLength,
       conveyorLengthUnit: FT_OP4OEData.conveyorLengthUnit,
       conveyorSpeed: FT_OP4OEData.conveyorSpeed,
       conveyorSpeedUnit: FT_OP4OEData.conveyorSpeedUnit,
-      conveyorIndex: FT_OP4OEData.conveyorIndex,
+      ...(FT_OP4OEData.conveyorIndex && { conveyorIndex: FT_OP4OEData.conveyorIndex }),
       ...(FT_OP4OEData.travelDirection && { travelDirection: FT_OP4OEData.travelDirection }),
       appEnviroment: FT_OP4OEData.appEnviroment,
       ...(FT_OP4OEData.ovenStatus && { ovenStatus: FT_OP4OEData.ovenStatus }),
       ...(FT_OP4OEData.ovenTemp && { ovenTemp: FT_OP4OEData.ovenTemp }),
       ...(FT_OP4OEData.otherAppEnviroment && { otherAppEnviroment: FT_OP4OEData.otherAppEnviroment }),
       ...(FT_OP4OEData.surroundingTemp && { surroundingTemp: FT_OP4OEData.surroundingTemp }),
-      ...(FT_OP4OEData.conveyorLoaded && { conveyorLoaded: FT_OP4OEData.conveyorLoaded }),
+      conveyorLoaded: FT_OP4OEData.conveyorLoaded,
       ...(FT_OP4OEData.conveyorSwing && { conveyorSwing: FT_OP4OEData.conveyorSwing }),
       strandStatus: FT_OP4OEData.strandStatus,
       ...(FT_OP4OEData.plantLayout && { plantLayout: FT_OP4OEData.plantLayout }),
@@ -78,6 +78,9 @@ router.post("/", authenticate, async (req, res) => {
                 ...(FT_OP4OEData.templateA.specialControllerOptions && { specialControllerOptions: FT_OP4OEData.templateA.specialControllerOptions }),
                 ...(FT_OP4OEData.templateA.operatingVoltage && { operatingVoltage: FT_OP4OEData.templateA.operatingVoltage })
             },
+
+
+            
       wheelOpenType: FT_OP4OEData.wheelOpenType,
       ...(FT_OP4OEData.wheelClosedType && { wheelClosedType: FT_OP4OEData.wheelClosedType }),
       openStatus: FT_OP4OEData.openStatus,

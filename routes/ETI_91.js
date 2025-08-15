@@ -14,8 +14,8 @@ router.post("/", authenticate, async (req, res) => {
             conveyorName: ETI_91Data.conveyorName,
             industrialChainManufacturer: ETI_91Data.industrialChainManufacturer,
             ...(ETI_91Data.otherIndustrialChainManufacturer && { otherIndustrialChainManufacturer: ETI_91Data.otherIndustrialChainManufacturer }),
-            conveyorLength: ETI_91Data.conveyorLength,
-            conveyorLengthUnit: ETI_91Data.conveyorLengthUnit,
+            ...(ETI_91Data.conveyorLength && { conveyorLength: ETI_91Data.conveyorLength }),
+            ...(ETI_91Data.conveyorLengthUnit && { conveyorLengthUnit: ETI_91Data.conveyorLengthUnit }),        
         });
 
         req.user.cart.push({ numRequested, productConfigurationInfo: order, productType: "ETI_91" });

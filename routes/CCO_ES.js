@@ -7,7 +7,7 @@ const templateB = require("../models/templateB");
 const templateC = require("../models/templateC");
 const templateD = require("../models/templateD.js");
 const templateF = require("../models/templateF.js");
-
+ 
 const router = express.Router();
 
 router.post("/", authenticate, async (req, res) => {
@@ -31,6 +31,7 @@ router.post("/", authenticate, async (req, res) => {
             ...(CCO_ESData.ovenStatus && { ovenStatus: CCO_ESData.ovenStatus }),
             ...(CCO_ESData.ovenTemp && { ovenTemp: CCO_ESData.ovenTemp }),
             ...(CCO_ESData.otherAppEnviroment && { otherAppEnviroment: CCO_ESData.otherAppEnviroment }),
+            ...(CCO_ESData.surroundingTemp && { surroundingTemp: CCO_ESData.surroundingTemp }),
             ...(CCO_ESData.conveyorLoaded && { conveyorLoaded: CCO_ESData.conveyorLoaded }),
             ...(CCO_ESData.conveyorSwing && { conveyorSwing: CCO_ESData.conveyorSwing }),
             strandStatus: CCO_ESData.strandStatus,
@@ -165,27 +166,27 @@ router.post("/", authenticate, async (req, res) => {
                 zerkLocationType: CCO_ESData.templateB.zerkLocationType,
                 wheelDiameter: CCO_ESData.templateB.wheelDiameter,
                 conveyorSwing: CCO_ESData.templateB.conveyorSwing,
-                ...(CCO_ESData.templateB.chainMaster && { lubeType: CCO_ESData.templateB.chainMaster}),
-                ...(CCO_ESData.templateB.remoteStatus && { lubeType: CCO_ESData.templateB.remoteStatus}),
-                ...(CCO_ESData.templateB.mountStatus && { lubeType: CCO_ESData.templateB.mountStatus}),
-                ...(CCO_ESData.templateB.otherUnitStatus && { lubeType: CCO_ESData.templateB.otherUnitStatus}),
-                ...(CCO_ESData.templateB.timerStatus && { lubeType: CCO_ESData.templateB.timerStatus}),
-                ...(CCO_ESData.templateB.electricStatus && { lubeType: CCO_ESData.templateB.electricStatus}),
-                ...(CCO_ESData.templateB.mightyLubeMonitoring && { lubeType: CCO_ESData.templateB.mightyLubeMonitoring}),
-                ...(CCO_ESData.templateB.preMountType && { lubeType: CCO_ESData.templateB.preMountType}),
-                ...(CCO_ESData.templateB.otherPreMountType && { lubeType: CCO_ESData.templateB.otherPreMountType}),
-                ...(CCO_ESData.templateB.plcConnection && { lubeType: CCO_ESData.templateB.plcConnection}),
-                ...(CCO_ESData.templateB.otherControllerNotes && { lubeType: CCO_ESData.templateB.otherControllerNotes}),
-                ...(CCO_ESData.templateB.templateB_UnitType && { lubeType: CCO_ESData_UnitType}),
-                ...(CCO_ESData.templateB.templateB_InvertedB && { lubeType: CCO_ESData_InvertedB}),
-                ...(CCO_ESData.templateB.templateB_InvertedE && { lubeType: CCO_ESData_InvertedE}),
-                ...(CCO_ESData.templateB.templateB_InvertedG && { lubeType: CCO_ESData_InvertedG}),
-                ...(CCO_ESData.templateB.templateB_InvertedH && { lubeType: CCO_ESData_InvertedH}),
-                ...(CCO_ESData.templateB.templateB_InvertedK && { lubeType: CCO_ESData_InvertedK}),
-                ...(CCO_ESData.templateB.templateB_InvertedT && { lubeType: CCO_ESData_InvertedT}),
-                ...(CCO_ESData.templateB.templateB_InvertedU && { lubeType: CCO_ESData_InvertedU}),
-                ...(CCO_ESData.templateB.templateB_InvertedV && { lubeType: CCO_ESData_InvertedV}),
-                ...(CCO_ESData.templateB.templateB_InvertedW && { lubeType: CCO_ESData_InvertedW}),
+                ...(CCO_ESData.templateB.chainMaster && { chainMaster: CCO_ESData.templateB.chainMaster}),
+                ...(CCO_ESData.templateB.remoteStatus && { remoteStatus: CCO_ESData.templateB.remoteStatus}),
+                ...(CCO_ESData.templateB.mountStatus && { mountStatus: CCO_ESData.templateB.mountStatus}),
+                ...(CCO_ESData.templateB.otherUnitStatus && { otherUnitStatus: CCO_ESData.templateB.otherUnitStatus}),
+                ...(CCO_ESData.templateB.timerStatus && { timerStatus: CCO_ESData.templateB.timerStatus}),
+                ...(CCO_ESData.templateB.electricStatus && { electricStatus: CCO_ESData.templateB.electricStatus}),
+                ...(CCO_ESData.templateB.mightyLubeMonitoring && { mightyLubeMonitoring: CCO_ESData.templateB.mightyLubeMonitoring}),
+                ...(CCO_ESData.templateB.preMountType && { preMountType: CCO_ESData.templateB.preMountType}),
+                ...(CCO_ESData.templateB.otherPreMountType && { otherPreMountType: CCO_ESData.templateB.otherPreMountType}),
+                ...(CCO_ESData.templateB.plcConnection && { plcConnection: CCO_ESData.templateB.plcConnection}),
+                ...(CCO_ESData.templateB.otherControllerNotes && { otherControllerNotes: CCO_ESData.templateB.otherControllerNotes}),
+                ...(CCO_ESData.templateB.templateB_UnitType && { templateB_UnitType: CCO_ESData.templateB.templateB_UnitType}),
+                ...(CCO_ESData.templateB.templateB_InvertedB && { templateB_InvertedB: CCO_ESData.templateB.templateB_InvertedB}),
+                ...(CCO_ESData.templateB.templateB_InvertedE && { templateB_InvertedE: CCO_ESData.templateB.templateB_InvertedE}),
+                ...(CCO_ESData.templateB.templateB_InvertedG && { templateB_InvertedG: CCO_ESData.templateB.templateB_InvertedG}),
+                ...(CCO_ESData.templateB.templateB_InvertedH && { templateB_InvertedH: CCO_ESData.templateB.templateB_InvertedH}),
+                ...(CCO_ESData.templateB.templateB_InvertedK && { templateB_InvertedK: CCO_ESData.templateB.templateB_InvertedK}),
+                ...(CCO_ESData.templateB.templateB_InvertedT && { templateB_InvertedT: CCO_ESData.templateB.templateB_InvertedT}),
+                ...(CCO_ESData.templateB.templateB_InvertedU && { templateB_InvertedU: CCO_ESData.templateB.templateB_InvertedU}),
+                ...(CCO_ESData.templateB.templateB_InvertedV && { templateB_InvertedV: CCO_ESData.templateB.templateB_InvertedV}),
+                ...(CCO_ESData.templateB.templateB_InvertedW && { templateB_InvertedW: CCO_ESData.templateB.templateB_InvertedW}),
 
             },
 
@@ -408,6 +409,7 @@ router.post("/", authenticate, async (req, res) => {
             ...(CCO_ESData.railLubeStatus && { railLubeStatus: CCO_ESData.railLubeStatus }),
             ...(CCO_ESData.externalLubeStatus && { externalLubeStatus: CCO_ESData.externalLubeStatus }),
             ...(CCO_ESData.lubeBrand && { lubeBrand: CCO_ESData.lubeBrand }),
+            ...(CCO_ESData.lubeType && { lubeType: CCO_ESData.lubeType }),
             ...(CCO_ESData.lubeViscosity && { lubeViscosity: CCO_ESData.lubeViscosity }),
             ...(CCO_ESData.sideLubeStatus && { sideLubeStatus: CCO_ESData.sideLubeStatus }),
             ...(CCO_ESData.topLubeStatus && { topLubeStatus: CCO_ESData.topLubeStatus }),

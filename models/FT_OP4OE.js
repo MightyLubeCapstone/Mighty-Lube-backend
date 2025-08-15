@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const templateA = require("./templateA.js");
 const templateE = require("./templateE.js");
-
+ 
 const FT_OP4OE_Schema = new mongoose.Schema({
   conveyorName: {
     type: String,
@@ -25,7 +25,7 @@ const FT_OP4OE_Schema = new mongoose.Schema({
     enum: [1, 2, 3, 4, 5, 6, 7, 8, 9],
     required: true,
   },
-  otherIndustrialChainManufacturer: {
+  otherChainManufacturer: {
     type: String,
     required: function () {
       return this.industrialChainManufacturer === 9;
@@ -62,7 +62,7 @@ const FT_OP4OE_Schema = new mongoose.Schema({
   },
   conveyorIndex: {
     type: Number,
-    required: true,
+    required: false,
   },
   travelDirection: {
     type: Number,
@@ -104,7 +104,7 @@ const FT_OP4OE_Schema = new mongoose.Schema({
   conveyorLoaded: {
     type: Number,
     enum: [1, 2],
-    required: false,
+    required: true,
   },
   conveyorSwing: {
     type: Number,

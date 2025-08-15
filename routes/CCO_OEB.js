@@ -21,9 +21,15 @@ router.post("/", authenticate, async (req, res) => {
             ...(CCO_OEBData.surroundingTemp && { surroundingTemp: CCO_OEBData.surroundingTemp }),
             ...(CCO_OEBData.ohpUnitType && { ohpUnitType: CCO_OEBData.ohpUnitType }),
             chainDrop: CCO_OEBData.chainDrop,
-            ...(CCO_OEBData.ohpDiameter && { ohpDiameter: CCO_OEBData.ohpDiameter }),
-            ...(CCO_OEBData.ohpWidth && { ohpWidth: CCO_OEBData.ohpWidth }),
-            ...(CCO_OEBData.ohpHeight && { ohpHeight: CCO_OEBData.ohpHeight }),
+            ...(CCO_OEBData.freeRailDiameter && { freeRailDiameter: CCO_OEBData.freeRailDiameter }),
+            ...(CCO_OEBData.freeRailWidth && { freeRailWidth: CCO_OEBData.freeRailWidth }),
+            ...(CCO_OEBData.freeRaiHeight && { freeRaiHeight: CCO_OEBData.freeRaiHeight }),
+            ...(CCO_OEBData.freeRaiVerticle && { freeRaiVerticle: CCO_OEBData.freeRaiVerticle }),
+            ...(CCO_OEBData.freeRailInvertedChain && { freeRailInvertedChain: CCO_OEBData.freeRailInvertedChain }),
+            ...(CCO_OEBData.freeRailInvertedDiameter && { freeRailInvertedDiameter: CCO_OEBData.freeRailInvertedDiameter }),
+            ...(CCO_OEBData.freeRailInvertedWidth && { freeRailInvertedWidth: CCO_OEBData.freeRailInvertedWidth }),
+            ...(CCO_OEBData.freeRailInvertedHeight && { freeRailInvertedHeight: CCO_OEBData.freeRailInvertedHeight }),
+            ...(CCO_OEBData.freeRailInvertedPitch && { freeRailInvertedPitch: CCO_OEBData.freeRailInvertedPitch }),
 
         });
         req.user.cart.push({

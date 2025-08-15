@@ -131,13 +131,14 @@ const CC5_OP4OE_Schema = new mongoose.Schema({
     required: true,
   },
 
+  
+  monitorData: templateA,
+  
   controlVoltage: {
     type: String,
     required: true,
   },
-
-  monitorData: templateA,
-
+  
   outboardStatus: {
     type: Number,
     enum: [1, 2],

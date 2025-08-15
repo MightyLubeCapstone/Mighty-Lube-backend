@@ -14,7 +14,7 @@ const COE_CEL_Schema = new mongoose.Schema({
     enum: [1, 2, 3, 4, 5],
     required: true,
   },
-
+ 
   otherChainSize: {
     type: String,
     required: function () {

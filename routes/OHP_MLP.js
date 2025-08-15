@@ -10,6 +10,7 @@ router.post("/", authenticate, async (req, res) => {
     try {
         const { OHP_MLPData, numRequested } = req.body;
         const order = new OHP_MLP({
+
             conveyorName: OHP_MLPData.conveyorName,
             chainSize: OHP_MLPData.chainSize,
             ...(OHP_MLPData.otherChainSize && { otherChainSize: OHP_MLPData.otherChainSize }),
@@ -73,6 +74,7 @@ router.post("/", authenticate, async (req, res) => {
                 ...(OHP_MLPData.templateA.specialControllerOptions && { specialControllerOptions: OHP_MLPData.templateA.specialControllerOptions }),
                 ...(OHP_MLPData.templateA.operatingVoltage && { operatingVoltage: OHP_MLPData.templateA.operatingVoltage })
             },
+            
             wheelOpenType: OHP_MLPData.wheelOpenType,
             wheelClosedType: OHP_MLPData.wheelClosedType,
             powerChainStatus: OHP_MLPData.powerChainStatus,

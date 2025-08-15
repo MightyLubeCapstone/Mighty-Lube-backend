@@ -18,13 +18,12 @@ const ETI_807_Schema = new mongoose.Schema({
             return this.industrialChainManufacturer === 5;
         },
     },
-    conveyorLength: {  change in the route to be false
+    conveyorLength: {
 
         type: Number,
         required: false,
     },
-    conveyorLengthUnit: { change in the route to be false
-
+    conveyorLengthUnit: { 
         type: Number,
         enum: [1, 2, 3, 4],
         required: false,

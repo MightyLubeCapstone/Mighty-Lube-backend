@@ -13,7 +13,7 @@ router.post("/", authenticate, async (req, res) => {
             ...(COE_CDLData.conveyorName && { conveyorName: COE_CDLData.conveyorName }),
             ...(COE_CDLData.chainSize && { chainSize: COE_CDLData.chainSize }),
             ...(COE_CDLData.otherChainSize && { otherChainSize: COE_CDLData.otherChainSize }),
-            appEnviroment: COE_CDLData.appEnviroment,
+            ...(COE_CDLData.appEnviroment && { appEnviroment: COE_CDLData.appEnviroment }),
             ...(COE_CDLData.ovenStatus && { ovenStatus: COE_CDLData.ovenStatus }),
             ...(COE_CDLData.ovenTemp && { ovenTemp: COE_CDLData.ovenTemp }),
             ...(COE_CDLData.otherAppEnviroment && { otherAppEnviroment: COE_CDLData.otherAppEnviroment }),

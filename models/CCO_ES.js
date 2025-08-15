@@ -111,6 +111,12 @@ const CCO_ESSchema = new mongoose.Schema({
     },
   },
 
+  surroundingTemp: {
+    type: Number,
+    enum: [1, 2],
+    required: false,
+  },
+
   conveyorLoaded: {
     type: Number,
     enum: [1, 2],
@@ -176,7 +182,7 @@ const CCO_ESSchema = new mongoose.Schema({
   },
 
   monitorData: templateA,
-  
+
   addFreeCarrier: {
     type: Number,
     enum: [1, 2, 3],

@@ -300,10 +300,7 @@ const IFT_OP4OE_Schema = new mongoose.Schema({
     type: Number,
     required: false,
   },
-  iftPowerV1: {
-    type: Number,
-    required: false,
-  },
+
   iftPowerW1: {
     type: Number,
     required: false,

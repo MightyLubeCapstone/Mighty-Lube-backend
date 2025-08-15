@@ -34,8 +34,8 @@ router.post("/", authenticate, async (req, res) => {
             ...(OHP_OP4AData.surroundingTemp && { surroundingTemp: OHP_OP4AData.surroundingTemp }),
             ...(OHP_OP4AData.conveyorLoaded && { conveyorLoaded: OHP_OP4AData.conveyorLoaded }),
             ...(OHP_OP4AData.conveyorSwing && { conveyorSwing: OHP_OP4AData.conveyorSwing }),
-            ...(OHP_OP4AData.operatingVoltage && { operatingVoltage: OHP_OP4AData.operatingVoltage }),
-            ...(OHP_OP4AData.controlVoltSingle && { controlVoltSingle: OHP_OP4AData.controlVoltSingle }),
+            operatingVoltage: OHP_OP4AData.operatingVoltage,
+            controlVoltSingle: OHP_OP4AData.controlVoltSingle,
             ...(OHP_OP4AData.compressedAir && { compressedAir: OHP_OP4AData.compressedAir }),
             ...(OHP_OP4AData.airSupplyType && { airSupplyType: OHP_OP4AData.airSupplyType }),
         monitorData: 

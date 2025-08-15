@@ -153,6 +153,7 @@ const OHP_GPCSchema = new mongoose.Schema({
   },
 
   monitorData: templateA,
+  
   currentGrease: {
     type: String,
     required: true,

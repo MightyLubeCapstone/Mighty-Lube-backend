@@ -74,7 +74,7 @@ router.post("/", authenticate, async (req, res) => {
                 ...(IBR_RFCData.templateA.specialControllerOptions && { specialControllerOptions: IBR_RFCData.templateA.specialControllerOptions }),
                 ...(IBR_RFCData.templateA.operatingVoltage && { operatingVoltage: IBR_RFCData.templateA.operatingVoltage })
             },
-
+ 
             wheelOpenType: IBR_RFCData.wheelOpenType,
             wheelClosedType: IBR_RFCData.wheelClosedType,
             openStatus: IBR_RFCData.openStatus,

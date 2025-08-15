@@ -21,7 +21,7 @@ const COE_CDL_Schema = new mongoose.Schema({
   appEnviroment: {
     type: Number,
     enum: [1, 2, 3, 4, 5, 6, 7],
-    required: true,
+    required: false,
   },
 
   ovenStatus: {

@@ -4,7 +4,7 @@ const { authenticate } = require("./sessions");
 const OHP_OP52 = require("../models/OHP_OP52");
 
 const router = express.Router();
-
+ 
 router.post("/", authenticate, async (req, res) => {
     try {
         const { OHP_OP52Data, numRequested } = req.body;
@@ -12,7 +12,7 @@ router.post("/", authenticate, async (req, res) => {
             conveyorName: OHP_OP52Data.conveyorName,
             chainSize: OHP_OP52Data.chainSize,
             ...(OHP_OP52Data.otherChainSize && { otherChainSize: OHP_OP52Data.otherChainSize }),
-            industrialChainManufacturer: OHP_OP52Data.industrialChainManufacturer,
+            ...(OHP_OP52Data.industrialChainManufacturer && { industrialChainManufacturer: OHP_OP52Data.industrialChainManufacturer }),
             ...(OHP_OP52Data.otherChainManufacturer && { otherChainManufacturer: OHP_OP52Data.otherChainManufacturer }),
             wheelManufacturer: OHP_OP52Data.wheelManufacturer,
             ...(OHP_OP52Data.otherWheelManufacturer && { otherWheelManufacturer: OHP_OP52Data.otherWheelManufacturer }),

@@ -31,7 +31,7 @@ router.post("/", authenticate, async (req, res) => {
             controlVoltSingle: FC_317Data.templateC.controlVoltSingle,
             compressedAir: FC_317Data.templateC.compressedAir,
             ...(FC_317Data.templateC.airSupplyType && { airSupplyType: FC_317Data.templateC.airSupplyType}),
-
+ 
             templateA_CData: 
             {
                 existingMonitor: FC_317Data.templateA.existingMonitor,

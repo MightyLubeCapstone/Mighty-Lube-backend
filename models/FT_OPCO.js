@@ -384,10 +384,7 @@ const FT_OPCO_Schema = new mongoose.Schema({
     enum: [1, 2, 3, 4],
     required: false,
   },
-  ftTopF: {
-    type: Number,
-    required: false,
-  },
+
   ftTopG: {
     type: Number,
     required: false,
@@ -409,10 +406,6 @@ const FT_OPCO_Schema = new mongoose.Schema({
     required: false,
   },
   ftTopJ1: {
-    type: Number,
-    required: false,
-  },
-  ftTopK1: {
     type: Number,
     required: false,
   },

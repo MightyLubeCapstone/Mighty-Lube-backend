@@ -79,7 +79,8 @@ router.post("/", authenticate, async (req, res) => {
                 ...(IFT_OP4OEData.templateA.fromAirTakeUpDistance && { fromAirTakeUpDistance: IFT_OP4OEData.templateA.fromAirTakeUpDistance }),
                 ...(IFT_OP4OEData.templateA.specialControllerOptions && { specialControllerOptions: IFT_OP4OEData.templateA.specialControllerOptions }),
                 ...(IFT_OP4OEData.templateA.operatingVoltage && { operatingVoltage: IFT_OP4OEData.templateA.operatingVoltage })
-            },          
+            },
+            
             ...(IFT_OP4OEData.wheelOpenType && { wheelOpenType: IFT_OP4OEData.wheelOpenType }),
             ...(IFT_OP4OEData.wheelClosedType && { wheelClosedType: IFT_OP4OEData.wheelClosedType }),
             ...(IFT_OP4OEData.openStatus && { openStatus: IFT_OP4OEData.openStatus }),
@@ -112,7 +113,6 @@ router.post("/", authenticate, async (req, res) => {
             ...(IFT_OP4OEData.iftPowerS1 && { iftPowerS1: IFT_OP4OEData.iftPowerS1 }),
             ...(IFT_OP4OEData.iftPowerT1 && { iftPowerT1: IFT_OP4OEData.iftPowerT1 }),
             ...(IFT_OP4OEData.iftPowerU1 && { iftPowerU1: IFT_OP4OEData.iftPowerU1 }),
-            ...(IFT_OP4OEData.iftPowerV1 && { iftPowerV1: IFT_OP4OEData.iftPowerV1 }),
             ...(IFT_OP4OEData.iftPowerW1 && { iftPowerW1: IFT_OP4OEData.iftPowerW1 }),
             ...(IFT_OP4OEData.iftPowerX1 && { iftPowerX1: IFT_OP4OEData.iftPowerX1 }),
         });

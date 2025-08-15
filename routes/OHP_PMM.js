@@ -16,8 +16,6 @@ router.post("/", authenticate, async (req, res) => {
             ...(OHP_PMMData.otherChainManufacturer && { otherChainManufacturer: OHP_PMMData.otherChainManufacturer }),
             orientationType: OHP_PMMData.orientationType,
             markerToUnitDistance: OHP_PMMData.markerToUnitDistance,
-            ...(OHP_PMMData.existingMonitor && { existingMonitor: OHP_PMMData.existingMonitor }),
-            ...(OHP_PMMData.newMonitor && { newMonitor: OHP_PMMData.newMonitor }),
         monitorData: 
         {
                 existingMonitor: OHP_PMMData.templateA.existingMonitor,

@@ -14,6 +14,7 @@ router.post("/", authenticate, async (req, res) => {
     try {
         const { CCO_139AData, numRequested } = req.body;
         const order = new CCO_139A({
+
             conveyorName: CCO_139AData.conveyorName,
             chainSize: CCO_139AData.chainSize,
             ...(CCO_139AData.otherChainSize && { otherChainSize: CCO_139AData.otherChainSize }),
@@ -165,30 +166,30 @@ router.post("/", authenticate, async (req, res) => {
                 zerkLocationType: CCO_139AData.templateB.zerkLocationType,
                 wheelDiameter: CCO_139AData.templateB.wheelDiameter,
                 conveyorSwing: CCO_139AData.templateB.conveyorSwing,
-                ...(CCO_139AData.templateB.chainMaster && { lubeType: CCO_139AData.templateB.chainMaster}),
-                ...(CCO_139AData.templateB.remoteStatus && { lubeType: CCO_139AData.templateB.remoteStatus}),
-                ...(CCO_139AData.templateB.mountStatus && { lubeType: CCO_139AData.templateB.mountStatus}),
-                ...(CCO_139AData.templateB.otherUnitStatus && { lubeType: CCO_139AData.templateB.otherUnitStatus}),
-                ...(CCO_139AData.templateB.timerStatus && { lubeType: CCO_139AData.templateB.timerStatus}),
-                ...(CCO_139AData.templateB.electricStatus && { lubeType: CCO_139AData.templateB.electricStatus}),
-                ...(CCO_139AData.templateB.mightyLubeMonitoring && { lubeType: CCO_139AData.templateB.mightyLubeMonitoring}),
-                ...(CCO_139AData.templateB.preMountType && { lubeType: CCO_139AData.templateB.preMountType}),
-                ...(CCO_139AData.templateB.otherPreMountType && { lubeType: CCO_139AData.templateB.otherPreMountType}),
-                ...(CCO_139AData.templateB.plcConnection && { lubeType: CCO_139AData.templateB.plcConnection}),
-                ...(CCO_139AData.templateB.otherControllerNotes && { lubeType: CCO_139AData.templateB.otherControllerNotes}),
-                ...(CCO_139AData.templateB.templateB_UnitType && { lubeType: CCO_139AData_UnitType}),
-                ...(CCO_139AData.templateB.templateB_InvertedB && { lubeType: CCO_139AData_InvertedB}),
-                ...(CCO_139AData.templateB.templateB_InvertedE && { lubeType: CCO_139AData_InvertedE}),
-                ...(CCO_139AData.templateB.templateB_InvertedG && { lubeType: CCO_139AData_InvertedG}),
-                ...(CCO_139AData.templateB.templateB_InvertedH && { lubeType: CCO_139AData_InvertedH}),
-                ...(CCO_139AData.templateB.templateB_InvertedK && { lubeType: CCO_139AData_InvertedK}),
-                ...(CCO_139AData.templateB.templateB_InvertedT && { lubeType: CCO_139AData_InvertedT}),
-                ...(CCO_139AData.templateB.templateB_InvertedU && { lubeType: CCO_139AData_InvertedU}),
-                ...(CCO_139AData.templateB.templateB_InvertedV && { lubeType: CCO_139AData_InvertedV}),
-                ...(CCO_139AData.templateB.templateB_InvertedW && { lubeType: CCO_139AData_InvertedW}),
+                ...(CCO_139AData.templateB.chainMaster && { chainMaster: CCO_139AData.templateB.chainMaster}),
+                ...(CCO_139AData.templateB.remoteStatus && { remoteStatus: CCO_139AData.templateB.remoteStatus}),
+                ...(CCO_139AData.templateB.mountStatus && { mountStatus: CCO_139AData.templateB.mountStatus}),
+                ...(CCO_139AData.templateB.otherUnitStatus && { otherUnitStatus: CCO_139AData.templateB.otherUnitStatus}),
+                ...(CCO_139AData.templateB.timerStatus && { timerStatus: CCO_139AData.templateB.timerStatus}),
+                ...(CCO_139AData.templateB.electricStatus && { electricStatus: CCO_139AData.templateB.electricStatus}),
+                ...(CCO_139AData.templateB.mightyLubeMonitoring && { mightyLubeMonitoring: CCO_139AData.templateB.mightyLubeMonitoring}),
+                ...(CCO_139AData.templateB.preMountType && { preMountType: CCO_139AData.templateB.preMountType}),
+                ...(CCO_139AData.templateB.otherPreMountType && { otherPreMountType: CCO_139AData.templateB.otherPreMountType}),
+                ...(CCO_139AData.templateB.plcConnection && { plcConnection: CCO_139AData.templateB.plcConnection}),
+                ...(CCO_139AData.templateB.otherControllerNotes && { otherControllerNotes: CCO_139AData.templateB.otherControllerNotes}),
+                ...(CCO_139AData.templateB.templateB_UnitType && { templateB_UnitType: CCO_139AData.templateB.templateB_UnitType}),
+                ...(CCO_139AData.templateB.templateB_InvertedB && { templateB_InvertedB: CCO_139AData.templateB.templateB_InvertedB}),
+                ...(CCO_139AData.templateB.templateB_InvertedE && { templateB_InvertedE: CCO_139AData.templateB.templateB_InvertedE}),
+                ...(CCO_139AData.templateB.templateB_InvertedG && { templateB_InvertedG: CCO_139AData.templateB.templateB_InvertedG}),
+                ...(CCO_139AData.templateB.templateB_InvertedH && { templateB_InvertedH: CCO_139AData.templateB.templateB_InvertedH}),
+                ...(CCO_139AData.templateB.templateB_InvertedK && { templateB_InvertedK: CCO_139AData.templateB.templateB_InvertedK}),
+                ...(CCO_139AData.templateB.templateB_InvertedT && { templateB_InvertedT: CCO_139AData.templateB.templateB_InvertedT}),
+                ...(CCO_139AData.templateB.templateB_InvertedU && { templateB_InvertedU: CCO_139AData.templateB.templateB_InvertedU}),
+                ...(CCO_139AData.templateB.templateB_InvertedV && { templateB_InvertedV: CCO_139AData.templateB.templateB_InvertedV}),
+                ...(CCO_139AData.templateB.templateB_InvertedW && { templateB_InvertedW: CCO_139AData.templateB.templateB_InvertedW}),
 
             },
-
+            
             templateCData: 
             {
                 
@@ -391,7 +392,7 @@ router.post("/", authenticate, async (req, res) => {
                 operatingVoltage: CCO_139AData.templateF.operatingVoltage,
                 controlVoltSingle: CCO_139AData.templateF.controlVoltSingle,
             },
-
+ 
             ...(CCO_139AData.railLubeStatus && { railLubeStatus: CCO_139AData.railLubeStatus }),
             ...(CCO_139AData.lubeBrand && { lubeBrand: CCO_139AData.lubeBrand }),
             ...(CCO_139AData.lubeType && { lubeType: CCO_139AData.lubeType }),

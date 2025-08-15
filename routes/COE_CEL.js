@@ -14,8 +14,9 @@ router.post("/", authenticate, async (req, res) => {
         const { COE_CELData, numRequested } = req.body;
 
         const order = new COE_CEL({
-            ...(COE_CELData.conveyorName && { conveyorName: COE_CELData.conveyorName }),
+            conveyorName: COE_CELData.conveyorName,
             chainSize: COE_CELData.chainSize,
+            ...(COE_CELData.otherChainSize && { otherChainSize: COE_CELData.otherChainSize }),
             industrialChainManufacturer: COE_CELData.industrialChainManufacturer,
             ...(COE_CELData.otherIndustrialChainManufacturer && { otherIndustrialChainManufacturer: COE_CELData.otherIndustrialChainManufacturer }),
             conveyorLength: COE_CELData.conveyorLength,
@@ -27,11 +28,14 @@ router.post("/", authenticate, async (req, res) => {
             appEnviroment: COE_CELData.appEnviroment,
             ...(COE_CELData.ovenStatus && { ovenStatus: COE_CELData.ovenStatus }),
             ...(COE_CELData.ovenTemp && { ovenTemp: COE_CELData.ovenTemp }),
+            ...(COE_CELData.otherAppEnviroment && { otherAppEnviroment: COE_CELData.otherAppEnviroment }),
             ...(COE_CELData.surroundingTemp && { surroundingTemp: COE_CELData.surroundingTemp }),
             ...(COE_CELData.conveyorLoaded && { conveyorLoaded: COE_CELData.conveyorLoaded }),
             ...(COE_CELData.conveyorSwing && { conveyorSwing: COE_CELData.conveyorSwing }),
             ...(COE_CELData.plantLayout && { plantLayout: COE_CELData.plantLayout }),
             ...(COE_CELData.requiredPics && { requiredPics: COE_CELData.requiredPics }),
+            operatingVoltage: COE_CELData.operatingVoltage,
+
             monitorData: 
             {
                 existingMonitor: COE_CELData.templateA.existingMonitor,
@@ -162,11 +166,6 @@ router.post("/", authenticate, async (req, res) => {
 
 
             },
-
-            ...(COE_CELData.wheelOpenType && { wheelOpenType: COE_CELData.wheelOpenType }),
-            ...(COE_CELData.wheelClosedType && { wheelClosedType: COE_CELData.wheelClosedType }),
-            ...(COE_CELData.openStatus && { openStatus: COE_CELData.openStatus }),
-
 
             templateEData: 
             {

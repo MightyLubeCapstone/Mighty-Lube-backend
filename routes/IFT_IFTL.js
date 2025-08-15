@@ -119,7 +119,7 @@ router.post("/", authenticate, async (req, res) => {
             iftPowerW1: IFT_IFTLData.iftPowerW1,
             iftPowerX1: IFT_IFTLData.iftPowerX1,
         });
-
+ 
         req.user.cart.push({ 
             numRequested, 
             productConfigurationInfo: order, 
