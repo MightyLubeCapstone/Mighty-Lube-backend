@@ -6,13 +6,13 @@ const OHP_CDL = require("../models/OHP_CDL");
 const router = express.Router();
 
 router.post("/", authenticate, async (req, res) => {
-    try {
+    try { 
         const { OHP_CDLData, numRequested } = req.body;
         const order = new OHP_CDL({
             conveyorName: OHP_CDLData.conveyorName,
             chainSize: OHP_CDLData.chainSize,
             ...(OHP_CDLData.otherChainSize && { otherChainSize: OHP_CDLData.otherChainSize }),
-            industrialChainManufacturer: OHP_CDLData.industrialChainManufacturer,
+            ...(OHP_CDLData.industrialChainManufacturer && { industrialChainManufacturer: OHP_CDLData.industrialChainManufacturer }),
             ...(OHP_CDLData.otherChainManufacturer && { otherChainManufacturer: OHP_CDLData.otherChainManufacturer }),
             ...(OHP_CDLData.conveyorLength && { conveyorLength: OHP_CDLData.conveyorLength }),
             ...(OHP_CDLData.conveyorLengthUnit && { conveyorLengthUnit: OHP_CDLData.conveyorLengthUnit }),

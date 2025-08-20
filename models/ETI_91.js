@@ -19,14 +19,15 @@ const ETI_91_Schema = new mongoose.Schema({
         },
     },
     conveyorLength: {
+
         type: Number,
-        required: true,
+        required: false,
     },
-    conveyorLengthUnit: {
+    conveyorLengthUnit: { 
 
         type: Number,
         enum: [1, 2, 3, 4],
-        required: true,
+        required: false,
 
     }
 });

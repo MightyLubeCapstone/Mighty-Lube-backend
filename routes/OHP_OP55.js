@@ -9,6 +9,7 @@ router.post("/", authenticate, async (req, res) => {
     try {
         const { OHP_OP55Data, numRequested } = req.body;
         const order = new OHP_OP55({
+            
             conveyorName: OHP_OP55Data.conveyorName,
             chainSize: OHP_OP55Data.chainSize,
             ...(OHP_OP55Data.otherChainSize && { otherChainSize: OHP_OP55Data.otherChainSize }),
@@ -34,7 +35,7 @@ router.post("/", authenticate, async (req, res) => {
             ...(OHP_OP55Data.otherControllerNotes && { otherControllerNotes: OHP_OP55Data.otherControllerNotes }),
             ...(OHP_OP55Data.specialControllerOption && { specialControllerOption: OHP_OP55Data.specialControllerOption }),
             ...(OHP_OP55Data.specialControllerInfo && { specialControllerInfo: OHP_OP55Data.specialControllerInfo }),
-        });
+        }); 
         req.user.cart.push({
             numRequested,
             productConfigurationInfo: order,

@@ -119,26 +119,7 @@ const IBR_RFC_Schema = new mongoose.Schema({
     required: true,
   },
 
-  existingMonitor: {
-    type: Number,
-    enum: [1, 2],
-    required: true,
-  },
-
-  newMonitor: {
-    type: Number,
-    enum: [1, 2],
-    required: true,
-    validate: {
-      validator: function (value) {
-        return !(this.existingMonitor === 1 && value === 1);
-      },
-      message: "Existing monitor and New Monitor cannot both be 1.",
-    },
-  },
-
   monitorData: templateA,
-
   wheelOpenType: {
     type: Number,
     enum: [1, 2, 3],
@@ -255,7 +236,7 @@ const IBR_RFC_Schema = new mongoose.Schema({
 
   specialControllerOptions: {
     type: Number,
-    required: false,
+    required: true,
     enum: [1, 2, 3],
   },
 

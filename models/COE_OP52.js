@@ -1,15 +1,15 @@
 const mongoose = require("mongoose");
 const getDecodedInfo = require("./getDecodedInfo.js");
- 
-const COE_CDL_Schema = new mongoose.Schema({
+
+const COE_OP52_Schema = new mongoose.Schema({
   conveyorName: {
     type: String,
-    required: false,
+    required: true,
   },
   chainSize: {
     type: Number,
     enum: [1, 2, 3, 4, 5],
-    required: false,
+    required: true,
   },
 
   otherChainSize: {
@@ -18,10 +18,15 @@ const COE_CDL_Schema = new mongoose.Schema({
       return this.cc5ChainSize === 5;
     },
   },
+  travelDirection: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },
   appEnviroment: {
     type: Number,
     enum: [1, 2, 3, 4, 5, 6, 7],
-    required: false,
+    required: true,
   },
 
   ovenStatus: {
@@ -45,12 +50,35 @@ const COE_CDL_Schema = new mongoose.Schema({
       return this.appEnviroment === 7;
     },
   },
+  brushApplicators: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },
+
+  m12Plugs: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },
+
+  oilBackupCat: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },
+
+  operatingVoltage: {
+    type: Number,
+    required: true,
+  },
+
   controlVoltSingle: {
     type: Number,
-    required: false,
+    required: true,
   },
 });
 
-const COE_CDL =
-  mongoose.models.COE_CDL || mongoose.model("COE_CDL", COE_CDL_Schema);
-module.exports = COE_CDL;
+const COE_OP52 =
+  mongoose.models.COE_OP52 || mongoose.model("COE_OP52", COE_OP52_Schema);
+module.exports = COE_OP52;

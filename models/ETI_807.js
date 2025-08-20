@@ -19,14 +19,14 @@ const ETI_807_Schema = new mongoose.Schema({
         },
     },
     conveyorLength: {
-        type: Number,
-        required: true,
-    },
-    conveyorLengthUnit: {
 
         type: Number,
+        required: false,
+    },
+    conveyorLengthUnit: { 
+        type: Number,
         enum: [1, 2, 3, 4],
-        required: true,
+        required: false,
 
     }
 });
