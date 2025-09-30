@@ -110,17 +110,13 @@ router.get('/allCarts', authenticate, async (_req, res) => {
     if (sample && Array.isArray(sample.users)) {
       items = await User.aggregate([
         { $unwind: '$users' },
-        { $unwind: { path: '$users.cart', preserveNullAndEmptyArrays: false } },
+        { $unwind: { path: '$users.configurations', preserveNullAndEmptyArrays: false } },
         {
           $project: {
             _id: 0,
             userID: '$users.userID',
             username: '$users.username',
-            orderID: '$users.cart.orderID',
-            orderCreated: '$users.cart.orderCreated',
-            numRequested: '$users.cart.numRequested',
-            productType: '$users.cart.productType',
-            productConfigurationInfo: '$users.cart.productConfigurationInfo',
+            productConfigurationInfo: '$users.configurations',
           }
         },
         { $sort: { orderCreated: -1, orderID: 1 } }
@@ -128,17 +124,13 @@ router.get('/allCarts', authenticate, async (_req, res) => {
     } else {
       // Layout B: normal one-doc-per-user (future-proof)
       items = await User.aggregate([
-        { $unwind: { path: '$cart', preserveNullAndEmptyArrays: false } },
+        { $unwind: { path: '$configurations', preserveNullAndEmptyArrays: false } },
         {
           $project: {
             _id: 0,
             userID: 1,
             username: 1,
-            orderID: '$cart.orderID',
-            orderCreated: '$cart.orderCreated',
-            numRequested: '$cart.numRequested',
-            productType: '$cart.productType',
-            productConfigurationInfo: '$cart.productConfigurationInfo',
+            productConfigurationInfo: '$configurations',
           }
         },
         { $sort: { orderCreated: -1, orderID: 1 } }
