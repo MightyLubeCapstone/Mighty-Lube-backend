@@ -26,7 +26,7 @@ router.get('/', (req, res) => {
 
 // GET /api/user_orders/admin/userRaw
 // NOTE: Lock this down with authenticate + admin check before prod.
-router.get('/admin/userRaw', async (req, res) => {
+router.get('/admin/userRaw', authenticate, async (req, res) => {
   try {
     await dbConnect();
 
@@ -99,8 +99,8 @@ router.get('/admin/userRaw', async (req, res) => {
   }
 });
 
-
-router.get('/allCarts', async (_req, res) => {
+// /api/user_orders/allCarts
+router.get('/allCarts', authenticate, async (_req, res) => {
   try {
     await dbConnect();
 

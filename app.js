@@ -11,9 +11,10 @@ const app = express();
 app.use(bodyParser.json());
 app.use(cors());
 
-// page routes
+// Dashboard routes
 const user_orders = require("./routes/user_orders");
 
+// page routes
 const { sessionsRoute } = require("./routes/sessions");
 const usersRoute = require("./routes/users");
 const configurationsRoute = require("./routes/configurations");
@@ -84,9 +85,10 @@ const ftOpcoRoute = require("./routes/FT_OPCO");
 // const pafPmmRoute = require("./routes/PAF_PMM");
 // const pafSlsRoute = require("./routes/PAF_SLS");
 
-// Route usage
+// Dashboard route usage
 app.use("/api/user_orders", user_orders);
 
+// Route usage
 app.use("/api/cart", cartRoute);
 app.use("/api/configurations", configurationsRoute);
 app.use("/api/drafts", draftsRoute);
