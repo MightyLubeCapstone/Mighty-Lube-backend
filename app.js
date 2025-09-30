@@ -11,6 +11,9 @@ const app = express();
 app.use(bodyParser.json());
 app.use(cors());
 
+// Dashboard routes
+const user_orders = require("./routes/user_orders");
+
 // page routes
 const { sessionsRoute } = require("./routes/sessions");
 const usersRoute = require("./routes/users");
@@ -81,6 +84,9 @@ const ftOpcoRoute = require("./routes/FT_OPCO");
 // const pafPmlRoute = require("./routes/PAF_PML");
 // const pafPmmRoute = require("./routes/PAF_PMM");
 // const pafSlsRoute = require("./routes/PAF_SLS");
+
+// Dashboard route usage
+app.use("/api/user_orders", user_orders);
 
 // Route usage
 app.use("/api/cart", cartRoute);
