@@ -10,26 +10,8 @@ const express = require("express");
 const { authenticate } = require("./sessions");
 const User = require("../models/user");
 const getDecodedInfo = require("../models/getDecodedInfo");
-const { generateOrderID } = require("../utils/orderutils");
 
 const router = express.Router();
-
-// generates order ID and adds new item to the cart with new order ID
-app.put('/api/add-to-cart', async (req, res) => {
-    try {
-        const orderID = await generateOrderID();
-
-        const user = await User.findById(userId);
-        user.cart.push({
-            orderID: orderID
-        });
-
-        await user.save();
-        res.json({ success: true, orderID });
-    } catch (error) {
-        res.status(500).json({ error: error.message});
-    }
-});
 
 router.get("/", authenticate, async (req, res) => {
     //used for FGCO form
