@@ -20,16 +20,29 @@ async function getTotalOrderCount() {
 
 // Function to generate sequential 6-character hex order ID
 async function generateOrderID() {
-    // Get current total count from database
+    // Ensure counter is seeded to at least the current DB count before incrementing.
+    // We avoid combining $max and $inc in the same update (MongoDB will throw a conflict).
     const currentCount = await getTotalOrderCount();
-    
-    // Increment and ensure we start from the actual database count
+
+    // Create or update the counter to be at least currentCount
+    const existing = await Counter.findById('orderID').lean();
+    if (!existing) {
+        // Try to create; if another process creates concurrently, ignore duplicate key
+        try {
+            await Counter.create({ _id: 'orderID', sequence_value: currentCount });
+        } catch (err) {
+            // ignore duplicate key errors caused by race
+            if (err.code !== 11000) throw err;
+        }
+    } else if (existing.sequence_value < currentCount) {
+        // Ensure sequence_value is at least currentCount
+        await Counter.findByIdAndUpdate('orderID', { $set: { sequence_value: currentCount } });
+    }
+
+    // Now atomically increment
     const counter = await Counter.findByIdAndUpdate(
         'orderID',
-        { 
-            $max: { sequence_value: currentCount },
-            $inc: { sequence_value: 1 } 
-        },
+        { $inc: { sequence_value: 1 } },
         { new: true, upsert: true }
     );
     

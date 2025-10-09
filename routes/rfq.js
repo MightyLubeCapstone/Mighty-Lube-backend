@@ -1,12 +1,12 @@
 const express = require("express");
 const { authenticate } = require("./sessions");
 const User = require("../models/user");
-const getDecodedInfo = require("../models/getDecodedInfo");
 const { updateOrderID } = require("../utils/orderutils");
 
 const router = express.Router();
 
 // update an existing cart item's orderID only
+// api/rfq/add-to-cart
 router.put('/add-to-cart', authenticate, async (req, res) => {
     try {
         const { oldOrderID } = req.body;

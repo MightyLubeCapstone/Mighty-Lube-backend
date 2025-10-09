@@ -13,7 +13,7 @@ app.use(cors());
 
 // Dashboard routes
 const user_orders = require("./routes/user_orders");
-const RFQ = require("./routes/rfq");
+const rfq = require("./routes/rfq");
 
 // page routes
 const { sessionsRoute } = require("./routes/sessions");
