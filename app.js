@@ -13,6 +13,7 @@ app.use(cors());
 
 // Dashboard routes
 const user_orders = require("./routes/user_orders");
+const orders = require("./routes/orders");
 
 // page routes
 const { sessionsRoute } = require("./routes/sessions");
@@ -87,6 +88,7 @@ const ftOpcoRoute = require("./routes/FT_OPCO");
 
 // Dashboard route usage
 app.use("/api/user_orders", user_orders);
+app.use("api/orders/", orders);
 
 // Route usage
 app.use("/api/cart", cartRoute);
