@@ -88,7 +88,7 @@ const ftOpcoRoute = require("./routes/FT_OPCO");
 
 // Dashboard route usage
 app.use("/api/user_orders", user_orders);
-app.use("api/orders/", orders);
+app.use("/api/orders", orders);
 
 // Route usage
 app.use("/api/cart", cartRoute);
