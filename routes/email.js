@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const nodemailer = require('nodemailer');
+const PDFDocument = require('pdfkit');
 const { authenticate, comparePassword, hashPassword } = require("../routes/sessions")
 const mappings = require("../models/mappings")
 const User = require('../models/user');
@@ -45,6 +46,52 @@ function getMappedInfo(order) {
   return mappedInfo;
 }
 
+// helper to generate a PDF buffer from configuration + user data
+function generatePdfBuffer(configuration, user) {
+  return new Promise((resolve, reject) => {
+    try {
+      const doc = new PDFDocument({ autoFirstPage: false });
+      const buffers = [];
+      doc.on('data', buffers.push.bind(buffers));
+      doc.on('end', () => resolve(Buffer.concat(buffers)));
+      doc.on('error', reject);
+
+      // first page with contact info
+      doc.addPage();
+      doc.fontSize(16).text('Configuration Details', { underline: true });
+      doc.moveDown();
+      doc.fontSize(12).text('Contact Information:');
+      doc.moveDown(0.5);
+      doc.fontSize(11).text(`Name: ${user.firstName || ''} ${user.lastName || ''}`);
+      doc.text(`Phone: ${user.phoneNumber || ''}`);
+      doc.text(`Company: ${user.companyName || ''}`);
+      doc.text(`Country: ${user.country || ''}`);
+      doc.moveDown();
+
+      // for each order add a page and the mapped fields
+      (configuration.cart || []).forEach((order, idx) => {
+        const mapped = getMappedInfo(order);
+        // ensure each order starts on its own page
+        doc.addPage();
+        doc.fontSize(14).text(order.productType || `Item ${idx + 1}`, { underline: true });
+        doc.moveDown(0.5);
+        doc.fontSize(11).text(`Requested number of this item: ${order.numRequested || ''}`);
+        doc.moveDown(0.5);
+
+        // print mapped fields
+        Object.entries(mapped || {}).forEach(([key, value]) => {
+          if (key === '_id') return;
+          doc.text(`${key}: ${value}`);
+        });
+      });
+
+      doc.end();
+    } catch (err) {
+      reject(err);
+    }
+  });
+}
+
 router.post('/send-email', authenticate, async (req, res) => {
   try {
     const configuration = req.user.configurations[req.user.configurations.length - 1];
@@ -61,11 +108,22 @@ router.post('/send-email', authenticate, async (req, res) => {
         emailContent += `\n${key}:\t${value}\n`;
       });
     })
+
+    // generate PDF buffer
+    const pdfBuffer = await generatePdfBuffer(configuration, req.user);
+
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: email,
       subject: configuration.configurationName,
       text: emailContent,
+      attachments: [
+        {
+          filename: 'configuration.pdf',
+          content: pdfBuffer,
+          contentType: 'application/pdf',
+        },
+      ],
     };
 
     await transporter.sendMail(mailOptions);
