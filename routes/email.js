@@ -95,7 +95,9 @@ function generatePdfBuffer(configuration, user) {
 router.post('/send-email', authenticate, async (req, res) => {
   try {
     const configuration = req.user.configurations[req.user.configurations.length - 1];
-    const email = req.user["email"];
+    // Commented out for testing purposes
+    //const email = req.user["email"];
+    const email = 'mightylube.test@gmail.com'; // <- hardcoded recipient for testing
     if (!email) {
       return res.status(400).json({ error: 'Invalid email address' });
     }
