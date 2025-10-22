@@ -7,95 +7,69 @@ const { dbConnect } = require("../config/config");
 const { authenticate } = require("./sessions");
 const User = require("../models/user");
 
+
 const router = express.Router();
-
-// update-only helper: only updates keys that already exist on target order
-function updateExistingKeys(targetOrder, incomingPatch) {
-    for (const key of Object.keys(incomingPatch)) {
-        if (key === 'orderID') continue; // never touch orderID
-        if (!(key in targetOrder)) {
-            // skip any keys that do not already exist on the stored order
-            continue;
-        }
-        const srcValue = incomingPatch[key];
-        const targetValue = targetOrder[key];
-
-        // Recurse for nested plain objects only when both sides are objects
-        if (
-            srcValue &&
-            typeof srcValue === 'object' &&
-            !Array.isArray(srcValue) &&
-            targetValue &&
-            typeof targetValue === 'object' &&
-            !Array.isArray(targetValue)
-        ) {
-            updateExistingKeys(targetValue, srcValue);
-        } else {
-            // For primitives and arrays: replace only if the key exists on target
-            targetOrder[key] = srcValue;
-        }
-    }
-}
-
 
 // PUT /api/orders/editing - Update an order inside a user's configurations carts
 router.put('/editing', authenticate, async (req, res) => {
     try {
         await dbConnect();
 
-        const { userID: providedUserID, order: incomingOrder } = req.body;
-        if (!incomingOrder || !incomingOrder.orderID) {
+        const { userID, order } = req.body;
+        if (!order || !order.orderID) {
             return res.status(400).json({ message: 'order with orderID is required' });
         }
 
-        // Determine which user document to update: provided userID (admin case) or the authenticated user / owner lookup
-        let targetUserDoc;
-        if (providedUserID) {
-            targetUserDoc = await User.findOne({ userID: providedUserID }).exec();
-            if (!targetUserDoc) {
-                return res.status(404).json({ message: 'User not found' });
-            }
+        // Determine which user to update: request body userID (admin case) or the authenticated user
+        let targetUser;
+        if (userID) {
+            targetUser = await User.findOne({ userID }).exec();
+            if (!targetUser) return res.status(404).json({ message: 'User not found' });
         } else {
             // Try to find the owner of the order across all users' configurations
-            targetUserDoc = await User.findOne({ 'configurations.cart.orderID': incomingOrder.orderID }).exec();
-            if (!targetUserDoc) {
-                // fallback to authenticated requester if owner not found
+            targetUser = await User.findOne({ 'configurations.cart.orderID': order.orderID }).exec();
+            if (!targetUser) {
+                // Fallback: use the authenticated user if present (this is the requester)
                 if (req.user) {
-                    targetUserDoc = await User.findById(req.user._id).exec();
-                    if (!targetUserDoc) return res.status(404).json({ message: 'Authenticated user not found' });
+                    targetUser = await User.findById(req.user._id).exec();
                 } else {
-                    return res.status(400).json({ message: 'userID or valid session is required' });
+                    return res.status(400).json({ message: 'userID or valid session is required, or order owner could not be found' });
                 }
             }
         }
 
         // Search for the order inside configurations[*].cart
-        let orderFound = false;
-        for (let configIndex = 0; configIndex < (targetUserDoc.configurations || []).length; configIndex++) {
-            const configuration = targetUserDoc.configurations[configIndex];
-            if (!configuration.cart || !configuration.cart.length) continue;
-            const orderIndex = configuration.cart.findIndex(o => o.orderID === incomingOrder.orderID);
-            if (orderIndex !== -1) {
-                const existingOrder = configuration.cart[orderIndex];
-                updateExistingKeys(existingOrder, incomingOrder);
-                existingOrder.updatedAt = new Date();
-                orderFound = true;
+        let found = false;
+        for (let cfgIdx = 0; cfgIdx < (targetUser.configurations || []).length; cfgIdx++) {
+            const cfg = targetUser.configurations[cfgIdx];
+            if (!cfg.cart || !cfg.cart.length) continue;
+            const ordIdx = cfg.cart.findIndex(o => o.orderID === order.orderID);
+            if (ordIdx !== -1) {
+                // Update only provided fields (do not overwrite orderID)
+                const existing = cfg.cart[ordIdx];
+                Object.keys(order).forEach(key => {
+                    if (key === 'orderID') return;
+                    existing[key] = order[key];
+                });
+                // Optionally set an updated timestamp on the order object
+                existing.updatedAt = new Date();
+                found = true;
                 break;
             }
         }
 
-        if (!orderFound) {
+        if (!found) {
             return res.status(404).json({ message: 'Order not found in user configurations' });
         }
 
-        // Mark modified & save
-        targetUserDoc.markModified('configurations');
-        await targetUserDoc.save();
+        // Mark modified and save
+        targetUser.markModified('configurations');
+        await targetUser.save();
 
         return res.status(200).json({
             message: 'Order updated successfully',
-            userID: targetUserDoc.userID,
-            orderID: incomingOrder.orderID,
+            userID: targetUser.userID,
+            orderID: order.orderID,
             updatedAt: new Date()
         });
 
