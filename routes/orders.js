@@ -102,4 +102,47 @@ router.put('/editing', authenticate, async (req, res) => {
     }
 });
 
-module.exports = router
+// PUT /api/orders/status - Update the status of an order in a user's configuration
+router.put('/status', authenticate, async (req, res) => {
+    try {
+        await dbConnect();
+
+        const { userID: providedUserID, configurationName, orderStatus } = req.body;
+
+        if (!providedUserID || !configurationName || !orderStatus) {
+            return res.status(400).json({ message: 'userID, configurationName and orderStatus are required' });
+        }
+
+        // Load the target user by userID
+        const targetUserDoc = await User.findOne({ userID: providedUserID }).exec();
+        if (!targetUserDoc) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Find the configuration by name
+        const configIndex = (targetUserDoc.configurations || []).findIndex(cfg => cfg.configurationName === configurationName);
+        if (configIndex === -1) {
+            return res.status(404).json({ message: 'Configuration not found' });
+        }
+
+        // Update only the configuration-level orderStatus
+        targetUserDoc.configurations[configIndex].orderStatus = orderStatus;
+        targetUserDoc.configurations[configIndex].updatedAt = new Date();
+
+        targetUserDoc.markModified('configurations');
+        await targetUserDoc.save();
+
+        return res.status(200).json({
+            message: 'Configuration orderStatus updated',
+            userID: targetUserDoc.userID,
+            configurationName: targetUserDoc.configurations[configIndex].configurationName,
+            orderStatus: targetUserDoc.configurations[configIndex].orderStatus,
+            updatedAt: targetUserDoc.configurations[configIndex].updatedAt
+        });
+    } catch (error) {
+        console.error('Error updating configuration orderStatus:', error);
+        return res.status(500).json({ message: 'Failed to update configuration orderStatus' });
+    }
+});
+
+module.exports = router;
