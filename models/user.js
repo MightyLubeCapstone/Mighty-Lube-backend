@@ -109,35 +109,7 @@ const UserSchema = new mongoose.Schema({
             type: String,
             required: true,
         },
-        cart: [{ 
-            orderID: {
-                type: String,
-                required: true,
-            },
-             status: {
-                type: String,
-                default: "Requested",
-
-            },
-            orderCreated: {
-                type: Date,
-                default: Date.now,
-            },
-            numRequested: {
-                type: Number,
-                required: true,
-            },
-            productConfigurationInfo: {
-                type: mongoose.Schema.Types.Mixed,
-            },
-            productType: {
-                type: String,
-                required: true,
-            },
-            updatedAt: {
-                type: Date,
-            },
-        }]
+        cart: [],
     }],
 });
 
