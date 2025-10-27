@@ -10,6 +10,31 @@ const User = require("../models/user");
 
 const router = express.Router();
 
+// deep-merge helper: merges src into target, adds new keys, merges nested objects, replaces arrays/primitives.
+// Does not allow replacing orderID.
+function deepMergeAllowNew(target, src) {
+    for (const key of Object.keys(src)) {
+        if (key === 'orderID') continue; // never overwrite orderID
+        const srcVal = src[key];
+        const tgtVal = target[key];
+
+        // If both are plain objects, merge recursively
+        if (
+            srcVal &&
+            typeof srcVal === 'object' &&
+            !Array.isArray(srcVal) &&
+            tgtVal &&
+            typeof tgtVal === 'object' &&
+            !Array.isArray(tgtVal)
+        ) {
+            deepMergeAllowNew(tgtVal, srcVal);
+        } else {
+            // Replace primitives and arrays, or add new keys
+            target[key] = srcVal;
+        }
+    }
+}
+
 // PUT /api/orders/editing - Update an order inside a user's configurations carts
 router.put('/editing', authenticate, async (req, res) => {
     try {
@@ -45,12 +70,10 @@ router.put('/editing', authenticate, async (req, res) => {
             if (!cfg.cart || !cfg.cart.length) continue;
             const ordIdx = cfg.cart.findIndex(o => o.orderID === order.orderID);
             if (ordIdx !== -1) {
-                // Update only provided fields (do not overwrite orderID)
+                // Deep-merge incoming order into existing order: updates values and adds new fields
                 const existing = cfg.cart[ordIdx];
-                Object.keys(order).forEach(key => {
-                    if (key === 'orderID') return;
-                    existing[key] = order[key];
-                });
+                deepMergeAllowNew(existing, order);
+
                 // Optionally set an updated timestamp on the order object
                 existing.updatedAt = new Date();
                 found = true;
