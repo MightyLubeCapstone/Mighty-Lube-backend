@@ -1,542 +1,317 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
+const templateA = require("./templateA.js");
 
 const templateB = new mongoose.Schema({
-    
-    existingMonitor: {
+  conveyorName: {
+    type: String,
+    required: true,
+  },
 
-        type: Number,
-        enum: [1, 2],
-        required: true,
+  industrialChainManufacturer: {
+    type: Number,
+    enum: [1, 2, 3, 4, 5, 6, 7, 8, 9],
+    required: true,
+  },
 
+  otherChainManufacturer: {
+    type: String,
+    required: function () {
+      return this.industrialChainManufacturer === 9;
     },
+  },
 
-    newMonitor: {
-        type: Number,
-        enum: [1, 2],
-        required: true,
-        validate: {
-            validator: function (value) {
-                return !(this.existingMonitor === 1 && value === 1);
-            },
-            message: "Existing monitor and New Monitor cannot both be 1."
-        }
+  wheelManufacturer: {
+    type: Number,
+    enum: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    required: true,
+  },
+
+  otherWheelManufacturer: {
+    type: String,
+    required: function () {
+      return this.wheelManufacturer === 10;
     },
+  },
 
-    dcuStatus: {
+  conveyorSpeed: {
+    type: Number,
+    required: true,
+  },
 
-        type: Number,
-        enum: [1, 2],
-        required: function () 
-        {
-            return this.existingMonitor === 2 || this.newMonitor === 2;
-        }
-        
+  conveyorSpeedUnit: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },
+
+  conveyorIndex: {
+    type: Number,
+    required: true,
+  },
+
+  travelDirection: {
+    type: Number,
+    enum: [1, 2],
+    required: false,
+  },
+
+  appEnviroment: {
+    type: Number,
+    enum: [1, 2, 3, 4, 5, 6, 7],
+    required: true,
+  },
+
+  otherAppEnviroment: {
+    type: String,
+    required: function () {
+      return this.appEnviroment === 7;
     },
+  },
 
-    dcuNum: {
+  surroundingTemp: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },
 
-        type: Number,
-        required: function () 
-        {
-            return this.dcuStatus === 2;
-        }
+  orientationType: {
+    type: Number,
+    enum: [1, 2, 3],
+    required: true,
+  },
 
+  operatingVoltage: {
+    type: Number,
+    required: true,
+  },
+
+  controlVoltSingle: {
+    type: Number,
+    required: true,
+  },
+
+  compressedAir: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },
+
+  airSupplyType: {
+    type: Number,
+    enum: [1, 2, 3],
+    required: false,
+  },
+
+  monitorData: templateA,
+
+  freeWheelStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },
+
+  actuatorStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },
+
+  pivotStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: false,
+  },
+
+  kingPinStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },
+
+  lubeBrand: {
+    type: String,
+    required: true,
+  },
+
+  lubeViscosity: {
+    type: String,
+    required: true,
+  },
+
+  lubeType: {
+    type: String,
+    required: false,
+  },
+
+  currentGrease: {
+    type: String,
+    required: true,
+  },
+
+  currentGreaseGrade: {
+    type: Number,
+    required: true,
+  },
+
+  zerkDirection: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },
+
+  zerkLocationType: {
+    type: Number,
+    enum: [1, 2, 3, 4, 5],
+    required: true,
+  },
+
+  wheelDiameter: {
+    type: Number,
+    required: true,
+  },
+
+  conveyorSwing: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },
+
+  chainMaster: {
+    type: Number,
+    enum: [1, 2],
+    required: function () {
+      return this.lubeBrand === "Mighty Lube";
     },
+  },
 
-    existingWindows: {
-
-        type: Number,
-        enum: [1, 2],
-        required: function () 
-        {
-            return this.existingMonitor === 2;
-        }
-
+  remoteStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: function () {
+      return this.lubeBrand === "Mighty Lube";
     },
+  },
 
-    existingHeadUnit: {
-
-        type: Number,
-        enum: [1, 2],
-        required: function () 
-        {
-            return this.existingMonitor === 2;
-        }
-
+  mountStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: function () {
+      return this.lubeBrand === "Mighty Lube";
     },
+  },
 
-    existingDCU: {
-
-        type: Number,
-        enum: [1, 2],
-        required: function () 
-        {
-            return this.existingMonitor === 2;
-        }
-
+  otherUnitStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: function () {
+      return this.lubeBrand === "Mighty Lube";
     },
+  },
 
-    existingPowerInterface: {
-
-        type: Number,
-        enum: [1, 2],
-        required: function () 
-        {
-            return this.existingMonitor === 2;
-        }
-
+  timerStatus: {
+    type: Number,
+    enum: [1, 2, 3],
+    required: function () {
+      return this.lubeBrand === "Mighty Lube";
     },
+  },
 
-    newReservoir: {
-
-        type: Number,
-        enum: [1, 2],
-        required: function () 
-        {
-            return this.existingMonitor === 2 || this.newMonitor === 2;
-        }
-
+  electricStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: function () {
+      return this.lubeBrand === "Mighty Lube";
     },
+  },
 
-    reservoirSize: {
-
-        type: Number,
-        enum: [1, 2],
-        required: function () 
-        {
-            return this.newReservoir === 2;
-        }
-
+  mightyLubeMonitoring: {
+    type: Number,
+    enum: [1, 2],
+    required: function () {
+      return this.lubeBrand === "Mighty Lube";
     },
+  },
 
-    otherReservoirSize: {
-
-        type: String,
-        required: function()
-        {
-            return this.reservoirSize === 2;
-        }
-
+  preMountType: {
+    type: Number,
+    enum: [1, 2, 3],
+    required: function () {
+      return this.lubeBrand === "Mighty Lube";
     },
+  },
 
-    newReservoirNum: {
-
-        type: Number,
-        required: function () 
-        {
-            return this.newReservoir === 2;
-        }
-
+  otherPreMountType: {
+    type: String,
+    required: function () {
+      return this.preMountType === 3;
     },
+  },
 
-    typeMonitor: {
-
-        type: Number,
-        enum: [1, 2],
-        required: function () 
-        {
-            return this.existingMonitor === 2 || this.newMonitor === 2;
-        }
-
+  plcConnection: {
+    type: Number,
+    enum: [1, 2],
+    required: function () {
+      return this.lubeBrand === "Mighty Lube";
     },
+  },
 
-    driveMotorAmp: {
-
-        type: Number,
-        enum: [1, 2],
-        required: function () 
-        {
-            return this.typeMonitor === 2;
-        }
-
+  otherControllerNotes: {
+    type: String,
+    required: function () {
+      return this.lubeBrand === "Mighty Lube";
     },
-
-    driveMotorAmpNum: {
-
-        type: Number,
-        required: function () 
-        {
-            return this.driveMotorAmp === 2;
-        }
-
-    },
-
-    driveTakeUpAir: {
-
-        type: Number,
-        enum: [1, 2],
-        required: function () 
-        {
-            return this.typeMonitor === 2;
-        }
-
-    },
-
-    driveTakeUpAirNum: {
-
-        type: Number,
-        required: function () 
-        {
-            return this.driveTakeUpAir === 2;
-        }
-
-    },
-
-    takeUpDistance: {
-
-        type: Number,
-        enum: [1, 2],
-        required: function () 
-        {
-            return this.typeMonitor === 2;
-        }
-
-    },
-
-    takeUpDistanceNum: {
-
-        type: Number,
-        required: function () 
-        {
-            return this.takeUpDistance === 2;
-        }
-
-    },
-
-    driveTemp: {
-
-        type: Number,
-        enum: [1, 2],
-        required: function () 
-        {
-            return this.typeMonitor === 2;
-        }
-
-    },
-
-    driveTempNum: {
-
-        type: Number,
-        required: function () 
-        {
-            return this.driveTemp === 2;
-        }
-
-    },
-
-    driveVibration: {
-
-        type: Number,
-        enum: [1, 2],
-        required: function () 
-        {
-            return this.typeMonitor === 2;
-        }
-
-    },
-
-    driveVibrationNum: {
-
-        type: Number,
-        required: function () 
-        {
-            return this.driveVibration === 2;
-        }
-
-    },
-
-    dogPitch: {
-
-        type: Number,
-        enum: [1, 2],
-        required: function () 
-        {
-            return this.typeMonitor === 2;
-        }
-
-    },
-
-    dogPitchNum: {
-
-        type: Number,
-        required: function () 
-        {
-            return this.dogPitch === 2;
-        }
-
-    },
-
-    paintMarker: {
-
-        type: Number,
-        enum: [1, 2],
-        required: function () 
-        {
-            return this.existingMonitor === 2 || this.newMonitor === 2;
-        }
-
-    },
-
-    paintMarkerNum: {
-
-        type: Number,
-        required: function () 
-        {
-            return this.paintMarker === 2;
-        }
-
-    },
-
-    chainVision: {
-
-        type: Number,
-        enum: [1, 2],
-        required: function () 
-        {
-            return this.typeMonitor === 2;
-        }
-
-    },
-
-    lubeVision: {
-
-        type: Number,
-        enum: [1, 2],
-        required: function () 
-        {
-            return this.typeMonitor === 2;
-        }
-
-    },
-
-    trolleyVision: {
-
-        type: Number,
-        enum: [1, 2],
-        required: function () 
-        {
-            return this.typeMonitor === 2;
-        }
-
-    },
-
-    trolleyDetect: {
-
-        type: Number,
-        enum: [1, 2],
-        required: function () 
-        {
-            return this.trolleyVision === 2;
-        }
-
-    },
-
-    omniView: {
-
-        type: Number,
-        enum: [1, 2],
-        required: function () 
-        {
-            return this.typeMonitor === 2;
-        }
-        
-    },
-
-    dcuUpgradeNum: {
-
-        type: Number,
-        required: function () 
-        {
-            return this.chainVision === 2 || this.omniView === 2;
-        }
-
-    },
-
-    itNameOne: {
-
-        type: String,
-        required: false,
-
-    },
-
-    itIPOne: {
-
-        type: Number,
-        required: false,
-
-    },
-
-    itGatewayOne: {
-
-        type: Number,
-        required: false,
-
-    },
-
-    itSubnetOne: {
-
-        type: Number,
-        required: false,
-
-    },
-
-    itDNSOne: {
-
-        type: Number,
-        required: false,
-
-    },
-
-    itSMTPOne: {
-
-        type: Number,
-        required: false,
-
-    },
-
-    itNameTwo: {
-
-        type: String,
-        required: false,
-
-    },
-
-    itIPTwo: {
-
-        type: Number,
-        required: false,
-
-    },
-
-    itGatewayTwo: {
-
-        type: Number,
-        required: false,
-
-    },
-
-    itSubnetTwo: {
-
-        type: Number,
-        required: false,
-
-    },
-
-    itDNSTwo: {
-
-        type: Number,
-        required: false,
-
-    },
-
-    itSMTPTwo: {
-
-        type: Number,
-        required: false,
-
-    },
-
-    itNameThree: {
-
-        type: String,
-        required: false,
-
-    },
-
-    itIPThree: {
-
-        type: Number,
-        required: false,
-
-    },
-
-    itGatewayThree: {
-
-        type: Number,
-        required: false,
-
-    },
-
-    itSubnetThree: {
-
-        type: Number,
-        required: false,
-
-    },
-
-    itDNSThree: {
-
-        type: Number,
-        required: false,
-
-    },
-
-    itSMTPThree: {
-
-        type: Number,
-        required: false,
-
-    },
-
-
-    itAdditionalNotes: {
-
-        type: String,
-        required: false,
-
-    },
-
-
-    piuDistance: {
-
-        type: Number,
-        required: function () 
-        {
-            return this.existingMonitor === 2 || this.newMonitor === 2;
-        }
-
-    },
-
-
-    switchDistance: {
-
-        type: Number,
-        required: function () 
-        {
-            return this.existingMonitor === 2 || this.newMonitor === 2;
-        }
-
-    },
-
-
-    ampPickup: {
-
-        type: Number,
-        required: function () 
-        {
-            return this.existingMonitor === 2 || this.newMonitor === 2;
-        }
-
-    },
-
-
-    fromAirTakeUpDistance: {
-
-        type: Number,
-        required: function () 
-        {
-            return this.existingMonitor === 2 || this.newMonitor === 2;
-        }
-
-    },
-
-
-    specialControllerOptions: {
-
-        type: Number,
-        enum: [1, 2, 3],
-
-    },
+  },
+
+  templateB_UnitType: {
+    type: Number,
+    enum: [1, 2, 3, 4],
+    required: false,
+  },
+
+  templateB_InvertedB: {
+    type: Number,
+    required: false,
+  },
+
+  templateB_InvertedE: {
+    type: Number,
+    required: false,
+  },
+
+  templateB_InvertedG: {
+    type: Number,
+    required: false,
+  },
+
+  templateB_InvertedH: {
+    type: Number,
+    required: false,
+  },
+
+  templateB_InvertedK: {
+    type: Number,
+    required: false,
+  },
+
+  templateB_InvertedT: {
+    type: Number,
+    required: false,
+  },
+
+  templateB_InvertedU: {
+    type: Number,
+    required: false,
+  },
+
+  templateB_InvertedV: {
+    type: Number,
+    required: false,
+  },
+
+  templateB_InvertedW: {
+    type: Number,
+    required: false,
+  },
 });
 
 module.exports = templateB;

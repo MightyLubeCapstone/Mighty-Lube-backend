@@ -1,200 +1,328 @@
-const mongoose = require('mongoose');
-const templateB = require("./templateB.js");
+const mongoose = require("mongoose");
+const templateA = require("./templateA.js");
+const getDecodedInfo = require("./getDecodedInfo.js");
+
 const IBR_RFC_Schema = new mongoose.Schema({
-    conveyorName: {
-        type: String,
-        required: false,
-    },
-    chainSize: {
-        type: Number,
-        required: false,
-    },
-    // add enum and check
-    industrialChainManufacturer: {
-        type: Number,
-        enum: [1, 2, 3, 4, 5, 6, 7, 8, 9],
-        required: false,
-    },
-    otherChainManufacturer: {
-        type: String,
-        required: function () {
-            return this.industrialChainManufacturer === 9;
-        },
-    },
-    conveyorLength: {
-        type: Number,
-        required: false,
-    },
-    measurementUnit: {
-        type: Number,
-        required: false,
-    },
-    conveyorSpeed: {
-        type: Number,
-        required: false,
-    },
-    speedUnit: {
-        type: Number,
-        required: false,
-    },
-    conveyorIndex: {
-        type: Number,
-        required: false,
-    },
-    travelDirection: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
-    },
-    appEnviroment: {
-        type: Number,
-        enum: [1, 2],
-        required: true,
-    },
-    ovenStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: function () {
-            return this.appEnviroment === 1;
-        },
-    },
-    ovenTemp: {
-        type: Number,
-        required: function () {
-            return this.appEnviroment === 1;
-        },
-    },
-    monitorData: templateB,
+  conveyorName: {
+    type: String,
+    required: true,
+  },
+  chainSize: {
+    type: Number,
+    enum: [1, 2, 3, 4, 5],
+    required: true,
+  },
 
+  otherChainSize: {
+    type: String,
+    required: function () {
+      return this.chainSize === 5;
+    },
+  },
+  industrialChainManufacturer: {
+    type: Number,
+    enum: [1, 2, 3, 4, 5, 6, 7, 8, 9],
+    required: true,
+  },
+  otherChainManufacturer: {
+    type: String,
+    required: function () {
+      return this.industrialChainManufacturer === 9;
+    },
+  },
+  conveyorLength: {
+    type: Number,
+    required: true,
+  },
+  conveyorLengthUnit: {
+    type: Number,
+    enum: [1, 2, 3, 4],
+    required: true,
+  },
+  conveyorSpeed: {
+    type: Number,
+    required: true,
+  },
+  speedUnit: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },
+  conveyorIndex: {
+    type: Number,
+    required: true,
+  },
+  travelDirection: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },
+  appEnviroment: {
+    type: Number,
+    enum: [1, 2, 3, 4, 5, 6, 7],
+    required: true,
+  },
 
-    
+  ovenStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: function () {
+      return this.appEnviroment === 3;
+    },
+  },
 
-    surroundingTemp: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
+  ovenTemp: {
+    type: Number,
+    required: function () {
+      return this.appEnviroment === 3;
     },
-    conveyorLoaded: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
-    },
-    conveyorSwing: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
-    },
-    strandStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
-    },
-    plantLayout: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
-    },
-    requiredPics: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
-    },
-    operatingVoltage: {
-        type: Number,
-        required: false,
-    },
-    controlVoltage: {
-        type: Number,
-        required: false,
-    },
-    wheelOpenType: {
-        type: Number,
-        enum: [1, 2, 3],
-        required: false,
-    },
-    wheelClosedType: {
-        type: Number,
-        enum: [1, 2, 3],
-        required: false,
-    },
-    openStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
-    },
-    powerChainStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
-    },
-    chainPinStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
-    },
-    catDriveStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
-    },
-    catDriveNum: {
-        type: Number,
-        required: false,
-    },
-    railLubeStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
-    },
-    externalLubeStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
-    },
-    lubeBrand: {
-        type: String,
-        required: false,
-    },
-    lubeType: {
-        type: String,
-        required: false,
-    },
-    lubeViscosity: {
-        type: String,
-        required: false,
-    },
-    
-    chainCleanStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
-    },
+  },
 
-    ibrUnitType: {
-        type: Number,
-        required: false,
+  otherAppEnviroment: {
+    type: String,
+    required: function () {
+      return this.appEnviroment === 7;
     },
-    ibrChainA1: {
-        type: Number,
-        required: false,
+  },
+
+  surroundingTemp: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },
+  conveyorLoaded: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },
+  strandStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },
+  plantLayout: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },
+  requiredPics: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },
+  operatingVoltage: {
+    type: Number,
+    required: true,
+  },
+  controlVoltage: {
+    type: Number,
+    required: true,
+  },
+
+  monitorData: templateA,
+  wheelOpenType: {
+    type: Number,
+    enum: [1, 2, 3],
+    required: true,
+  },
+  wheelClosedType: {
+    type: Number,
+    enum: [1, 2, 3],
+    required: true,
+  },
+  openStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },
+  powerChainStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },
+  chainPinStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },
+
+  sliderPlateStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },
+
+  outBoardStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },
+
+  railLubeStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },
+  externalLubeStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },
+  lubeBrand: {
+    type: String,
+    required: true,
+  },
+  lubeType: {
+    type: String,
+    required: true,
+  },
+  lubeViscosity: {
+    type: String,
+    required: true,
+  },
+
+  reservoirSize: {
+    type: Number,
+    enum: [1, 2, 3],
+    required: true,
+  },
+
+  otherReservoirSize: {
+    type: String,
+    required: function () {
+      return this.reservoirSize === 3;
     },
-    ibrChainB1: {
-        type: Number,
-        required: false,
-    },
-    ibrChainC1: {
-        type: Number,
-        required: false,
-    },
-    ibrChainD1: {
-        type: Number,
-        required: false,
-    },
-    ibrChainF1: {
-        type: Number,
-        required: false,
-    },
+  },
+
+  reservoirSizeNum: {
+    type: Number,
+    required: true,
+  },
+
+  chainCleanStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },
+
+  mightyLubeMonitoring: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },
+
+  ctrController: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },
+
+  plcConnection: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },
+
+  monitoringController: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },
+
+  otherControllerInfo: {
+    type: String,
+    required: true,
+  },
+
+  specialControllerOptions: {
+    type: Number,
+    required: true,
+    enum: [1, 2, 3],
+  },
+
+  measurementUnitType: {
+    type: Number,
+    enum: [1, 2, 3, 4],
+    required: true,
+  },
+  powerRailG: {
+    type: Number,
+    required: true,
+  },
+  powerRailH: {
+    type: Number,
+    required: true,
+  },
+  powerRailA1: {
+    type: Number,
+    required: true,
+  },
+  powerRailB1: {
+    type: Number,
+    required: true,
+  },
+  powerRailH1: {
+    type: Number,
+    required: true,
+  },
+
+  powerRailJ1: {
+    type: Number,
+    required: true,
+  },
+  powerRailL1: {
+    type: Number,
+    required: true,
+  },
+  powerRailM1: {
+    type: Number,
+    required: true,
+  },
+  powerRailN1: {
+    type: Number,
+    required: true,
+  },
+  powerRailP1: {
+    type: Number,
+    required: true,
+  },
+  powerRailR1: {
+    type: Number,
+    required: true,
+  },
+
+  wireMeasurementUnit: {
+    type: Number,
+    enum: [1, 2, 3, 4],
+    required: true,
+  },
+
+  conductor2: {
+    type: Number,
+    required: true,
+  },
+
+  conductor4: {
+    type: Number,
+    required: true,
+  },
+
+  conductor7: {
+    type: Number,
+    required: true,
+  },
+
+  conductor12: {
+    type: Number,
+    required: true,
+  },
+
+  junctionBoxNum: {
+    type: Number,
+    required: true,
+  },
 });
 
-const IBR_RFC = mongoose.models.IBR_RFC || mongoose.model('IBR_RFC', IBR_RFC_Schema);
+const IBR_RFC =
+  mongoose.models.IBR_RFC || mongoose.model("IBR_RFC", IBR_RFC_Schema);
 module.exports = IBR_RFC;

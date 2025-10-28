@@ -1,228 +1,272 @@
-const mongoose = require('mongoose');
-const templateB = require("./templateB.js");
+const mongoose = require("mongoose");
+const templateA = require("./templateA.js");
 const OHP_MLPSchema = new mongoose.Schema({
-    conveyorName: {
-        type: String,
-        required: true,
-    },
-
-    chainSize: {
-        type: Number,
-        enum: [1, 2, 3, 4, 5, 6, 7, 8],
-        required: true,
-    },
-
-    otherChainSize: {
-        type: String,
-        required: function () {
-            return this.chainSize === 8;
-        },
-    },
-
-    industrialChainManufacturer: {
-        type: Number,
-        enum: [1, 2, 3, 4, 5, 6, 7, 8, 9],
-        required: true,
-    },
-
-    otherChainManufacturer: {
-        type: String,
-        required: function () {
-            return this.industrialChainManufacturer === 9;
-        },
-    },
-
-    conveyorLength: {
-        type: Number,
-        required: true,
-    },
-
-    conveyorLengthUnit: {
-        type: Number, // Converted to simple type instead of ref
-        required: true,
-    },
-
-    conveyorSpeed: {
-        type: Number,
-        required: true,
-    },
-
-    conveyorSpeedUnit: {
-        type: Number, // Converted to simple type instead of ref
-        required: true,
-    },
-
-    conveyorIndex: {
-        type: Number,
-        required: true,
-    },
-
-    travelDirection: {
-        type: Number,
-        enum: [1, 2],
-        required: true,
-    },
-
-    appEnviroment: {
-        type: Number,
-        enum: [1, 2],
-        required: true,
-    },
-
-    ovenStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: function () {
-            return this.appEnviroment === 1;
-        },
-    },
-
-    ovenTemp: {
-        type: Number,
-        required: function () {
-            return this.appEnviroment === 1;
-        },
-    },
-
-    surroundingTemp: {
-        type: Number,
-        enum: [1, 2],
-        required: true,
-    },
-
-    conveyorLoaded: {
-        type: Number,
-        enum: [1, 2],
-        required: true,
-    },
-
-    conveyorSwing: {
-        type: Number,
-        enum: [1, 2],
-        required: true,
-    },
-
-    operatingVoltSingle: {
-        type: Number,
-        required: true,
-    },
-
-    controlVoltSingle: {
-        type: Number,
-        required: true,
-    },
-
-    monitorData: templateB,
-
-
-    
-
-    wheelOpenType: {
-    type: Number, 
-    enum: [1,2,3],
+  conveyorName: {
+    type: String,
     required: true,
-},
-
-    wheelClosedType: {
-    type: Number, 
-    enum: [1,2,3],
+  },
+  chainSize: {
+    type: Number,
+    enum: [1, 2, 3, 4, 5],
     required: true,
-},
+  },
 
-    powerChainStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: true,
+  otherChainSize: {
+    type: String,
+    required: function () {
+      return this.chainSize === 5;
     },
+  },
+  industrialChainManufacturer: {
+    type: Number,
+    enum: [1, 2, 3, 4, 5, 6, 7, 8, 9],
+    required: true,
+  },
+  otherChainManufacturer: {
+    type: String,
+    required: function () {
+      return this.industrialChainManufacturer === 9;
+    },
+  },
+  conveyorLength: {
+    type: Number,
+    required: true,
+  },
+  conveyorLengthUnit: {
+    type: Number,
+    enum: [1, 2, 3, 4],
+    required: true,
+  },
+  conveyorSpeed: {
+    type: Number,
+    required: true,
+  },
+  speedUnit: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },
+  conveyorIndex: {
+    type: Number,
+    required: true,
+  },
+  travelDirection: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },
+  appEnviroment: {
+    type: Number,
+    enum: [1, 2, 3, 4, 5, 6, 7],
+    required: true,
+  },
 
-    chainPinStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: true,
+  ovenStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: function () {
+      return this.appEnviroment === 3;
     },
+  },
 
-    catDriveStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: true,
+  ovenTemp: {
+    type: Number,
+    required: function () {
+      return this.appEnviroment === 3;
     },
+  },
 
-    catDriveNum: {
-        type: Number,
-        required: true,
+  otherAppEnviroment: {
+    type: String,
+    required: function () {
+      return this.appEnviroment === 7;
     },
+  },
 
-    railLubeStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: true,
-    },
+  surroundingTemp: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },
 
-    externalLubeStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: true,
-    },
+  conveyorLoaded: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },
 
-    lubeBrand: {
-        type: String,
-        required: true,
-    },
+  conveyorSwing: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },
 
-    lubeType: {
-        type: String,
-        required: true,
-    },
+  orientationType: {
+    type: Number,
+    enum: [1, 2, 3],
+    required: true,
+  },
 
-    lubeViscosity: {
-        type: String,
-        required: true,
-    },
+  operatingVoltSingle: {
+    type: Number,
+    required: true,
+  },
 
-    sideLubeStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: true,
-    },
+  controlVoltSingle: {
+    type: Number,
+    required: true,
+  },
 
-    topLubeStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: true,
-    },
+  monitorData: templateA,
+  wheelOpenType: {
+    type: Number,
+    enum: [1, 2, 3],
+    required: true,
+  },
 
-    chainCleanStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: true,
-    },
+  wheelClosedType: {
+    type: Number,
+    enum: [1, 2, 3],
+    required: true,
+  },
 
-    ohpUnitType: {
-        type: Number, // Converted to simple type instead of ref
-        required: true,
-    },
+  powerChainStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },
 
-    chainDrop: {
-        type: Number,
-        required: true,
-    },
+  chainPinStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },
 
-    ohpDiameter: {
-        type: Number,
-        required: true,
-    },
+  catDriveStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },
 
-    ohpWidth: {
-        type: Number,
-        required: true,
-    },
+  catDriveNum: {
+    type: Number,
+    required: true,
+  },
 
-    ohpHeight: {
-        type: Number,
-        required: true,
+  railLubeStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },
+
+  externalLubeStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },
+
+  lubeBrand: {
+    type: String,
+    required: true,
+  },
+
+  lubeType: {
+    type: String,
+    required: true,
+  },
+
+  lubeViscosity: {
+    type: String,
+    required: true,
+  },
+
+  sideLubeStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },
+
+  topLubeStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },
+
+  reservoirSize: {
+    type: Number,
+    enum: [1, 2, 3],
+    required: true,
+  },
+
+  otherReservoirSize: {
+    type: String,
+    required: function () {
+      return this.reservoirSize === 3;
     },
+  },
+
+  reservoirSizeNum: {
+    type: Number,
+    required: true,
+  },
+
+  chainCleanStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },
+
+  specialControllerOptions: {
+    type: Number,
+    required: true,
+    enum: [1, 2, 3],
+  },
+
+  ohpUnitType: {
+    type: Number,
+    enum: [1, 2, 3, 4],
+    required: true,
+  },
+
+  ohpVertical: {
+    type: Number,
+    required: true,
+  },
+
+  ohpWidth: {
+    type: Number,
+    required: true,
+  },
+
+  ohpHeight: {
+    type: Number,
+    required: true,
+  },
+
+  ohpDiameter: {
+    type: Number,
+    required: true,
+  },
+
+  ohpWidthInverted: {
+    type: Number,
+    required: true,
+  },
+
+
+  distanceFromReservouir: {
+    type: Number,
+    required: true,
+  },
+
+  overSprayBrushStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },
+
 });
 
-const OHP_MLP = mongoose.model('tblOHP_MLP', OHP_MLPSchema);
+const OHP_MLP = mongoose.model("tblOHP_MLP", OHP_MLPSchema);
 
 module.exports = OHP_MLP;

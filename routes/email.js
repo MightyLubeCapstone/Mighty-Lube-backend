@@ -11,8 +11,8 @@ const router = express.Router();
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
+    user: "mightylubeemailtest@gmail.com",
+    pass: "fbsu upww fefd kytb",
   },
 });
 
@@ -22,7 +22,7 @@ function getMappedInfo(order) {
   const modelMapping = mappings[`${modelName}_Mapping`];
 
   function mapValues(field, selectedValue) {
-    if (!modelMapping || !modelMapping[field]) {
+    if (!modelMapping || modelMapping[field] === undefined) {
       return selectedValue;
     }
     else {
@@ -32,16 +32,131 @@ function getMappedInfo(order) {
     }
   }
 
-  let mappedInfo = { ...order.productConfigurationInfo };
+  function mapTemplateValues(field, selectedValue) {
+    if (!modelMapping || !modelMapping.monitorData[field])
+      return selectedValue;
+    return modelMapping.monitorData[field][selectedValue.toString()];
+  }
 
+  let mappedInfo = order.productConfigurationInfo;
   // ✅ Map top-level fields
   if (modelMapping) {
     Object.keys(modelMapping).forEach(field => {
-      if (mappedInfo[field] !== undefined) {
-        mappedInfo[field] = mapValues(field, mappedInfo[field]);
+      if (mappedInfo[field] !== undefined && mappedInfo[field] != -1) {
+        if (typeof mappedInfo[field] !== 'object' || mappedInfo[field] === null) {
+          mappedInfo[field] = mapValues(field, mappedInfo[field]);
+        }
+      }
+      else {
+        delete mappedInfo[field];
       }
     });
+    delete mappedInfo._id;
+  }
 
+  // ✅ Handle `monitorData` (templateA fields)
+  if (mappedInfo.monitorData) {
+    mappedInfo.monitorData = { ...order.productConfigurationInfo.monitorData };
+    if (modelMapping && modelMapping.monitorData) {
+      Object.keys(modelMapping.monitorData).forEach(field => {
+        if (mappedInfo.monitorData[field] !== undefined && mappedInfo.monitorData[field] != -1) {
+          mappedInfo.monitorData[field] = mapTemplateValues(
+            field,
+            mappedInfo.monitorData[field]
+          );
+        }
+        else {
+          delete mappedInfo.monitorData[field];
+        }
+      });
+      delete mappedInfo.monitorData._id;
+    }
+  }
+  if (mappedInfo.templateBData) {
+    mappedInfo.templateBData = { ...order.productConfigurationInfo.templateBData };
+    if (modelMapping && modelMapping.templateBData) {
+      Object.keys(modelMapping.templateBData).forEach(field => {
+        if (mappedInfo.templateBData[field] !== undefined && mappedInfo.templateBData[field] != -1) {
+          mappedInfo.templateBData[field] = mapTemplateValues(
+            field,
+            mappedInfo.templateBData[field]
+          );
+        }
+        else {
+          delete mappedInfo.templateBData[field];
+        }
+      });
+      delete mappedInfo.templateBData._id;
+
+    }
+  }
+  if (mappedInfo.templateCData) {
+    mappedInfo.templateCData = { ...order.productConfigurationInfo.templateCData };
+    if (modelMapping && modelMapping.templateCData) {
+      Object.keys(modelMapping.templateCData).forEach(field => {
+        if (mappedInfo.templateCData[field] !== undefined && mappedInfo.templateCData[field] != -1) {
+          mappedInfo.templateCData[field] = mapTemplateValues(
+            field,
+            mappedInfo.templateCData[field]
+          );
+        }
+        else {
+          delete mappedInfo.templateCData[field];
+        }
+      });
+    }
+    delete mappedInfo.templateCData._id;
+  }
+  if (mappedInfo.templateDData) {
+    mappedInfo.templateDData = { ...order.productConfigurationInfo.templateDData };
+    if (modelMapping && modelMapping.templateDData) {
+      Object.keys(modelMapping.templateDData).forEach(field => {
+        if (mappedInfo.templateDData[field] !== undefined && mappedInfo.templateDData[field] != -1) {
+          mappedInfo.templateDData[field] = mapTemplateValues(
+            field,
+            mappedInfo.templateDData[field]
+          );
+        }
+        else {
+          delete mappedInfo.templateDData[field];
+        }
+      });
+    }
+    delete mappedInfo.templateDData._id;
+  }
+  if (mappedInfo.templateEData) {
+    mappedInfo.templateEData = { ...order.productConfigurationInfo.templateEData };
+    if (modelMapping && modelMapping.templateEData) {
+      Object.keys(modelMapping.templateEData).forEach(field => {
+        if (mappedInfo.templateEData[field] !== undefined && mappedInfo.templateEData[field] != -1) {
+          mappedInfo.templateEData[field] = mapTemplateValues(
+            field,
+            mappedInfo.templateEData[field]
+          );
+        }
+        else {
+          delete mappedInfo.templateEData[field];
+        }
+      });
+    }
+    delete mappedInfo.templateEData._id;
+  }
+  if (mappedInfo.templateFData) {
+    mappedInfo.templateFData = { ...order.productConfigurationInfo.templateFData };
+    if (modelMapping && modelMapping.templateFData) {
+      Object.keys(modelMapping.templateFData).forEach(field => {
+        if (mappedInfo.templateFData[field] !== undefined && mappedInfo.templateFData[field] != -1) {
+          mappedInfo.templateFData[field] = mapTemplateValues(
+            field,
+            mappedInfo.templateFData[field]
+          );
+        }
+        else {
+          delete mappedInfo.templateFData[field];
+        }
+      });
+    }
+    delete mappedInfo.templateFData._id;
   }
   return mappedInfo;
 }
@@ -105,9 +220,12 @@ router.post('/send-email', authenticate, async (req, res) => {
     configuration.cart.forEach((order) => {
       emailContent += `\n\n\n#################################################\n${order.productType}\n\nRequested number of this item: ${order.numRequested}\n`;
       order = getMappedInfo(order);
-      delete order._id; // Remove the _id property
       Object.entries(order).forEach(([key, value]) => {
-        emailContent += `\n${key}:\t${value}\n`;
+        if (typeof value === 'object' && value !== null) {
+          emailContent += `\n${key}:\n${JSON.stringify(value, null, 2)}\n`;
+        } else {
+          emailContent += `\n${key}:\t${value}\n`;
+        }
       });
     })
 
@@ -115,8 +233,8 @@ router.post('/send-email', authenticate, async (req, res) => {
     const pdfBuffer = await generatePdfBuffer(configuration, req.user);
 
     const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: email,
+      from: email,
+      to: "mightylubeemailtest@gmail.com",
       subject: configuration.configurationName,
       text: emailContent,
       attachments: [
@@ -154,7 +272,7 @@ router.post('/forgot', async (req, res) => {
     await user.save();
 
     const mailOptions = {
-      from: process.env.EMAIL_USER,
+      from: "mightylubeemailtest@gmail.com",
       to: email,
       subject: "Mighty Lube Password Reset",
       text: `Your One-time passcode is ${user.resetCode}`,

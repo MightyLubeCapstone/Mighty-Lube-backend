@@ -1,5 +1,6 @@
 const express = require("express");
 const { authenticate } = require("./sessions");
+const { updateOrderID } = require("../utils/orderutils"); // added
 
 const router = express.Router();
 
@@ -21,8 +22,24 @@ router.put("/", authenticate, async (req, res) => {
     try {
         const { configurationName } = req.body;
         const user = req.user;
-        const cart = user.cart;
-        user.configurations.push({ configurationName, cart });
+        const cart = user.cart || [];
+
+        // Update orderID for each cart item using the util function
+        const updatedCart = await Promise.all(cart.map(async (item) => {
+            try {
+                if (!item || !item.orderID) return item;
+                const newOrderID = await updateOrderID(user._id, item.orderID);
+                if (newOrderID) {
+                    item.orderID = newOrderID;
+                }
+                return item;
+            } catch (err) {
+                console.error("Failed to update orderID for item", item, err);
+                return item; // fallback to original item on error
+            }
+        }));
+
+        user.configurations.push({ configurationName, cart: updatedCart });
         user.cart = []; // clear out the user's current cart
         // Ensure Mongoose knows that the arrays have changed
         user.markModified("configurations");

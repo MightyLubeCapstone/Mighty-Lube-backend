@@ -1,159 +1,152 @@
-const mongoose = require('mongoose');
-const templateB = require("./templateB.js");
+const mongoose = require("mongoose");
+const templateA = require("./templateA.js");
 const OHP_OP13Schema = new mongoose.Schema({
+  conveyorName: {
+    type: String,
+    required: true,
+  },
 
-    conveyorName: {
-        type: String,
-        required: true,
+  chainSize: {
+    type: Number,
+    enum: [1, 2, 3, 4, 5],
+    required: true,
+  },
+
+  otherChainSize: {
+    type: String,
+    required: function () {
+      return this.chainSize === 5;
     },
+  },
 
-    chainSize: {
-        type: Number,
-        enum: [1, 2, 3, 4, 5, 6, 7, 8],
-        required: true,
+  industrialChainManufacturer: {
+    type: Number,
+    enum: [1, 2, 3, 4, 5, 6, 7, 8, 9],
+    required: false,
+  },
+
+  otherChainManufacturer: {
+    type: String,
+    required: function () {
+      return this.industrialChainManufacturer === 9;
     },
+  },
+  appEnviroment: {
+    type: Number,
+    enum: [1, 2, 3, 4, 5, 6, 7],
+    required: false,
+  },
 
-    otherChainSize: {
-        type: String,
-        required: function () {
-            return this.chainSize === 8;
-        },
+  ovenStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: function () {
+      return this.appEnviroment === 3;
     },
+  },
 
-    industrialChainManufacturer: {
-        type: Number,
-        enum: [1, 2, 3, 4, 5, 6, 7, 8, 9],
-        required: true,
+  ovenTemp: {
+    type: Number,
+    required: function () {
+      return this.appEnviroment === 3;
     },
+  },
 
-    otherChainManufacturer: {
-        type: String,
-        required: function () {
-            return this.industrialChainManufacturer === 9;
-        },
+  otherAppEnviroment: {
+    type: String,
+    required: function () {
+      return this.appEnviroment === 7;
     },
+  },
 
-    appEnviroment: {
-        type: Number,
-        enum: [1, 2],
-        required: true,
-    },
+  conveyorLoaded: {
+    type: Number,
+    enum: [1, 2],
+    required: false,
+  },
 
-    // Required if appEnviroment === 1
-    ovenStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: function () {
-            return this.appEnviroment === 1;
-        }
-    },
+  operatingVoltTriple: {
+    type: Number,
+    required: false,
+  },
 
-    ovenTemp: {
-        type: Number,
-        required: function () {
-            return this.appEnviroment === 1;
-        }
-    },
+  controlVoltSingle: {
+    type: Number,
+    required: false,
+  },
 
-    conveyorLoaded: {
-        type: Number,
-        enum: [1, 2],
-        required: true,
-    },
+  sanitaryUnit: {
+    type: Number,
+    enum: [1, 2, 3, 4],
+    required: true,
+  },
 
-    plantLayout: {
-        type: Number,
-        enum: [1, 2],
-        required: true,
-    },
+  sanitaryA: {
+    type: Number,
+    required: true,
+  },
 
-    requiredPics: {
-        type: Number,
-        enum: [1, 2],
-        required: true,
-    },
+  sanitaryC: {
+    type: Number,
+    required: false,
+  },
 
-    operatingVoltTriple: {
-        type: Number,
-        required: true,
-    },
+  sanitaryA2: {
+    type: Number,
+    required: false,
+  },
 
-    controlVoltSingle: {
-        type: Number,
-        required: true,
-    },
+  sanitaryB2: {
+    type: Number,
+    required: false,
+  },
 
-    sanitaryUnit: {
-        type: Number,
-        required: true,
-    },
+  sanitaryC2: {
+    type: Number,
+    required: false,
+  },
 
-    sanitaryA: {
-        type: Number,
-        required: true,
-    },
+  sanitaryD2: {
+    type: Number,
+    required: false,
+  },
 
-    sanitaryC: {
-        type: Number,
-        required: true,
-    },
+  sanitaryE2: {
+    type: Number,
+    required: false,
+  },
 
-    sanitaryA2: {
-        type: Number,
-        required: true,
-    },
+  sanitaryF2: {
+    type: Number,
+    required: false,
+  },
 
-    sanitaryB2: {
-        type: Number,
-        required: true,
-    },
+  sanitaryG2: {
+    type: Number,
+    required: false,
+  },
 
-    sanitaryC2: {
-        type: Number,
-        required: true,
-    },
+  sanitaryH2: {
+    type: Number,
+    required: false,
+  },
 
-    sanitaryD2: {
-        type: Number,
-        required: true,
-    },
+  sanitaryJ2: {
+    type: Number,
+    required: false,
+  },
 
-    sanitaryE2: {
-        type: Number,
-        required: true,
-    },
+  sanitaryL2: {
+    type: Number,
+    required: false,
+  },
 
-    sanitaryF2: {
-        type: Number,
-        required: true,
-    },
-
-    sanitaryG2: {
-        type: Number,
-        required: true,
-    },
-
-    sanitaryH2: {
-        type: Number,
-        required: true,
-    },
-
-    sanitaryJ2: {
-        type: Number,
-        required: true,
-    },
-
-    sanitaryL2: {
-        type: Number,
-        required: true,
-    },
-
-    sanitaryM2: {
-        type: Number,
-        required: true,
-    },
-
+  sanitaryM2: {
+    type: Number,
+    required: false,
+  },
 });
 
-const OHP_OP13 = mongoose.models.OHP_OP13 || mongoose.model('OHP_OP13', OHP_OP13Schema);
+const OHP_OP13 =
+  mongoose.models.OHP_OP13 || mongoose.model("OHP_OP13", OHP_OP13Schema);
 module.exports = OHP_OP13;

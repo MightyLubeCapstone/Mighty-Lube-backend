@@ -1,4 +1,6 @@
 const mongoose = require('mongoose');
+const getDecodedInfo = require("./getDecodedInfo.js");  
+
 
 const FGCOSchema = new mongoose.Schema({
 

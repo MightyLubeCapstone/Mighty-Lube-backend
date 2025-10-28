@@ -99,7 +99,7 @@ const UserSchema = new mongoose.Schema({
     configurations: [{
         orderStatus: { // this will not be used until the dashboard is able to modify it
             type: String,
-            default: "Incomplete" // maybe, depends on whatever they want it to say
+            default: "Requested" // maybe, depends on whatever they want it to say
         },
         dateOrdered: {
             type: Date,

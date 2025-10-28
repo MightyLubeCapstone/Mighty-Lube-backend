@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
-const templateB = require("./templateB.js");
+const templateA = require("./templateA.js");
+const getDecodedInfo = require("./getDecodedInfo.js");  
+
 const FRO_OEB_Schema = new mongoose.Schema({
     conveyorName: {
         type: String,
@@ -11,12 +13,12 @@ const FRO_OEB_Schema = new mongoose.Schema({
         required: false,
     },
     // add enum and check
-    otherChainSize: {
-        type: String,
-        required: function () {
-            return this.chainSize === 5;
-        },
-    },
+    // otherChainSize: {
+    //     type: String,
+    //     required: function () {
+    //         return this.chainSize === 5;
+    //     },
+    // },
     industrialChainManufacturer: {
         type: Number,
         enum: [1, 2, 3, 4, 5, 6, 7, 8, 9],
@@ -27,33 +29,44 @@ const FRO_OEB_Schema = new mongoose.Schema({
         required: function () {
             return this.industrialChainManufacturer === 9;
         },
-    },
-    conveyorLength: {
+    },    conveyorLength: {
         type: Number,
         required: false,
     },
     conveyorLengthUnit: {
+
         type: Number,
+        enum: [1, 2, 3, 4],
         required: false,
+
     },
-    appEnviroment: {
-        type: Number,
-        enum: [1, 2],
-        required: true,
+  appEnviroment: {
+    type: Number,
+    enum: [1, 2, 3, 4, 5, 6, 7],
+    required: true,
+  },
+
+  ovenStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: function () {
+      return this.appEnviroment === 3;
     },
-    ovenStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: function () {
-            return this.appEnviroment === 1;
-        },
+  },
+
+  ovenTemp: {
+    type: Number,
+    required: function () {
+      return this.appEnviroment === 3;
     },
-    ovenTemp: {
-        type: Number,
-        required: function () {
-            return this.appEnviroment === 1;
-        },
+  },
+
+  otherAppEnviroment: {
+    type: String,
+    required: function () {
+      return this.appEnviroment === 7;
     },
+  },
     surroundingTemp: {
         type: Number,
         enum: [1, 2],
@@ -61,7 +74,9 @@ const FRO_OEB_Schema = new mongoose.Schema({
     },
     frUnitType: {
         type: Number,
+        enum: [1, 2, 3, 4],
         required: false,
+
     },
     frOverheadA: {
         type: Number,

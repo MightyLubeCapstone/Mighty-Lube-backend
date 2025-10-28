@@ -1,172 +1,181 @@
-const mongoose = require('mongoose');
-const templateB = require("./templateB.js");
+const mongoose = require("mongoose");
+const templateA = require("./templateA.js");
 const OHP_OP8Schema = new mongoose.Schema({
+  conveyorName: {
+    type: String,
+    required: true,
+  },
 
-    conveyorName: {
-        type: String,
-        required: true,
+  chainSize: {
+    type: Number,
+    enum: [1, 2, 3, 4, 5],
+    required: true,
+  },
+
+  otherChainSize: {
+    type: String,
+    required: function () {
+      return this.chainSize === 5;
     },
+  },
 
-    chainSize: {
-        type: Number,
-        enum: [1, 2, 3, 4, 5, 6, 7, 8],
-        required: true,
+  industrialChainManufacturer: {
+    type: Number,
+    enum: [1, 2, 3, 4, 5, 6, 7, 8, 9],
+    required: true,
+  },
+
+  otherChainManufacturer: {
+    type: String,
+    required: function () {
+      return this.industrialChainManufacturer === 9;
     },
+  },
 
-    otherChainSize: {
-        type: String,
-        required: function () {
-            return this.chainSize === 8;
-        },
+  appEnviroment: {
+    type: Number,
+    enum: [1, 2, 3, 4, 5, 6, 7],
+    required: false,
+  },
+
+  ovenStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: function () {
+      return this.appEnviroment === 3;
     },
+  },
 
-    industrialChainManufacturer: {
-        type: Number,
-        enum: [1, 2, 3, 4, 5, 6, 7, 8, 9],
-        required: true,
+  ovenTemp: {
+    type: Number,
+    required: function () {
+      return this.appEnviroment === 3;
     },
+  },
 
-    otherChainManufacturer: {
-        type: String,
-        required: function () {
-            return this.industrialChainManufacturer === 9;
-        },
+  otherAppEnviroment: {
+    type: String,
+    required: function () {
+      return this.appEnviroment === 7;
     },
+  },
 
-    conveyorLength: {
-        type: Number,
-        required: true,
+  surroundingTemp: {
+    type: Number,
+    enum: [1, 2],
+    required: false,
+  },
+
+  conveyorLoaded: {
+    type: Number,
+    enum: [1, 2],
+    required: false,
+  },
+
+  operatingVoltTriple: {
+    type: Number,
+    required: false,
+  },
+
+  opPowerStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: false,
+  },  
+
+  brushStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },  
+
+  brushMaterialType: {
+    type: Number,
+    enum: [1, 2, 3, 4],
+    required: false,
+  },
+
+  otherBrushMaterialType: {
+    type: String,
+    required: function () {
+      return this.brushMaterialType === 4;
     },
+  },
 
-    measurementUnit: {
-        type: Number,
-        required: true,
-    },
+  clearanceStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: false,
+  },
 
-    travelDirection: {
-        type: Number,
-        required: true,
-    },
+  washStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: false,
+  },
 
-    appEnviroment: {
-        type: Number,
-        enum: [1, 2],
-        required: true,
-    },
+  foodIndustryStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: false,
+  },
 
-    // Required if appEnviroment === 1
-    ovenStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: function () {
-            return this.appEnviroment === 1;
-        }
-    },
+  powerPanelType: {
+    type: Number,
+    enum: [1],
+    required: false,
+  },  
 
-    ovenTemp: {
-        type: Number,
-        required: function () {
-            return this.appEnviroment === 1;
-        }
-    },
+  threeStationType: {
+    type: Number,
+    enum: [1],
+    required: false,
+  },  
 
-    surroundingTemp: {
-        type: Number,
-        enum: [1, 2],
-        required: true,
-    },
+  shroudStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },  
 
-    conveyorLoaded: {
-        type: Number,
-        enum: [1, 2],
-        required: true,
-    },
+  shroudType: {
+    type: Number,
+    enum: [1, 2],
+    required: false,
+  },
 
-    operatingVoltTriple: {
-        type: Number,
-        required: true,
-    },
+  additionalInfo: {
+    type: String,
+    required: false,
+  },
 
-    controlVoltSingle: {
-        type: Number,
-        required: true,
-    },
+  ohpUnitType: {
+    type: Number,
+    enum: [1, 2, 3, 4],
+    required: false,
+  },
 
-    opPowerStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: true,
-    },
+  chainDrop: {
+    type: Number,
+    required: false,
+  },
 
-    brushMaterialType: {
-        type: Number,
-        required: true,
-    },
+  ohpDiameter: {
+    type: Number,
+    required: false,
+  },
 
-    clearanceStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: true,
-    },
+  ohpWidth: {
+    type: Number,
+    required: false,
+  },
 
-    washStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: true,
-    },
-
-    foodIndustryStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: true,
-    },
-
-    powerPanelType: {
-        type: Number,
-        required: true,
-    },
-
-    threeStationType: {
-        type: Number,
-        required: true,
-    },
-
-    shroudType: {
-        type: Number,
-        required: true,
-    },
-
-    additionalInfo: {
-        type: String,
-        required: false,
-    },
-
-    ohpUnit: {
-        type: Number,
-        required: true,
-    },
-
-    chainDrop: {
-        type: Number,
-        required: false,
-    },
-
-    ohpDiameter: {
-        type: Number,
-        required: true,
-    },
-
-    ohpWidth: {
-        type: Number,
-        required: true,
-    },
-
-    ohpHeight: {
-        type: Number,
-        required: true,
-    },
-
+  ohpHeight: {
+    type: Number,
+    required: false,
+  },
 });
 
-const OHP_OP8 = mongoose.models.OHP_OP8 || mongoose.model('OHP_OP8', OHP_OP8Schema);
+const OHP_OP8 =
+  mongoose.models.OHP_OP8 || mongoose.model("OHP_OP8", OHP_OP8Schema);
 module.exports = OHP_OP8;

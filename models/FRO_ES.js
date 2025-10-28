@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
-const templateB = require("./templateB.js");
+const templateA = require("./templateA.js");
+const getDecodedInfo = require("./getDecodedInfo.js");  
+
 const FRO_ES_Schema = new mongoose.Schema({
     conveyorName: {
         type: String,
@@ -7,6 +9,7 @@ const FRO_ES_Schema = new mongoose.Schema({
     },
     chainSize: {
         type: Number,
+        enum: [1, 2, 3, 4, 5],
         required: false,
     },
     // add enum and check
@@ -20,14 +23,16 @@ const FRO_ES_Schema = new mongoose.Schema({
         required: function () {
             return this.industrialChainManufacturer === 9;
         },
-    },
-    conveyorLength: {
+    },    conveyorLength: {
         type: Number,
         required: false,
     },
     conveyorLengthUnit: {
+
         type: Number,
+        enum: [1, 2, 3, 4],
         required: false,
+
     },
     conveyorSpeed: {
         type: Number,
@@ -43,25 +48,49 @@ const FRO_ES_Schema = new mongoose.Schema({
         enum: [1, 2],
         required: false,
     },
-    appEnviroment: {
+  appEnviroment: {
+    type: Number,
+    enum: [1, 2, 3, 4, 5, 6, 7],
+    required: true,
+  },
+
+  ovenStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: function () {
+      return this.appEnviroment === 3;
+    },
+  },
+
+  ovenTemp: {
+    type: Number,
+    required: function () {
+      return this.appEnviroment === 3;
+    },
+  },
+
+  otherAppEnviroment: {
+    type: String,
+    required: function () {
+      return this.appEnviroment === 7;
+    },
+  },
+    existingMonitor: {
+
         type: Number,
         enum: [1, 2],
-        required: true,
+        required: false,
+
     },
-    ovenStatus: {
+
+    newMonitor: {
         type: Number,
         enum: [1, 2],
-        required: function () {
-            return this.appEnviroment === 1;
-        },
+        required: false,
+    
     },
-    ovenTemp: {
-        type: Number,
-        required: function () {
-            return this.appEnviroment === 1;
-        },
-    },
-    monitorData: templateB,
+   // monitorData: templateA,
+
 
 
     

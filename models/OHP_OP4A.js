@@ -1,246 +1,281 @@
-const mongoose = require('mongoose');
-const templateB = require("./templateB.js");
+const mongoose = require("mongoose");
+const templateA = require("./templateA.js");
+
 const OHP_OP4ASchema = new mongoose.Schema({
-    conveyorName: {
-        type: String,
-        required: true,
+  conveyorName: {
+    type: String,
+    required: true,
+  },
+
+  chainSize: {
+    type: Number,
+    enum: [1, 2, 3, 4, 5],
+    required: true,
+  },
+
+  otherChainSize: {
+    type: String,
+    required: function () {
+      return this.chainSize === 5;
     },
+  },
 
-    chainSize: {
-        type: Number,
-        enum: [1, 2, 3, 4, 5, 6, 7, 8],
-        required: true,
+  industrialChainManufacturer: {
+    type: Number,
+    enum: [1, 2, 3, 4, 5, 6, 7, 8, 9],
+    required: true,
+  },
+
+  otherChainManufacturer: {
+    type: String,
+    required: function () {
+      return this.industrialChainManufacturer === 9;
     },
+  },
 
-    otherChainSize: {
-        type: String,
-        required: function () {
-            return this.chainSize === 8;
-        },
+  wheelManufacturer: {
+    type: Number,
+    enum: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    required: true,
+  },
+
+  otherWheelManufacturer: {
+    type: String,
+    required: function () {
+      return this.wheelManufacturer === 10;
     },
+  },
 
-    industrialChainManufacturer: {
-        type: Number,
-        enum: [1, 2, 3, 4, 5, 6, 7, 8, 9],
-        required: true,
+  conveyorLength: {
+    type: Number,
+    required: true,
+  },
+
+  conveyorLengthUnit: {
+    type: Number,
+    enum: [1, 2, 3, 4],
+    required: false,
+  },
+
+  conveyorSpeed: {
+    type: Number,
+    required: true,
+  },
+
+  conveyorSpeedUnit: {
+    type: Number,
+    enum: [1, 2],
+    required: false,
+  },
+
+  conveyorIndex: {
+    type: Number,
+    required: true,
+  },
+
+  travelDirection: {
+    type: Number,
+    enum: [1, 2],
+    required: false,
+  },
+
+  appEnviroment: {
+    type: Number,
+    enum: [1, 2, 3, 4, 5, 6, 7],
+    required: true,
+  },
+
+  ovenStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: function () {
+      return this.appEnviroment === 3;
     },
+  },
 
-    otherChainManufacturer: {
-        type: String,
-        required: function () {
-            return this.industrialChainManufacturer === 9;
-        },
+  ovenTemp: {
+    type: Number,
+    required: function () {
+      return this.appEnviroment === 3;
     },
+  },
 
-    conveyorLength: {
-        type: Number,
-        required: true,
+  otherAppEnviroment: {
+    type: String,
+    required: function () {
+      return this.appEnviroment === 7;
     },
+  },
 
-    conveyorLengthUnit: {
-        type: Number, // Converted to simple type instead of ref
-        required: true,
-    },
+  airOrElectric: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },
 
-    conveyorSpeed: {
-        type: Number,
-        required: true,
-    },
+  surroundingTemp: {
+    type: Number,
+    enum: [1, 2],
+    required: false,
+  },
 
-    conveyorSpeedUnit: {
-        type: Number, // Converted to simple type instead of ref
-        required: true,
-    },
+  conveyorLoaded: {
+    type: Number,
+    enum: [1, 2],
+    required: false,
+  },
 
-    conveyorIndex: {
-        type: Number,
-        required: true,
-    },
+  conveyorSwing: {
+    type: Number,
+    enum: [1, 2],
+    required: false,
+  },
 
-    travelDirection: {
-        type: Number,
-        enum: [1, 2],
-        required: true,
-    },
+  operatingVoltage: {
+    type: Number,
+    required: true,
+  },
 
-    appEnviroment: {
-        type: Number,
-        enum: [1, 2],
-        required: true,
-    },
+  controlVoltSingle: {
+    type: Number,
+    required: true,
+  },
 
-    ovenStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: function () {
-            return this.appEnviroment === 1;
-        },
-    },
+  compressedAir: {
+    type: Number,
+    required: false,
+  },
 
-    ovenTemp: {
-        type: Number,
-        required: function () {
-            return this.appEnviroment === 1;
-        },
-    },
+  airSupplyType: {
+    type: Number,
+    enum: [1, 2, 3],
+    required: false,
+  },
 
-    surroundingTemp: {
-        type: Number,
-        enum: [1, 2],
-        required: true,
-    },
-
-    conveyorLoaded: {
-        type: Number,
-        enum: [1, 2],
-        required: true,
-    },
-
-    conveyorSwing: {
-        type: Number,
-        enum: [1, 2],
-        required: true,
-    },
-
-    controlVoltSingle: {
-        type: Number,
-        required: true,
-    },
-
-    compressedAir: {
-        type: Number,
-        required: true,
-    },
-
-    airSupplyType: {
-        type: Number, // Converted to simple type instead of ref
-        required: true,
-    },
-
-    monitorData: templateB,
+    monitorData: templateA,
 
 
-    
 
-    railLubeStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: true,
-    },
+  railLubeStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: false,
+  },
 
-    lubeBrand: {
-        type: String,
-        required: true,
-    },
+  lubeBrand: {
+    type: String,
+    required: false,
+  },
 
-    lubeType: {
-        type: String,
-        required: true,
-    },
+  lubeType: {
+    type: String,
+    required: false,
+  },
 
-    lubeViscosity: {
-        type: String,
-        required: true,
-    },
+  lubeViscosity: {
+    type: String,
+    required: false,
+  },
 
-    sideLubeStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: true,
-    },
+  sideLubeStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: false,
+  },
 
-    topLubeStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: true,
-    },
+  topLubeStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: false,
+  },
 
-    fiveGallonStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: true,
-    },
+  fiveGallonStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: false,
+  },
 
-    chainCleanStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: true,
-    },
+  chainCleanStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: false,
+  },
 
-    chainMaster: {
-        type: Number,
-        enum: [1, 2],
-        required: true,
-    },
+  chainMaster: {
+    type: Number,
+    enum: [1, 2],
+    required: false,
+  },
 
-    otherUnitStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: true,
-    },
+  otherUnitStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: false,
+  },
 
-    timerStatus: {
-        type: Number,
-        enum: [1, 2, 3],
-        required: false,
-    },
+  timerStatus: {
+    type: Number,
+    enum: [1, 2, 3],
+    required: false,
+  },
 
-    electricStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: true,
-    },
+  electricStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+  },
 
-    pneumaticStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: true,
-    },
+  pneumaticStatus: {
+    type: Number,
+    enum: [1, 2],
+    required: false,
+  },
 
-    mightyLubeMonitoring: {
-        type: Number,
-        enum: [1, 2],
-        required: true,
-    },
+  mightyLubeMonitoring: {
+    type: Number,
+    enum: [1, 2],
+    required: false,
+  },
 
-    plcConnection: {
-        type: Number,
-        enum: [1, 2],
-        required: true,
-    },
+  plcConnection: {
+    type: Number,
+    enum: [1, 2],
+    required: false,
+  },
 
-    otherControllerNotes: {
-        type: String,
-        required: true,
-    },
+  otherControllerNotes: {
+    type: String,
+    required: false,
+  },
 
+  ohpUnitType: {
+    type: Number,
+    enum: [1, 2, 3, 4],
+    required: false,
+  },
 
-    ohpUnitType: {
-        type: Number, // Converted to simple type instead of ref
-        required: true,
-    },
+  chainDrop: {
+    type: Number,
+    required: false,
+  },
 
-    chainDrop: {
-        type: Number,
-        required: true,
-    },
+  ohpWidth: {
+    type: Number,
+    required: false,
+  },
 
-    ohpWidth: {
-        type: Number,
-        required: true,
-    },
+  ohpHeight: {
+    type: Number,
+    required: false,
+  },
 
-    ohpHeight: {
-        type: Number,
-        required: true,
-    },
-
-    radioButtonType: {
-        type: Number, // Converted to simple type instead of ref
-        required: true,
-    },
+  radioButtonType: {
+    type: Number,
+    enum: [1],
+    required: false,
+  },
 });
 
-const OHP_OP4A = mongoose.model('tblOHP_OP4A', OHP_OP4ASchema);
+const OHP_OP4A = mongoose.model("tblOHP_OP4A", OHP_OP4ASchema);
 
 module.exports = OHP_OP4A;
