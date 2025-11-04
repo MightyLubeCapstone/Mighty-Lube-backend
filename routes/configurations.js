@@ -51,5 +51,32 @@ router.put("/", authenticate, async (req, res) => {
         res.status(500).json({ error: `Internal server error: ${error}` });
     }
 })
+/**
+ * DELETE /api/orders/:configId
+ * HARD delete: remove an entire configuration (row) from the authenticated user.
+ * Returns 204 No Content on success.
+ */
+router.delete("/:configId", authenticate, async (req, res) => {
+    try {
+      const { configId } = req.params;
+      const user = req.user; // Mongoose doc for the authenticated user
+  
+      const configs = Array.isArray(user.configurations) ? user.configurations : [];
+      const idx = configs.findIndex((c) => String(c._id) === String(configId));
+      if (idx === -1) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+  
+      // Remove the configuration and save
+      user.configurations.splice(idx, 1);
+      user.markModified("configurations");
+      await user.save();
+  
+      return res.status(204).end(); // hard delete: no body
+    } catch (err) {
+      console.error("Error deleting configuration:", err);
+      return res.status(500).json({ message: "Failed to delete order" });
+    }
+  });
 
 module.exports = router;
