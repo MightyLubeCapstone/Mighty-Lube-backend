@@ -1,12 +1,15 @@
 const nodemailer = require('nodemailer');
 const User = require('../models/user');
 
-const transporter = nodemailer.createTransporter({
+const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-    user: "mightylubeemailtest@gmail.com",
-    pass: "lucasdevangavingavinnoah",
+    user: "mightylube.test@gmail.com",
+    pass: "xrav hwrm zhok fdlv",
   },
+  tls: {
+    rejectUnauthorized: false,
+  }
 });
 
 async function sendOrderNotification(user, orderData, actionType = 'added') {
@@ -41,8 +44,8 @@ async function sendOrderNotification(user, orderData, actionType = 'added') {
     `;
 
       const mailOptions = {
-        from: "mightylubeemailtest@gmail.com",
-        to: "mightylubeemailtest@gmail.com",
+        from: "mightylube.test@gmail.com",
+        to: "mightylube.test@gmail.com",
         subject: `New Configuration Order: ${configurationName} - ${user.firstName} ${user.lastName}`,
         text: emailContent,
       };
@@ -67,8 +70,8 @@ async function sendOrderNotification(user, orderData, actionType = 'added') {
     `;
 
       const mailOptions = {
-        from: "mightylubeemailtest@gmail.com",
-        to: "mightylubeemailtest@gmail.com",
+        from: "mightylube.test@gmail.com",
+        to: "mightylube.test@gmail.com",
         subject: `Order ${actionType}: ${orderData.productType} - ${user.firstName} ${user.lastName}`,
         text: emailContent,
       };
