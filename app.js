@@ -15,6 +15,7 @@ app.use(cors());
 const user_orders = require("./routes/user_orders");
 const orders = require("./routes/orders");
 const rfq = require("./routes/rfq");
+const email = require("./routes/email");
 
 // page routes
 const { sessionsRoute } = require("./routes/sessions");
@@ -91,6 +92,7 @@ const ftOpcoRoute = require("./routes/FT_OPCO");
 app.use("/api/user_orders", user_orders);
 app.use("/api/orders", orders);
 app.use("/api/rfq", rfq);
+app.use("/api/email", email);
 
 // Route usage
 app.use("/api/cart", cartRoute);
