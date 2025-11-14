@@ -1,6 +1,7 @@
 const express = require("express");
 const { authenticate } = require("./sessions");
 const { updateOrderID } = require("../utils/orderutils"); // added
+const { sendOrderNotification } = require("../utils/emailnotif"); // added
 
 const router = express.Router();
 
@@ -45,6 +46,14 @@ router.put("/", authenticate, async (req, res) => {
         user.markModified("configurations");
         user.markModified("cart");
         await user.save();
+
+        // Send email notification for the complete configuration order
+        try {
+            await sendOrderNotification(user, updatedCart, configurationName);
+        } catch (emailError) {
+            console.error("Failed to send order creation email:", emailError);
+        }
+        
         return res.status(200).json({ message: `Successfully updated orders` });
     } catch (error) {
         console.log(error);
