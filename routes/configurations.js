@@ -2,6 +2,7 @@ const express = require("express");
 const { authenticate } = require("./sessions");
 const { updateOrderID } = require("../utils/orderutils"); // added
 const { sendOrderNotification } = require("../utils/emailnotif"); // added
+const User = require("../models/user"); //added
 
 const router = express.Router();
 
@@ -60,5 +61,42 @@ router.put("/", authenticate, async (req, res) => {
         res.status(500).json({ error: `Internal server error: ${error}` });
     }
 })
+
+/**
+ * DELETE /api/orders/:configId
+ * HARD delete: remove an entire configuration (row) from ANY user.
+ * Returns 204 No Content on success.
+ */
+router.delete("/:configId", authenticate, async (req, res) => {
+  try {
+      const { configId } = req.params;
+
+      // Find the user that owns this configuration (regardless of who is logged in)
+      const userWithConfig = await User.findOne({ "configurations._id": configId });
+      if (!userWithConfig) {
+          return res.status(404).json({ message: "Order not found" });
+      }
+
+      const configs = Array.isArray(userWithConfig.configurations)
+          ? userWithConfig.configurations
+          : [];
+
+      const idx = configs.findIndex((c) => String(c._id) === String(configId));
+      if (idx === -1) {
+          // Shouldn't happen if the query above matched, but just in case
+          return res.status(404).json({ message: "Order not found" });
+      }
+
+      // Remove the configuration and save
+      userWithConfig.configurations.splice(idx, 1);
+      userWithConfig.markModified("configurations");
+      await userWithConfig.save();
+
+      return res.status(204).end(); // hard delete: no body
+  } catch (err) {
+      console.error("Error deleting configuration:", err);
+      return res.status(500).json({ message: "Failed to delete order" });
+  }
+});
 
 module.exports = router;
