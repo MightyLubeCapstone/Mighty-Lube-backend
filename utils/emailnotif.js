@@ -65,8 +65,12 @@ ${configList || '    No configuration details'}
     `;
       }).join('\n');
 
+      // Get order ID from the first item if available
+      const firstOrderID = cartItems.length > 0 && cartItems[0].orderID ? cartItems[0].orderID : null;
+      const orderIdText = firstOrderID ? ` - Order ID: ${firstOrderID}` : '';
+      
       const emailContent = `
-      CONFIGURATION ORDER
+      CONFIGURATION ORDER${orderIdText}
       
       Customer Information:
       - Name: ${user.firstName} ${user.lastName}
@@ -83,6 +87,7 @@ ${configList || '    No configuration details'}
       const mailOptions = {
         from: "mightylube.test@gmail.com",
         to: "mightylube.test@gmail.com",
+        cc: user.email,
         subject: `New Configuration Order: ${configurationName} - ${user.firstName} ${user.lastName}`,
         text: emailContent,
       };
@@ -122,6 +127,7 @@ ${configList || '  No configuration details'}
       const mailOptions = {
         from: "mightylube.test@gmail.com",
         to: "mightylube.test@gmail.com",
+        cc: user.email,
         subject: `Order ${actionType}: ${orderData.productType} - ${user.firstName} ${user.lastName}`,
         text: emailContent,
       };
