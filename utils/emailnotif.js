@@ -45,7 +45,7 @@ function generatePdfBuffer(text) {
       try {
         const fs = require('fs');
         if (fs.existsSync(logoPath)) {
-          doc.image(logoPath, 50, 15, { width: 50, height: 210 });
+          doc.image(logoPath, 50, 15, { width: 210, height: 50 });
           // Adjust text position to make room for logo
           doc.fillColor('white')
              .font('Helvetica-Bold')
