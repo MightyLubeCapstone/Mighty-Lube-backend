@@ -45,7 +45,7 @@ function generatePdfBuffer(text) {
       try {
         const fs = require('fs');
         if (fs.existsSync(logoPath)) {
-          doc.image(logoPath, 50, 15, { width: 50, height: 50 });
+          doc.image(logoPath, 50, 15, { width: 50, height: 210 });
           // Adjust text position to make room for logo
           doc.fillColor('white')
              .font('Helvetica-Bold')
@@ -141,7 +141,8 @@ ${configList || '    No configuration details'}
       const mailOptions = {
         from: "mightylube.test@gmail.com",
         to: "mightylube.test@gmail.com",
-        cc: user.email,
+        //need to uncomment this when testing is done
+        //cc: user.email,
         subject: `New Configuration Order: ${configurationName} - ${user.firstName} ${user.lastName}`,
         text: emailContent,
       };
