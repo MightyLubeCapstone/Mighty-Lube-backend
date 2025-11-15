@@ -50,7 +50,7 @@ function generatePdfBuffer(text) {
           doc.fillColor('white')
              .font('Helvetica-Bold')
              .fontSize(24)
-             .text('MIGHTY LUBE', 110, 25, { align: 'left' });
+             .text('MIGHTY LUBE', 280, 25, { align: 'left' });
         } else {
           // No logo, use original text position
           doc.fillColor('white')
@@ -68,7 +68,7 @@ function generatePdfBuffer(text) {
       
       // Subtitle
       doc.fontSize(12)
-         .text('Order Confirmation & Receipt', 110, 50);
+         .text('Order Confirmation & Receipt', 280, 50);
       
       // Decorative line under banner
       doc.rect(0, bannerHeight, pageWidth, 2)
