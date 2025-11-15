@@ -32,11 +32,65 @@ function generatePdfBuffer(text) {
       doc.on('end', () => resolve(Buffer.concat(chunk)));
       doc.on('error', reject);
 
-      doc.fontSize(12);
+      // Create header banner
+      const pageWidth = doc.page.width;
+      const bannerHeight = 80;
+      
+      // Header background (blue banner)
+      doc.rect(0, 0, pageWidth, bannerHeight)
+         .fill('#2c3e50');
+      
+      // Add logo image (if it exists)
+      const logoPath = require('path').join(__dirname, '..', 'assets', 'images', 'thumbnail_Outlook-va5wa3tl.png');
+      try {
+        const fs = require('fs');
+        if (fs.existsSync(logoPath)) {
+          doc.image(logoPath, 50, 15, { width: 50, height: 50 });
+          // Adjust text position to make room for logo
+          doc.fillColor('white')
+             .font('Helvetica-Bold')
+             .fontSize(24)
+             .text('MIGHTY LUBE', 110, 25, { align: 'left' });
+        } else {
+          // No logo, use original text position
+          doc.fillColor('white')
+             .font('Helvetica-Bold')
+             .fontSize(24)
+             .text('MIGHTY LUBE', 50, 25, { align: 'left' });
+        }
+      } catch (err) {
+        // Fallback if image loading fails
+        doc.fillColor('white')
+           .font('Helvetica-Bold')
+           .fontSize(24)
+           .text('MIGHTY LUBE', 50, 25, { align: 'left' });
+      }
+      
+      // Subtitle
+      doc.fontSize(12)
+         .text('Order Confirmation & Receipt', 110, 50);
+      
+      // Decorative line under banner
+      doc.rect(0, bannerHeight, pageWidth, 2)
+         .fill('#34495e');
+      
+      // Reset to black for content
+      doc.fillColor('black')
+         .font('Helvetica')
+         .fontSize(12);
+      
+      // Start content below banner with some padding
+      let yPosition = bannerHeight + 20;
+      
       const lines = String(text).split('\n');
       lines.forEach((line) => {
-        doc.text(line.replace(/\t/g, '    '));
+        // Skip empty lines at the start and add proper spacing
+        if (line.trim() || yPosition > bannerHeight + 20) {
+          doc.text(line.replace(/\t/g, '    '), 50, yPosition);
+          yPosition += 15; // Line spacing
+        }
       });
+      
       doc.end();
     } catch (e) {
       reject(e);
