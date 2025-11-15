@@ -80,15 +80,15 @@ function generatePdfBuffer(text) {
          .fontSize(12);
       
       // Start content below banner with some padding
-      let yPosition = bannerHeight + 20;
+      doc.y = bannerHeight + 20; // Set starting position
+      doc.x = 50; // Left margin
       
-      const lines = String(text).split('\n');
-      lines.forEach((line) => {
-        // Skip empty lines at the start and add proper spacing
-        if (line.trim() || yPosition > bannerHeight + 20) {
-          doc.text(line.replace(/\t/g, '    '), 50, yPosition);
-          yPosition += 15; // Line spacing
-        }
+      // Let PDFKit handle text flow and page breaks automatically
+      const cleanText = String(text).replace(/\t/g, '    ').trim();
+      doc.text(cleanText, {
+        width: pageWidth - 100, // Right margin of 50px
+        align: 'left',
+        lineGap: 3 // Small gap between lines
       });
       
       doc.end();
