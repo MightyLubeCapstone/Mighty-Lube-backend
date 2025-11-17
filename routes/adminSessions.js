@@ -16,7 +16,7 @@ router.post("/", async (req, res) => {
         const user = await User.findOne({ "username": username }).exec();
 
         // build allowed list from env, remove empty values, compare case-insensitively
-        const allowed = [process.env.EMAIL_1, process.env.EMAIL_2].filter(Boolean).map(e => e.toLowerCase().trim());
+        const allowed = [process.env.EMAIL_1, process.env.EMAIL_2, process.env.EMAIL_3].filter(Boolean).map(e => e.toLowerCase().trim());
         const userEmail = (user && user.username) ? user.username.toLowerCase().trim() : "";
 
         if (!user || !allowed.includes(userEmail)) {
