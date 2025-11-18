@@ -145,10 +145,10 @@ async function sendOrderNotification(user, orderData, actionType = 'added', conf
         const config = item.productConfigurationInfo || {};
         const configList = Object.entries(config).map(([key, value]) => `    ${key}: ${value}`).join('\n');
         
-        // Calculate timing information
+        // Get timing information
         const createdTime = formatTimestamp(item.orderCreated);
         const completedTime = formatTimestamp(item.completedDate);
-        const duration = calculateDuration(item.orderCreated, item.completedDate);
+        const duration = item.processingDuration ? item.processingDuration.formatted : calculateDuration(item.orderCreated, item.completedDate);
         
         return `
       Item ${index + 1}:
@@ -167,8 +167,20 @@ ${configList || '    No configuration details'}
       const firstOrderID = cartItems.length > 0 && cartItems[0].orderID ? cartItems[0].orderID : null;
       const orderIdText = firstOrderID ? ` - Order ID: ${firstOrderID}` : '';
       
+      // Customize email content based on action type
+      let emailHeader, emailSubject;
+      if (actionType.toLowerCase() === 'completed') {
+        emailHeader = `ORDER COMPLETED - Configuration Order${orderIdText}`;
+        emailSubject = `Order Completed: ${finalConfigName} - ${user.firstName} ${user.lastName}`;
+      } else {
+        emailHeader = `${actionType.toUpperCase()} CONFIGURATION ORDER${orderIdText}`;
+        emailSubject = `${actionType.charAt(0).toUpperCase() + actionType.slice(1)} Configuration Order: ${finalConfigName} - ${user.firstName} ${user.lastName}`;
+      }
+
       const emailContent = `
-      ${actionType.toUpperCase()} CONFIGURATION ORDER${orderIdText}
+      ${emailHeader}
+      
+      ${actionType.toLowerCase() === 'completed' ? 'Your configuration order has been successfully completed and is ready for delivery/pickup!' : ''}
       
       Customer Information:
       - Name: ${user.firstName} ${user.lastName}
@@ -177,6 +189,7 @@ ${configList || '    No configuration details'}
       
       Configuration Name: ${finalConfigName}
       Total Items: ${cartItems.length}
+      ${actionType.toLowerCase() === 'completed' ? 'Status: COMPLETED' : ''}
       
       ORDER DETAILS:
       ${itemsList}
@@ -187,7 +200,7 @@ ${configList || '    No configuration details'}
         to: "mightylube.test@gmail.com",
         //need to uncomment this when testing is done
         //cc: user.email,
-        subject: `${actionType.charAt(0).toUpperCase() + actionType.slice(1)} Configuration Order: ${finalConfigName} - ${user.firstName} ${user.lastName}`,
+        subject: emailSubject,
         text: emailContent,
       };
 
@@ -208,17 +221,30 @@ ${configList || '    No configuration details'}
       const config = orderData.productConfigurationInfo || {};
       const configList = Object.entries(config).map(([key, value]) => `  ${key}: ${value}`).join('\n');
       
-      // Calculate timing information for single order
+      // Get timing information for single order
       const createdTime = formatTimestamp(orderData.orderCreated);
       const completedTime = formatTimestamp(orderData.completedDate);
-      const duration = calculateDuration(orderData.orderCreated, orderData.completedDate);
+      const duration = orderData.processingDuration ? orderData.processingDuration.formatted : calculateDuration(orderData.orderCreated, orderData.completedDate);
       
+      // Customize email content based on action type
+      let emailHeader, emailSubject;
+      if (actionType.toLowerCase() === 'completed') {
+        emailHeader = `ORDER COMPLETED - ${orderData.productType}`;
+        emailSubject = `Order Completed: ${orderData.productType} - ${user.firstName} ${user.lastName}`;
+      } else {
+        emailHeader = `${actionType.toUpperCase()} ORDER`;
+        emailSubject = `Order ${actionType}: ${orderData.productType} - ${user.firstName} ${user.lastName}`;
+      }
+
       const emailContent = `
-      ${actionType.toUpperCase()} ORDER
+      ${emailHeader}
       
-      User: ${user.firstName} ${user.lastName}
-      Email: ${user.email}
-      Company: ${user.companyName}
+      ${actionType.toLowerCase() === 'completed' ? 'Your order has been successfully completed and is ready for delivery/pickup!' : ''}
+      
+      Customer Information:
+      - Name: ${user.firstName} ${user.lastName}
+      - Email: ${user.email}
+      - Company: ${user.companyName}
       
       Product Type: ${orderData.productType}
       Quantity Requested: ${orderData.numRequested}
@@ -226,6 +252,7 @@ ${configList || '    No configuration details'}
       Created: ${createdTime}
       Completed: ${completedTime}
       Processing Time: ${duration}
+      ${actionType.toLowerCase() === 'completed' ? 'Status: COMPLETED' : ''}
       
       Configuration Details:
 ${configList || '  No configuration details'}
@@ -235,7 +262,7 @@ ${configList || '  No configuration details'}
         from: "mightylube.test@gmail.com",
         to: "mightylube.test@gmail.com",
         cc: user.email,
-        subject: `Order ${actionType}: ${orderData.productType} - ${user.firstName} ${user.lastName}`,
+        subject: emailSubject,
         text: emailContent,
       };
 
