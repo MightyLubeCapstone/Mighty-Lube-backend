@@ -97,13 +97,13 @@ function generatePdfBuffer(text) {
     }
   });
 }
-async function sendOrderNotification(user, orderData, actionType = 'added') {
+async function sendOrderNotification(user, orderData, actionType = 'added', configurationName = null) {
   try {
     // Check if orderData is an array (configuration order) or single order
     if (Array.isArray(orderData)) {
       // Configuration order with multiple items
-      const configurationName = actionType; // Reuse actionType parameter for configuration name
       const cartItems = orderData;
+      const finalConfigName = configurationName || 'Configuration Order';
       
       const itemsList = cartItems.map((item, index) => {
         const config = item.productConfigurationInfo || {};
@@ -131,7 +131,7 @@ ${configList || '    No configuration details'}
       - Email: ${user.email}
       - Company: ${user.companyName || 'N/A'}
       
-      Configuration Name: ${configurationName}
+      Configuration Name: ${finalConfigName}
       Total Items: ${cartItems.length}
       
       ORDER DETAILS:
@@ -143,7 +143,7 @@ ${configList || '    No configuration details'}
         to: "mightylube.test@gmail.com",
         //need to uncomment this when testing is done
         //cc: user.email,
-        subject: `${actionType.charAt(0).toUpperCase() + actionType.slice(1)} Configuration Order: ${configurationName} - ${user.firstName} ${user.lastName}`,
+        subject: `${actionType.charAt(0).toUpperCase() + actionType.slice(1)} Configuration Order: ${finalConfigName} - ${user.firstName} ${user.lastName}`,
         text: emailContent,
       };
 
@@ -158,7 +158,7 @@ ${configList || '    No configuration details'}
       }
 
       await transporter.sendMail(mailOptions);
-      console.log(`Configuration order email sent for: ${configurationName}`);
+      console.log(`Configuration order email sent for: ${finalConfigName}`);
     } else {
       // Single order
       const config = orderData.productConfigurationInfo || {};
