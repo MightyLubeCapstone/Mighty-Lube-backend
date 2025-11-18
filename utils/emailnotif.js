@@ -1,6 +1,42 @@
 const nodemailer = require('nodemailer');
 const User = require('../models/user');
 
+// Utility function to calculate duration between two dates
+function calculateDuration(startDate, endDate) {
+  if (!startDate || !endDate) return 'N/A';
+  
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  const diffMs = end - start;
+  
+  if (diffMs < 0) return 'Invalid duration';
+  
+  const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+  
+  if (days > 0) {
+    return `${days} day${days > 1 ? 's' : ''}, ${hours} hour${hours > 1 ? 's' : ''}`;
+  } else if (hours > 0) {
+    return `${hours} hour${hours > 1 ? 's' : ''}, ${minutes} minute${minutes > 1 ? 's' : ''}`;
+  } else {
+    return `${minutes} minute${minutes > 1 ? 's' : ''}`;
+  }
+}
+
+// Function to format timestamp for display
+function formatTimestamp(date) {
+  if (!date) return 'Not completed';
+  return new Date(date).toLocaleString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    timeZoneName: 'short'
+  });
+}
+
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
@@ -109,11 +145,19 @@ async function sendOrderNotification(user, orderData, actionType = 'added', conf
         const config = item.productConfigurationInfo || {};
         const configList = Object.entries(config).map(([key, value]) => `    ${key}: ${value}`).join('\n');
         
+        // Calculate timing information
+        const createdTime = formatTimestamp(item.orderCreated);
+        const completedTime = formatTimestamp(item.completedDate);
+        const duration = calculateDuration(item.orderCreated, item.completedDate);
+        
         return `
       Item ${index + 1}:
       - Product Type: ${item.productType || 'N/A'}
       - Quantity: ${item.numRequested || 'N/A'}
       - Order ID: ${item.orderID || 'Pending'}
+      - Created: ${createdTime}
+      - Completed: ${completedTime}
+      - Processing Time: ${duration}
       - Configuration:
 ${configList || '    No configuration details'}
     `;
@@ -164,6 +208,11 @@ ${configList || '    No configuration details'}
       const config = orderData.productConfigurationInfo || {};
       const configList = Object.entries(config).map(([key, value]) => `  ${key}: ${value}`).join('\n');
       
+      // Calculate timing information for single order
+      const createdTime = formatTimestamp(orderData.orderCreated);
+      const completedTime = formatTimestamp(orderData.completedDate);
+      const duration = calculateDuration(orderData.orderCreated, orderData.completedDate);
+      
       const emailContent = `
       ${actionType.toUpperCase()} ORDER
       
@@ -174,6 +223,9 @@ ${configList || '    No configuration details'}
       Product Type: ${orderData.productType}
       Quantity Requested: ${orderData.numRequested}
       Order ID: ${orderData.orderID || 'Pending'}
+      Created: ${createdTime}
+      Completed: ${completedTime}
+      Processing Time: ${duration}
       
       Configuration Details:
 ${configList || '  No configuration details'}

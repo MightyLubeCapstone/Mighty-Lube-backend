@@ -24,6 +24,7 @@ const configurationsRoute = require("./routes/configurations");
 const draftsRoute = require("./routes/drafts");
 const emailRoute = require("./routes/email");
 const cartRoute = require("./routes/cart");
+const completeRoute = require("./routes/complete");
 const fglmRoute = require("./routes/fglm");
 const fgcoRoute = require("./routes/fgco");
 const cc5clRoute = require("./routes/CC5_CL");
@@ -96,6 +97,7 @@ app.use("/api/email", email);
 
 // Route usage
 app.use("/api/cart", cartRoute);
+app.use("/api/complete", completeRoute);
 app.use("/api/configurations", configurationsRoute);
 app.use("/api/drafts", draftsRoute);
 app.use("/api/email", emailRoute);

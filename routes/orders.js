@@ -8,6 +8,32 @@ const { authenticate } = require("./sessions");
 const User = require("../models/user");
 const { sendOrderNotification } = require("../utils/emailnotif");
 
+// Utility function to calculate processing time
+function calculateProcessingTime(startDate, endDate) {
+    if (!startDate || !endDate) return null;
+    
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const diffMs = end - start;
+    
+    if (diffMs < 0) return null;
+    
+    const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+    
+    return {
+        totalMs: diffMs,
+        days,
+        hours,
+        minutes,
+        formatted: days > 0 ? 
+            `${days} day${days > 1 ? 's' : ''}, ${hours} hour${hours > 1 ? 's' : ''}` :
+            hours > 0 ? 
+                `${hours} hour${hours > 1 ? 's' : ''}, ${minutes} minute${minutes > 1 ? 's' : ''}` :
+                `${minutes} minute${minutes > 1 ? 's' : ''}`
+    };
+}
 
 const router = express.Router();
 
@@ -136,20 +162,158 @@ router.put('/status', authenticate, async (req, res) => {
         // Update only the configuration-level orderStatus
         targetUserDoc.configurations[configIndex].orderStatus = orderStatus;
         targetUserDoc.configurations[configIndex].updatedAt = new Date();
+        
+        // If status is being set to "Completed", set completion timestamp
+        if (orderStatus.toLowerCase() === 'completed') {
+            targetUserDoc.configurations[configIndex].completedDate = new Date();
+            
+            // Also mark all orders in the configuration as completed
+            targetUserDoc.configurations[configIndex].cart.forEach(order => {
+                if (!order.completedDate) {
+                    order.completedDate = new Date();
+                }
+            });
+        }
 
         targetUserDoc.markModified('configurations');
         await targetUserDoc.save();
-
-        return res.status(200).json({
+        
+        // Send email notification if order was completed
+        if (orderStatus.toLowerCase() === 'completed') {
+            try {
+                const { sendOrderNotification } = require('../utils/emailnotif');
+                await sendOrderNotification(
+                    targetUserDoc, 
+                    targetUserDoc.configurations[configIndex].cart, 
+                    'completed', 
+                    configurationName
+                );
+            } catch (emailError) {
+                console.warn('Failed to send completion notification:', emailError);
+            }
+        }
+        
+        const responseData = {
             message: 'Configuration orderStatus updated',
             userID: targetUserDoc.userID,
             configurationName: targetUserDoc.configurations[configIndex].configurationName,
             orderStatus: targetUserDoc.configurations[configIndex].orderStatus,
             updatedAt: targetUserDoc.configurations[configIndex].updatedAt
-        });
+        };
+        
+        // Add completion data if applicable
+        if (orderStatus.toLowerCase() === 'completed') {
+            responseData.completedDate = targetUserDoc.configurations[configIndex].completedDate;
+            responseData.processingTime = calculateProcessingTime(
+                targetUserDoc.configurations[configIndex].dateOrdered,
+                targetUserDoc.configurations[configIndex].completedDate
+            );
+        }
+
+        return res.status(200).json(responseData);
     } catch (error) {
         console.error('Error updating configuration orderStatus:', error);
         return res.status(500).json({ message: 'Failed to update configuration orderStatus' });
+    }
+});
+
+// PUT /api/orders/complete-cart-order - Mark individual cart order as completed
+router.put('/complete-cart-order', authenticate, async (req, res) => {
+    try {
+        await dbConnect();
+        
+        const { orderID } = req.body;
+        const user = req.user;
+        
+        if (!orderID) {
+            return res.status(400).json({ message: 'orderID is required' });
+        }
+        
+        // Find the order in the user's cart
+        const order = user.cart.find(order => order.orderID === orderID);
+        if (!order) {
+            return res.status(404).json({ message: 'Order not found in cart' });
+        }
+        
+        // Set completion timestamp
+        order.completedDate = new Date();
+        
+        // Mark as modified and save
+        user.markModified("cart");
+        await user.save();
+        
+        // Send completion notification email
+        try {
+            await sendOrderNotification(user, order, 'completed');
+        } catch (emailError) {
+            console.warn('Failed to send completion notification:', emailError);
+        }
+        
+        const processingTime = calculateProcessingTime(order.orderCreated, order.completedDate);
+        
+        res.status(200).json({ 
+            message: `Order ${orderID} marked as completed`,
+            orderID: order.orderID,
+            completedDate: order.completedDate,
+            processingTime
+        });
+        
+    } catch (error) {
+        console.error('Error completing cart order:', error);
+        res.status(500).json({ message: 'Failed to complete cart order' });
+    }
+});
+
+// GET /api/orders/completion-status/:orderID - Get completion status of an order
+router.get('/completion-status/:orderID', authenticate, async (req, res) => {
+    try {
+        await dbConnect();
+        
+        const { orderID } = req.params;
+        const user = req.user;
+        
+        // Look for order in cart
+        let order = user.cart.find(order => order.orderID === orderID);
+        let location = 'cart';
+        let configurationName = null;
+        
+        // If not in cart, look in configurations
+        if (!order) {
+            for (const config of user.configurations) {
+                order = config.cart.find(o => o.orderID === orderID);
+                if (order) {
+                    location = 'configuration';
+                    configurationName = config.configurationName;
+                    break;
+                }
+            }
+        }
+        
+        if (!order) {
+            return res.status(404).json({ message: 'Order not found' });
+        }
+        
+        const processingTime = order.completedDate ? 
+            calculateProcessingTime(order.orderCreated, order.completedDate) : null;
+        
+        const responseData = {
+            orderID: order.orderID,
+            location,
+            created: order.orderCreated,
+            completed: order.completedDate,
+            isCompleted: !!order.completedDate,
+            processingTime
+        };
+        
+        if (configurationName) {
+            responseData.configurationName = configurationName;
+        }
+        
+        res.status(200).json(responseData);
+        
+    } catch (error) {
+        console.error('Error getting completion status:', error);
+        res.status(500).json({ message: 'Failed to get completion status' });
     }
 });
 
