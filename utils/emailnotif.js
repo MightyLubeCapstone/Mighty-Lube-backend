@@ -124,7 +124,7 @@ ${configList || '    No configuration details'}
       const orderIdText = firstOrderID ? ` - Order ID: ${firstOrderID}` : '';
       
       const emailContent = `
-      CONFIGURATION ORDER${orderIdText}
+      ${actionType.toUpperCase()} CONFIGURATION ORDER${orderIdText}
       
       Customer Information:
       - Name: ${user.firstName} ${user.lastName}
@@ -143,7 +143,7 @@ ${configList || '    No configuration details'}
         to: "mightylube.test@gmail.com",
         //need to uncomment this when testing is done
         //cc: user.email,
-        subject: `New Configuration Order: ${configurationName} - ${user.firstName} ${user.lastName}`,
+        subject: `${actionType.charAt(0).toUpperCase() + actionType.slice(1)} Configuration Order: ${configurationName} - ${user.firstName} ${user.lastName}`,
         text: emailContent,
       };
 
@@ -165,7 +165,7 @@ ${configList || '    No configuration details'}
       const configList = Object.entries(config).map(([key, value]) => `  ${key}: ${value}`).join('\n');
       
       const emailContent = `
-      Order ${actionType.toUpperCase()}
+      ${actionType.toUpperCase()} ORDER
       
       User: ${user.firstName} ${user.lastName}
       Email: ${user.email}

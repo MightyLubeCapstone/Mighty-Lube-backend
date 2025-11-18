@@ -6,6 +6,7 @@ const express = require("express");
 const { dbConnect } = require("../config/config");
 const { authenticate } = require("./sessions");
 const User = require("../models/user");
+const { sendOrderNotification } = require("../utils/emailnotif");
 
 
 const router = express.Router();
@@ -88,6 +89,13 @@ router.put('/editing', authenticate, async (req, res) => {
         // Mark modified and save
         targetUser.markModified('configurations');
         await targetUser.save();
+
+        // Send email notification for configuration edit
+        try {
+            await sendOrderNotification(targetUser, order, 'edited');
+        } catch (emailError) {
+            console.warn('Failed to send configuration edit notification:', emailError);
+        }
 
         return res.status(200).json({
             message: 'Order updated successfully',
