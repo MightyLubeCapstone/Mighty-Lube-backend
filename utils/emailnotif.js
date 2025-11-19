@@ -26,7 +26,7 @@ function calculateDuration(startDate, endDate) {
 
 // Function to format timestamp for display
 function formatTimestamp(date) {
-  if (!date) return 'Not completed';
+  if (!date) return 'Not complete';
   return new Date(date).toLocaleString('en-US', {
     year: 'numeric',
     month: 'short',
@@ -148,8 +148,8 @@ async function sendOrderNotification(user, orderData, actionType = 'added', conf
 
         // Get timing information
         const createdTime = formatTimestamp(item.orderCreated);
-        const completedTime = formatTimestamp(item.completedDate);
-        const duration = item.processingDuration ? item.processingDuration.formatted : calculateDuration(item.orderCreated, item.completedDate);
+        const completeTime = formatTimestamp(item.completeDate);
+        const duration = item.processingDuration ? item.processingDuration.formatted : calculateDuration(item.orderCreated, item.completeDate);
 
         return `
           Item ${index + 1}:
@@ -157,7 +157,7 @@ async function sendOrderNotification(user, orderData, actionType = 'added', conf
           - Quantity: ${item.numRequested || 'N/A'}
           - Order ID: ${item.orderID || 'Pending'}
           - Created: ${createdTime}
-          - Completed: ${completedTime}
+          - Completed: ${completeTime}
           - Processing Time: ${duration}
           - Configuration:
             ${configList || '    No configuration details'}
@@ -170,9 +170,9 @@ async function sendOrderNotification(user, orderData, actionType = 'added', conf
 
       // Customize email content based on action type
       let emailHeader, emailSubject;
-      if (actionType.toLowerCase() === 'completed') {
-        emailHeader = `ORDER COMPLETED - Configuration Order${orderIdText}`;
-        emailSubject = `Order Completed: ${finalConfigName} - ${user.firstName} ${user.lastName}`;
+      if (actionType.toLowerCase() === 'complete') {
+        emailHeader = `ORDER COMPLETE - Configuration Order${orderIdText}`;
+        emailSubject = `Order Complete: ${finalConfigName} - ${user.firstName} ${user.lastName}`;
       } else {
         emailHeader = `${actionType.toUpperCase()} CONFIGURATION ORDER${orderIdText}`;
         emailSubject = `${actionType.charAt(0).toUpperCase() + actionType.slice(1)} Configuration Order: ${finalConfigName} - ${user.firstName} ${user.lastName}`;
@@ -181,7 +181,7 @@ async function sendOrderNotification(user, orderData, actionType = 'added', conf
       const emailContent = `
         ${emailHeader}
         
-        ${actionType.toLowerCase() === 'completed' ? 'Your configuration order has been successfully completed and is ready for delivery/pickup!' : ''}
+        ${actionType.toLowerCase() === 'complete' ? 'Your configuration order has been successfully complete and is ready for delivery/pickup!' : ''}
         
         Customer Information:
         - Name: ${user.firstName} ${user.lastName}
@@ -190,7 +190,7 @@ async function sendOrderNotification(user, orderData, actionType = 'added', conf
         
         Configuration Name: ${finalConfigName}
         Total Items: ${cartItems.length}
-        ${actionType.toLowerCase() === 'completed' ? 'Status: COMPLETED' : ''}
+        ${actionType.toLowerCase() === 'complete' ? 'Status: COMPLETE' : ''}
         
         ORDER DETAILS:
           ${itemsList}
@@ -224,14 +224,14 @@ async function sendOrderNotification(user, orderData, actionType = 'added', conf
 
       // Get timing information for single order
       const createdTime = formatTimestamp(orderData.orderCreated);
-      const completedTime = formatTimestamp(orderData.completedDate);
-      const duration = orderData.processingDuration ? orderData.processingDuration.formatted : calculateDuration(orderData.orderCreated, orderData.completedDate);
+      const completeTime = formatTimestamp(orderData.completeDate);
+      const duration = orderData.processingDuration ? orderData.processingDuration.formatted : calculateDuration(orderData.orderCreated, orderData.completeDate);
 
       // Customize email content based on action type
       let emailHeader, emailSubject;
-      if (actionType.toLowerCase() === 'completed') {
-        emailHeader = `ORDER COMPLETED - ${orderData.productType}`;
-        emailSubject = `Order Completed: ${orderData.productType} - ${user.firstName} ${user.lastName}`;
+      if (actionType.toLowerCase() === 'complete') {
+        emailHeader = `ORDER COMPLETE - ${orderData.productType}`;
+        emailSubject = `Order Complete: ${orderData.productType} - ${user.firstName} ${user.lastName}`;
       } else {
         emailHeader = `${actionType.toUpperCase()} ORDER`;
         emailSubject = `Order ${actionType}: ${orderData.productType} - ${user.firstName} ${user.lastName}`;
@@ -240,7 +240,7 @@ async function sendOrderNotification(user, orderData, actionType = 'added', conf
       const emailContent = `
         ${emailHeader}
         
-        ${actionType.toLowerCase() === 'completed' ? 'Your order has been successfully completed and is ready for delivery/pickup!' : ''}
+        ${actionType.toLowerCase() === 'complete' ? 'Your order has been successfully complete and is ready for delivery/pickup!' : ''}
         
         Customer Information:
         - Name: ${user.firstName} ${user.lastName}
@@ -251,9 +251,9 @@ async function sendOrderNotification(user, orderData, actionType = 'added', conf
         Quantity Requested: ${orderData.numRequested}
         Order ID: ${orderData.orderID || 'Pending'}
         Created: ${createdTime}
-        Completed: ${completedTime}
+        Completed: ${completeTime}
         Processing Time: ${duration}
-        ${actionType.toLowerCase() === 'completed' ? 'Status: COMPLETED' : ''}
+        ${actionType.toLowerCase() === 'complete' ? 'Status: COMPLETE' : ''}
         
         Configuration Details:
           ${configList || '  No configuration details'}

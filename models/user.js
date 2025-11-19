@@ -68,7 +68,7 @@ const UserSchema = new mongoose.Schema({
             type: Date,
             default: Date.now,
         },
-        completedDate: {
+        completeDate: {
             type: Date,
             default: null,
         },
@@ -109,7 +109,7 @@ const UserSchema = new mongoose.Schema({
             type: Date,
             default: Date.now,
         },
-        completedDate: {
+        completeDate: {
             type: Date,
             default: null,
         },

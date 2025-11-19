@@ -164,13 +164,13 @@ router.put('/status', authenticate, async (req, res) => {
         targetUserDoc.configurations[configIndex].updatedAt = new Date();
         
         // If status is being set to "Completed", set completion timestamp
-        if (orderStatus.toLowerCase() === 'completed') {
-            targetUserDoc.configurations[configIndex].completedDate = new Date();
+        if (orderStatus.toLowerCase() === 'complete') {
+            targetUserDoc.configurations[configIndex].completeDate = new Date();
             
-            // Also mark all orders in the configuration as completed
+            // Also mark all orders in the configuration as complete
             targetUserDoc.configurations[configIndex].cart.forEach(order => {
-                if (!order.completedDate) {
-                    order.completedDate = new Date();
+                if (!order.completeDate) {
+                    order.completeDate = new Date();
                 }
             });
         }
@@ -178,14 +178,14 @@ router.put('/status', authenticate, async (req, res) => {
         targetUserDoc.markModified('configurations');
         await targetUserDoc.save();
         
-        // Send email notification if order was completed
-        if (orderStatus.toLowerCase() === 'completed') {
+        // Send email notification if order was complete
+        if (orderStatus.toLowerCase() === 'complete') {
             try {
                 const { sendOrderNotification } = require('../utils/emailnotif');
                 await sendOrderNotification(
                     targetUserDoc, 
                     targetUserDoc.configurations[configIndex].cart, 
-                    'completed', 
+                    'complete', 
                     configurationName
                 );
             } catch (emailError) {
@@ -202,11 +202,11 @@ router.put('/status', authenticate, async (req, res) => {
         };
         
         // Add completion data if applicable
-        if (orderStatus.toLowerCase() === 'completed') {
-            responseData.completedDate = targetUserDoc.configurations[configIndex].completedDate;
+        if (orderStatus.toLowerCase() === 'complete') {
+            responseData.completeDate = targetUserDoc.configurations[configIndex].completeDate;
             responseData.processingTime = calculateProcessingTime(
                 targetUserDoc.configurations[configIndex].dateOrdered,
-                targetUserDoc.configurations[configIndex].completedDate
+                targetUserDoc.configurations[configIndex].completeDate
             );
         }
 
@@ -217,7 +217,7 @@ router.put('/status', authenticate, async (req, res) => {
     }
 });
 
-// PUT /api/orders/complete-cart-order - Mark individual cart order as completed
+// PUT /api/orders/complete-cart-order - Mark individual cart order as complete
 router.put('/complete-cart-order', authenticate, async (req, res) => {
     try {
         await dbConnect();
@@ -236,7 +236,7 @@ router.put('/complete-cart-order', authenticate, async (req, res) => {
         }
         
         // Set completion timestamp
-        order.completedDate = new Date();
+        order.completeDate = new Date();
         
         // Mark as modified and save
         user.markModified("cart");
@@ -244,17 +244,17 @@ router.put('/complete-cart-order', authenticate, async (req, res) => {
         
         // Send completion notification email
         try {
-            await sendOrderNotification(user, order, 'completed');
+            await sendOrderNotification(user, order, 'complete');
         } catch (emailError) {
             console.warn('Failed to send completion notification:', emailError);
         }
         
-        const processingTime = calculateProcessingTime(order.orderCreated, order.completedDate);
+        const processingTime = calculateProcessingTime(order.orderCreated, order.completeDate);
         
         res.status(200).json({ 
-            message: `Order ${orderID} marked as completed`,
+            message: `Order ${orderID} marked as complete`,
             orderID: order.orderID,
-            completedDate: order.completedDate,
+            completeDate: order.completeDate,
             processingTime
         });
         
@@ -293,15 +293,15 @@ router.get('/completion-status/:orderID', authenticate, async (req, res) => {
             return res.status(404).json({ message: 'Order not found' });
         }
         
-        const processingTime = order.completedDate ? 
-            calculateProcessingTime(order.orderCreated, order.completedDate) : null;
+        const processingTime = order.completeDate ? 
+            calculateProcessingTime(order.orderCreated, order.completeDate) : null;
         
         const responseData = {
             orderID: order.orderID,
             location,
             created: order.orderCreated,
-            completed: order.completedDate,
-            isCompleted: !!order.completedDate,
+            complete: order.completeDate,
+            isCompleted: !!order.completeDate,
             processingTime
         };
         
