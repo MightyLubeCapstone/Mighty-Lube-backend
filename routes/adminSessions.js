@@ -19,9 +19,6 @@ router.post("/", async (req, res) => {
         const allowed = [process.env.EMAIL_1, process.env.EMAIL_2, process.env.EMAIL_3, process.env.EMAIL_4].filter(Boolean).map(e => e.toLowerCase().trim());
         const userEmail = (user && user.username) ? user.username.toLowerCase().trim() : "";
 
-        console.log("ADMIN EMAILS FROM ENV:", allowed);
-        console.log("LOGIN USERNAME:", username, "Normalized:", userEmail);
-        
         if (!user || !allowed.includes(userEmail)) {
             return res.status(401).json({ error: "Unauthorized: No account found with that username!" });
         }
