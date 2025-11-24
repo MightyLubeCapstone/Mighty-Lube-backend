@@ -3,7 +3,7 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const { dbConnect } = require("./config/config");
 const dotenv = require("dotenv");
-dotenv.config();
+dotenv.config()({ path: path.join(_dirname, ".env") });
 
 const app = express();
 
