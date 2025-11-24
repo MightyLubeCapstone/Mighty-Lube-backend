@@ -16,11 +16,11 @@ router.post("/", async (req, res) => {
         const user = await User.findOne({ "username": username }).exec();
 
         // build allowed list from env, remove empty values, compare case-insensitively
-        const allowed = [process.env.EMAIL_1, process.env.EMAIL_2, process.env.EMAIL_3].filter(Boolean).map(e => e.toLowerCase().trim());
+        const allowed = [process.env.EMAIL_1, process.env.EMAIL_2, process.env.EMAIL_3, process.env.EMAIL_4].filter(Boolean).map(e => e.toLowerCase().trim());
         const userEmail = (user && user.username) ? user.username.toLowerCase().trim() : "";
 
         if (!user || !allowed.includes(userEmail)) {
-            return res.status(401).json({ error: "Unauthorized: No account found with that username!" });
+            return res.status(401).json({ error: "Unauthorized: Admin account only" });
         }
 
         if (!(await comparePassword(password, user["password"]))) {
