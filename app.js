@@ -15,7 +15,6 @@ app.use(cors());
 const user_orders = require("./routes/user_orders");
 const orders = require("./routes/orders");
 const rfq = require("./routes/rfq");
-const email = require("./routes/email");
 const adminSessions = require("./routes/adminSessions");
 
 // page routes
@@ -93,7 +92,6 @@ const ftOpcoRoute = require("./routes/FT_OPCO");
 app.use("/api/user_orders", user_orders);
 app.use("/api/orders", orders);
 app.use("/api/rfq", rfq);
-app.use("/api/email", email);
 app.use("/api/adminSessions", adminSessions);
 
 // Route usage
