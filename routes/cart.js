@@ -8,7 +8,6 @@
 
 const express = require("express");
 const { authenticate } = require("./sessions");
-const { sendOrderNotification } = require("../utils/emailnotif");
 const User = require("../models/user");
 const getDecodedInfo = require("../models/getDecodedInfo");
 
@@ -85,14 +84,6 @@ router.put("/order", authenticate, async (req, res) => {
         // Ensure Mongoose knows that the `orders` array has changed
         user.markModified("cart");
         await user.save();
-
-        // Send email notification for cart order edit
-        try {
-            await sendOrderNotification(user, orderInfo, 'edited');
-        } catch (emailError) {
-            console.warn('Failed to send cart order edit notification:', emailError);
-        }
-
         return res.status(200).json({ message: `Successfully updated the order ${orderID}` });
     } catch (error) {
         res.status(500).json({ error: `Internal server error: ${error}` });

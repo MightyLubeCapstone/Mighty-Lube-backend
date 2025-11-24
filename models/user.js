@@ -68,10 +68,6 @@ const UserSchema = new mongoose.Schema({
             type: Date,
             default: Date.now,
         },
-        completeDate: {
-            type: Date,
-            default: null,
-        },
         numRequested: {
             type: Number,
             required: true,
@@ -108,10 +104,6 @@ const UserSchema = new mongoose.Schema({
         dateOrdered: {
             type: Date,
             default: Date.now,
-        },
-        completeDate: {
-            type: Date,
-            default: null,
         },
         configurationName: {
             type: String,

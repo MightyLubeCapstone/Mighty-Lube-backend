@@ -50,7 +50,7 @@ router.put("/", authenticate, async (req, res) => {
 
         // Send email notification for the complete configuration order
         try {
-            await sendOrderNotification(user, updatedCart, 'new', configurationName);
+            await sendOrderNotification(user, updatedCart, configurationName);
         } catch (emailError) {
             console.error("Failed to send order creation email:", emailError);
         }
