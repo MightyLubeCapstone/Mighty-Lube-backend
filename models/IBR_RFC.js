@@ -114,6 +114,15 @@ const IBR_RFC_Schema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+
+  // ✅ NEW OPTIONAL FIELD
+  technicianNote: {
+    type: String,
+    required: false,
+    trim: true,
+  },
+
+
   controlVoltage: {
     type: Number,
     required: true,

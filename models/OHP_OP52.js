@@ -107,6 +107,13 @@ const OHP_OP52Schema = new mongoose.Schema({
     required: false,
   },
 
+  // ✅ NEW OPTIONAL FIELD
+  technicianNote: {
+    type: String,
+    required: false,
+    trim: true,
+  },
+  
   lubeBrand: {
     type: String,
     required: false,

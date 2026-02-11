@@ -72,6 +72,13 @@ const FC_TCG_Schema = new mongoose.Schema({
     required: true,
   },
 
+  // ✅ NEW OPTIONAL FIELD
+  technicianNote: {
+    type: String,
+    required: false,
+    trim: true,
+  },
+
   operatingVoltage: {
     type: Number,
     required: true,

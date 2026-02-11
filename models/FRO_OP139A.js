@@ -115,6 +115,14 @@ const FRO_OP139A_Schema = new mongoose.Schema({
         type: Number,
         required: false,
     },
+
+    // ✅ NEW OPTIONAL FIELD
+  technicianNote: {
+    type: String,
+    required: false,
+    trim: true,
+  },
+  
     compressedAir: {
         type: Number,
         required: false,

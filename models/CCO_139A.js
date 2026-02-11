@@ -135,6 +135,14 @@ const CCO_139ASchema = new mongoose.Schema({
     required: false,
   },
 
+  // ✅ NEW OPTIONAL FIELD
+  technicianNote: {
+    type: String,
+    required: false,
+    trim: true,
+  },
+  
+
   conveyorLoaded: {
     type: Number,
     enum: [1, 2],

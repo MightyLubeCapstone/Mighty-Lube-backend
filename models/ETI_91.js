@@ -23,6 +23,13 @@ const ETI_91_Schema = new mongoose.Schema({
         type: Number,
         required: false,
     },
+    
+    // ✅ NEW OPTIONAL FIELD
+  technicianNote: {
+    type: String,
+    required: false,
+    trim: true,
+  },
     conveyorLengthUnit: { 
 
         type: Number,
@@ -30,6 +37,7 @@ const ETI_91_Schema = new mongoose.Schema({
         required: false,
 
     }
+    
 });
 
 const ETI_91 = mongoose.models.ETI_91 || mongoose.model('ETI_91', ETI_91_Schema);

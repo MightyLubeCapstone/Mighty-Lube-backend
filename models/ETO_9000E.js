@@ -102,6 +102,14 @@ const ETO_9000E_Schema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+
+  // ✅ NEW OPTIONAL FIELD
+  technicianNote: {
+    type: String,
+    required: false,
+    trim: true,
+  },
+
   monitorData: templateA,
   addFreeCarrier: {
     type: Number,

@@ -74,6 +74,13 @@ const OHP_OP55Schema = new mongoose.Schema({
     required: true,
   },
 
+  // ✅ NEW OPTIONAL FIELD
+  technicianNote: {
+    type: String,
+    required: false,
+    trim: true,
+  },
+  
   controlVoltSingle: {
     type: Number,
     required: true,

@@ -18,6 +18,12 @@ const ETI_807_Schema = new mongoose.Schema({
             return this.industrialChainManufacturer === 5;
         },
     },
+    // ✅ NEW OPTIONAL FIELD
+  technicianNote: {
+    type: String,
+    required: false,
+    trim: true,
+  },
     conveyorLength: {
 
         type: Number,

@@ -32,6 +32,13 @@ const OHP_PMMSchema = new mongoose.Schema({
     },
   },
 
+  // ✅ NEW OPTIONAL FIELD
+  technicianNote: {
+    type: String,
+    required: false,
+    trim: true,
+  },
+  
   orientationType: {
     type: Number,
     enum: [1, 2, 3],

@@ -103,6 +103,14 @@ const ETI_OP48E_Schema = new mongoose.Schema({
     required: true,
   },
 
+  // ✅ NEW OPTIONAL FIELD
+  technicianNote: {
+    type: String,
+    required: false,
+    trim: true,
+  },
+  
+
   controlVoltage: {
     type: Number, 
     required: true,

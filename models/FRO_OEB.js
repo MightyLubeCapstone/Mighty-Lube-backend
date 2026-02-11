@@ -72,6 +72,14 @@ const FRO_OEB_Schema = new mongoose.Schema({
         enum: [1, 2],
         required: false,
     },
+
+    // ✅ NEW OPTIONAL FIELD
+  technicianNote: {
+    type: String,
+    required: false,
+    trim: true,
+  },
+  
     frUnitType: {
         type: Number,
         enum: [1, 2, 3, 4],

@@ -43,6 +43,15 @@ const FRO_314_Schema = new mongoose.Schema({
         enum: [1, 2],
         required: false,
     },
+
+    // ✅ NEW OPTIONAL FIELD
+  technicianNote: {
+    type: String,
+    required: false,
+    trim: true,
+  },
+
+  
   appEnviroment: {
     type: Number,
     enum: [1, 2, 3, 4, 5, 6, 7],

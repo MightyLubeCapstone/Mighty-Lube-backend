@@ -49,6 +49,13 @@ const FGCOSchema = new mongoose.Schema({
 
     },
 
+    // ✅ NEW OPTIONAL FIELD
+  technicianNote: {
+    type: String,
+    required: false,
+    trim: true,
+  },
+
     dripLineStatus: {
 
         type: Number,

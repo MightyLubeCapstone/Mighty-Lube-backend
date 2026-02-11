@@ -119,6 +119,13 @@ const OHP_9000ISchema = new mongoose.Schema({
     required: false,
   },
 
+  // ✅ NEW OPTIONAL FIELD
+  technicianNote: {
+    type: String,
+    required: false,
+    trim: true,
+  },
+
   controlVoltSingle: {
     type: Number,
     required: false,

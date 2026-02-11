@@ -51,6 +51,14 @@ const OHP_OP4ASchema = new mongoose.Schema({
     required: true,
   },
 
+
+  // ✅ NEW OPTIONAL FIELD
+  technicianNote: {
+    type: String,
+    required: false,
+    trim: true,
+  },
+  
   conveyorLengthUnit: {
     type: Number,
     enum: [1, 2, 3, 4],

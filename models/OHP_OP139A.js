@@ -161,6 +161,14 @@ const OHP_OP139ASchema = new mongoose.Schema({
     required: true,
   },
 
+
+  // ✅ NEW OPTIONAL FIELD
+  technicianNote: {
+    type: String,
+    required: false,
+    trim: true,
+  },
+  
   controlVoltSingle: {
     type: Number,
     required: true,

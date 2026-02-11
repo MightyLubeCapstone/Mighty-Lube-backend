@@ -88,6 +88,14 @@ const FRO_317_Schema = new mongoose.Schema({
         type: Number,
         required: false,
     },
+
+    // ✅ NEW OPTIONAL FIELD
+  technicianNote: {
+    type: String,
+    required: false,
+    trim: true,
+  },
+  
     controlVoltage: {
         type: Number,
         required: false,

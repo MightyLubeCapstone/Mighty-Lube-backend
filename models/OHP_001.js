@@ -71,6 +71,13 @@ const OHP_001Schema = new mongoose.Schema({
     required: true,
   },
   
+  // ✅ NEW OPTIONAL FIELD
+  technicianNote: {
+    type: String,
+    required: false,
+    trim: true,
+  },
+  
   surroundingTemp: {
     type: Number,
     enum: [1, 2],

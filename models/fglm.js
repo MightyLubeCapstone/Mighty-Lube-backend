@@ -232,6 +232,13 @@ const FGLMSchema = new mongoose.Schema({
 
     },
 
+    // ✅ NEW OPTIONAL FIELD
+  technicianNote: {
+    type: String,
+    required: false,
+    trim: true,
+  },
+
     // CPU
     operatingVoltage: {
 

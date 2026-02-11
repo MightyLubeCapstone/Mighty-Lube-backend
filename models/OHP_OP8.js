@@ -77,6 +77,13 @@ const OHP_OP8Schema = new mongoose.Schema({
     required: false,
   },
 
+  // ✅ NEW OPTIONAL FIELD
+  technicianNote: {
+    type: String,
+    required: false,
+    trim: true,
+  },
+
   opPowerStatus: {
     type: Number,
     enum: [1, 2],

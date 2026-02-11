@@ -116,6 +116,14 @@ const COE_OP4OE_Schema = new mongoose.Schema({
     required: true,
   },
 
+  // ✅ NEW OPTIONAL FIELD
+  technicianNote: {
+    type: String,
+    required: false,
+    trim: true,
+  },
+  
+
   controlVoltage: {
     type: Number,
     required: true,

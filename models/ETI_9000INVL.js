@@ -95,6 +95,14 @@ const ETI_9000INVL_Schema = new mongoose.Schema({
     required: true,
   },
 
+  // ✅ NEW OPTIONAL FIELD
+  technicianNote: {
+    type: String,
+    required: false,
+    trim: true,
+  },
+  
+
   monitorData: templateA,
   
   addFreeCarrier: {

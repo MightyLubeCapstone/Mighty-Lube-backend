@@ -125,6 +125,13 @@ const CC5_CLSchema = new mongoose.Schema({
     required: true,
   },
 
+  // ✅ NEW OPTIONAL FIELD
+  technicianNote: {
+    type: String,
+    required: false,
+    trim: true,
+  },
+  
   monitorData: templateA,
 
   outboardStatus: {

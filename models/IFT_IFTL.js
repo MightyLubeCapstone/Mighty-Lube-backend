@@ -112,6 +112,13 @@ const IFT_IFTL_Schema = new mongoose.Schema({
     required: true,
   },
 
+  // ✅ NEW OPTIONAL FIELD
+  technicianNote: {
+    type: String,
+    required: false,
+    trim: true,
+  },
+  
   monitorData: templateA,
   wheelOpenType: {
     type: Number,

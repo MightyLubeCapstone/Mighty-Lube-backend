@@ -135,6 +135,14 @@ const CCO_ESSchema = new mongoose.Schema({
     required: true,
   },
 
+  // ✅ NEW OPTIONAL FIELD
+  technicianNote: {
+    type: String,
+    required: false,
+    trim: true,
+  },
+  
+
   openBearings: {
     type: Number,
     enum: [1, 2],

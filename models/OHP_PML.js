@@ -69,6 +69,13 @@ const OHP_PMLSchema = new mongoose.Schema({
     required: true,
   },
 
+  // ✅ NEW OPTIONAL FIELD
+  technicianNote: {
+    type: String,
+    required: false,
+    trim: true,
+  },
+  
   ovenStatus: {
     type: Number,
     enum: [1, 2],

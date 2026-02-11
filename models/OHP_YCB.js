@@ -62,6 +62,13 @@ const OHP_YCBSchema = new mongoose.Schema({
     },
   },
 
+  // ✅ NEW OPTIONAL FIELD
+  technicianNote: {
+    type: String,
+    required: false,
+    trim: true,
+  },
+
   otherAppEnviroment: {
     type: String,
     required: function () {

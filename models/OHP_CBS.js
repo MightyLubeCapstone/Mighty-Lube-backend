@@ -55,6 +55,13 @@ const OHPCBSSchema = new mongoose.Schema({
     required: false,
   },
 
+  // ✅ NEW OPTIONAL FIELD
+  technicianNote: {
+    type: String,
+    required: false,
+    trim: true,
+  },
+
   ovenStatus: {
     type: Number,
     enum: [1, 2],

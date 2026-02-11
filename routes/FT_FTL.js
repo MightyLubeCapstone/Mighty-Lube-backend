@@ -1,3 +1,162 @@
+// const express = require("express");
+// const { dbConnect } = require("../config/config");
+// const { authenticate } = require("./sessions");
+// const FT_FTL = require("../models/FT_FTL");
+// const templateA = require("../models/templateA");
+// const templateE = require("../models/templateE");
+
+// const router = express.Router();
+
+// router.post("/", authenticate, async (req, res) => {
+//   try {
+//     const { FT_FTLData, numRequested } = req.body;
+//     const order = new FT_FTL({
+//       conveyorName: FT_FTLData.conveyorName,
+//       chainSize: FT_FTLData.chainSize,
+//       ...(FT_FTLData.otherChainSize && { otherChainSize: FT_FTLData.otherChainSize }),
+//       industrialChainManufacturer: FT_FTLData.industrialChainManufacturer,
+//       ...(FT_FTLData.otherChainManufacturer && { otherChainManufacturer: FT_FTLData.otherChainManufacturer }),
+//       wheelManufacturer: FT_FTLData.wheelManufacturer,
+//       ...(FT_FTLData.otherWheelManufacturer && { otherWheelManufacturer: FT_FTLData.otherWheelManufacturer }),
+//       conveyorLength: FT_FTLData.conveyorLength,
+//       conveyorLengthUnit: FT_FTLData.conveyorLengthUnit,
+//       conveyorSpeed: FT_FTLData.conveyorSpeed,
+//       speedUnit: FT_FTLData.speedUnit,
+//       ...(FT_FTLData.conveyorIndex && { conveyorIndex: FT_FTLData.conveyorIndex }),
+//       ...(FT_FTLData.travelDirection && { travelDirection: FT_FTLData.travelDirection }),
+//       appEnviroment: FT_FTLData.appEnviroment,
+//       ...(FT_FTLData.ovenStatus && { ovenStatus: FT_FTLData.ovenStatus }),
+//       ...(FT_FTLData.ovenTemp && { ovenTemp: FT_FTLData.ovenTemp }),
+//       ...(FT_FTLData.otherAppEnviroment && { otherAppEnviroment: FT_FTLData.otherAppEnviroment }),
+//       strandStatus: FT_FTLData.strandStatus,
+//       ...(FT_FTLData.surroundingTemp && { surroundingTemp: FT_FTLData.surroundingTemp }),
+//       conveyorLoaded: FT_FTLData.conveyorLoaded,
+//       ...(FT_FTLData.conveyorSwing && { conveyorSwing: FT_FTLData.conveyorSwing }),
+//       ...(FT_FTLData.plantLayout && { plantLayout: FT_FTLData.plantLayout }),
+//       ...(FT_FTLData.requiredPics && { requiredPics: FT_FTLData.requiredPics }),
+//       operatingVoltage: FT_FTLData.operatingVoltage,
+//       monitorData: 
+//       {
+//                 existingMonitor: FT_FTLData.templateA.existingMonitor,
+//                 newMonitor: FT_FTLData.templateA.newMonitor,		
+//                 ...(FT_FTLData.templateA.dcuStatus && { dcuStatus: FT_FTLData.templateA.dcuStatus }),
+//                 ...(FT_FTLData.templateA.dcuNum && { dcuNum: FT_FTLData.templateA.dcuNum }),
+//                 ...(FT_FTLData.templateA.existingWindows && { existingWindows: FT_FTLData.templateA.existingWindows }),
+//                 ...(FT_FTLData.templateA.existingHeadUnit && { existingHeadUnit: FT_FTLData.templateA.existingHeadUnit }),
+//                 ...(FT_FTLData.templateA.existingDCU && { existingDCU: FT_FTLData.templateA.existingDCU }),
+//                 ...(FT_FTLData.templateA.existingPowerInterface && { existingPowerInterface: FT_FTLData.templateA.existingPowerInterface }),
+//                 ...(FT_FTLData.templateA.newReservoir && { newReservoir: FT_FTLData.templateA.newReservoir }),
+//                 ...(FT_FTLData.templateA.reservoirSize && { reservoirSize: FT_FTLData.templateA.reservoirSize }),
+//                 ...(FT_FTLData.templateA.otherReservoirSize && { otherReservoirSize: FT_FTLData.templateA.otherReservoirSize }),
+//                 ...(FT_FTLData.templateA.newReservoirNum && { newReservoirNum: FT_FTLData.templateA.newReservoirNum }),
+//                 ...(FT_FTLData.templateA.typeMonitor && { typeMonitor: FT_FTLData.templateA.typeMonitor }),
+//                 ...(FT_FTLData.templateA.driveMotorAmp && { driveMotorAmp: FT_FTLData.templateA.driveMotorAmp }),
+//                 ...(FT_FTLData.templateA.driveMotorAmpNum && { driveMotorAmpNum: FT_FTLData.templateA.driveMotorAmpNum }),
+//                 ...(FT_FTLData.templateA.driveTakeUpAir && { driveTakeUpAir: FT_FTLData.templateA.driveTakeUpAir }),
+//                 ...(FT_FTLData.templateA.driveTakeUpAirNum && { driveTakeUpAirNum: FT_FTLData.templateA.driveTakeUpAirNum }),
+//                 ...(FT_FTLData.templateA.takeUpDistance && { takeUpDistance: FT_FTLData.templateA.takeUpDistance }),
+//                 ...(FT_FTLData.templateA.takeUpDistanceNum && { takeUpDistanceNum: FT_FTLData.templateA.takeUpDistanceNum }),
+//                 ...(FT_FTLData.templateA.driveTemp && { driveTemp: FT_FTLData.templateA.driveTemp }),
+//                 ...(FT_FTLData.templateA.driveTempNum && { driveTempNum: FT_FTLData.templateA.driveTempNum }),
+//                 ...(FT_FTLData.templateA.driveVibration && { driveVibration: FT_FTLData.templateA.driveVibration }),
+//                 ...(FT_FTLData.templateA.driveVibrationNum && { driveVibrationNum: FT_FTLData.templateA.driveVibrationNum }),
+//                 ...(FT_FTLData.templateA.dogPitch && { dogPitch: FT_FTLData.templateA.dogPitch }),
+//                 ...(FT_FTLData.templateA.dogPitchNum && { dogPitchNum: FT_FTLData.templateA.dogPitchNum }),
+//                 ...(FT_FTLData.templateA.paintMarker && { paintMarker: FT_FTLData.templateA.paintMarker }),
+//                 ...(FT_FTLData.templateA.paintMarkerNum && { paintMarkerNum: FT_FTLData.templateA.paintMarkerNum }),
+//                 ...(FT_FTLData.templateA.chainVision && { chainVision: FT_FTLData.templateA.chainVision }),
+//                 ...(FT_FTLData.templateA.lubeVision && { lubeVision: FT_FTLData.templateA.lubeVision }),
+//                 ...(FT_FTLData.templateA.trolleyVision && { trolleyVision: FT_FTLData.templateA.trolleyVision }),
+//                 ...(FT_FTLData.templateA.trolleyDetect && { trolleyDetect: FT_FTLData.templateA.trolleyDetect }),
+//                 ...(FT_FTLData.templateA.omniView && { omniView: FT_FTLData.templateA.omniView }),
+//                 ...(FT_FTLData.templateA.dcuUpgradeNum && { dcuUpgradeNum: FT_FTLData.templateA.dcuUpgradeNum }),
+//                 ...(FT_FTLData.templateA.piuDistance && { piuDistance: FT_FTLData.templateA.piuDistance }),
+//                 ...(FT_FTLData.templateA.switchDistance && { switchDistance: FT_FTLData.templateA.switchDistance }),
+//                 ...(FT_FTLData.templateA.ampPickup && { ampPickup: FT_FTLData.templateA.ampPickup }),
+//                 ...(FT_FTLData.templateA.fromAirTakeUpDistance && { fromAirTakeUpDistance: FT_FTLData.templateA.fromAirTakeUpDistance }),
+//                 ...(FT_FTLData.templateA.specialControllerOptions && { specialControllerOptions: FT_FTLData.templateA.specialControllerOptions }),
+//                 ...(FT_FTLData.templateA.operatingVoltage && { operatingVoltage: FT_FTLData.templateA.operatingVoltage })
+//             },
+//       wheelOpenType: FT_FTLData.wheelOpenType,
+//       ...(FT_FTLData.wheelClosedType && { wheelClosedType: FT_FTLData.wheelClosedType }),
+//       openStatus: FT_FTLData.openStatus,
+//       outBoardStatus: FT_FTLData.outBoardStatus,
+//       catDriveStatus: FT_FTLData.catDriveStatus,
+
+//             templateEData: 
+//             {
+//                 conveyorName: FT_FTLData.templateE.conveyorName,
+//                 ...(FT_FTLData.templateE.chainSize && { chainSize: FT_FTLData.templateE.chainSize }),
+//                 ...(FT_FTLData.templateE.otherChainSize && { otherChainSize: FT_FTLData.templateE.otherChainSize }),
+//                 ...(FT_FTLData.templateE.industrialChainManufacturer && { industrialChainManufacturer: FT_FTLData.templateE.industrialChainManufacturer }),
+//                 ...(FT_FTLData.templateE.otherChainManufacturer && { otherChainManufacturer: FT_FTLData.templateE.otherChainManufacturer }),
+//                 ...(FT_FTLData.templateE.conveyorLength && { conveyorLength: FT_FTLData.templateE.conveyorLength }),
+//                 ...(FT_FTLData.templateE.conveyorLengthUnit && { conveyorLengthUnit: FT_FTLData.templateE.conveyorLengthUnit }),
+//                 ...(FT_FTLData.templateE.appEnviroment && { appEnviroment: FT_FTLData.templateE.appEnviroment }),
+//                 ...(FT_FTLData.templateE.otherAppEnviroment && { otherAppEnviroment: FT_FTLData.templateE.otherAppEnviroment }),
+//                 ...(FT_FTLData.templateE.lubeBrand && { lubeBrand: FT_FTLData.templateE.lubeBrand }),
+//                 ...(FT_FTLData.templateE.lubeType && { lubeType: FT_FTLData.templateE.lubeType }),
+//                 ...(FT_FTLData.templateE.lubeViscosity && { lubeViscosity: FT_FTLData.templateE.lubeViscosity }),
+//                 ...(FT_FTLData.templateE.specialControllerOptions && { specialControllerOptions: FT_FTLData.templateE.specialControllerOptions }),
+//                 ...(FT_FTLData.templateE.wireMeasurementUnit && { wireMeasurementUnit: FT_FTLData.templateE.wireMeasurementUnit }),
+//                 ...(FT_FTLData.templateE.conductor2 && { conductor2: FT_FTLData.templateE.conductor2 }),
+//                 ...(FT_FTLData.templateE.conductor4 && { conductor4: FT_FTLData.templateE.conductor4 }),
+//                 ...(FT_FTLData.templateE.conductor7 && { conductor7: FT_FTLData.templateE.conductor7 }),
+//                 ...(FT_FTLData.templateE.conductor12 && { conductor12: FT_FTLData.templateE.conductor12 }),
+//                 ...(FT_FTLData.templateE.junctionBoxNum && { junctionBoxNum: FT_FTLData.templateE.junctionBoxNum }),
+
+//             },     
+
+//       ...(FT_FTLData.externalLubeStatus && { externalLubeStatus: FT_FTLData.externalLubeStatus }),
+//       ...(FT_FTLData.lubeBrand && { lubeBrand: FT_FTLData.lubeBrand }),
+//       ...(FT_FTLData.lubeType && { lubeType: FT_FTLData.lubeType }),
+//       ...(FT_FTLData.lubeViscosity && { lubeViscosity: FT_FTLData.lubeViscosity }),
+//       ...(FT_FTLData.reservoirSize && { reservoirSize: FT_FTLData.reservoirSize }),
+//       ...(FT_FTLData.reservoirSizeNum && { reservoirSizeNum: FT_FTLData.reservoirSizeNum }),
+//       ...(FT_FTLData.chainCleanStatus && { chainCleanStatus: FT_FTLData.chainCleanStatus }),
+//       ...(FT_FTLData.mightyLubeMonitoring && { mightyLubeMonitoring: FT_FTLData.mightyLubeMonitoring }),
+//       ...(FT_FTLData.ctrController && { ctrController: FT_FTLData.ctrController }),
+//       ...(FT_FTLData.plcConnection && { plcConnection: FT_FTLData.plcConnection }),
+//       ...(FT_FTLData.monitoringController && { monitoringController: FT_FTLData.monitoringController }),
+//       ...(FT_FTLData.otherControllerInfo && { otherControllerInfo: FT_FTLData.otherControllerInfo }),
+//       ...(FT_FTLData.specialControllerOptions && { specialControllerOptions: FT_FTLData.specialControllerOptions }),
+//       ...(FT_FTLData.measurementUnitType && { measurementUnitType: FT_FTLData.measurementUnitType }),
+//       ...(FT_FTLData.powerRailG && { powerRailG: FT_FTLData.powerRailG }),
+//       ...(FT_FTLData.powerRailH && { powerRailH: FT_FTLData.powerRailH }),
+//       ...(FT_FTLData.powerRailA1 && { powerRailA1: FT_FTLData.powerRailA1 }),
+//       ...(FT_FTLData.powerRailB1 && { powerRailB1: FT_FTLData.powerRailB1 }),
+//       ...(FT_FTLData.powerRailH1 && { powerRailH1: FT_FTLData.powerRailH1 }),
+//       ...(FT_FTLData.powerRailJ1 && { powerRailJ1: FT_FTLData.powerRailJ1 }),
+//       ...(FT_FTLData.powerRailL1 && { powerRailL1: FT_FTLData.powerRailL1 }),
+//       ...(FT_FTLData.powerRailM1 && { powerRailM1: FT_FTLData.powerRailM1 }),
+//       ...(FT_FTLData.powerRailN1 && { powerRailN1: FT_FTLData.powerRailN1 }),
+//       ...(FT_FTLData.powerRailP1 && { powerRailP1: FT_FTLData.powerRailP1 }),
+//       ...(FT_FTLData.powerRailR1 && { powerRailR1: FT_FTLData.powerRailR1 }),
+//       ...(FT_FTLData.wireMeasurementUnit && { wireMeasurementUnit: FT_FTLData.wireMeasurementUnit }),
+//       ...(FT_FTLData.conductor2 && { conductor2: FT_FTLData.conductor2 }),
+//       ...(FT_FTLData.conductor4 && { conductor4: FT_FTLData.conductor4 }),
+//       ...(FT_FTLData.conductor7 && { conductor7: FT_FTLData.conductor7 }),
+//       ...(FT_FTLData.conductor12 && { conductor12: FT_FTLData.conductor12 }),
+//       ...(FT_FTLData.junctionBoxNum && { junctionBoxNum: FT_FTLData.junctionBoxNum })
+//     });
+
+//     req.user.cart.push({ numRequested, productConfigurationInfo: order, productType: "FT_FTL" });
+//     await req.user.save();
+
+//     return res.status(200).json({ message: "FT_FTL entry added" });
+//   } catch (error) {
+//     console.log(error);
+//     res.status(500).json({ error: "Internal server error" });
+//   }
+// });
+
+// module.exports = router;
+
+
+
+
+
+
 const express = require("express");
 const { dbConnect } = require("../config/config");
 const { authenticate } = require("./sessions");
@@ -7,9 +166,21 @@ const templateE = require("../models/templateE");
 
 const router = express.Router();
 
+/**
+ * FT_FTL Create API
+ *
+ * - Receives FT_FTLData + numRequested from request body
+ * - Builds a FT_FTL mongoose object (only includes optional fields if provided)
+ * - Pushes the configuration into the authenticated user's cart
+ *
+ * Note:
+ * technicianNote is an optional field used for internal/technician remarks.
+ * It does not change any business logic; it's just stored along with the order.
+ */
 router.post("/", authenticate, async (req, res) => {
   try {
     const { FT_FTLData, numRequested } = req.body;
+
     const order = new FT_FTL({
       conveyorName: FT_FTLData.conveyorName,
       chainSize: FT_FTLData.chainSize,
@@ -35,77 +206,79 @@ router.post("/", authenticate, async (req, res) => {
       ...(FT_FTLData.plantLayout && { plantLayout: FT_FTLData.plantLayout }),
       ...(FT_FTLData.requiredPics && { requiredPics: FT_FTLData.requiredPics }),
       operatingVoltage: FT_FTLData.operatingVoltage,
-      monitorData: 
-      {
-                existingMonitor: FT_FTLData.templateA.existingMonitor,
-                newMonitor: FT_FTLData.templateA.newMonitor,		
-                ...(FT_FTLData.templateA.dcuStatus && { dcuStatus: FT_FTLData.templateA.dcuStatus }),
-                ...(FT_FTLData.templateA.dcuNum && { dcuNum: FT_FTLData.templateA.dcuNum }),
-                ...(FT_FTLData.templateA.existingWindows && { existingWindows: FT_FTLData.templateA.existingWindows }),
-                ...(FT_FTLData.templateA.existingHeadUnit && { existingHeadUnit: FT_FTLData.templateA.existingHeadUnit }),
-                ...(FT_FTLData.templateA.existingDCU && { existingDCU: FT_FTLData.templateA.existingDCU }),
-                ...(FT_FTLData.templateA.existingPowerInterface && { existingPowerInterface: FT_FTLData.templateA.existingPowerInterface }),
-                ...(FT_FTLData.templateA.newReservoir && { newReservoir: FT_FTLData.templateA.newReservoir }),
-                ...(FT_FTLData.templateA.reservoirSize && { reservoirSize: FT_FTLData.templateA.reservoirSize }),
-                ...(FT_FTLData.templateA.otherReservoirSize && { otherReservoirSize: FT_FTLData.templateA.otherReservoirSize }),
-                ...(FT_FTLData.templateA.newReservoirNum && { newReservoirNum: FT_FTLData.templateA.newReservoirNum }),
-                ...(FT_FTLData.templateA.typeMonitor && { typeMonitor: FT_FTLData.templateA.typeMonitor }),
-                ...(FT_FTLData.templateA.driveMotorAmp && { driveMotorAmp: FT_FTLData.templateA.driveMotorAmp }),
-                ...(FT_FTLData.templateA.driveMotorAmpNum && { driveMotorAmpNum: FT_FTLData.templateA.driveMotorAmpNum }),
-                ...(FT_FTLData.templateA.driveTakeUpAir && { driveTakeUpAir: FT_FTLData.templateA.driveTakeUpAir }),
-                ...(FT_FTLData.templateA.driveTakeUpAirNum && { driveTakeUpAirNum: FT_FTLData.templateA.driveTakeUpAirNum }),
-                ...(FT_FTLData.templateA.takeUpDistance && { takeUpDistance: FT_FTLData.templateA.takeUpDistance }),
-                ...(FT_FTLData.templateA.takeUpDistanceNum && { takeUpDistanceNum: FT_FTLData.templateA.takeUpDistanceNum }),
-                ...(FT_FTLData.templateA.driveTemp && { driveTemp: FT_FTLData.templateA.driveTemp }),
-                ...(FT_FTLData.templateA.driveTempNum && { driveTempNum: FT_FTLData.templateA.driveTempNum }),
-                ...(FT_FTLData.templateA.driveVibration && { driveVibration: FT_FTLData.templateA.driveVibration }),
-                ...(FT_FTLData.templateA.driveVibrationNum && { driveVibrationNum: FT_FTLData.templateA.driveVibrationNum }),
-                ...(FT_FTLData.templateA.dogPitch && { dogPitch: FT_FTLData.templateA.dogPitch }),
-                ...(FT_FTLData.templateA.dogPitchNum && { dogPitchNum: FT_FTLData.templateA.dogPitchNum }),
-                ...(FT_FTLData.templateA.paintMarker && { paintMarker: FT_FTLData.templateA.paintMarker }),
-                ...(FT_FTLData.templateA.paintMarkerNum && { paintMarkerNum: FT_FTLData.templateA.paintMarkerNum }),
-                ...(FT_FTLData.templateA.chainVision && { chainVision: FT_FTLData.templateA.chainVision }),
-                ...(FT_FTLData.templateA.lubeVision && { lubeVision: FT_FTLData.templateA.lubeVision }),
-                ...(FT_FTLData.templateA.trolleyVision && { trolleyVision: FT_FTLData.templateA.trolleyVision }),
-                ...(FT_FTLData.templateA.trolleyDetect && { trolleyDetect: FT_FTLData.templateA.trolleyDetect }),
-                ...(FT_FTLData.templateA.omniView && { omniView: FT_FTLData.templateA.omniView }),
-                ...(FT_FTLData.templateA.dcuUpgradeNum && { dcuUpgradeNum: FT_FTLData.templateA.dcuUpgradeNum }),
-                ...(FT_FTLData.templateA.piuDistance && { piuDistance: FT_FTLData.templateA.piuDistance }),
-                ...(FT_FTLData.templateA.switchDistance && { switchDistance: FT_FTLData.templateA.switchDistance }),
-                ...(FT_FTLData.templateA.ampPickup && { ampPickup: FT_FTLData.templateA.ampPickup }),
-                ...(FT_FTLData.templateA.fromAirTakeUpDistance && { fromAirTakeUpDistance: FT_FTLData.templateA.fromAirTakeUpDistance }),
-                ...(FT_FTLData.templateA.specialControllerOptions && { specialControllerOptions: FT_FTLData.templateA.specialControllerOptions }),
-                ...(FT_FTLData.templateA.operatingVoltage && { operatingVoltage: FT_FTLData.templateA.operatingVoltage })
-            },
+
+      // technicianNote: Optional note added by technician for internal/reference use
+      ...(FT_FTLData.technicianNote && { technicianNote: FT_FTLData.technicianNote }),
+
+      monitorData: {
+        existingMonitor: FT_FTLData.templateA.existingMonitor,
+        newMonitor: FT_FTLData.templateA.newMonitor,
+        ...(FT_FTLData.templateA.dcuStatus && { dcuStatus: FT_FTLData.templateA.dcuStatus }),
+        ...(FT_FTLData.templateA.dcuNum && { dcuNum: FT_FTLData.templateA.dcuNum }),
+        ...(FT_FTLData.templateA.existingWindows && { existingWindows: FT_FTLData.templateA.existingWindows }),
+        ...(FT_FTLData.templateA.existingHeadUnit && { existingHeadUnit: FT_FTLData.templateA.existingHeadUnit }),
+        ...(FT_FTLData.templateA.existingDCU && { existingDCU: FT_FTLData.templateA.existingDCU }),
+        ...(FT_FTLData.templateA.existingPowerInterface && { existingPowerInterface: FT_FTLData.templateA.existingPowerInterface }),
+        ...(FT_FTLData.templateA.newReservoir && { newReservoir: FT_FTLData.templateA.newReservoir }),
+        ...(FT_FTLData.templateA.reservoirSize && { reservoirSize: FT_FTLData.templateA.reservoirSize }),
+        ...(FT_FTLData.templateA.otherReservoirSize && { otherReservoirSize: FT_FTLData.templateA.otherReservoirSize }),
+        ...(FT_FTLData.templateA.newReservoirNum && { newReservoirNum: FT_FTLData.templateA.newReservoirNum }),
+        ...(FT_FTLData.templateA.typeMonitor && { typeMonitor: FT_FTLData.templateA.typeMonitor }),
+        ...(FT_FTLData.templateA.driveMotorAmp && { driveMotorAmp: FT_FTLData.templateA.driveMotorAmp }),
+        ...(FT_FTLData.templateA.driveMotorAmpNum && { driveMotorAmpNum: FT_FTLData.templateA.driveMotorAmpNum }),
+        ...(FT_FTLData.templateA.driveTakeUpAir && { driveTakeUpAir: FT_FTLData.templateA.driveTakeUpAir }),
+        ...(FT_FTLData.templateA.driveTakeUpAirNum && { driveTakeUpAirNum: FT_FTLData.templateA.driveTakeUpAirNum }),
+        ...(FT_FTLData.templateA.takeUpDistance && { takeUpDistance: FT_FTLData.templateA.takeUpDistance }),
+        ...(FT_FTLData.templateA.takeUpDistanceNum && { takeUpDistanceNum: FT_FTLData.templateA.takeUpDistanceNum }),
+        ...(FT_FTLData.templateA.driveTemp && { driveTemp: FT_FTLData.templateA.driveTemp }),
+        ...(FT_FTLData.templateA.driveTempNum && { driveTempNum: FT_FTLData.templateA.driveTempNum }),
+        ...(FT_FTLData.templateA.driveVibration && { driveVibration: FT_FTLData.templateA.driveVibration }),
+        ...(FT_FTLData.templateA.driveVibrationNum && { driveVibrationNum: FT_FTLData.templateA.driveVibrationNum }),
+        ...(FT_FTLData.templateA.dogPitch && { dogPitch: FT_FTLData.templateA.dogPitch }),
+        ...(FT_FTLData.templateA.dogPitchNum && { dogPitchNum: FT_FTLData.templateA.dogPitchNum }),
+        ...(FT_FTLData.templateA.paintMarker && { paintMarker: FT_FTLData.templateA.paintMarker }),
+        ...(FT_FTLData.templateA.paintMarkerNum && { paintMarkerNum: FT_FTLData.templateA.paintMarkerNum }),
+        ...(FT_FTLData.templateA.chainVision && { chainVision: FT_FTLData.templateA.chainVision }),
+        ...(FT_FTLData.templateA.lubeVision && { lubeVision: FT_FTLData.templateA.lubeVision }),
+        ...(FT_FTLData.templateA.trolleyVision && { trolleyVision: FT_FTLData.templateA.trolleyVision }),
+        ...(FT_FTLData.templateA.trolleyDetect && { trolleyDetect: FT_FTLData.templateA.trolleyDetect }),
+        ...(FT_FTLData.templateA.omniView && { omniView: FT_FTLData.templateA.omniView }),
+        ...(FT_FTLData.templateA.dcuUpgradeNum && { dcuUpgradeNum: FT_FTLData.templateA.dcuUpgradeNum }),
+        ...(FT_FTLData.templateA.piuDistance && { piuDistance: FT_FTLData.templateA.piuDistance }),
+        ...(FT_FTLData.templateA.switchDistance && { switchDistance: FT_FTLData.templateA.switchDistance }),
+        ...(FT_FTLData.templateA.ampPickup && { ampPickup: FT_FTLData.templateA.ampPickup }),
+        ...(FT_FTLData.templateA.fromAirTakeUpDistance && { fromAirTakeUpDistance: FT_FTLData.templateA.fromAirTakeUpDistance }),
+        ...(FT_FTLData.templateA.specialControllerOptions && { specialControllerOptions: FT_FTLData.templateA.specialControllerOptions }),
+        ...(FT_FTLData.templateA.operatingVoltage && { operatingVoltage: FT_FTLData.templateA.operatingVoltage })
+      },
+
       wheelOpenType: FT_FTLData.wheelOpenType,
       ...(FT_FTLData.wheelClosedType && { wheelClosedType: FT_FTLData.wheelClosedType }),
       openStatus: FT_FTLData.openStatus,
       outBoardStatus: FT_FTLData.outBoardStatus,
       catDriveStatus: FT_FTLData.catDriveStatus,
 
-            templateEData: 
-            {
-                conveyorName: FT_FTLData.templateE.conveyorName,
-                ...(FT_FTLData.templateE.chainSize && { chainSize: FT_FTLData.templateE.chainSize }),
-                ...(FT_FTLData.templateE.otherChainSize && { otherChainSize: FT_FTLData.templateE.otherChainSize }),
-                ...(FT_FTLData.templateE.industrialChainManufacturer && { industrialChainManufacturer: FT_FTLData.templateE.industrialChainManufacturer }),
-                ...(FT_FTLData.templateE.otherChainManufacturer && { otherChainManufacturer: FT_FTLData.templateE.otherChainManufacturer }),
-                ...(FT_FTLData.templateE.conveyorLength && { conveyorLength: FT_FTLData.templateE.conveyorLength }),
-                ...(FT_FTLData.templateE.conveyorLengthUnit && { conveyorLengthUnit: FT_FTLData.templateE.conveyorLengthUnit }),
-                ...(FT_FTLData.templateE.appEnviroment && { appEnviroment: FT_FTLData.templateE.appEnviroment }),
-                ...(FT_FTLData.templateE.otherAppEnviroment && { otherAppEnviroment: FT_FTLData.templateE.otherAppEnviroment }),
-                ...(FT_FTLData.templateE.lubeBrand && { lubeBrand: FT_FTLData.templateE.lubeBrand }),
-                ...(FT_FTLData.templateE.lubeType && { lubeType: FT_FTLData.templateE.lubeType }),
-                ...(FT_FTLData.templateE.lubeViscosity && { lubeViscosity: FT_FTLData.templateE.lubeViscosity }),
-                ...(FT_FTLData.templateE.specialControllerOptions && { specialControllerOptions: FT_FTLData.templateE.specialControllerOptions }),
-                ...(FT_FTLData.templateE.wireMeasurementUnit && { wireMeasurementUnit: FT_FTLData.templateE.wireMeasurementUnit }),
-                ...(FT_FTLData.templateE.conductor2 && { conductor2: FT_FTLData.templateE.conductor2 }),
-                ...(FT_FTLData.templateE.conductor4 && { conductor4: FT_FTLData.templateE.conductor4 }),
-                ...(FT_FTLData.templateE.conductor7 && { conductor7: FT_FTLData.templateE.conductor7 }),
-                ...(FT_FTLData.templateE.conductor12 && { conductor12: FT_FTLData.templateE.conductor12 }),
-                ...(FT_FTLData.templateE.junctionBoxNum && { junctionBoxNum: FT_FTLData.templateE.junctionBoxNum }),
-
-            },     
+      templateEData: {
+        conveyorName: FT_FTLData.templateE.conveyorName,
+        ...(FT_FTLData.templateE.chainSize && { chainSize: FT_FTLData.templateE.chainSize }),
+        ...(FT_FTLData.templateE.otherChainSize && { otherChainSize: FT_FTLData.templateE.otherChainSize }),
+        ...(FT_FTLData.templateE.industrialChainManufacturer && { industrialChainManufacturer: FT_FTLData.templateE.industrialChainManufacturer }),
+        ...(FT_FTLData.templateE.otherChainManufacturer && { otherChainManufacturer: FT_FTLData.templateE.otherChainManufacturer }),
+        ...(FT_FTLData.templateE.conveyorLength && { conveyorLength: FT_FTLData.templateE.conveyorLength }),
+        ...(FT_FTLData.templateE.conveyorLengthUnit && { conveyorLengthUnit: FT_FTLData.templateE.conveyorLengthUnit }),
+        ...(FT_FTLData.templateE.appEnviroment && { appEnviroment: FT_FTLData.templateE.appEnviroment }),
+        ...(FT_FTLData.templateE.otherAppEnviroment && { otherAppEnviroment: FT_FTLData.templateE.otherAppEnviroment }),
+        ...(FT_FTLData.templateE.lubeBrand && { lubeBrand: FT_FTLData.templateE.lubeBrand }),
+        ...(FT_FTLData.templateE.lubeType && { lubeType: FT_FTLData.templateE.lubeType }),
+        ...(FT_FTLData.templateE.lubeViscosity && { lubeViscosity: FT_FTLData.templateE.lubeViscosity }),
+        ...(FT_FTLData.templateE.specialControllerOptions && { specialControllerOptions: FT_FTLData.templateE.specialControllerOptions }),
+        ...(FT_FTLData.templateE.wireMeasurementUnit && { wireMeasurementUnit: FT_FTLData.templateE.wireMeasurementUnit }),
+        ...(FT_FTLData.templateE.conductor2 && { conductor2: FT_FTLData.templateE.conductor2 }),
+        ...(FT_FTLData.templateE.conductor4 && { conductor4: FT_FTLData.templateE.conductor4 }),
+        ...(FT_FTLData.templateE.conductor7 && { conductor7: FT_FTLData.templateE.conductor7 }),
+        ...(FT_FTLData.templateE.conductor12 && { conductor12: FT_FTLData.templateE.conductor12 }),
+        ...(FT_FTLData.templateE.junctionBoxNum && { junctionBoxNum: FT_FTLData.templateE.junctionBoxNum })
+      },
 
       ...(FT_FTLData.externalLubeStatus && { externalLubeStatus: FT_FTLData.externalLubeStatus }),
       ...(FT_FTLData.lubeBrand && { lubeBrand: FT_FTLData.lubeBrand }),
@@ -140,7 +313,12 @@ router.post("/", authenticate, async (req, res) => {
       ...(FT_FTLData.junctionBoxNum && { junctionBoxNum: FT_FTLData.junctionBoxNum })
     });
 
-    req.user.cart.push({ numRequested, productConfigurationInfo: order, productType: "FT_FTL" });
+    req.user.cart.push({
+      numRequested,
+      productConfigurationInfo: order,
+      productType: "FT_FTL"
+    });
+
     await req.user.save();
 
     return res.status(200).json({ message: "FT_FTL entry added" });
