@@ -166,10 +166,92 @@ app.use("/api/ft_opco", ftOpcoRoute);
 // app.use("/api/paf_pmm", pafPmmRoute);
 // app.use("/api/paf_sls", pafSlsRoute);
 
-// run app without .env vars
-const PORT = process.env.PORT || 8080;
-
-app.listen(PORT, "0.0.0.0", () => {
-	dbConnect();
-	console.log(`Listening on port ${PORT}...`);
+// Health check route
+app.get("/", (req, res) => {
+	res.status(200).json({
+		success: true,
+		message: "Backend server is running",
+		port: 8080,
+		timestamp: new Date().toISOString(),
+	});
 });
+
+// Request log
+app.use((req, res, next) => {
+	const start = Date.now();
+
+	res.on("finish", () => {
+		const duration = Date.now() - start;
+		console.log(
+			`[${new Date().toLocaleString()}] ${req.method} ${req.originalUrl} ${res.statusCode} - ${duration}ms`
+		);
+	});
+
+	next();
+});
+
+// 404 route
+app.use((req, res) => {
+	console.warn(`⚠️ Route not found: ${req.method} ${req.originalUrl}`);
+
+	res.status(404).json({
+		success: false,
+		message: "Route not found",
+		path: req.originalUrl,
+	});
+});
+
+// Global error handler
+app.use((err, req, res, next) => {
+	console.error("❌ Server Error:");
+	console.error(err);
+
+	res.status(err.status || 500).json({
+		success: false,
+		message: err.message || "Internal Server Error",
+	});
+});
+
+// Process error handlers
+process.on("uncaughtException", (err) => {
+	console.error("❌ Uncaught Exception:");
+	console.error(err);
+});
+
+process.on("unhandledRejection", (reason) => {
+	console.error("❌ Unhandled Promise Rejection:");
+	console.error(reason);
+});
+
+// run app without .env vars
+async function startServer() {
+	try {
+		console.log("======================================");
+		console.log("🚀 Starting Backend Server...");
+		console.log("📅 Started At :", new Date().toLocaleString());
+		console.log("🌍 Environment:", process.env.NODE_ENV || "development");
+		console.log("🟢 Node Version:", process.version);
+		console.log("🔄 Connecting to database...");
+		console.log("======================================");
+
+		await dbConnect();
+
+		console.log("✅ Database Connected Successfully");
+
+		app.listen(8080, "0.0.0.0", () => {
+			console.log("======================================");
+			console.log("✅ Server is Running");
+			console.log("🌐 Host     : http://0.0.0.0:8080");
+			console.log("📡 Local    : http://localhost:8080");
+			console.log("📁 API Base : http://localhost:8080/api");
+			console.log(`🕒 Started  : ${new Date().toLocaleString()}`);
+			console.log("======================================");
+		});
+	} catch (err) {
+		console.error("❌ Failed to start server");
+		console.error(err);
+		process.exit(1);
+	}
+}
+
+startServer();
