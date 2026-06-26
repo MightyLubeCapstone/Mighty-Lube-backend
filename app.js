@@ -167,7 +167,9 @@ app.use("/api/ft_opco", ftOpcoRoute);
 // app.use("/api/paf_sls", pafSlsRoute);
 
 // run app without .env vars
-app.listen(8080, '0.0.0.0', () => {
+const PORT = process.env.PORT || 8080;
+
+app.listen(PORT, "0.0.0.0", () => {
 	dbConnect();
-	console.log(`Listening on port 8080...`);
+	console.log(`Listening on port ${PORT}...`);
 });
