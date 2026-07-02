@@ -1,20 +1,31 @@
 require('dotenv').config();
 const express = require('express');
 const nodemailer = require('nodemailer');
-const { authenticate, comparePassword, hashPassword } = require("../routes/sessions")
-const mappings = require("../models/mappings")
+const { authenticate, comparePassword, hashPassword } = require("../routes/sessions");
+const mappings = require("../models/mappings");
 const User = require('../models/user');
 
 const router = express.Router();
 
+/**
+ * Creates a unique trace ID for each forgot-password request.
+ * This makes logs easier to follow.
+ */
 function createTraceId() {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
+/**
+ * Logs each forgot-password step with the trace ID.
+ */
 function logForgot(traceId, step, details = {}) {
   console.log(`[forgot-password:${traceId}] ${step}`, details);
 }
 
+/**
+ * Masks email addresses before logging.
+ * Example: test@gmail.com -> te***@gmail.com
+ */
 function maskEmail(email) {
   if (!email || typeof email !== "string") return email;
   const [name, domain] = email.split("@");
@@ -22,6 +33,10 @@ function maskEmail(email) {
   return `${name.slice(0, 2)}***@${domain}`;
 }
 
+/**
+ * Masks secret values before logging.
+ * Shows only length, first two characters, and last two characters.
+ */
 function maskSecret(value) {
   if (!value) return null;
   return {
@@ -32,6 +47,9 @@ function maskSecret(value) {
   };
 }
 
+/**
+ * Converts error objects into detailed log-friendly objects.
+ */
 function getErrorDetails(error) {
   return {
     message: error.message,
@@ -48,20 +66,35 @@ function getErrorDetails(error) {
   };
 }
 
+/**
+ * Logs how long a step took.
+ */
 function logElapsed(traceId, step, startedAt) {
   logForgot(traceId, step, { elapsedMs: Date.now() - startedAt });
 }
 
-// Nodemailer sends emails through Gmail. In production, EMAIL_USER and EMAIL_PASS
-// should come from .env so credentials are not hardcoded in the source code.
+/**
+ * SMTP email configuration.
+ *
+ * These values are used by Nodemailer to connect to Gmail SMTP.
+ * In production, EMAIL_USER and EMAIL_PASS should come from .env.
+ */
 const emailHost = process.env.EMAIL_HOST || "smtp.gmail.com";
-const emailPort = Number(process.env.EMAIL_PORT || 465);
+const emailPort = Number(process.env.EMAIL_PORT || 587);
 const emailSecure = process.env.EMAIL_SECURE
   ? process.env.EMAIL_SECURE === "true"
   : emailPort === 465;
-const emailUser = process.env.EMAIL_USER || "mightylubeemailtest@gmail.com";
-const emailPass = process.env.EMAIL_PASS || "fbsu upww fefd kytb";
 
+const emailUser = process.env.EMAIL_USER;
+const emailPass = process.env.EMAIL_PASS;
+
+if (!emailUser || !emailPass) {
+  throw new Error("EMAIL_USER or EMAIL_PASS is missing in environment variables");
+}
+/**
+ * Logs SMTP settings safely.
+ * Password is masked and not printed directly.
+ */
 console.log("[email-config] SMTP config loaded", {
   host: emailHost,
   port: emailPort,
@@ -73,35 +106,91 @@ console.log("[email-config] SMTP config loaded", {
   nodeEnv: process.env.NODE_ENV || "development",
 });
 
+/**
+ * Creates the Nodemailer transporter.
+ * This transporter is reused whenever the app sends emails.
+ */
 const transporter = nodemailer.createTransport({
   host: emailHost,
   port: emailPort,
   secure: emailSecure,
-  connectionTimeout: 15000,
-  greetingTimeout: 15000,
-  socketTimeout: 30000,
+
+  pool: true,
+  maxConnections: 1,
+  maxMessages: 20,
+
+  connectionTimeout: 30000,
+  greetingTimeout: 30000,
+  socketTimeout: 60000,
+
   logger: process.env.EMAIL_DEBUG === "true",
   debug: process.env.EMAIL_DEBUG === "true",
+
   auth: {
     user: emailUser,
     pass: emailPass,
   },
+
+  tls: {
+    servername: emailHost,
+  },
 });
 
-transporter.verify((error) => {
-  if (error) {
-    console.error("[email-config] SMTP startup verify failed", getErrorDetails(error));
-    return;
+/**
+ * Verifies SMTP connection when the server starts.
+ */
+async function sendMailWithRetry(mailOptions, traceId, maxAttempts = 3) {
+  let lastError;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      logForgot(traceId, "SMTP send attempt started", {
+        attempt,
+        maxAttempts,
+        to: maskEmail(mailOptions.to),
+        from: maskEmail(mailOptions.from),
+        subject: mailOptions.subject,
+      });
+
+      const info = await transporter.sendMail(mailOptions);
+
+      logForgot(traceId, "SMTP send attempt succeeded", {
+        attempt,
+        accepted: info.accepted,
+        rejected: info.rejected,
+        response: info.response,
+        messageId: info.messageId,
+      });
+
+      return info;
+    } catch (error) {
+      lastError = error;
+
+      logForgot(traceId, "SMTP send attempt failed", {
+        attempt,
+        maxAttempts,
+        error: getErrorDetails(error),
+      });
+
+      if (attempt < maxAttempts) {
+        await new Promise(resolve => setTimeout(resolve, attempt * 2000));
+      }
+    }
   }
 
-  console.log("[email-config] SMTP startup verify succeeded");
-});
+  throw lastError;
+}
+
 
 function getMappedInfo(order) {
   const modelName = order.productType ? order.productType : null;
 
+  // Finds the mapping object for this product type.
   const modelMapping = mappings[`${modelName}_Mapping`];
 
+  /**
+   * Maps normal top-level configuration values.
+   */
   function mapValues(field, selectedValue) {
     if (!modelMapping || modelMapping[field] === undefined) {
       return selectedValue;
@@ -113,6 +202,9 @@ function getMappedInfo(order) {
     }
   }
 
+  /**
+   * Maps nested template/monitor data values.
+   */
   function mapTemplateValues(field, selectedValue) {
     if (!modelMapping || !modelMapping.monitorData[field])
       return selectedValue;
@@ -120,7 +212,8 @@ function getMappedInfo(order) {
   }
 
   let mappedInfo = order.productConfigurationInfo;
-  // ✅ Map top-level fields
+
+  // Map top-level fields and remove empty/unselected values.
   if (modelMapping) {
     Object.keys(modelMapping).forEach(field => {
       if (mappedInfo[field] !== undefined && mappedInfo[field] != -1) {
@@ -132,12 +225,15 @@ function getMappedInfo(order) {
         delete mappedInfo[field];
       }
     });
+
+    // Remove MongoDB internal ID from email output.
     delete mappedInfo._id;
   }
 
-  // ✅ Handle `monitorData` (templateA fields)
+  // Handle monitorData/templateA fields.
   if (mappedInfo.monitorData) {
     mappedInfo.monitorData = { ...order.productConfigurationInfo.monitorData };
+
     if (modelMapping && modelMapping.monitorData) {
       Object.keys(modelMapping.monitorData).forEach(field => {
         if (mappedInfo.monitorData[field] !== undefined && mappedInfo.monitorData[field] != -1) {
@@ -150,11 +246,16 @@ function getMappedInfo(order) {
           delete mappedInfo.monitorData[field];
         }
       });
+
       delete mappedInfo.monitorData._id;
     }
   }
+
+
+
   if (mappedInfo.templateBData) {
     mappedInfo.templateBData = { ...order.productConfigurationInfo.templateBData };
+
     if (modelMapping && modelMapping.templateBData) {
       Object.keys(modelMapping.templateBData).forEach(field => {
         if (mappedInfo.templateBData[field] !== undefined && mappedInfo.templateBData[field] != -1) {
@@ -167,12 +268,16 @@ function getMappedInfo(order) {
           delete mappedInfo.templateBData[field];
         }
       });
-      delete mappedInfo.templateBData._id;
 
+      // Remove MongoDB internal ID from email output.
+      delete mappedInfo.templateBData._id;
     }
   }
+
+  // Handle templateCData fields.
   if (mappedInfo.templateCData) {
     mappedInfo.templateCData = { ...order.productConfigurationInfo.templateCData };
+
     if (modelMapping && modelMapping.templateCData) {
       Object.keys(modelMapping.templateCData).forEach(field => {
         if (mappedInfo.templateCData[field] !== undefined && mappedInfo.templateCData[field] != -1) {
@@ -186,10 +291,15 @@ function getMappedInfo(order) {
         }
       });
     }
+
+    // Remove MongoDB internal ID from email output.
     delete mappedInfo.templateCData._id;
   }
+
+  // Handle templateDData fields.
   if (mappedInfo.templateDData) {
     mappedInfo.templateDData = { ...order.productConfigurationInfo.templateDData };
+
     if (modelMapping && modelMapping.templateDData) {
       Object.keys(modelMapping.templateDData).forEach(field => {
         if (mappedInfo.templateDData[field] !== undefined && mappedInfo.templateDData[field] != -1) {
@@ -203,10 +313,15 @@ function getMappedInfo(order) {
         }
       });
     }
+
+    // Remove MongoDB internal ID from email output.
     delete mappedInfo.templateDData._id;
   }
+
+  // Handle templateEData fields.
   if (mappedInfo.templateEData) {
     mappedInfo.templateEData = { ...order.productConfigurationInfo.templateEData };
+
     if (modelMapping && modelMapping.templateEData) {
       Object.keys(modelMapping.templateEData).forEach(field => {
         if (mappedInfo.templateEData[field] !== undefined && mappedInfo.templateEData[field] != -1) {
@@ -220,10 +335,15 @@ function getMappedInfo(order) {
         }
       });
     }
+
+    // Remove MongoDB internal ID from email output.
     delete mappedInfo.templateEData._id;
   }
+
+  // Handle templateFData fields.
   if (mappedInfo.templateFData) {
     mappedInfo.templateFData = { ...order.productConfigurationInfo.templateFData };
+
     if (modelMapping && modelMapping.templateFData) {
       Object.keys(modelMapping.templateFData).forEach(field => {
         if (mappedInfo.templateFData[field] !== undefined && mappedInfo.templateFData[field] != -1) {
@@ -237,50 +357,100 @@ function getMappedInfo(order) {
         }
       });
     }
+
+    // Remove MongoDB internal ID from email output.
     delete mappedInfo.templateFData._id;
   }
+
+  // Return the cleaned and readable product configuration.
   return mappedInfo;
 }
 
+
+
 router.post('/send-email', authenticate, async (req, res) => {
   try {
+    // Get the latest configuration saved by the user.
     const configuration = req.user.configurations[req.user.configurations.length - 1];
+
+    // Get the logged-in user's email address.
     const email = req.user["email"];
+
+    // Validate that the user has an email.
     if (!email) {
       return res.status(400).json({ error: 'Invalid email address' });
     }
-    let emailContent = `Contact Information:\n\tName: ${req.user["firstName"]} ${req.user["lastName"]}\n\tPhone: ${req.user["phoneNumber"]}\n\tCompany: ${req.user["companyName"]}\n\tCountry: ${req.user["country"]}`;
+
+    // Start building the email body with user contact information.
+    let emailContent =
+      `Contact Information:\n\tName: ${req.user["firstName"]} ${req.user["lastName"]}\n\tPhone: ${req.user["phoneNumber"]}\n\tCompany: ${req.user["companyName"]}\n\tCountry: ${req.user["country"]}`;
+
+    // Add each product/order from the user's cart into the email body.
     configuration.cart.forEach((order) => {
-      emailContent += `\n\n\n#################################################\n${order.productType}\n\nRequested number of this item: ${order.numRequested}\n`;
+      emailContent +=
+        `\n\n\n#################################################\n${order.productType}\n\nRequested number of this item: ${order.numRequested}\n`;
+
+      // Convert internal configuration values into readable mapped values.
       order = getMappedInfo(order);
+
+      // Add each configuration field to the email body.
       Object.entries(order).forEach(([key, value]) => {
         if (typeof value === 'object' && value !== null) {
+          // Format nested objects nicely.
           emailContent += `\n${key}:\n${JSON.stringify(value, null, 2)}\n`;
         } else {
+          // Format simple key-value fields.
           emailContent += `\n${key}:\t${value}\n`;
         }
       });
-    })
+    });
+
+    // Email options for sending the product configuration.
     const mailOptions = {
-      from: email,
+      from: emailUser,
+      replyTo: email,
       to: "mightylubeemailtest@gmail.com",
       subject: configuration.configurationName,
       text: emailContent,
     };
 
-    await transporter.sendMail(mailOptions);
+    // Send the email.
+    await sendMailWithRetry(mailOptions, createTraceId());
+
+    // Return success response.
     res.status(201).json({ message: 'Email sent successfully' });
   } catch (error) {
+    // Log and return email sending errors.
     console.error('Email error:', error.message);
     res.status(500).json({ error: error.message });
   }
 });
 
 
+
+/**
+ * -------------------------------------------------------------------------
+ * POST /forgot
+ * -------------------------------------------------------------------------
+ * Purpose:
+ * Step 1 of the Forgot Password process.
+ *
+ * Flow:
+ * 1. Receive user's email.
+ * 2. Validate the email.
+ * 3. Search for the user in the database.
+ * 4. Generate a 6-digit reset code.
+ * 5. Save the reset code in MongoDB.
+ * 6. Verify SMTP connection.
+ * 7. Send the reset code to the user's email.
+ * -------------------------------------------------------------------------
+ */
 router.post('/forgot', async (req, res) => {
   const traceId = createTraceId();
   const requestStartedAt = Date.now();
+
   try {
+    // Log incoming request details.
     logForgot(traceId, "POST started", {
       hasBody: Boolean(req.body),
       hasEmail: Boolean(req.body?.email),
@@ -288,45 +458,61 @@ router.post('/forgot', async (req, res) => {
       userAgent: req.headers["user-agent"],
     });
 
+    // Get email from request body.
     const { email } = req.body;
+
+    // Validate email.
     if (!email) {
       logForgot(traceId, "POST failed validation: missing email");
       return res.status(400).json({ error: 'Invalid email address' });
     }
 
+    // Look up user by email.
     const userLookupStartedAt = Date.now();
     logForgot(traceId, "POST looking up user", { email: maskEmail(email) });
+
     const user = await User.findOne({ email });
+
     logElapsed(traceId, "POST user lookup finished", userLookupStartedAt);
 
+    // Stop if user does not exist.
     if (!user) {
       logForgot(traceId, "POST user not found", { email: maskEmail(email) });
       return res.status(404).json({ error: 'No user found with that email!' });
     }
+
+    // Log found user details.
     logForgot(traceId, "POST user found", {
       userID: user.userID,
       mongooseId: String(user._id),
       hasExistingResetCode: Boolean(user.resetCode),
     });
 
-    // Old flow: generate a 6-digit passcode and store it on the user document.
-    // Do not log the passcode value; only log whether it was generated/saved.
+    // Generate a random 6-digit one-time reset code.
     const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Store reset code on user document.
     user.resetCode = resetCode;
 
+    // Save reset code to database.
     const saveStartedAt = Date.now();
+
     logForgot(traceId, "POST saving reset code", {
       userID: user.userID,
       resetCodeLength: resetCode.length,
       modifiedPaths: user.modifiedPaths(),
     });
+
     await user.save();
+
     logElapsed(traceId, "POST reset code save finished", saveStartedAt);
+
     logForgot(traceId, "POST reset code saved", {
       userID: user.userID,
       hasResetCodeAfterSave: Boolean(user.resetCode),
     });
 
+    // Prepare reset email.
     const mailOptions = {
       from: emailUser,
       to: email,
@@ -334,6 +520,7 @@ router.post('/forgot', async (req, res) => {
       text: `Your one-time passcode is ${user.resetCode}`,
     };
 
+    // Log SMTP configuration before sending.
     logForgot(traceId, "POST SMTP config before verify/send", {
       host: emailHost,
       port: emailPort,
@@ -346,20 +533,27 @@ router.post('/forgot', async (req, res) => {
       emailDebug: process.env.EMAIL_DEBUG === "true",
     });
 
+    // Verify SMTP connection before sending email.
     const verifyStartedAt = Date.now();
     logForgot(traceId, "POST verifying SMTP connection");
     await transporter.verify();
     logElapsed(traceId, "POST SMTP verify succeeded", verifyStartedAt);
 
+    // Send reset email.
     const sendStartedAt = Date.now();
+
     logForgot(traceId, "POST sending reset email", {
       to: maskEmail(email),
       from: maskEmail(mailOptions.from),
       subject: mailOptions.subject,
       textLength: mailOptions.text.length,
     });
-    const sendInfo = await transporter.sendMail(mailOptions);
+    
+    const sendInfo = await sendMailWithRetry(mailOptions, traceId);
+
     logElapsed(traceId, "POST sendMail finished", sendStartedAt);
+
+    // Log email result.
     logForgot(traceId, "POST reset email sent", {
       to: maskEmail(email),
       accepted: sendInfo.accepted,
@@ -367,41 +561,71 @@ router.post('/forgot', async (req, res) => {
       response: sendInfo.response,
       messageId: sendInfo.messageId,
     });
+
     logElapsed(traceId, "POST completed", requestStartedAt);
-    res.status(201).json({ message: 'Email sent successfully' });
+
+    return res.status(201).json({ message: 'Email sent successfully' });
   } catch (error) {
     console.error(`[forgot-password:${traceId}] POST failed`, getErrorDetails(error));
     logElapsed(traceId, "POST failed elapsed", requestStartedAt);
-    res.status(500).json({ error: error.message, traceId });
+    return res.status(500).json({ error: error.message, traceId });
   }
 });
 
-// Validates the one-time passcode that was emailed by POST /forgot.
+/**
+ * -------------------------------------------------------------------------
+ * GET /forgot
+ * -------------------------------------------------------------------------
+ * Purpose:
+ * Step 2 of the Forgot Password process.
+ *
+ * Flow:
+ * 1. Receive email and passcode from request headers.
+ * 2. Validate email and passcode.
+ * 3. Search for the user in the database.
+ * 4. Compare submitted passcode with saved reset code.
+ * 5. Clear reset code if valid.
+ * -------------------------------------------------------------------------
+ */
 router.get("/forgot", async (req, res) => {
   const traceId = createTraceId();
   const requestStartedAt = Date.now();
+
   try {
+    // Log request details.
     logForgot(traceId, "GET started", {
       hasEmail: Boolean(req.headers.email),
       hasPasscode: Boolean(req.headers.passcode),
       contentType: req.headers["content-type"],
     });
 
+    // Get email and passcode from headers.
     const { email, passcode } = req.headers;
+
+    // Validate required values.
     if (!email || !passcode) {
       logForgot(traceId, "GET failed validation: missing email or passcode");
       return res.status(400).json({ error: 'Empty email or passcode' });
     }
 
+    // Look up user by email.
     const userLookupStartedAt = Date.now();
-    logForgot(traceId, "GET looking up user", { email: maskEmail(email) });
+
+    logForgot(traceId, "GET looking up user", {
+      email: maskEmail(email),
+    });
+
     const user = await User.findOne({ email });
+
     logElapsed(traceId, "GET user lookup finished", userLookupStartedAt);
 
+    // Stop if user does not exist.
     if (!user) {
       logForgot(traceId, "GET user not found", { email: maskEmail(email) });
       return res.status(404).json({ error: 'No user found with that email!' });
     }
+
+    // Log user reset-code status.
     logForgot(traceId, "GET user found", {
       userID: user.userID,
       hasResetCode: Boolean(user.resetCode),
@@ -409,35 +633,68 @@ router.get("/forgot", async (req, res) => {
       resetCodeLength: user.resetCode ? String(user.resetCode).length : 0,
     });
 
-    // compare passcode to the one in document...
+    // Compare submitted passcode with stored reset code.
     if (passcode == user.resetCode) {
+      // Clear reset code after successful validation.
       user.resetCode = null;
-      logForgot(traceId, "GET passcode valid, clearing reset code", { userID: user.userID });
+
+      logForgot(traceId, "GET passcode valid, clearing reset code", {
+        userID: user.userID,
+      });
+
       const saveStartedAt = Date.now();
+
       await user.save();
+
       logElapsed(traceId, "GET reset code clear save finished", saveStartedAt);
-      logForgot(traceId, "GET reset code cleared", { userID: user.userID });
+
+      logForgot(traceId, "GET reset code cleared", {
+        userID: user.userID,
+      });
+
       logElapsed(traceId, "GET completed", requestStartedAt);
+
       return res.status(200).json({ message: "Validated passcode!" });
     }
 
+    // Passcode did not match.
     logForgot(traceId, "GET invalid passcode", {
       userID: user.userID,
       hasResetCode: Boolean(user.resetCode),
     });
+
     logElapsed(traceId, "GET completed with invalid passcode", requestStartedAt);
-    res.status(401).json({ error: "Invalid passcode!" });
+
+    return res.status(401).json({ error: "Invalid passcode!" });
   } catch (error) {
     console.error(`[forgot-password:${traceId}] GET failed`, getErrorDetails(error));
     logElapsed(traceId, "GET failed elapsed", requestStartedAt);
-    res.status(500).json({ error: error.message, traceId });
+    return res.status(500).json({ error: error.message, traceId });
   }
-})
+});
 
+/**
+ * -------------------------------------------------------------------------
+ * PUT /forgot
+ * -------------------------------------------------------------------------
+ * Purpose:
+ * Step 3 of the Forgot Password process.
+ *
+ * Flow:
+ * 1. Receive email and new password.
+ * 2. Validate required values.
+ * 3. Search for the user in the database.
+ * 4. Make sure new password is different from old password.
+ * 5. Hash the new password.
+ * 6. Save updated password.
+ * -------------------------------------------------------------------------
+ */
 router.put("/forgot", async (req, res) => {
   const traceId = createTraceId();
   const requestStartedAt = Date.now();
+
   try {
+    // Log request details.
     logForgot(traceId, "PUT started", {
       hasBodyEmail: Boolean(req.body?.email),
       hasHeaderEmail: Boolean(req.headers.email),
@@ -446,61 +703,101 @@ router.put("/forgot", async (req, res) => {
       contentType: req.headers["content-type"],
     });
 
-    // Old frontend sent these in headers. Body support is kept for cleaner API calls.
+    // Old frontend sent these in headers.
+    // Body support is kept for cleaner API calls.
     const email = req.body.email || req.headers.email;
     const password = req.body.password || req.headers.password;
 
+    // Validate email and password.
     if (!email || !password) {
       logForgot(traceId, "PUT failed validation: missing email or password");
       return res.status(400).json({ error: 'Empty email or password' });
     }
 
+    // Look up user by email.
     const userLookupStartedAt = Date.now();
+
     logForgot(traceId, "PUT looking up user", {
       email: maskEmail(email),
       passwordLength: String(password).length,
     });
+
     const user = await User.findOne({ email });
+
     logElapsed(traceId, "PUT user lookup finished", userLookupStartedAt);
 
+    // Stop if user does not exist.
     if (!user) {
       logForgot(traceId, "PUT user not found", { email: maskEmail(email) });
       return res.status(404).json({ error: 'No user found with that email!' });
     }
+
+    // Log found user details.
     logForgot(traceId, "PUT user found", {
       userID: user.userID,
       hasResetCode: Boolean(user.resetCode),
     });
 
-    // compare password to the one in document...
+    // Check if new password is same as old password.
     const compareStartedAt = Date.now();
-    logForgot(traceId, "PUT checking if password changed", { userID: user.userID });
+
+    logForgot(traceId, "PUT checking if password changed", {
+      userID: user.userID,
+    });
+
     if (await comparePassword(password, user.password)) {
       logElapsed(traceId, "PUT password comparison finished", compareStartedAt);
-      logForgot(traceId, "PUT rejected same password", { userID: user.userID });
-      return res.status(400).json({ error: "Password must be different than previous password!" });
+
+      logForgot(traceId, "PUT rejected same password", {
+        userID: user.userID,
+      });
+
+      return res.status(400).json({
+        error: "Password must be different than previous password!",
+      });
     }
+
     logElapsed(traceId, "PUT password comparison finished", compareStartedAt);
 
-    // change password :D
+    // Hash new password before saving.
     const hashStartedAt = Date.now();
-    logForgot(traceId, "PUT hashing new password", { userID: user.userID });
+
+    logForgot(traceId, "PUT hashing new password", {
+      userID: user.userID,
+    });
+
     let passwordHash = await hashPassword(password);
+
     logElapsed(traceId, "PUT password hash finished", hashStartedAt);
+
+    // Save new password and clear reset code.
     user.password = passwordHash;
     user.resetCode = null;
-    logForgot(traceId, "PUT saving new password", { userID: user.userID });
+
+    logForgot(traceId, "PUT saving new password", {
+      userID: user.userID,
+    });
+
     const saveStartedAt = Date.now();
+
     await user.save();
+
     logElapsed(traceId, "PUT password save finished", saveStartedAt);
-    logForgot(traceId, "PUT password changed successfully", { userID: user.userID });
+
+    logForgot(traceId, "PUT password changed successfully", {
+      userID: user.userID,
+    });
+
     logElapsed(traceId, "PUT completed", requestStartedAt);
-    res.status(200).json({ message: "Successfully changed password!" });
+
+    return res.status(200).json({
+      message: "Successfully changed password!",
+    });
   } catch (error) {
     console.error(`[forgot-password:${traceId}] PUT failed`, getErrorDetails(error));
     logElapsed(traceId, "PUT failed elapsed", requestStartedAt);
-    res.status(500).json({ error: error.message, traceId });
+    return res.status(500).json({ error: error.message, traceId });
   }
-})
+});
 
 module.exports = router;
