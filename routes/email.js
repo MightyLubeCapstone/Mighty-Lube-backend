@@ -1,6 +1,6 @@
 require('dotenv').config();
 const express = require('express');
-const nodemailer = require('nodemailer');
+const { Resend } = require("resend");
 const { authenticate, comparePassword, hashPassword } = require("../routes/sessions");
 const mappings = require("../models/mappings");
 const User = require('../models/user');
@@ -74,66 +74,20 @@ function logElapsed(traceId, step, startedAt) {
 }
 
 /**
- * SMTP email configuration.
- *
- * These values are used by Nodemailer to connect to Gmail SMTP.
- * In production, EMAIL_USER and EMAIL_PASS should come from .env.
+ * Email API configuration.
+ * Sevalla blocks SMTP, so we use Resend's HTTP API.
  */
-const emailHost = process.env.EMAIL_HOST || "smtp.gmail.com";
-const emailPort = Number(process.env.EMAIL_PORT || 587);
-const emailSecure = process.env.EMAIL_SECURE
-  ? process.env.EMAIL_SECURE === "true"
-  : emailPort === 465;
+const resend = new Resend(process.env.RESEND_API_KEY);
+const emailFrom = process.env.EMAIL_FROM;
 
-const emailUser = process.env.EMAIL_USER;
-const emailPass = process.env.EMAIL_PASS;
-
-if (!emailUser || !emailPass) {
-  throw new Error("EMAIL_USER or EMAIL_PASS is missing in environment variables");
+if (!process.env.RESEND_API_KEY || !emailFrom) {
+  throw new Error("RESEND_API_KEY or EMAIL_FROM is missing in environment variables");
 }
-/**
- * Logs SMTP settings safely.
- * Password is masked and not printed directly.
- */
-console.log("[email-config] SMTP config loaded", {
-  host: emailHost,
-  port: emailPort,
-  secure: emailSecure,
-  user: maskEmail(emailUser),
-  pass: maskSecret(emailPass),
-  hasEmailUserEnv: Boolean(process.env.EMAIL_USER),
-  hasEmailPassEnv: Boolean(process.env.EMAIL_PASS),
+
+console.log("[email-config] Resend API config loaded", {
+  from: emailFrom,
+  hasResendApiKey: Boolean(process.env.RESEND_API_KEY),
   nodeEnv: process.env.NODE_ENV || "development",
-});
-
-/**
- * Creates the Nodemailer transporter.
- * This transporter is reused whenever the app sends emails.
- */
-const transporter = nodemailer.createTransport({
-  host: emailHost,
-  port: emailPort,
-  secure: emailSecure,
-
-  pool: true,
-  maxConnections: 1,
-  maxMessages: 20,
-
-  connectionTimeout: 30000,
-  greetingTimeout: 30000,
-  socketTimeout: 60000,
-
-  logger: process.env.EMAIL_DEBUG === "true",
-  debug: process.env.EMAIL_DEBUG === "true",
-
-  auth: {
-    user: emailUser,
-    pass: emailPass,
-  },
-
-  tls: {
-    servername: emailHost,
-  },
 });
 
 /**
@@ -144,29 +98,32 @@ async function sendMailWithRetry(mailOptions, traceId, maxAttempts = 3) {
 
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
-      logForgot(traceId, "SMTP send attempt started", {
+      logForgot(traceId, "Email API send attempt started", {
         attempt,
         maxAttempts,
         to: maskEmail(mailOptions.to),
-        from: maskEmail(mailOptions.from),
+        from: mailOptions.from,
         subject: mailOptions.subject,
       });
 
-      const info = await transporter.sendMail(mailOptions);
-
-      logForgot(traceId, "SMTP send attempt succeeded", {
-        attempt,
-        accepted: info.accepted,
-        rejected: info.rejected,
-        response: info.response,
-        messageId: info.messageId,
+      const result = await resend.emails.send({
+        from: mailOptions.from,
+        to: mailOptions.to,
+        subject: mailOptions.subject,
+        text: mailOptions.text,
+        reply_to: mailOptions.replyTo,
       });
 
-      return info;
+      logForgot(traceId, "Email API send attempt succeeded", {
+        attempt,
+        id: result?.data?.id,
+      });
+
+      return result;
     } catch (error) {
       lastError = error;
 
-      logForgot(traceId, "SMTP send attempt failed", {
+      logForgot(traceId, "Email API send attempt failed", {
         attempt,
         maxAttempts,
         error: getErrorDetails(error),
@@ -407,7 +364,7 @@ router.post('/send-email', authenticate, async (req, res) => {
 
     // Email options for sending the product configuration.
     const mailOptions = {
-      from: emailUser,
+      from: emailFrom,
       replyTo: email,
       to: "mightylubeemailtest@gmail.com",
       subject: configuration.configurationName,
@@ -514,30 +471,17 @@ router.post('/forgot', async (req, res) => {
 
     // Prepare reset email.
     const mailOptions = {
-      from: emailUser,
+      from: emailFrom,
       to: email,
       subject: "Mighty Lube Password Reset",
       text: `Your one-time passcode is ${user.resetCode}`,
     };
 
-    // Log SMTP configuration before sending.
-    logForgot(traceId, "POST SMTP config before verify/send", {
-      host: emailHost,
-      port: emailPort,
-      secure: emailSecure,
-      from: maskEmail(mailOptions.from),
+    logForgot(traceId, "POST email API config before send", {
+      from: mailOptions.from,
       to: maskEmail(email),
-      hasEmailUserEnv: Boolean(process.env.EMAIL_USER),
-      hasEmailPassEnv: Boolean(process.env.EMAIL_PASS),
-      emailPass: maskSecret(emailPass),
-      emailDebug: process.env.EMAIL_DEBUG === "true",
+      hasResendApiKey: Boolean(process.env.RESEND_API_KEY),
     });
-
-    // Verify SMTP connection before sending email.
-    const verifyStartedAt = Date.now();
-    logForgot(traceId, "POST verifying SMTP connection");
-    await transporter.verify();
-    logElapsed(traceId, "POST SMTP verify succeeded", verifyStartedAt);
 
     // Send reset email.
     const sendStartedAt = Date.now();
