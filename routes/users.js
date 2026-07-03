@@ -43,10 +43,10 @@ router.get("/userinfo", authenticate, async (req, res) => {
 
 router.post("/", async (req, res) => {
 	try {
-		const { username, password, firstName, lastName, emailAddress, phoneNumber, companyName, country } = req.body;
+		const { username, password, securityPin, firstName, lastName, emailAddress, phoneNumber, companyName, country } = req.body;
 
 		// Check if not null fields are empty
-		if (!username || !password || !firstName || !lastName || !emailAddress) {
+		if (!username || !password || !securityPin || !firstName || !lastName || !emailAddress) {
 			return res.status(400).send("Missing fields");
 		}
 		// Username/password verification
@@ -58,6 +58,9 @@ router.post("/", async (req, res) => {
 			const newUser = new User({
 				username: username,
 				password: await hashPassword(password),
+				// Stored as plain text for now per current requirement.
+				// TODO: Hash this later using hashPassword/securityPin comparison.
+				securityPin: securityPin,
 				firstName: firstName,
 				lastName: lastName,
 				email: emailAddress,

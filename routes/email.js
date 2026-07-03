@@ -406,10 +406,12 @@ router.post('/send-email', authenticate, async (req, res) => {
  * 1. Receive user's email.
  * 2. Validate the email.
  * 3. Search for the user in the database.
- * 4. Generate a 6-digit reset code.
- * 5. Save the reset code in MongoDB.
- * 6. Verify SMTP connection.
- * 7. Send the reset code to the user's email.
+ * 4. If user exists, frontend can ask for the saved security pin.
+ *
+ * Old unused flow kept in comments below:
+ * - Generate a 6-digit reset code.
+ * - Save the reset code in MongoDB.
+ * - Send the reset code to the user's email.
  * -------------------------------------------------------------------------
  */
 router.post('/forgot', async (req, res) => {
@@ -453,69 +455,32 @@ router.post('/forgot', async (req, res) => {
       userID: user.userID,
       mongooseId: String(user._id),
       hasExistingResetCode: Boolean(user.resetCode),
+      hasSecurityPin: Boolean(user.securityPin),
     });
 
-    // Generate a random 6-digit one-time reset code.
-    const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
-
-    // Store reset code on user document.
-    user.resetCode = resetCode;
-
-    // Save reset code to database.
-    const saveStartedAt = Date.now();
-
-    logForgot(traceId, "POST saving reset code", {
-      userID: user.userID,
-      resetCodeLength: resetCode.length,
-      modifiedPaths: user.modifiedPaths(),
-    });
-
-    await user.save();
-
-    logElapsed(traceId, "POST reset code save finished", saveStartedAt);
-
-    logForgot(traceId, "POST reset code saved", {
-      userID: user.userID,
-      hasResetCodeAfterSave: Boolean(user.resetCode),
-    });
-
-    // Prepare reset email.
-    const mailOptions = {
-      from: emailFrom,
-      to: email,
-      subject: "Mighty Lube Password Reset",
-      text: `Your one-time passcode is ${user.resetCode}`,
-    };
-
-    logForgot(traceId, "POST email API config before send", {
-      from: mailOptions.from,
-      to: maskEmail(email),
-      hasResendApiKey: Boolean(process.env.RESEND_API_KEY),
-    });
-
-    // Send reset email.
-    const sendStartedAt = Date.now();
-
-    logForgot(traceId, "POST sending reset email", {
-      to: maskEmail(email),
-      from: maskEmail(mailOptions.from),
-      subject: mailOptions.subject,
-      textLength: mailOptions.text.length,
-    });
-    
-    const sendInfo = await sendMailWithRetry(mailOptions, traceId);
-
-    logElapsed(traceId, "POST sendMail finished", sendStartedAt);
-
-    // Log email result.
-    logForgot(traceId, "POST reset email sent", {
-      to: maskEmail(email),
-      resendId: sendInfo?.data?.id,
-    });
+    /*
+     * OLD UNUSED EMAIL-CODE FLOW:
+     *
+     * const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
+     * user.resetCode = resetCode;
+     * await user.save();
+     *
+     * const mailOptions = {
+     *   from: emailFrom,
+     *   to: email,
+     *   subject: "Mighty Lube Password Reset",
+     *   text: `Your one-time passcode is ${user.resetCode}`,
+     * };
+     *
+     * await sendMailWithRetry(mailOptions, traceId);
+     */
 
     logElapsed(traceId, "POST completed", requestStartedAt);
 
-    return res.status(201).json({ message: 'Email sent successfully' });
+    return res.status(200).json({
+      message: 'User found. Please verify security pin.',
+      canVerifyPin: true,
+    });
   } catch (error) {
     console.error(`[forgot-password:${traceId}] POST failed`, getErrorDetails(error));
     logElapsed(traceId, "POST failed elapsed", requestStartedAt);
@@ -523,21 +488,12 @@ router.post('/forgot', async (req, res) => {
   }
 });
 
-/**
- * -------------------------------------------------------------------------
- * GET /forgot
- * -------------------------------------------------------------------------
- * Purpose:
- * Step 2 of the Forgot Password process.
+/*
+ * OLD UNUSED PASSCODE VALIDATION ROUTE:
  *
- * Flow:
- * 1. Receive email and passcode from request headers.
- * 2. Validate email and passcode.
- * 3. Search for the user in the database.
- * 4. Compare submitted passcode with saved reset code.
- * 5. Clear reset code if valid.
- * -------------------------------------------------------------------------
- */
+ * This route was used when forgot password emailed a one-time passcode.
+ * The new flow uses the user's saved securityPin instead.
+ *
 router.get("/forgot", async (req, res) => {
   const traceId = createTraceId();
   const requestStartedAt = Date.now();
@@ -623,6 +579,71 @@ router.get("/forgot", async (req, res) => {
     return res.status(500).json({ error: error.message, traceId });
   }
 });
+*/
+
+/**
+ * -------------------------------------------------------------------------
+ * POST /forgot/verify-pin
+ * -------------------------------------------------------------------------
+ * Purpose:
+ * Step 2 of the Forgot Password process.
+ *
+ * Flow:
+ * 1. Receive email and securityPin.
+ * 2. Validate both values.
+ * 3. Search for the user in the database.
+ * 4. Compare submitted pin with saved securityPin.
+ * -------------------------------------------------------------------------
+ */
+router.post("/forgot/verify-pin", async (req, res) => {
+  const traceId = createTraceId();
+  const requestStartedAt = Date.now();
+
+  try {
+    const email = req.body.email || req.headers.email;
+    const securityPin = req.body.securityPin || req.headers.securitypin;
+
+    logForgot(traceId, "PIN verify started", {
+      hasEmail: Boolean(email),
+      hasSecurityPin: Boolean(securityPin),
+      contentType: req.headers["content-type"],
+    });
+
+    if (!email || !securityPin) {
+      logForgot(traceId, "PIN verify failed validation: missing email or security pin");
+      return res.status(400).json({ error: 'Empty email or security pin' });
+    }
+
+    const userLookupStartedAt = Date.now();
+    logForgot(traceId, "PIN verify looking up user", { email: maskEmail(email) });
+    const user = await User.findOne({ email });
+    logElapsed(traceId, "PIN verify user lookup finished", userLookupStartedAt);
+
+    if (!user) {
+      logForgot(traceId, "PIN verify user not found", { email: maskEmail(email) });
+      return res.status(404).json({ error: 'No user found with that email!' });
+    }
+
+    logForgot(traceId, "PIN verify user found", {
+      userID: user.userID,
+      hasSecurityPin: Boolean(user.securityPin),
+      submittedPinLength: String(securityPin).length,
+      savedPinLength: user.securityPin ? String(user.securityPin).length : 0,
+    });
+
+    if (securityPin !== user.securityPin) {
+      logForgot(traceId, "PIN verify invalid security pin", { userID: user.userID });
+      return res.status(401).json({ error: "Invalid security pin!" });
+    }
+
+    logElapsed(traceId, "PIN verify completed", requestStartedAt);
+    return res.status(200).json({ message: "Security pin verified!" });
+  } catch (error) {
+    console.error(`[forgot-password:${traceId}] PIN verify failed`, getErrorDetails(error));
+    logElapsed(traceId, "PIN verify failed elapsed", requestStartedAt);
+    return res.status(500).json({ error: error.message, traceId });
+  }
+});
 
 /**
  * -------------------------------------------------------------------------
@@ -632,12 +653,13 @@ router.get("/forgot", async (req, res) => {
  * Step 3 of the Forgot Password process.
  *
  * Flow:
- * 1. Receive email and new password.
+ * 1. Receive email, security pin, and new password.
  * 2. Validate required values.
  * 3. Search for the user in the database.
- * 4. Make sure new password is different from old password.
- * 5. Hash the new password.
- * 6. Save updated password.
+ * 4. Compare submitted security pin with saved securityPin.
+ * 5. Make sure new password is different from old password.
+ * 6. Hash the new password.
+ * 7. Save updated password.
  * -------------------------------------------------------------------------
  */
 router.put("/forgot", async (req, res) => {
@@ -649,6 +671,8 @@ router.put("/forgot", async (req, res) => {
     logForgot(traceId, "PUT started", {
       hasBodyEmail: Boolean(req.body?.email),
       hasHeaderEmail: Boolean(req.headers.email),
+      hasBodySecurityPin: Boolean(req.body?.securityPin),
+      hasHeaderSecurityPin: Boolean(req.headers.securitypin),
       hasBodyPassword: Boolean(req.body?.password),
       hasHeaderPassword: Boolean(req.headers.password),
       contentType: req.headers["content-type"],
@@ -657,12 +681,13 @@ router.put("/forgot", async (req, res) => {
     // Old frontend sent these in headers.
     // Body support is kept for cleaner API calls.
     const email = req.body.email || req.headers.email;
+    const securityPin = req.body.securityPin || req.headers.securitypin;
     const password = req.body.password || req.headers.password;
 
-    // Validate email and password.
-    if (!email || !password) {
-      logForgot(traceId, "PUT failed validation: missing email or password");
-      return res.status(400).json({ error: 'Empty email or password' });
+    // Validate email, security pin, and password.
+    if (!email || !securityPin || !password) {
+      logForgot(traceId, "PUT failed validation: missing email, security pin, or password");
+      return res.status(400).json({ error: 'Empty email, security pin, or password' });
     }
 
     // Look up user by email.
@@ -670,6 +695,7 @@ router.put("/forgot", async (req, res) => {
 
     logForgot(traceId, "PUT looking up user", {
       email: maskEmail(email),
+      securityPinLength: String(securityPin).length,
       passwordLength: String(password).length,
     });
 
@@ -687,7 +713,18 @@ router.put("/forgot", async (req, res) => {
     logForgot(traceId, "PUT user found", {
       userID: user.userID,
       hasResetCode: Boolean(user.resetCode),
+      hasSecurityPin: Boolean(user.securityPin),
     });
+
+    // Check security pin before allowing password reset.
+    // Stored as plain text for now per current requirement.
+    // TODO: Replace this with comparePassword(securityPin, user.securityPin) after hashing pins.
+    if (securityPin !== user.securityPin) {
+      logForgot(traceId, "PUT rejected invalid security pin", { userID: user.userID });
+      return res.status(401).json({ error: "Invalid security pin!" });
+    }
+
+    logForgot(traceId, "PUT security pin verified", { userID: user.userID });
 
     // Check if new password is same as old password.
     const compareStartedAt = Date.now();

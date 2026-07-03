@@ -19,6 +19,10 @@ const UserSchema = new mongoose.Schema({
         type: String,
         default: null,
     },
+    securityPin: {
+        type: String,
+        default: null,
+    },
     firstName: {
         type: String,
         required: true,
