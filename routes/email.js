@@ -103,20 +103,33 @@ async function sendMailWithRetry(mailOptions, traceId, maxAttempts = 3) {
         subject: mailOptions.subject,
       });
 
-      const result = await resend.emails.send({
-        from: mailOptions.from,
-        to: mailOptions.to,
-        subject: mailOptions.subject,
-        text: mailOptions.text,
-        reply_to: mailOptions.replyTo,
+     const result = await resend.emails.send({
+      from: mailOptions.from,
+      to: mailOptions.to,
+      subject: mailOptions.subject,
+      text: mailOptions.text,
+      reply_to: mailOptions.replyTo,
+    });
+
+      logForgot(traceId, "Resend raw result", {
+        data: result?.data,
+        error: result?.error,
       });
 
-      logForgot(traceId, "Email API send attempt succeeded", {
-        attempt,
-        id: result?.data?.id,
-      });
+      if (result?.error) {
+        throw new Error(JSON.stringify(result.error));
+}
 
-      return result;
+if (!result?.data?.id) {
+  throw new Error("Resend did not return an email ID");
+}
+
+logForgot(traceId, "Email API send attempt succeeded", {
+  attempt,
+  id: result.data.id,
+});
+
+return result;
     } catch (error) {
       lastError = error;
 
