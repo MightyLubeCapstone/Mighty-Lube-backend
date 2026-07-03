@@ -79,6 +79,7 @@ function logElapsed(traceId, step, startedAt) {
  */
 const resend = new Resend(process.env.RESEND_API_KEY);
 const emailFrom = process.env.EMAIL_FROM;
+const SECURITY_PIN_VERIFIED_MARKER = "SECURITY_PIN_VERIFIED";
 
 if (!process.env.RESEND_API_KEY || !emailFrom) {
   throw new Error("RESEND_API_KEY or EMAIL_FROM is missing in environment variables");
@@ -582,6 +583,68 @@ router.get("/forgot", async (req, res) => {
 */
 
 /**
+ * Backward-compatible PIN verification route.
+ *
+ * Some frontend code still calls:
+ * GET /api/email/forgot?email=...&securityPin=...
+ *
+ * The preferred new route is:
+ * POST /api/email/forgot/verify-pin
+ */
+router.get("/forgot", async (req, res) => {
+  const traceId = createTraceId();
+  const requestStartedAt = Date.now();
+
+  try {
+    const email = req.query.email || req.headers.email;
+    const securityPin = req.query.securityPin || req.query.securitypin || req.headers.securitypin;
+
+    logForgot(traceId, "GET PIN verify started", {
+      hasEmail: Boolean(email),
+      hasSecurityPin: Boolean(securityPin),
+      queryKeys: Object.keys(req.query || {}),
+    });
+
+    if (!email || !securityPin) {
+      logForgot(traceId, "GET PIN verify failed validation: missing email or security pin");
+      return res.status(400).json({ error: 'Empty email or security pin' });
+    }
+
+    const userLookupStartedAt = Date.now();
+    logForgot(traceId, "GET PIN verify looking up user", { email: maskEmail(email) });
+    const user = await User.findOne({ email });
+    logElapsed(traceId, "GET PIN verify user lookup finished", userLookupStartedAt);
+
+    if (!user) {
+      logForgot(traceId, "GET PIN verify user not found", { email: maskEmail(email) });
+      return res.status(404).json({ error: 'No user found with that email!' });
+    }
+
+    logForgot(traceId, "GET PIN verify user found", {
+      userID: user.userID,
+      hasSecurityPin: Boolean(user.securityPin),
+      submittedPinLength: String(securityPin).length,
+      savedPinLength: user.securityPin ? String(user.securityPin).length : 0,
+    });
+
+    if (securityPin !== user.securityPin) {
+      logForgot(traceId, "GET PIN verify invalid security pin", { userID: user.userID });
+      return res.status(401).json({ error: "Invalid security pin!" });
+    }
+
+    user.resetCode = SECURITY_PIN_VERIFIED_MARKER;
+    await user.save();
+
+    logElapsed(traceId, "GET PIN verify completed", requestStartedAt);
+    return res.status(200).json({ message: "Security pin verified!" });
+  } catch (error) {
+    console.error(`[forgot-password:${traceId}] GET PIN verify failed`, getErrorDetails(error));
+    logElapsed(traceId, "GET PIN verify failed elapsed", requestStartedAt);
+    return res.status(500).json({ error: error.message, traceId });
+  }
+});
+
+/**
  * -------------------------------------------------------------------------
  * POST /forgot/verify-pin
  * -------------------------------------------------------------------------
@@ -636,6 +699,9 @@ router.post("/forgot/verify-pin", async (req, res) => {
       return res.status(401).json({ error: "Invalid security pin!" });
     }
 
+    user.resetCode = SECURITY_PIN_VERIFIED_MARKER;
+    await user.save();
+
     logElapsed(traceId, "PIN verify completed", requestStartedAt);
     return res.status(200).json({ message: "Security pin verified!" });
   } catch (error) {
@@ -653,10 +719,10 @@ router.post("/forgot/verify-pin", async (req, res) => {
  * Step 3 of the Forgot Password process.
  *
  * Flow:
- * 1. Receive email, security pin, and new password.
+ * 1. Receive email and new password.
  * 2. Validate required values.
  * 3. Search for the user in the database.
- * 4. Compare submitted security pin with saved securityPin.
+ * 4. Confirm the security pin was already verified.
  * 5. Make sure new password is different from old password.
  * 6. Hash the new password.
  * 7. Save updated password.
@@ -671,23 +737,34 @@ router.put("/forgot", async (req, res) => {
     logForgot(traceId, "PUT started", {
       hasBodyEmail: Boolean(req.body?.email),
       hasHeaderEmail: Boolean(req.headers.email),
+      hasQueryEmail: Boolean(req.query?.email),
       hasBodySecurityPin: Boolean(req.body?.securityPin),
       hasHeaderSecurityPin: Boolean(req.headers.securitypin),
       hasBodyPassword: Boolean(req.body?.password),
       hasHeaderPassword: Boolean(req.headers.password),
+      hasQueryPassword: Boolean(req.query?.password),
       contentType: req.headers["content-type"],
     });
 
-    // Old frontend sent these in headers.
-    // Body support is kept for cleaner API calls.
-    const email = req.body.email || req.headers.email;
-    const securityPin = req.body.securityPin || req.headers.securitypin;
-    const password = req.body.password || req.headers.password;
+    // The final screen only asks the user for password, but the frontend must
+    // still send email as hidden state so the backend knows which account to update.
+    const email = req.body.email || req.headers.email || req.query.email;
+    const password = req.body.password || req.headers.password || req.query.password;
 
-    // Validate email, security pin, and password.
-    if (!email || !securityPin || !password) {
-      logForgot(traceId, "PUT failed validation: missing email, security pin, or password");
-      return res.status(400).json({ error: 'Empty email, security pin, or password' });
+    if (!email) {
+      logForgot(traceId, "PUT failed validation: missing email");
+      return res.status(400).json({
+        error: "Email is required to update password.",
+        code: "MISSING_EMAIL",
+      });
+    }
+
+    if (!password) {
+      logForgot(traceId, "PUT failed validation: missing password");
+      return res.status(400).json({
+        error: "New password is required.",
+        code: "MISSING_PASSWORD",
+      });
     }
 
     // Look up user by email.
@@ -695,7 +772,6 @@ router.put("/forgot", async (req, res) => {
 
     logForgot(traceId, "PUT looking up user", {
       email: maskEmail(email),
-      securityPinLength: String(securityPin).length,
       passwordLength: String(password).length,
     });
 
@@ -716,15 +792,15 @@ router.put("/forgot", async (req, res) => {
       hasSecurityPin: Boolean(user.securityPin),
     });
 
-    // Check security pin before allowing password reset.
-    // Stored as plain text for now per current requirement.
-    // TODO: Replace this with comparePassword(securityPin, user.securityPin) after hashing pins.
-    if (securityPin !== user.securityPin) {
-      logForgot(traceId, "PUT rejected invalid security pin", { userID: user.userID });
-      return res.status(401).json({ error: "Invalid security pin!" });
+    if (user.resetCode !== SECURITY_PIN_VERIFIED_MARKER) {
+      logForgot(traceId, "PUT rejected because security pin was not verified", { userID: user.userID });
+      return res.status(403).json({
+        error: "Security pin must be verified before changing password.",
+        code: "SECURITY_PIN_NOT_VERIFIED",
+      });
     }
 
-    logForgot(traceId, "PUT security pin verified", { userID: user.userID });
+    logForgot(traceId, "PUT security pin verification marker found", { userID: user.userID });
 
     // Check if new password is same as old password.
     const compareStartedAt = Date.now();
