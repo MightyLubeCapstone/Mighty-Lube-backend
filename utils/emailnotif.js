@@ -1,4 +1,4 @@
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 const User = require('../models/user');
 
 // Utility function to calculate duration between two dates
@@ -37,16 +37,24 @@ function formatTimestamp(date) {
   });
 }
 
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: "mightylube.test@gmail.com",
-    pass: "xrav hwrm zhok fdlv",
-  },
-  tls: {
-    rejectUnauthorized: false,
+const resend = new Resend(process.env.RESEND_API_KEY);
+const emailFrom = process.env.EMAIL_FROM;
+const emailTo = process.env.ORDER_EMAIL_TO || emailFrom;
+
+async function sendEmail(mailOptions) {
+  if (!process.env.RESEND_API_KEY || !emailFrom) {
+    throw new Error('RESEND_API_KEY or EMAIL_FROM is missing in environment variables');
   }
-});
+
+  return resend.emails.send({
+    from: mailOptions.from || emailFrom,
+    to: mailOptions.to,
+    cc: mailOptions.cc,
+    subject: mailOptions.subject,
+    text: mailOptions.text,
+    attachments: mailOptions.attachments,
+  });
+}
 
 // PDF Document Generation
 let PDFDocument;
@@ -197,8 +205,8 @@ async function sendOrderNotification(user, orderData, actionType = 'added', conf
       `;
 
       const mailOptions = {
-        from: "mightylube.test@gmail.com",
-        to: "mightylube.test@gmail.com",
+        from: emailFrom,
+        to: emailTo,
         //cc: user.email,
         subject: emailSubject,
         text: emailContent,
@@ -214,7 +222,7 @@ async function sendOrderNotification(user, orderData, actionType = 'added', conf
         }
       }
 
-      await transporter.sendMail(mailOptions);
+      await sendEmail(mailOptions);
       console.log(`Configuration order email sent for: ${finalConfigName}`);
 
     } else {
@@ -260,8 +268,8 @@ async function sendOrderNotification(user, orderData, actionType = 'added', conf
     `;
 
       const mailOptions = {
-        from: "mightylube.test@gmail.com",
-        to: "mightylube.test@gmail.com",
+        from: emailFrom,
+        to: emailTo,
         cc: user.email,
         subject: emailSubject,
         text: emailContent,
@@ -277,7 +285,7 @@ async function sendOrderNotification(user, orderData, actionType = 'added', conf
         }
       }
 
-      await transporter.sendMail(mailOptions);
+      await sendEmail(mailOptions);
       console.log(`Email notification sent for order ${actionType}`);
     }
   } 

@@ -75,7 +75,7 @@ function logElapsed(traceId, step, startedAt) {
 
 /**
  * Email API configuration.
- * Sevalla blocks SMTP, so we use Resend's HTTP API.
+ * Resend sends email through HTTPS, which avoids SMTP connection issues.
  */
 const resend = new Resend(process.env.RESEND_API_KEY);
 const emailFrom = process.env.EMAIL_FROM;
@@ -90,9 +90,6 @@ console.log("[email-config] Resend API config loaded", {
   nodeEnv: process.env.NODE_ENV || "development",
 });
 
-/**
- * Verifies SMTP connection when the server starts.
- */
 async function sendMailWithRetry(mailOptions, traceId, maxAttempts = 3) {
   let lastError;
 
@@ -500,10 +497,7 @@ router.post('/forgot', async (req, res) => {
     // Log email result.
     logForgot(traceId, "POST reset email sent", {
       to: maskEmail(email),
-      accepted: sendInfo.accepted,
-      rejected: sendInfo.rejected,
-      response: sendInfo.response,
-      messageId: sendInfo.messageId,
+      resendId: sendInfo?.data?.id,
     });
 
     logElapsed(traceId, "POST completed", requestStartedAt);
