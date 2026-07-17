@@ -28,12 +28,14 @@ router.get("/userinfo", authenticate, async (req, res) => {
 			return res.status(404).json({ message: "User not found!" });
 		}
 		return res.status(200).json({
+			userID: user.userID,
 			firstName: user.firstName,
 			lastName: user.lastName,
 			username: user.username,
 			companyName: user.companyName,
 			phoneNumber: user.phoneNumber,
-			emailAddress: user.email
+			emailAddress: user.email,
+			role: user.role
 		});
 	} catch (error) {
 		console.error("Error getting users first name, last name:", error);
@@ -43,11 +45,40 @@ router.get("/userinfo", authenticate, async (req, res) => {
 
 router.post("/", async (req, res) => {
 	try {
-		const { username, password, securityPin, firstName, lastName, emailAddress, phoneNumber, companyName, country } = req.body;
+		const {
+			username,
+			password,
+			securityPin,
+			firstName,
+			lastName,
+			emailAddress,
+			email,
+			phoneNumber,
+			companyName,
+			country
+		} = req.body;
+		const userEmail = emailAddress || email;
 
-		// Check if not null fields are empty
-		if (!username || !password || !securityPin || !firstName || !lastName || !emailAddress) {
-			return res.status(400).send("Missing fields");
+		const requiredFields = {
+			username,
+			password,
+			securityPin,
+			firstName,
+			lastName,
+			email: userEmail,
+			phoneNumber,
+			companyName,
+			country
+		};
+		const missingFields = Object.entries(requiredFields)
+			.filter(([, value]) => value === undefined || value === null || String(value).trim() === "")
+			.map(([field]) => field);
+
+		if (missingFields.length > 0) {
+			return res.status(400).json({
+				error: "Missing fields",
+				missingFields
+			});
 		}
 		// Username/password verification
 		else if (username.length < 6 || username.length > 24 ||
@@ -60,10 +91,10 @@ router.post("/", async (req, res) => {
 				password: await hashPassword(password),
 				// Stored as plain text for now per current requirement.
 				// TODO: Hash this later using hashPassword/securityPin comparison.
-				securityPin: securityPin,
-				firstName: firstName,
-				lastName: lastName,
-				email: emailAddress,
+					securityPin: securityPin,
+					firstName: firstName,
+					lastName: lastName,
+					email: userEmail,
 				phoneNumber: phoneNumber,
 				companyName: companyName,
 				country: country

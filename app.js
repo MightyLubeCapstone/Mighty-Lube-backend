@@ -16,7 +16,7 @@ app.use(cors());
 const user_orders = require("./routes/user_orders");
 const orders = require("./routes/orders");
 const rfq = require("./routes/rfq");
-const adminSessions = require("./routes/adminSessions");
+const adminRoute = require("./routes/admin");
 
 // page routes
 const { sessionsRoute } = require("./routes/sessions");
@@ -93,7 +93,7 @@ const ftOpcoRoute = require("./routes/FT_OPCO");
 app.use("/api/user_orders", user_orders);
 app.use("/api/orders", orders);
 app.use("/api/rfq", rfq);
-app.use("/api/adminSessions", adminSessions);
+app.use("/api/admin", adminRoute);
 
 // Route usage
 app.use("/api/cart", cartRoute);
@@ -226,10 +226,27 @@ process.on("unhandledRejection", (reason) => {
 // run app without .env vars
 async function startServer() {
 	try {
+		const serverMode = (
+			process.env.SERVER_MODE ||
+			(process.env.NODE_ENV === "production" ? "production" : "local")
+		).toLowerCase();
+		const isProduction = serverMode === "production";
+		const host = isProduction
+			? process.env.SERVER_HOST_PRODUCTION || "0.0.0.0"
+			: process.env.SERVER_HOST_LOCAL || "127.0.0.1";
+		const configuredPort = isProduction
+			? process.env.SERVER_PORT_PRODUCTION
+			: process.env.SERVER_PORT_LOCAL;
+		// Hosting platforms commonly provide PORT dynamically.
+		const port = Number(process.env.PORT || configuredPort || 8080);
+		const apiBaseUrl = isProduction
+			? process.env.API_BASE_URL_PRODUCTION
+			: process.env.API_BASE_URL_LOCAL || `http://localhost:${port}/api`;
+
 		console.log("======================================");
 		console.log("🚀 Starting Backend Server...");
 		console.log("📅 Started At :", new Date().toLocaleString());
-		console.log("🌍 Environment:", process.env.NODE_ENV || "development");
+		console.log("🌍 Server Mode:", serverMode);
 		console.log("🟢 Node Version:", process.version);
 		console.log("🔄 Connecting to database...");
 		console.log("======================================");
@@ -238,12 +255,11 @@ async function startServer() {
 
 		console.log("✅ Database Connected Successfully");
 
-		app.listen(8080, "0.0.0.0", () => {
+		app.listen(port, host, () => {
 			console.log("======================================");
 			console.log("✅ Server is Running");
-			console.log("🌐 Host     : http://0.0.0.0:8080");
-			console.log("📡 Local    : http://localhost:8080");
-			console.log("📁 API Base : http://localhost:8080/api");
+			console.log(`🌐 Host     : http://${host}:${port}`);
+			console.log(`📁 API Base : ${apiBaseUrl}`);
 			console.log(`🕒 Started  : ${new Date().toLocaleString()}`);
 			console.log("======================================");
 		});

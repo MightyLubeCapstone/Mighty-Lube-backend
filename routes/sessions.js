@@ -19,13 +19,19 @@ async function comparePassword(password, hash) {
 async function authenticate(req, res, next) {
 	const { authorization } = req.headers;
 	if (!authorization || !authorization.startsWith("Bearer ")) {
-		return res.status(401).json({ error: "Unauthorized: Missing token" });
+		return res.status(401).json({
+			error: "Unauthorized: Missing token",
+			message: "Session is missing, invalid, or expired"
+		});
 	}
 	req.sessionID = authorization.slice(7); // Extract token
 	try {
 		const user = await User.findOne({ "sessions.sessionID": req.sessionID });
 		if (!user) {
-			return res.status(401).json({ error: "Invalid session!" });
+			return res.status(401).json({
+				error: "Invalid session!",
+				message: "Session is missing, invalid, or expired"
+			});
 		}
 		// Check session expiration
 		const session = user.sessions.find(s => s.sessionID === req.sessionID);
@@ -37,7 +43,10 @@ async function authenticate(req, res, next) {
 				{ $pull: { sessions: { sessionID } } }, // Remove the session object that matches sessionID
 				{ new: true } // Return updated document
 			);
-			return res.status(401).json({ error: "Session expired!" });
+			return res.status(401).json({
+				error: "Session expired!",
+				message: "Session is missing, invalid, or expired"
+			});
 		}
 		req.user = user; // Store user in request for further use
 		next();
@@ -47,10 +56,28 @@ async function authenticate(req, res, next) {
 	}
 }
 
+function requireAdmin(req, res, next) {
+	if (!req.user || req.user.role !== "admin") {
+		return res.status(403).json({
+			error: "Admin access required",
+			message: "Administrator access is required"
+		});
+	}
+
+	next();
+}
+
 
 sessionsRoute.get("/", authenticate, async (req, res) => {
 	try {
-		res.status(200).json({ message: "Valid Session" });
+		res.status(200).json({
+			message: "Valid Session",
+			user: {
+				userID: req.user.userID,
+				username: req.user.username,
+				role: req.user.role
+			}
+		});
 	}
 	catch (e) {
 		res.status(500).json({ error: "Internal server error : ", e });
@@ -76,6 +103,7 @@ sessionsRoute.post("/", async (req, res) => {
 		return res.status(201).json({
 			status: "success",
 			sessionID: sessionID,
+			role: user.role,
 		});
 	}
 	catch (error) {
@@ -109,4 +137,4 @@ sessionsRoute.delete("/", authenticate, async (req, res) => {
 	}
 });
 
-module.exports = { authenticate, hashPassword, comparePassword, sessionsRoute };
+module.exports = { authenticate, requireAdmin, hashPassword, comparePassword, sessionsRoute };

@@ -12,7 +12,7 @@
 
 const express = require("express");
 const { dbConnect } = require("../config/config");
-const { authenticate } = require("./sessions");
+const { authenticate, requireAdmin } = require("./sessions");
 const User = require("../models/user");
 
 
@@ -26,19 +26,22 @@ router.get('/', (req, res) => {
 
 // GET /api/user_orders/admin/userRaw
 // NOTE: Lock this down with authenticate + admin check before prod.
-router.get('/admin/userRaw', authenticate, async (req, res) => {
+router.get('/admin/userRaw', authenticate, requireAdmin, async (req, res) => {
   try {
     await dbConnect();
 
     const shape = (req.query.shape || 'raw').toLowerCase(); // 'raw' | 'flatten'
-    const includeSensitive = String(req.query.includeSensitive || 'false').toLowerCase() === 'true';
     const limit = Math.min(parseInt(req.query.limit || '500', 10) || 500, 5000);
     const skip = parseInt(req.query.skip || '0', 10) || 0;
 
-    // Build base projection (exclude sensitive by default)
-    const baseProjection = includeSensitive
-      ? {} // include everything
-      : { password: 0, sessions: 0, __v: 0 };
+    // Authentication secrets must never be returned by an API.
+    const baseProjection = {
+      password: 0,
+      securityPin: 0,
+      resetCode: 0,
+      sessions: 0,
+      __v: 0
+    };
 
     // Detect wrapper vs normal layout
     const sample = await User.findOne({}, { users: 1 }).lean();
@@ -52,7 +55,6 @@ router.get('/admin/userRaw', authenticate, async (req, res) => {
         count: docs.length,
         skip,
         limit,
-        includeSensitive,
         data: docs,
       });
     }
@@ -62,10 +64,15 @@ router.get('/admin/userRaw', authenticate, async (req, res) => {
       // Wrapper layout: unwind users[]
       const docs = await User.aggregate([
         { $unwind: '$users' },
-        // Optionally strip sensitive fields
-        ...(includeSensitive
-          ? []
-          : [{ $project: { 'users.password': 0, 'users.sessions': 0, 'users.__v': 0 } }]),
+        {
+          $project: {
+            'users.password': 0,
+            'users.securityPin': 0,
+            'users.resetCode': 0,
+            'users.sessions': 0,
+            'users.__v': 0
+          }
+        },
         // Page AFTER unwind to keep page sizes meaningful
         { $skip: skip },
         { $limit: limit },
@@ -78,7 +85,6 @@ router.get('/admin/userRaw', authenticate, async (req, res) => {
         count: docs.length,
         skip,
         limit,
-        includeSensitive,
         data: docs,
       });
     } else {
@@ -89,7 +95,6 @@ router.get('/admin/userRaw', authenticate, async (req, res) => {
         count: docs.length,
         skip,
         limit,
-        includeSensitive,
         data: docs,
       });
     }
@@ -100,7 +105,7 @@ router.get('/admin/userRaw', authenticate, async (req, res) => {
 });
 
 // /api/user_orders/allCarts
-router.get('/allCarts', authenticate, async (_req, res) => {
+router.get('/allCarts', authenticate, requireAdmin, async (_req, res) => {
   try {
     await dbConnect();
 

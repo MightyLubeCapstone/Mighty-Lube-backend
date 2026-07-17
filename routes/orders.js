@@ -4,7 +4,7 @@
 
 const express = require("express");
 const { dbConnect } = require("../config/config");
-const { authenticate } = require("./sessions");
+const { authenticate, requireAdmin } = require("./sessions");
 const User = require("../models/user");
 const { sendOrderNotification } = require("../utils/emailnotif");
 
@@ -137,7 +137,7 @@ router.put('/editing', authenticate, async (req, res) => {
 });
 
 // PUT /api/orders/status - Update the status of an order in a user's configuration
-router.put('/status', authenticate, async (req, res) => {
+router.put('/status', authenticate, requireAdmin, async (req, res) => {
     try {
         await dbConnect();
 
