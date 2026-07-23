@@ -13,38 +13,252 @@ function normalizeConfigurationStatus(status) {
 	return "requested";
 }
 
+function configurationActor(user) {
+	return {
+		userID: user.userID,
+		username: user.username,
+		firstName: user.firstName,
+		lastName: user.lastName,
+		role: user.role || "user"
+	};
+}
+
+function startOfDay(date) {
+	const result = new Date(date);
+	result.setHours(0, 0, 0, 0);
+	return result;
+}
+
+function endOfDay(date) {
+	const result = new Date(date);
+	result.setHours(23, 59, 59, 999);
+	return result;
+}
+
+function parseDateInput(value, useEndOfDay = false) {
+	if (!value) return null;
+	const dateOnly = /^\d{4}-\d{2}-\d{2}$/.test(value);
+	const parsed = new Date(dateOnly ? `${value}T00:00:00` : value);
+	if (Number.isNaN(parsed.getTime())) {
+		const error = new Error(`Invalid date: ${value}`);
+		error.status = 400;
+		throw error;
+	}
+	return dateOnly && useEndOfDay ? endOfDay(parsed) : parsed;
+}
+
+function getListQuery(query) {
+	const sortBy = query.sortBy || "createdAt";
+	const sortOrder = String(query.sortOrder || "asc").toLowerCase();
+	const dateField = query.dateField || "createdAt";
+	const requestedDateFilter = String(
+		query.dateFilter || (query.startDate || query.endDate ? "custom" : "all")
+	).toLowerCase();
+	const dateFilterAliases = {
+		all: "all",
+		today: "today",
+		lastday: "lastDay",
+		yesterday: "lastDay",
+		thisweek: "thisWeek",
+		custom: "custom"
+	};
+	const dateFilter = dateFilterAliases[requestedDateFilter];
+
+	if (!["createdAt", "updatedAt"].includes(sortBy)) {
+		const error = new Error("sortBy must be createdAt or updatedAt");
+		error.status = 400;
+		throw error;
+	}
+	if (!["asc", "desc"].includes(sortOrder)) {
+		const error = new Error("sortOrder must be asc or desc");
+		error.status = 400;
+		throw error;
+	}
+	if (!["createdAt", "updatedAt"].includes(dateField)) {
+		const error = new Error("dateField must be createdAt or updatedAt");
+		error.status = 400;
+		throw error;
+	}
+	if (!dateFilter) {
+		const error = new Error("dateFilter must be all, today, lastDay, thisWeek, or custom");
+		error.status = 400;
+		throw error;
+	}
+
+	let startDate = null;
+	let endDate = null;
+	const now = new Date();
+
+	if (dateFilter === "today") {
+		startDate = startOfDay(now);
+		endDate = endOfDay(now);
+	} else if (dateFilter === "lastDay") {
+		const yesterday = new Date(now);
+		yesterday.setDate(yesterday.getDate() - 1);
+		startDate = startOfDay(yesterday);
+		endDate = endOfDay(yesterday);
+	} else if (dateFilter === "thisWeek") {
+		const mondayOffset = (now.getDay() + 6) % 7;
+		startDate = startOfDay(now);
+		startDate.setDate(startDate.getDate() - mondayOffset);
+		endDate = endOfDay(now);
+	} else if (dateFilter === "custom") {
+		if (!query.startDate || !query.endDate) {
+			const error = new Error("startDate and endDate are required for a custom date filter");
+			error.status = 400;
+			throw error;
+		}
+		startDate = parseDateInput(query.startDate);
+		endDate = parseDateInput(query.endDate, true);
+		if (startDate > endDate) {
+			const error = new Error("startDate cannot be after endDate");
+			error.status = 400;
+			throw error;
+		}
+	}
+
+	return { sortBy, sortOrder, dateField, dateFilter, startDate, endDate };
+}
+
+function filterAndSort(items, listQuery) {
+	const { sortBy, sortOrder, dateField, startDate, endDate } = listQuery;
+	const filtered = startDate && endDate
+		? items.filter((item) => {
+			const value = new Date(item[dateField]);
+			return !Number.isNaN(value.getTime()) && value >= startDate && value <= endDate;
+		})
+		: items;
+
+	const direction = sortOrder === "asc" ? 1 : -1;
+	return filtered.sort((a, b) => {
+		const difference = new Date(a[sortBy]) - new Date(b[sortBy]);
+		if (difference !== 0) return difference * direction;
+		return String(a._id).localeCompare(String(b._id)) * direction;
+	});
+}
+
+function serializeListQuery(listQuery) {
+	return {
+		sortBy: listQuery.sortBy,
+		sortOrder: listQuery.sortOrder,
+		dateField: listQuery.dateField,
+		dateFilter: listQuery.dateFilter,
+		startDate: listQuery.startDate ? listQuery.startDate.toISOString() : null,
+		endDate: listQuery.endDate ? listQuery.endDate.toISOString() : null
+	};
+}
+
+function getStatusFilter(query) {
+	const rawStatus = query.status || query.statuses || "all";
+	const statuses = String(rawStatus)
+		.split(",")
+		.map((status) => status.trim().toLowerCase())
+		.filter(Boolean);
+
+	if (statuses.length === 0 || statuses.includes("all")) {
+		return [];
+	}
+
+	const invalidStatuses = statuses.filter(
+		(status) => !["requested", "pending", "done"].includes(status)
+	);
+	if (invalidStatuses.length > 0) {
+		const error = new Error(
+			"status must be requested, pending, done, all, or a comma-separated combination"
+		);
+		error.status = 400;
+		throw error;
+	}
+
+	return [...new Set(statuses)];
+}
+
 // Every route in this file requires a valid session belonging to an admin.
 router.use(authenticate, requireAdmin);
 
 // GET /api/admin/configurations
 // Returns configuration data only, plus totals for the dashboard cards.
-router.get("/configurations", async (_req, res) => {
+router.get("/configurations", async (req, res) => {
 	try {
+		const listQuery = getListQuery(req.query);
+		const statusFilter = getStatusFilter(req.query);
 		const configurations = await User.aggregate([
 			{ $unwind: "$configurations" },
-			{ $replaceRoot: { newRoot: "$configurations" } },
-			{ $sort: { dateOrdered: -1 } }
+			{
+				$set: {
+					"configurations.createdAt": {
+						$ifNull: ["$configurations.createdAt", "$configurations.dateOrdered"]
+					},
+					"configurations.updatedAt": {
+						$ifNull: [
+							"$configurations.updatedAt",
+							{ $ifNull: ["$configurations.createdAt", "$configurations.dateOrdered"] }
+						]
+					},
+					"configurations.createdBy": {
+						$ifNull: [
+							"$configurations.createdBy",
+							{
+								userID: "$userID",
+								username: "$username",
+								firstName: "$firstName",
+								lastName: "$lastName",
+								role: { $ifNull: ["$role", "user"] }
+							}
+						]
+					},
+					"configurations.updatedBy": {
+						$ifNull: [
+							"$configurations.updatedBy",
+							{
+								userID: "$userID",
+								username: "$username",
+								firstName: "$firstName",
+								lastName: "$lastName",
+								role: { $ifNull: ["$role", "user"] }
+							}
+						]
+					}
+				}
+			},
+			{ $replaceRoot: { newRoot: "$configurations" } }
 		]);
 
+		const normalizedConfigurations = configurations.map((configuration) => ({
+			...configuration,
+			status: normalizeConfigurationStatus(configuration.orderStatus)
+		}));
+		const statusFilteredConfigurations = statusFilter.length > 0
+			? normalizedConfigurations.filter(
+				(configuration) => statusFilter.includes(configuration.status)
+			)
+			: normalizedConfigurations;
+		const data = filterAndSort(statusFilteredConfigurations, listQuery);
+
 		const summary = {
-			total: configurations.length,
+			total: data.length,
 			requested: 0,
 			pending: 0,
 			done: 0
 		};
 
-		const data = configurations.map((configuration) => {
-			const status = normalizeConfigurationStatus(configuration.orderStatus);
-			summary[status] += 1;
-			return { ...configuration, status };
+		data.forEach((configuration) => {
+			summary[configuration.status] += 1;
 		});
 
 		return res.status(200).json({
 			summary,
+			query: {
+				...serializeListQuery(listQuery),
+				status: statusFilter.length > 0 ? statusFilter : ["all"]
+			},
 			data
 		});
 	} catch (error) {
 		console.error("Failed to fetch admin configurations:", error);
+		if (error.status === 400) {
+			return res.status(400).json({ error: error.message });
+		}
 		return res.status(500).json({ error: "Failed to fetch configurations" });
 	}
 });
@@ -87,6 +301,8 @@ router.patch("/configurations/:configurationId", async (req, res) => {
 		if (cart !== undefined) {
 			configuration.cart = cart;
 		}
+		configuration.updatedAt = new Date();
+		configuration.updatedBy = configurationActor(req.user);
 
 		user.markModified("configurations");
 		await user.save();
@@ -138,6 +354,8 @@ router.patch("/configurations/:configurationId/status", async (req, res) => {
 		} else {
 			configuration.completeDate = null;
 		}
+		configuration.updatedAt = new Date();
+		configuration.updatedBy = configurationActor(req.user);
 
 		user.markModified("configurations");
 		await user.save();
@@ -157,19 +375,34 @@ router.patch("/configurations/:configurationId/status", async (req, res) => {
 
 // GET /api/admin/users
 // Authentication secrets are intentionally never returned.
-router.get("/users", async (_req, res) => {
+router.get("/users", async (req, res) => {
 	try {
-		const users = await User.find({})
-			.select("userID username role firstName lastName email phoneNumber companyName country")
-			.sort({ firstName: 1, lastName: 1 })
+		const listQuery = getListQuery(req.query);
+		const storedUsers = await User.find({})
+			.select("userID username role firstName lastName email phoneNumber companyName country createdAt updatedAt")
 			.lean();
+
+		const normalizedUsers = storedUsers
+			.map((user) => {
+				const fallbackCreatedAt = user._id.getTimestamp();
+				return {
+					...user,
+					createdAt: user.createdAt || fallbackCreatedAt,
+					updatedAt: user.updatedAt || user.createdAt || fallbackCreatedAt
+				};
+			});
+		const users = filterAndSort(normalizedUsers, listQuery);
 
 		return res.status(200).json({
 			count: users.length,
+			query: serializeListQuery(listQuery),
 			data: users
 		});
 	} catch (error) {
 		console.error("Failed to fetch admin users:", error);
+		if (error.status === 400) {
+			return res.status(400).json({ error: error.message });
+		}
 		return res.status(500).json({ error: "Failed to fetch users" });
 	}
 });

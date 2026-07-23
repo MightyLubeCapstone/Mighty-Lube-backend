@@ -1,6 +1,14 @@
 const mongoose = require('mongoose');
 const uuid = require("uuid");
 
+const configurationActorSchema = new mongoose.Schema({
+    userID: { type: String, required: true },
+    username: { type: String, required: true },
+    firstName: { type: String, default: "" },
+    lastName: { type: String, default: "" },
+    role: { type: String, enum: ["user", "admin"], required: true },
+}, { _id: false });
+
 const UserSchema = new mongoose.Schema({
     userID: {
         type: String,
@@ -119,6 +127,20 @@ const UserSchema = new mongoose.Schema({
             type: Date,
             default: Date.now,
         },
+        createdAt: {
+            type: Date,
+        },
+        updatedAt: {
+            type: Date,
+        },
+        createdBy: {
+            type: configurationActorSchema,
+            default: null,
+        },
+        updatedBy: {
+            type: configurationActorSchema,
+            default: null,
+        },
         completeDate: {
             type: Date,
             default: null,
@@ -129,7 +151,7 @@ const UserSchema = new mongoose.Schema({
         },
         cart: [],
     }],
-});
+}, { timestamps: true });
 
 const User = mongoose.models.User || mongoose.model('User', UserSchema);
 module.exports = User;

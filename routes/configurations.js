@@ -25,6 +25,14 @@ router.put("/", authenticate, async (req, res) => {
         const { configurationName } = req.body;
         const user = req.user;
         const cart = user.cart || [];
+        const now = new Date();
+        const actor = {
+            userID: user.userID,
+            username: user.username,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            role: user.role || "user",
+        };
 
         // Update orderID for each cart item using the util function
         const updatedCart = await Promise.all(cart.map(async (item) => {
@@ -41,7 +49,14 @@ router.put("/", authenticate, async (req, res) => {
             }
         }));
 
-        user.configurations.push({ configurationName, cart: updatedCart });
+        user.configurations.push({
+            configurationName,
+            cart: updatedCart,
+            createdAt: now,
+            updatedAt: now,
+            createdBy: actor,
+            updatedBy: actor,
+        });
         user.cart = []; // clear out the user's current cart
         // Ensure Mongoose knows that the arrays have changed
         user.markModified("configurations");

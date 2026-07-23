@@ -103,6 +103,14 @@ router.put('/editing', authenticate, async (req, res) => {
 
                 // Optionally set an updated timestamp on the order object
                 existing.updatedAt = new Date();
+                cfg.updatedAt = new Date();
+                cfg.updatedBy = {
+                    userID: req.user.userID,
+                    username: req.user.username,
+                    firstName: req.user.firstName,
+                    lastName: req.user.lastName,
+                    role: req.user.role || 'user'
+                };
                 found = true;
                 break;
             }
@@ -162,6 +170,13 @@ router.put('/status', authenticate, requireAdmin, async (req, res) => {
         // Update only the configuration-level orderStatus
         targetUserDoc.configurations[configIndex].orderStatus = orderStatus;
         targetUserDoc.configurations[configIndex].updatedAt = new Date();
+        targetUserDoc.configurations[configIndex].updatedBy = {
+            userID: req.user.userID,
+            username: req.user.username,
+            firstName: req.user.firstName,
+            lastName: req.user.lastName,
+            role: req.user.role || 'user'
+        };
         
         // If status is being set to "Completed", set completion timestamp
         if (orderStatus.toLowerCase() === 'complete') {
