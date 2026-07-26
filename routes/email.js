@@ -627,9 +627,12 @@ router.get("/forgot", async (req, res) => {
       savedPinLength: user.securityPin ? String(user.securityPin).length : 0,
     });
 
-    if (securityPin !== user.securityPin) {
+    const submittedPin = String(securityPin).trim();
+    const savedPin = String(user.securityPin || "").trim();
+
+    if (submittedPin !== savedPin) {
       logForgot(traceId, "GET PIN verify invalid security pin", { userID: user.userID });
-      return res.status(401).json({ error: "Invalid security pin!" });
+      return res.status(400).json({ error: "Invalid security pin!" });
     }
 
     user.resetCode = SECURITY_PIN_VERIFIED_MARKER;
@@ -694,9 +697,12 @@ router.post("/forgot/verify-pin", async (req, res) => {
       savedPinLength: user.securityPin ? String(user.securityPin).length : 0,
     });
 
-    if (securityPin !== user.securityPin) {
+    const submittedPin = String(securityPin).trim();
+    const savedPin = String(user.securityPin || "").trim();
+
+    if (submittedPin !== savedPin) {
       logForgot(traceId, "PIN verify invalid security pin", { userID: user.userID });
-      return res.status(401).json({ error: "Invalid security pin!" });
+      return res.status(400).json({ error: "Invalid security pin!" });
     }
 
     user.resetCode = SECURITY_PIN_VERIFIED_MARKER;

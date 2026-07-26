@@ -2,6 +2,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const { dbConnect } = require("./config/config");
+const { name: packageName, version: backendVersion } = require("./package.json");
 const path = require("path");
 const dotenv = require("dotenv");
 dotenv.config({ path: path.join(__dirname, ".env") });
@@ -171,8 +172,19 @@ app.get("/", (req, res) => {
 	res.status(200).json({
 		success: true,
 		message: "Backend server is running",
-		port: 8080,
+		version: backendVersion,
+		port: Number(process.env.PORT || 8080),
 		timestamp: new Date().toISOString(),
+	});
+});
+
+// Public backend version route. package.json is the single source of truth.
+app.get("/api/version", (_req, res) => {
+	res.set("Cache-Control", "no-store");
+	return res.status(200).json({
+		name: packageName,
+		version: backendVersion,
+		environment: process.env.NODE_ENV || "development"
 	});
 });
 

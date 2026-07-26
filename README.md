@@ -22,6 +22,45 @@ Version 2.0.0 extends version 1.0.0 with:
 - Configuration status filtering.
 - Local/production server and database configuration.
 
+<details>
+<summary><strong>Backend version and health APIs</strong></summary>
+
+The version is read directly from `package.json`, which is the single source of truth.
+
+### Get backend version
+
+```http
+GET /api/version
+```
+
+No authentication is required.
+
+```json
+{
+  "name": "mighty-lube",
+  "version": "2.0.0",
+  "environment": "production"
+}
+```
+
+### Health check
+
+```http
+GET /
+```
+
+```json
+{
+  "success": true,
+  "message": "Backend server is running",
+  "version": "2.0.0",
+  "port": 8080,
+  "timestamp": "2026-07-27T10:00:00.000Z"
+}
+```
+
+</details>
+
 ## Getting started
 
 ```bash

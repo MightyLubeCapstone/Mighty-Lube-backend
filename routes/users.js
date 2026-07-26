@@ -56,8 +56,8 @@ router.post("/", async (req, res) => {
 			phoneNumber,
 			companyName,
 			country
-		} = req.body;
-		const userEmail = emailAddress || email;
+			} = req.body;
+			const userEmail = emailAddress || email;
 
 		const requiredFields = {
 			username,
@@ -74,53 +74,82 @@ router.post("/", async (req, res) => {
 			.filter(([, value]) => value === undefined || value === null || String(value).trim() === "")
 			.map(([field]) => field);
 
-		if (missingFields.length > 0) {
-			return res.status(400).json({
-				error: "Missing fields",
-				missingFields
-			});
-		}
-		// Username/password verification
-		else if (username.length < 6 || username.length > 24 ||
-			password.length < 8 || password.length > 50) {
-			return res.status(400).send("Invalid username/password");
-		} else {
-			// Insert new account into database
-			const newUser = new User({
-				username: username,
-				password: await hashPassword(password),
-				// Stored as plain text for now per current requirement.
-				// TODO: Hash this later using hashPassword/securityPin comparison.
-					securityPin: securityPin,
-					firstName: firstName,
-					lastName: lastName,
-					email: userEmail,
-				phoneNumber: phoneNumber,
-				companyName: companyName,
-				country: country
-			});
-			const document = await User.insertOne(newUser);
-
-			if (document) {
-				// Generate session ID
-				const sessionID = uuid.v4();
-				// Add new session to tblSessions
-				document.sessions.push({ sessionID });
-				await document.save();
-				// Return session ID
-				return res.status(201).json({
-					status: "success",
-					sessionID: sessionID,
+			if (missingFields.length > 0) {
+				return res.status(400).json({
+					error: "Missing required fields",
+					missingFields
 				});
-			} else {
-				return res.status(400).send("Account not created");
 			}
+
+			const normalized = {
+				username: String(username).trim(),
+				password: String(password),
+				securityPin: String(securityPin).trim(),
+				firstName: String(firstName).trim(),
+				lastName: String(lastName).trim(),
+				email: String(userEmail).trim().toLowerCase(),
+				phoneNumber: String(phoneNumber).trim(),
+				companyName: String(companyName).trim(),
+				country: String(country).trim()
+			};
+
+			const fieldErrors = {};
+			if (normalized.username.length < 6 || normalized.username.length > 24) {
+				fieldErrors.username = "Username must be between 6 and 24 characters";
+			}
+			if (normalized.password.length < 8 || normalized.password.length > 50) {
+				fieldErrors.password = "Password must be between 8 and 50 characters";
+			}
+			if (!/^\d{6}$/.test(normalized.securityPin)) {
+				fieldErrors.securityPin = "Security PIN must contain exactly 6 digits";
+			}
+			if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized.email)) {
+				fieldErrors.email = "Enter a valid email address";
+			}
+
+			if (Object.keys(fieldErrors).length > 0) {
+				return res.status(400).json({
+					error: "Validation failed",
+					fieldErrors
+				});
+			}
+
+			const document = new User({
+				username: normalized.username,
+				password: await hashPassword(normalized.password),
+				// Stored as plain text for the current security-PIN recovery flow.
+				securityPin: normalized.securityPin,
+				firstName: normalized.firstName,
+				lastName: normalized.lastName,
+				email: normalized.email,
+				phoneNumber: normalized.phoneNumber,
+				companyName: normalized.companyName,
+				country: normalized.country
+			});
+
+			const sessionID = uuid.v4();
+			document.sessions.push({ sessionID });
+			await document.save();
+
+			return res.status(201).json({
+				status: "success",
+				sessionID,
+				role: document.role
+			});
+		} catch (e) {
+			console.error(e);
+			if (e.name === "ValidationError") {
+				const fieldErrors = Object.fromEntries(
+					Object.entries(e.errors).map(([field, error]) => [field, error.message])
+				);
+				return res.status(400).json({
+					error: "Validation failed",
+					fieldErrors
+				});
+			}
+			return res.status(500).json({ error: "Internal server error" });
 		}
-	} catch (e) {
-		console.error(e);
-		res.status(500).json({ error: "Internal server error", e });
-	}
-});
+	});
 
 router.put("/", authenticate, async (req, res) => {
 	try {
