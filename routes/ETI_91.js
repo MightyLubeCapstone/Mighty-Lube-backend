@@ -1,108 +1,180 @@
-// // routes/ETI_91.js
-// const express = require("express");
-// const { dbConnect } = require("../config/config");
-// const { authenticate } = require("./sessions");
-// const ETI_91 = require("../models/ETI_91");
-
-// const router = express.Router();
-
-// router.post("/", authenticate, async (req, res) => {
-//     try {
-//         const { ETI_91Data, numRequested } = req.body;
-
-//         const order = new ETI_91({
-//             conveyorName: ETI_91Data.conveyorName,
-//             industrialChainManufacturer: ETI_91Data.industrialChainManufacturer,
-//             ...(ETI_91Data.otherIndustrialChainManufacturer && { otherIndustrialChainManufacturer: ETI_91Data.otherIndustrialChainManufacturer }),
-//             ...(ETI_91Data.conveyorLength && { conveyorLength: ETI_91Data.conveyorLength }),
-//             ...(ETI_91Data.conveyorLengthUnit && { conveyorLengthUnit: ETI_91Data.conveyorLengthUnit }),        
-//         });
-
-//         req.user.cart.push({ numRequested, productConfigurationInfo: order, productType: "ETI_91" });
-//         await req.user.save();
-
-//         return res.status(200).json({ message: "ETI_91 entry added" });
-//     } catch (error) {
-//         console.error(error);
-//         res.status(500).json({ error: "Internal server error" });
-//     }
-// });
-
-// module.exports = router;
-
-
-/**
- * routes/ETI_91.js
- * ----------------
- * ✅ Update done:
- * 1) Added optional technicianNote (trim + save only if non-empty)
- * 2) Added safe guards so API doesn't crash if ETI_91Data is missing
- * 3) Added detailed comments
- *
- * NOTE:
- * - Ensure your ETI_91 mongoose schema includes:
- *   technicianNote: { type: String, required: false }
- */
-
-const express = require("express");
-const { dbConnect } = require("../config/config"); // (unused in this route, safe to remove)
-const { authenticate } = require("./sessions");
-const ETI_91 = require("../models/ETI_91");
-
+const express = require("express")
 const router = express.Router();
+
+const ETI_91 = require("../models/ETI_91");
+const Cart = require("../models/cart");
+const { authenticate } = require("./sessions");
+
+// =========================================================
+// POST /api/eti_91
+//
+// Body:
+//
+// {
+//   "ETI_91Data": {
+//     "conveyorName": "...",
+//     "chainSize": "...",
+//     "otherChainSize": "...",
+//     "industrialChainManufacturer": "...",
+//     "otherIndustrialChainManufacturer": "...",
+//     "conveyorLength": "...",
+//     "conveyorLengthUnit": "...",
+//     "conveyorSpeed": "...",ss
+//     "conveyorSpeedUnit": "...",
+//     "appEnviroment": "...",
+//     "otherAppEnviroment": "...",
+//     "technicianNote": "..."
+//   },
+//   "numRequested": 1
+// }
+// =========================================================
 
 router.post("/", authenticate, async (req, res) => {
   try {
-    // ✅ Read request body safely (avoid crash if req.body is undefined)
-    const { ETI_91Data, numRequested } = req.body || {};
+    const { ETI_91Data, numRequested } = req.body;
 
-    // ✅ Validate required payload object
+    // =====================================================
+    // BASIC REQUEST VALIDATION
+    // =====================================================
+
     if (!ETI_91Data) {
-      return res.status(400).json({ error: "ETI_91Data is required" });
+      return res.status(400).json({
+        success: false,
+        message: "ETI_91Data is required",
+      });
     }
 
-    // ✅ Create a new Mongoose document (product configuration)
-    const order = new ETI_91({
-      // Required/basic fields
+    if (!numRequested || numRequested < 1) {
+      return res.status(400).json({
+        success: false,
+        message: "numRequested must be at least 1",
+      });
+    }
+
+    // =====================================================
+    // BUILD CONFIGURATION DATA
+    //
+    // Hidden conditional fields are not expected from
+    // Flutter when their parent field is not "Other".
+    // =====================================================
+
+    const configurationData = {
       conveyorName: ETI_91Data.conveyorName,
-      industrialChainManufacturer: ETI_91Data.industrialChainManufacturer,
 
-      // Optional fields (save only if present)
-      ...(ETI_91Data.otherIndustrialChainManufacturer && {
-        otherIndustrialChainManufacturer: ETI_91Data.otherIndustrialChainManufacturer,
-      }),
-      ...(ETI_91Data.conveyorLength && { conveyorLength: ETI_91Data.conveyorLength }),
-      ...(ETI_91Data.conveyorLengthUnit && { conveyorLengthUnit: ETI_91Data.conveyorLengthUnit }),
+      chainSize: ETI_91Data.chainSize,
 
-      /**
-       * ✅ NEW: technicianNote (optional)
-       * Frontend should send: ETI_91Data.technicianNote
-       */
-      ...(ETI_91Data.technicianNote &&
-        ETI_91Data.technicianNote.trim() && {
-          technicianNote: ETI_91Data.technicianNote.trim(),
-        }),
+      industrialChainManufacturer:
+        ETI_91Data.industrialChainManufacturer,
+
+      conveyorLength: ETI_91Data.conveyorLength,
+
+      conveyorLengthUnit:
+        ETI_91Data.conveyorLengthUnit,
+
+      conveyorSpeed: ETI_91Data.conveyorSpeed,
+
+      conveyorSpeedUnit:
+        ETI_91Data.conveyorSpeedUnit,
+
+      appEnviroment: ETI_91Data.appEnviroment,
+    };
+
+    // =====================================================
+    // CONDITIONAL FIELDS
+    // =====================================================
+
+    if (ETI_91Data.chainSize === "Other") {
+      configurationData.otherChainSize =
+        ETI_91Data.otherChainSize;
+    }
+
+    if (
+      ETI_91Data.industrialChainManufacturer === "Other"
+    ) {
+      configurationData.otherIndustrialChainManufacturer =
+        ETI_91Data.otherIndustrialChainManufacturer;
+    }
+
+    if (ETI_91Data.appEnviroment === "Other") {
+      configurationData.otherAppEnviroment =
+        ETI_91Data.otherAppEnviroment;
+    }
+
+    // =====================================================
+    // OPTIONAL TECHNICIAN NOTE
+    // =====================================================
+
+    if (
+      ETI_91Data.technicianNote &&
+      ETI_91Data.technicianNote.trim() !== ""
+    ) {
+      configurationData.technicianNote =
+        ETI_91Data.technicianNote.trim();
+    }
+
+    // =====================================================
+    // SAVE CONFIGURATION
+    //
+    // Mongoose model performs required-field and conditional
+    // validation here.
+    // =====================================================
+
+    const configuration = new ETI_91(
+      configurationData
+    );
+
+    const savedConfiguration =
+      await configuration.save();
+
+    // =====================================================
+    // ADD PRODUCT TO CART
+    // =====================================================
+
+    const cartItem = new Cart({
+      userId: req.user._id,
+      productType: "ETI_91",
+      productConfiguration:
+        savedConfiguration._id,
+      numRequested,
     });
 
-    // ✅ Push this configuration into the authenticated user's cart
-    req.user.cart.push({
-      numRequested, // how many units the user requested
-      productConfigurationInfo: order, // full configuration object
-      productType: "ETI_91", // product identifier
+    await cartItem.save();
+
+    // =====================================================
+    // RESPONSE
+    // =====================================================
+
+    return res.status(201).json({
+      success: true,
+      message:
+        "ETI_91 configuration added successfully",
+      data: {
+        configuration:
+          savedConfiguration,
+        cartItem,
+      },
     });
-
-    // ✅ Persist the cart update
-    await req.user.save();
-
-    // ✅ Return success response
-    return res.status(200).json({ message: "ETI_91 entry added" });
   } catch (error) {
-    // ✅ Log the error for debugging
-    console.error(error);
+    console.error(
+      "ETI_91 configuration error:",
+      error
+    );
 
-    // ✅ Return generic server error to client
-    return res.status(500).json({ error: "Internal server error" });
+    // Mongoose validation error
+    if (error.name === "ValidationError") {
+      return res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
+
+    return res.status(500).json({
+      success: false,
+      message:
+        "Failed to add ETI_91 configuration",
+      error: error.message,
+    });
   }
 });
 
-module.exports = router;
+module.exports = router

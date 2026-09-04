@@ -1,158 +1,184 @@
 const mongoose = require("mongoose");
-const templateA = require("./templateA.js");
-const OHP_OP55Schema = new mongoose.Schema({
-  conveyorName: {
-    type: String,
-    required: true,
-  },
 
-  chainSize: {
-    type: Number,
-    enum: [1, 2, 3, 4, 5],
-    required: true,
-  },
+// =========================================================
+// PRODUCT
+//
+// Product Name: OP-55
+// Product ID: OH_CCS_O55
+// =========================================================
 
-  otherChainSize: {
-    type: String,
-    required: function () {
-      return this.chainSize === 5;
+const OHCCSO55Schema = new mongoose.Schema(
+  {
+    // =====================================================
+    // GENERAL INFORMATION
+    // =====================================================
+
+    conveyorName: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+
+    conveyorChainSize: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+
+    chainManufacturer: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+
+    conveyorLength: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+
+    conveyorLengthUnit: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+
+    directionOfTravel: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+
+    applicationEnvironment: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    surroundingTemperatureOutsideRange: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+
+    conveyorLoadState: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    conveyorOrientation: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+
+    // =====================================================
+    // CUSTOMER POWER UTILITIES
+    // =====================================================
+
+    controlVoltage: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    compressedAirSupply: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    compressedAirSupplyUnit: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+
+    // =====================================================
+    // CONTROLLER
+    // =====================================================
+
+    chainMasterController: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+
+    timer: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+
+    electricOnOff: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+
+    pneumaticOnOff: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+
+    otherDescribe: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+
+    // =====================================================
+    // OVERHEAD POWER RAIL: MEASUREMENTS
+    // =====================================================
+
+    measurementUnit: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+
+    chainDropA: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+
+    overheadPowerMonoRailPowerRailG: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+
+    overheadPowerMonoRailPowerRailH: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+
+    // =====================================================
+    // TECHNICIAN NOTE
+    // =====================================================
+
+    technicianNote: {
+      type: String,
+      required: true,
+      trim: true,
     },
   },
-  industrialChainManufacturer: {
-    type: Number,
-    enum: [1, 2, 3, 4, 5, 6, 7, 8, 9],
-    required: true,
-  },
+  {
+    timestamps: true,
+  }
+);
 
-  otherChainManufacturer: {
-    type: String,
-    required: function () {
-      return this.industrialChainManufacturer === 9;
-    },
-  },
-  conveyorLength: {
-    type: Number,
-    required: false,
-  },
+// =========================================================
+// MODEL
+// =========================================================
 
-  conveyorLengthUnit: {
-    type: Number,
-    enum: [1, 2, 3, 4],
-    required: false,
-  },
+const OH_CCS_O55 = mongoose.model(
+  "OH_CCS_O55",
+  OHCCSO55Schema
+);
 
-  appEnviroment: {
-    type: Number,
-    enum: [1, 2, 3, 4, 5, 6, 7],
-    required: false,
-  },
-
-  ovenStatus: {
-    type: Number,
-    enum: [1, 2],
-    required: function () {
-      return this.appEnviroment === 3;
-    },
-  },
-
-  ovenTemp: {
-    type: Number,
-    required: function () {
-      return this.appEnviroment === 3;
-    },
-  },
-
-  otherAppEnviroment: {
-    type: String,
-    required: function () {
-      return this.appEnviroment === 7;
-    },
-  },
-
-  operatingVoltage: {
-    type: Number,
-    required: true,
-  },
-
-  // ✅ NEW OPTIONAL FIELD
-  technicianNote: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-  
-  controlVoltSingle: {
-    type: Number,
-    required: true,
-  },
-
-  lubeBrand: {
-    type: String,
-    required: false,
-  },
-
-  lubeType: {
-    type: String,
-    required: false,
-  },
-
-  lubeViscosity: {
-    type: String,
-    required: false,
-  },
-
-  sideLubeStatus: {
-    type: Number,
-    enum: [1, 2],
-    required: false,
-  },
-
-  topLubeStatus: {
-    type: Number,
-    enum: [1, 2],
-    required: false,
-  },
-
-  chainMaster: {
-    type: Number,
-    enum: [1, 2],
-    required: false,
-  },
-
-  timerStatus: {
-    type: Number,
-    enum: [1, 2, 3],
-    required: false,
-  },
-
-  electricStatus: {
-    type: Number,
-    enum: [1, 2],
-    required: false,
-  },
-
-  plcConnection: {
-    type: Number,
-    enum: [1, 2],
-    required: false,
-  },
-
-  otherControllerNotes: {
-    type: String,
-    required: false,
-  },
-
-  specialControllerOption: {
-    type: String,
-    required: false,
-  },
-
-  specialControllerInfo: {
-    type: String,
-    required: false,
-  },
-});
-
-const OHP_OP5 = mongoose.model("tblOHP_OP55", OHP_OP55Schema);
-
-module.exports = OHP_OP55;
+module.exports = OH_CCS_O55;

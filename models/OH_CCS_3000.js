@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const OHCCSBRUSHSchema = new mongoose.Schema(
+const OHCCS3000Schema = new mongoose.Schema(
   {
     // =========================================================
     // GENERAL INFORMATION
@@ -48,6 +48,18 @@ const OHCCSBRUSHSchema = new mongoose.Schema(
       trim: true,
     },
 
+    conveyorSpeed: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    conveyorSpeedUnit: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
     applicationEnvironment: {
       type: String,
       required: true,
@@ -82,6 +94,12 @@ const OHCCSBRUSHSchema = new mongoose.Schema(
       trim: true,
     },
 
+    overheadPowerMonoRailPowerTrolleyWheelB: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
     overheadPowerMonoRailPowerRailG: {
       type: String,
       default: "",
@@ -109,8 +127,8 @@ const OHCCSBRUSHSchema = new mongoose.Schema(
   }
 );
 
-const OH_CCS_BRUSH =
-  mongoose.models.OH_CCS_BRUSH ||
-  mongoose.model("OH_CCS_BRUSH", OHCCSBRUSHSchema);
+const OH_CCS_3000 =
+  mongoose.models.OH_CCS_3000 ||
+  mongoose.model("OH_CCS_3000", OHCCS3000Schema);
 
-module.exports = OH_CCS_BRUSH;
+module.exports = OH_CCS_3000;

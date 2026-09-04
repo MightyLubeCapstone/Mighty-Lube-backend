@@ -1,137 +1,142 @@
-// const express = require("express");
-// const { dbConnect } = require("../config/config");
-// const { authenticate } = require("./sessions");
-// const OHP_OP13 = require("../models/OHP_OP13");
-
-// const router = express.Router();
-
-// router.post("/", authenticate, async (req, res) => {
-//     try {
-
-//         const { OHP_OP13Data, numRequested } = req.body;
-//         const order = new OHP_OP13({
-//             conveyorName: OHP_OP13Data.conveyorName,
-//             chainSize: OHP_OP13Data.chainSize,
-//             ...(OHP_OP13Data.otherChainSize && { otherChainSize: OHP_OP13Data.otherChainSize }),
-//             ...(OHP_OP13Data.industrialChainManufacturer && { industrialChainManufacturer: OHP_OP13Data.industrialChainManufacturer }),
-//             ...(OHP_OP13Data.otherChainManufacturer && { otherChainManufacturer: OHP_OP13Data.otherChainManufacturer }),
-//             ...(OHP_OP13Data.appEnviroment && { appEnviroment: OHP_OP13Data.appEnviroment }),
-//             ...(OHP_OP13Data.ovenStatus && { ovenStatus: OHP_OP13Data.ovenStatus }),
-//             ...(OHP_OP13Data.ovenTemp && { ovenTemp: OHP_OP13Data.ovenTemp }),
-//             ...(OHP_OP13Data.otherAppEnviroment && { otherAppEnviroment: OHP_OP13Data.otherAppEnviroment }),
-//             ...(OHP_OP13Data.conveyorLoaded && { conveyorLoaded: OHP_OP13Data.conveyorLoaded }),
-//             ...(OHP_OP13Data.operatingVoltTriple && { operatingVoltTriple: OHP_OP13Data.operatingVoltTriple }),
-//            ...(OHP_OP13Data.controlVoltSingle && { controlVoltSingle: OHP_OP13Data.controlVoltSingle }),
-//             sanitaryUnit: OHP_OP13Data.sanitaryUnit,
-//             sanitaryA: OHP_OP13Data.sanitaryA,
-//             ...(OHP_OP13Data.sanitaryC && { sanitaryC: OHP_OP13Data.sanitaryC }),
-//             ...(OHP_OP13Data.sanitaryA2 && { sanitaryA2: OHP_OP13Data.sanitaryA2 }),
-//             ...(OHP_OP13Data.sanitaryB2 && { sanitaryB2: OHP_OP13Data.sanitaryB2 }),
-//             ...(OHP_OP13Data.sanitaryC2 && { sanitaryC2: OHP_OP13Data.sanitaryC2 }),
-//             ...(OHP_OP13Data.sanitaryD2 && { sanitaryD2: OHP_OP13Data.sanitaryD2 }),
-//             ...(OHP_OP13Data.sanitaryE2 && { sanitaryE2: OHP_OP13Data.sanitaryE2 }),
-//             ...(OHP_OP13Data.sanitaryF2 && { sanitaryF2: OHP_OP13Data.sanitaryF2 }),
-//             ...(OHP_OP13Data.sanitaryG2 && { sanitaryG2: OHP_OP13Data.sanitaryG2 }),
-//             ...(OHP_OP13Data.sanitaryH2 && { sanitaryH2: OHP_OP13Data.sanitaryH2 }),
-//             ...(OHP_OP13Data.sanitaryJ2 && { sanitaryJ2: OHP_OP13Data.sanitaryJ2 }),
-//             ...(OHP_OP13Data.sanitaryL2 && { sanitaryL2: OHP_OP13Data.sanitaryL2 }),
-//             ...(OHP_OP13Data.sanitaryM2 && { sanitaryM2: OHP_OP13Data.sanitaryM2 }),
-//         });
-//         req.user.cart.push({
-//             numRequested,
-//             productConfigurationInfo: order,
-//             productType: "OHP_OP13"
-//         });
-//         await req.user.save();
-//         return res.status(200).json({ message: "OHP_OP13 entry added" });
-//     } catch (error) {
-//         console.error(error);
-//         res.status(500).json({ error: "Internal server error" });
-//     }
-// });
-
-// module.exports = router;
-
-
-
-
-
-
-
-
-
-
 const express = require("express");
-const { dbConnect } = require("../config/config"); // kept as-is
 const { authenticate } = require("./sessions");
-const OHP_OP13 = require("../models/OHP_OP13");
+const OH_CCS_OP13 = require("../models/OH_CCS_OP13");
 
 const router = express.Router();
 
 router.post("/", authenticate, async (req, res) => {
     try {
-        const { OHP_OP13Data, numRequested } = req.body;
+        const { OH_CCS_OP13Data, numRequested } = req.body;
 
-        const order = new OHP_OP13({
-            conveyorName: OHP_OP13Data.conveyorName,
-            chainSize: OHP_OP13Data.chainSize,
-            ...(OHP_OP13Data.otherChainSize && { otherChainSize: OHP_OP13Data.otherChainSize }),
-            ...(OHP_OP13Data.industrialChainManufacturer && {
-                industrialChainManufacturer: OHP_OP13Data.industrialChainManufacturer
-            }),
-            ...(OHP_OP13Data.otherChainManufacturer && {
-                otherChainManufacturer: OHP_OP13Data.otherChainManufacturer
-            }),
-            ...(OHP_OP13Data.appEnviroment && { appEnviroment: OHP_OP13Data.appEnviroment }),
-            ...(OHP_OP13Data.ovenStatus && { ovenStatus: OHP_OP13Data.ovenStatus }),
-            ...(OHP_OP13Data.ovenTemp && { ovenTemp: OHP_OP13Data.ovenTemp }),
-            ...(OHP_OP13Data.otherAppEnviroment && {
-                otherAppEnviroment: OHP_OP13Data.otherAppEnviroment
-            }),
-            ...(OHP_OP13Data.conveyorLoaded && {
-                conveyorLoaded: OHP_OP13Data.conveyorLoaded
-            }),
-            ...(OHP_OP13Data.operatingVoltTriple && {
-                operatingVoltTriple: OHP_OP13Data.operatingVoltTriple
-            }),
-            ...(OHP_OP13Data.controlVoltSingle && {
-                controlVoltSingle: OHP_OP13Data.controlVoltSingle
-            }),
+        if (!OH_CCS_OP13Data) {
+            return res.status(400).json({
+                error: "OH_CCS_OP13Data is required",
+            });
+        }
 
-            sanitaryUnit: OHP_OP13Data.sanitaryUnit,
-            sanitaryA: OHP_OP13Data.sanitaryA,
-            ...(OHP_OP13Data.sanitaryC && { sanitaryC: OHP_OP13Data.sanitaryC }),
-            ...(OHP_OP13Data.sanitaryA2 && { sanitaryA2: OHP_OP13Data.sanitaryA2 }),
-            ...(OHP_OP13Data.sanitaryB2 && { sanitaryB2: OHP_OP13Data.sanitaryB2 }),
-            ...(OHP_OP13Data.sanitaryC2 && { sanitaryC2: OHP_OP13Data.sanitaryC2 }),
-            ...(OHP_OP13Data.sanitaryD2 && { sanitaryD2: OHP_OP13Data.sanitaryD2 }),
-            ...(OHP_OP13Data.sanitaryE2 && { sanitaryE2: OHP_OP13Data.sanitaryE2 }),
-            ...(OHP_OP13Data.sanitaryF2 && { sanitaryF2: OHP_OP13Data.sanitaryF2 }),
-            ...(OHP_OP13Data.sanitaryG2 && { sanitaryG2: OHP_OP13Data.sanitaryG2 }),
-            ...(OHP_OP13Data.sanitaryH2 && { sanitaryH2: OHP_OP13Data.sanitaryH2 }),
-            ...(OHP_OP13Data.sanitaryJ2 && { sanitaryJ2: OHP_OP13Data.sanitaryJ2 }),
-            ...(OHP_OP13Data.sanitaryL2 && { sanitaryL2: OHP_OP13Data.sanitaryL2 }),
-            ...(OHP_OP13Data.sanitaryM2 && { sanitaryM2: OHP_OP13Data.sanitaryM2 }),
+        const order = new OH_CCS_OP13({
+            // =====================================================
+            // GENERAL INFORMATION
+            // =====================================================
 
-            // ✅ NEW FIELD ADDED
-            // Used to store technician-specific notes or observations
-            ...(OHP_OP13Data.technicianNote && {
-                technicianNote: OHP_OP13Data.technicianNote
-            }),
+            conveyorName:
+                OH_CCS_OP13Data.conveyorName,
+
+            conveyorChainSize:
+                OH_CCS_OP13Data.conveyorChainSize,
+
+            otherConveyorChainSize:
+                OH_CCS_OP13Data.otherConveyorChainSize,
+
+            chainManufacturer:
+                OH_CCS_OP13Data.chainManufacturer,
+
+            otherChainManufacturer:
+                OH_CCS_OP13Data.otherChainManufacturer,
+
+            applicationEnvironment:
+                OH_CCS_OP13Data.applicationEnvironment,
+
+            otherApplicationEnvironment:
+                OH_CCS_OP13Data.otherApplicationEnvironment,
+
+            conveyorLoadStatus:
+                OH_CCS_OP13Data.conveyorLoadStatus,
+
+            hasPlantLayout:
+                OH_CCS_OP13Data.hasPlantLayout,
+
+            plantLayoutAttachment:
+                OH_CCS_OP13Data.plantLayoutAttachment,
+
+            hasRequiredPictures:
+                OH_CCS_OP13Data.hasRequiredPictures,
+
+            requiredPicturesAttachment:
+                OH_CCS_OP13Data.requiredPicturesAttachment,
+
+            // =====================================================
+            // CUSTOMER POWER UTILITIES
+            // =====================================================
+
+            operatingVoltage:
+                OH_CCS_OP13Data.operatingVoltage,
+
+            controlVoltage:
+                OH_CCS_OP13Data.controlVoltage,
+
+            // =====================================================
+            // SANITARY MEASUREMENTS
+            // =====================================================
+
+            measurementUnit:
+                OH_CCS_OP13Data.measurementUnit,
+
+            sanitaryChainDropA:
+                OH_CCS_OP13Data.sanitaryChainDropA,
+
+            sanitaryTrolleyWheelDiameterB:
+                OH_CCS_OP13Data.sanitaryTrolleyWheelDiameterB,
+
+            sanitaryWheelDropD:
+                OH_CCS_OP13Data.sanitaryWheelDropD,
+
+            sanitaryTrolleyWheelBottomWidthE:
+                OH_CCS_OP13Data.sanitaryTrolleyWheelBottomWidthE,
+
+            sanitaryTrolleyWheelTopWidthF:
+                OH_CCS_OP13Data.sanitaryTrolleyWheelTopWidthF,
+
+            sanitaryCenterSupportWidthG:
+                OH_CCS_OP13Data.sanitaryCenterSupportWidthG,
+
+            sanitaryCenterSupportHeightH:
+                OH_CCS_OP13Data.sanitaryCenterSupportHeightH,
+
+            sanitaryHookRadiusL1:
+                OH_CCS_OP13Data.sanitaryHookRadiusL1,
+
+            sanitaryHookRadiusL2:
+                OH_CCS_OP13Data.sanitaryHookRadiusL2,
+
+            sanitaryCHookSupportDiameterL3:
+                OH_CCS_OP13Data.sanitaryCHookSupportDiameterL3,
+
+            sanitaryCHookSupportHeightL4:
+                OH_CCS_OP13Data.sanitaryCHookSupportHeightL4,
+
+            sanitaryHookRadiusL5:
+                OH_CCS_OP13Data.sanitaryHookRadiusL5,
+
+            sanitaryHookRadiusL6:
+                OH_CCS_OP13Data.sanitaryHookRadiusL6,
+
+            // =====================================================
+            // TECHNICIAN NOTE
+            // =====================================================
+
+            technicianNote:
+                OH_CCS_OP13Data.technicianNote,
         });
 
         req.user.cart.push({
             numRequested,
             productConfigurationInfo: order,
-            productType: "OHP_OP13",
+            productType: "OH_CCS_OP13",
         });
 
         await req.user.save();
-        return res.status(200).json({ message: "OHP_OP13 entry added" });
+
+        return res.status(200).json({
+            message: "OH_CCS_OP13 entry added",
+        });
     } catch (error) {
         console.error(error);
-        return res.status(500).json({ error: "Internal server error" });
+
+        return res.status(500).json({
+            error: "Internal server error",
+        });
     }
 });
 
-module.exports = router;
+module.exports = router

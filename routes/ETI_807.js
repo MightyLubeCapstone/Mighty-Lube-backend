@@ -1,139 +1,176 @@
-// // routes/ETI_807.js
-// const express = require("express");
-// const { dbConnect } = require("../config/config");
-// const { authenticate } = require("./sessions");
-// const ETI_807 = require("../models/ETI_807");
-
-// const router = express.Router();
-
-// router.post("/", authenticate, async (req, res) => {
-//     try {
-//         const { ETI_807Data, numRequested } = req.body;
-
-//         const order = new ETI_807({
-//             conveyorName: ETI_807Data.conveyorName,
-//             industrialChainManufacturer: ETI_807Data.industrialChainManufacturer,
-//             ...(ETI_807Data.otherIndustrialChainManufacturer && { otherIndustrialChainManufacturer: ETI_807Data.otherIndustrialChainManufacturer }),
-//             ...(ETI_807Data.conveyorLength && { conveyorLength: ETI_807Data.conveyorLength }),
-//             ...(ETI_807Data.conveyorLengthUnit && { conveyorLengthUnit: ETI_807Data.conveyorLengthUnit }),
-//         });
-
-//         req.user.cart.push({ 
-//             numRequested, 
-//             productConfigurationInfo: order, 
-//             productType: "ETI_807" 
-//         });
-//         await req.user.save();
-
-//         return res.status(200).json({ message: "ETI_807 entry added" });
-//     } catch (error) {
-//         console.error(error);
-//         res.status(500).json({ error: "Internal server error" });
-//     }
-// });
-
-// module.exports = router;
-
-
-
-/**
- * routes/ETI_807.js
- * -----------------
- * ✅ What this file does:
- * - Receives ETI_807 form data from frontend
- * - Converts it into a MongoDB (Mongoose) document
- * - Pushes that configuration into the logged-in user’s cart
- * - Supports optional fields safely
- * - Adds technicianNote (NEW)
- *
- * IMPORTANT:
- * - Make sure ETI_807 mongoose schema has:
- *   technicianNote: { type: String, required: false }
- */
-
 const express = require("express");
-const { dbConnect } = require("../config/config"); // (not directly used here, safe to remove)
 const { authenticate } = require("./sessions");
 const ETI_807 = require("../models/ETI_807");
 
 const router = express.Router();
 
+// =========================================================
+// POST /api/eti_807
+//
+// Product:
+// Overhead Non-Powered Mighty Lube
+// Chain Cleaners 8074-B / 8075-B
+//
+// Expected body:
+//
+// {
+//   "ETI_807Data": {
+//     "conveyorName": "...",
+//     "chainSize": "...",
+//     "otherChainSize": "...",
+//     "industrialChainManufacturer": "...",
+//     "otherIndustrialChainManufacturer": "...",
+//     "conveyorLength": "...",
+//     "conveyorLengthUnit": "...",
+//     "conveyorSpeed": "...",
+//     "conveyorSpeedUnit": "...",
+//     "appEnviroment": "...",
+//     "otherAppEnviroment": "...",
+//     "technicianNote": "..."
+//   },
+//   "numRequested": 1
+// }
+// =========================================================
+
 router.post("/", authenticate, async (req, res) => {
   try {
-    /**
-     * Frontend sends payload like:
-     * {
-     *   ETI_807Data: { ...form fields... },
-     *   numRequested: 2
-     * }
-     */
     const { ETI_807Data, numRequested } = req.body || {};
 
-    // ✅ Safety check – avoid runtime crash
+    // =====================================================
+    // BASIC REQUEST VALIDATION
+    // =====================================================
+
     if (!ETI_807Data) {
-      return res.status(400).json({ error: "ETI_807Data is required" });
+      return res.status(400).json({
+        error: "ETI_807Data is required",
+      });
     }
 
-    /**
-     * ✅ Create a new ETI_807 configuration object
-     * This object is NOT saved directly to DB.
-     * It is stored inside user's cart first.
-     */
+    if (!numRequested || numRequested < 1) {
+      return res.status(400).json({
+        error: "numRequested must be at least 1",
+      });
+    }
+
+    // =====================================================
+    // BUILD PRODUCT CONFIGURATION
+    // =====================================================
+
     const order = new ETI_807({
-      // Required / primary fields
+      // ---------------------------------------------------
+      // GENERAL INFORMATION
+      // ---------------------------------------------------
+
       conveyorName: ETI_807Data.conveyorName,
-      industrialChainManufacturer: ETI_807Data.industrialChainManufacturer,
 
-      // Optional fields – added only if provided by frontend
-      ...(ETI_807Data.otherIndustrialChainManufacturer && {
-        otherIndustrialChainManufacturer:
-          ETI_807Data.otherIndustrialChainManufacturer,
-      }),
-      ...(ETI_807Data.conveyorLength && {
-        conveyorLength: ETI_807Data.conveyorLength,
-      }),
-      ...(ETI_807Data.conveyorLengthUnit && {
-        conveyorLengthUnit: ETI_807Data.conveyorLengthUnit,
-      }),
+      chainSize: ETI_807Data.chainSize,
 
-      /**
-       * ✅ NEW FIELD: technicianNote
-       * - Free-text note entered by technician
-       * - Trimmed to avoid saving empty spaces
-       */
+      industrialChainManufacturer:
+        ETI_807Data.industrialChainManufacturer,
+
+      conveyorLength: ETI_807Data.conveyorLength,
+
+      conveyorLengthUnit:
+        ETI_807Data.conveyorLengthUnit,
+
+      conveyorSpeed: ETI_807Data.conveyorSpeed,
+
+      conveyorSpeedUnit:
+        ETI_807Data.conveyorSpeedUnit,
+
+      appEnviroment: ETI_807Data.appEnviroment,
+
+      // ---------------------------------------------------
+      // CONDITIONAL: OTHER CHAIN SIZE
+      // ---------------------------------------------------
+
+      ...(ETI_807Data.chainSize === "Other" &&
+        ETI_807Data.otherChainSize && {
+          otherChainSize:
+            ETI_807Data.otherChainSize.trim(),
+        }),
+
+      // ---------------------------------------------------
+      // CONDITIONAL: OTHER CHAIN MANUFACTURER
+      // ---------------------------------------------------
+
+      ...(ETI_807Data.industrialChainManufacturer ===
+        "Other" &&
+        ETI_807Data.otherIndustrialChainManufacturer && {
+          otherIndustrialChainManufacturer:
+            ETI_807Data.otherIndustrialChainManufacturer.trim(),
+        }),
+
+      // ---------------------------------------------------
+      // CONDITIONAL: OTHER APPLICATION ENVIRONMENT
+      // ---------------------------------------------------
+
+      ...(ETI_807Data.appEnviroment === "Other" &&
+        ETI_807Data.otherAppEnviroment && {
+          otherAppEnviroment:
+            ETI_807Data.otherAppEnviroment.trim(),
+        }),
+
+      // ---------------------------------------------------
+      // OPTIONAL TECHNICIAN NOTE
+      // ---------------------------------------------------
+
       ...(ETI_807Data.technicianNote &&
         ETI_807Data.technicianNote.trim() && {
-          technicianNote: ETI_807Data.technicianNote.trim(),
+          technicianNote:
+            ETI_807Data.technicianNote.trim(),
         }),
     });
 
-    /**
-     * ✅ Push configuration into authenticated user's cart
-     * Cart structure:
-     * {
-     *   numRequested,
-     *   productConfigurationInfo,
-     *   productType
-     * }
-     */
+    // =====================================================
+    // VALIDATE CONFIGURATION
+    //
+    // Important because this document is embedded into
+    // user's cart and is not saved independently here.
+    // =====================================================
+
+    await order.validate();
+
+    // =====================================================
+    // ADD TO AUTHENTICATED USER CART
+    // =====================================================
+
     req.user.cart.push({
       numRequested,
       productConfigurationInfo: order,
       productType: "ETI_807",
     });
 
-    // ✅ Persist cart update in MongoDB
     await req.user.save();
 
-    // ✅ Success response
-    return res.status(200).json({ message: "ETI_807 entry added" });
-  } catch (error) {
-    // ✅ Log actual error for debugging
-    console.error(error);
+    // =====================================================
+    // SUCCESS RESPONSE
+    // =====================================================
 
-    // ✅ Generic error response to client
-    return res.status(500).json({ error: "Internal server error" });
+    return res.status(200).json({
+      message: "ETI_807 entry added",
+    });
+  } catch (error) {
+    console.error("ETI_807 configuration error:", error);
+
+    // =====================================================
+    // MONGOOSE VALIDATION ERROR
+    // =====================================================
+
+    if (error.name === "ValidationError") {
+      return res.status(400).json({
+        error: error.message,
+      });
+    }
+
+    // =====================================================
+    // INTERNAL SERVER ERROR
+    // =====================================================
+
+    return res.status(500).json({
+      error: "Internal server error",
+    });
   }
 });
 
-module.exports = router;
+module.exports = router

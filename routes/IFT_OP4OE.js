@@ -1,282 +1,285 @@
-// const express = require("express");
-// const { dbConnect } = require("../config/config");
-// const { authenticate } = require("./sessions");
-// const IFT_OP4OE = require("../models/IFT_OP4OE");
-// const templateA = require("../models/templateA");
-
-// const router = express.Router();
-
-// router.post("/", authenticate, async (req, res) => {
-//     try {
-//         const { IFT_OP4OEData, numRequested } = req.body;
-
-//         const order = new IFT_OP4OE({
-//             ...(IFT_OP4OEData.conveyorName && { conveyorName: IFT_OP4OEData.conveyorName }),
-//             chainSize: IFT_OP4OEData.chainSize,
-//             ...(IFT_OP4OEData.otherChainSize && { otherChainSize: IFT_OP4OEData.otherChainSize }),
-//             industrialChainManufacturer: IFT_OP4OEData.industrialChainManufacturer,
-//             ...(IFT_OP4OEData.otherChainManufacturer && { otherChainManufacturer: IFT_OP4OEData.otherChainManufacturer }),
-//            wheelManufacturer: IFT_OP4OEData.wheelManufacturer,
-//             ...(IFT_OP4OEData.otherWheelManufacturer && { otherWheelManufacturer: IFT_OP4OEData.otherWheelManufacturer }),
-//           conveyorLength: IFT_OP4OEData.conveyorLength ,
-//             ...(IFT_OP4OEData.measurementUnit && { measurementUnit: IFT_OP4OEData.measurementUnit }),
-//             conveyorSpeed: IFT_OP4OEData.conveyorSpeed,
-//             ...(IFT_OP4OEData.speedUnit && { speedUnit: IFT_OP4OEData.speedUnit }),
-//             conveyorIndex: IFT_OP4OEData.conveyorIndex,
-//             ...(IFT_OP4OEData.travelDirection && { travelDirection: IFT_OP4OEData.travelDirection }),
-//             appEnviroment: IFT_OP4OEData.appEnviroment,
-//             ...(IFT_OP4OEData.ovenStatus && { ovenStatus: IFT_OP4OEData.ovenStatus }),
-//             ...(IFT_OP4OEData.ovenTemp && { ovenTemp: IFT_OP4OEData.ovenTemp }),
-//             ...(IFT_OP4OEData.otherAppEnviroment && { otherAppEnviroment: IFT_OP4OEData.otherAppEnviroment }),
-//             ...(IFT_OP4OEData.surroundingTemp && { surroundingTemp: IFT_OP4OEData.surroundingTemp }),
-//             ...(IFT_OP4OEData.conveyorLoaded && { conveyorLoaded: IFT_OP4OEData.conveyorLoaded }),
-//             ...(IFT_OP4OEData.conveyorSwing && { conveyorSwing: IFT_OP4OEData.conveyorSwing }),
-//             strandStatus: IFT_OP4OEData.strandStatus,
-//             ...(IFT_OP4OEData.plantLayout && { plantLayout: IFT_OP4OEData.plantLayout }),
-//             ...(IFT_OP4OEData.requiredPics && { requiredPics: IFT_OP4OEData.requiredPics }),
-//             pointsOfLube: IFT_OP4OEData.pointsOfLube ,
-//             m12Plugs: IFT_OP4OEData.m12Plugs ,
-//             operatingVoltage: IFT_OP4OEData.operatingVoltage ,
-//             controlVoltage: IFT_OP4OEData.controlVoltage,
-//             monitorData: 
-//             {
-//                 existingMonitor: IFT_OP4OEData.templateA.existingMonitor,
-//                 newMonitor: IFT_OP4OEData.templateA.newMonitor,		
-//                 ...(IFT_OP4OEData.templateA.dcuStatus && { dcuStatus: IFT_OP4OEData.templateA.dcuStatus }),
-//                 ...(IFT_OP4OEData.templateA.dcuNum && { dcuNum: IFT_OP4OEData.templateA.dcuNum }),
-//                 ...(IFT_OP4OEData.templateA.existingWindows && { existingWindows: IFT_OP4OEData.templateA.existingWindows }),
-//                 ...(IFT_OP4OEData.templateA.existingHeadUnit && { existingHeadUnit: IFT_OP4OEData.templateA.existingHeadUnit }),
-//                 ...(IFT_OP4OEData.templateA.existingDCU && { existingDCU: IFT_OP4OEData.templateA.existingDCU }),
-//                 ...(IFT_OP4OEData.templateA.existingPowerInterface && { existingPowerInterface: IFT_OP4OEData.templateA.existingPowerInterface }),
-//                 ...(IFT_OP4OEData.templateA.newReservoir && { newReservoir: IFT_OP4OEData.templateA.newReservoir }),
-//                 ...(IFT_OP4OEData.templateA.reservoirSize && { reservoirSize: IFT_OP4OEData.templateA.reservoirSize }),
-//                 ...(IFT_OP4OEData.templateA.otherReservoirSize && { otherReservoirSize: IFT_OP4OEData.templateA.otherReservoirSize }),
-//                 ...(IFT_OP4OEData.templateA.newReservoirNum && { newReservoirNum: IFT_OP4OEData.templateA.newReservoirNum }),
-//                 ...(IFT_OP4OEData.templateA.typeMonitor && { typeMonitor: IFT_OP4OEData.templateA.typeMonitor }),
-//                 ...(IFT_OP4OEData.templateA.driveMotorAmp && { driveMotorAmp: IFT_OP4OEData.templateA.driveMotorAmp }),
-//                 ...(IFT_OP4OEData.templateA.driveMotorAmpNum && { driveMotorAmpNum: IFT_OP4OEData.templateA.driveMotorAmpNum }),
-//                 ...(IFT_OP4OEData.templateA.driveTakeUpAir && { driveTakeUpAir: IFT_OP4OEData.templateA.driveTakeUpAir }),
-//                 ...(IFT_OP4OEData.templateA.driveTakeUpAirNum && { driveTakeUpAirNum: IFT_OP4OEData.templateA.driveTakeUpAirNum }),
-//                 ...(IFT_OP4OEData.templateA.takeUpDistance && { takeUpDistance: IFT_OP4OEData.templateA.takeUpDistance }),
-//                 ...(IFT_OP4OEData.templateA.takeUpDistanceNum && { takeUpDistanceNum: IFT_OP4OEData.templateA.takeUpDistanceNum }),
-//                 ...(IFT_OP4OEData.templateA.driveTemp && { driveTemp: IFT_OP4OEData.templateA.driveTemp }),
-//                 ...(IFT_OP4OEData.templateA.driveTempNum && { driveTempNum: IFT_OP4OEData.templateA.driveTempNum }),
-//                 ...(IFT_OP4OEData.templateA.driveVibration && { driveVibration: IFT_OP4OEData.templateA.driveVibration }),
-//                 ...(IFT_OP4OEData.templateA.driveVibrationNum && { driveVibrationNum: IFT_OP4OEData.templateA.driveVibrationNum }),
-//                 ...(IFT_OP4OEData.templateA.dogPitch && { dogPitch: IFT_OP4OEData.templateA.dogPitch }),
-//                 ...(IFT_OP4OEData.templateA.dogPitchNum && { dogPitchNum: IFT_OP4OEData.templateA.dogPitchNum }),
-//                 ...(IFT_OP4OEData.templateA.paintMarker && { paintMarker: IFT_OP4OEData.templateA.paintMarker }),
-//                 ...(IFT_OP4OEData.templateA.paintMarkerNum && { paintMarkerNum: IFT_OP4OEData.templateA.paintMarkerNum }),
-//                 ...(IFT_OP4OEData.templateA.chainVision && { chainVision: IFT_OP4OEData.templateA.chainVision }),
-//                 ...(IFT_OP4OEData.templateA.lubeVision && { lubeVision: IFT_OP4OEData.templateA.lubeVision }),
-//                 ...(IFT_OP4OEData.templateA.trolleyVision && { trolleyVision: IFT_OP4OEData.templateA.trolleyVision }),
-//                 ...(IFT_OP4OEData.templateA.trolleyDetect && { trolleyDetect: IFT_OP4OEData.templateA.trolleyDetect }),
-//                 ...(IFT_OP4OEData.templateA.omniView && { omniView: IFT_OP4OEData.templateA.omniView }),
-//                 ...(IFT_OP4OEData.templateA.dcuUpgradeNum && { dcuUpgradeNum: IFT_OP4OEData.templateA.dcuUpgradeNum }),
-//                 ...(IFT_OP4OEData.templateA.piuDistance && { piuDistance: IFT_OP4OEData.templateA.piuDistance }),
-//                 ...(IFT_OP4OEData.templateA.switchDistance && { switchDistance: IFT_OP4OEData.templateA.switchDistance }),
-//                 ...(IFT_OP4OEData.templateA.ampPickup && { ampPickup: IFT_OP4OEData.templateA.ampPickup }),
-//                 ...(IFT_OP4OEData.templateA.fromAirTakeUpDistance && { fromAirTakeUpDistance: IFT_OP4OEData.templateA.fromAirTakeUpDistance }),
-//                 ...(IFT_OP4OEData.templateA.specialControllerOptions && { specialControllerOptions: IFT_OP4OEData.templateA.specialControllerOptions }),
-//                 ...(IFT_OP4OEData.templateA.operatingVoltage && { operatingVoltage: IFT_OP4OEData.templateA.operatingVoltage })
-//             },
-            
-//             ...(IFT_OP4OEData.wheelOpenType && { wheelOpenType: IFT_OP4OEData.wheelOpenType }),
-//             ...(IFT_OP4OEData.wheelClosedType && { wheelClosedType: IFT_OP4OEData.wheelClosedType }),
-//             ...(IFT_OP4OEData.openStatus && { openStatus: IFT_OP4OEData.openStatus }),
-//             ...(IFT_OP4OEData.freeWheelStatus && { freeWheelStatus: IFT_OP4OEData.freeWheelStatus }),
-//             ...(IFT_OP4OEData.guideRollerStatus && { guideRollerStatus: IFT_OP4OEData.guideRollerStatus }),
-//             ...(IFT_OP4OEData.openRaceStyle && { openRaceStyle: IFT_OP4OEData.openRaceStyle }),
-//             ...(IFT_OP4OEData.closedRaceStyle && { closedRaceStyle: IFT_OP4OEData.closedRaceStyle }),
-//             ...(IFT_OP4OEData.holeStatus && { holeStatus: IFT_OP4OEData.holeStatus }),
-//             ...(IFT_OP4OEData.actuatorStatus && { actuatorStatus: IFT_OP4OEData.actuatorStatus }),
-//             ...(IFT_OP4OEData.pivotStatus && { pivotStatus: IFT_OP4OEData.pivotStatus }),
-//             ...(IFT_OP4OEData.kingPinStatus && { kingPinStatus: IFT_OP4OEData.kingPinStatus }),
-//             ...(IFT_OP4OEData.outboardStatus && { outboardStatus: IFT_OP4OEData.outboardStatus }),
-//             ...(IFT_OP4OEData.railLubeStatus && { railLubeStatus: IFT_OP4OEData.railLubeStatus }),
-//             ...(IFT_OP4OEData.lubeBrand && { lubeBrand: IFT_OP4OEData.lubeBrand }),
-//             ...(IFT_OP4OEData.lubeType && { lubeType: IFT_OP4OEData.lubeType }),
-//             ...(IFT_OP4OEData.lubeViscosity && { lubeViscosity: IFT_OP4OEData.lubeViscosity }),
-//             ...(IFT_OP4OEData.chainMaster && { chainMaster: IFT_OP4OEData.chainMaster }),
-//             ...(IFT_OP4OEData.timerStatus && { timerStatus: IFT_OP4OEData.timerStatus }),
-//             ...(IFT_OP4OEData.electricStatus && { electricStatus: IFT_OP4OEData.electricStatus }),
-//             ...(IFT_OP4OEData.pneumaticStatus && { pneumaticStatus: IFT_OP4OEData.pneumaticStatus }),
-//             ...(IFT_OP4OEData.mightyLubeMonitoring && { mightyLubeMonitoring: IFT_OP4OEData.mightyLubeMonitoring }),
-//             ...(IFT_OP4OEData.plcConnection && { plcConnection: IFT_OP4OEData.plcConnection }),
-//             ...(IFT_OP4OEData.otherControllerInfo && { otherControllerInfo: IFT_OP4OEData.otherControllerInfo }),
-//             ...(IFT_OP4OEData.iftUnitType && { iftUnitType: IFT_OP4OEData.iftUnitType }),
-//             ...(IFT_OP4OEData.iftPowerA && { iftPowerA: IFT_OP4OEData.iftPowerA }),
-//             ...(IFT_OP4OEData.iftPowerB && { iftPowerB: IFT_OP4OEData.iftPowerB }),
-//             ...(IFT_OP4OEData.iftPowerG && { iftPowerG: IFT_OP4OEData.iftPowerG }),
-//             ...(IFT_OP4OEData.iftPowerH && { iftPowerH: IFT_OP4OEData.iftPowerH }),
-//             ...(IFT_OP4OEData.iftPowerJ && { iftPowerJ: IFT_OP4OEData.iftPowerJ }),
-//             ...(IFT_OP4OEData.iftPowerS1 && { iftPowerS1: IFT_OP4OEData.iftPowerS1 }),
-//             ...(IFT_OP4OEData.iftPowerT1 && { iftPowerT1: IFT_OP4OEData.iftPowerT1 }),
-//             ...(IFT_OP4OEData.iftPowerU1 && { iftPowerU1: IFT_OP4OEData.iftPowerU1 }),
-//             ...(IFT_OP4OEData.iftPowerW1 && { iftPowerW1: IFT_OP4OEData.iftPowerW1 }),
-//             ...(IFT_OP4OEData.iftPowerX1 && { iftPowerX1: IFT_OP4OEData.iftPowerX1 }),
-//         });
-
-//         req.user.cart.push({ numRequested, productConfigurationInfo: order, productType: "IFT_OP4OE" });
-//         await req.user.save();
-
-//         return res.status(200).json({ message: "IFT_OP4OE entry added" });
-//     } catch (error) {
-//         console.error(error);
-//         res.status(500).json({ error: "Internal server error" });
-//     }
-// });
-
-// module.exports = router;
-
-
-
-
-
-
-
-
 const express = require("express");
-const { dbConnect } = require("../config/config");
 const { authenticate } = require("./sessions");
 const IFT_OP4OE = require("../models/IFT_OP4OE");
-const templateA = require("../models/templateA");
 
 const router = express.Router();
 
-/**
- * IFT_OP4OE Create API
- *
- * - Receives IFT_OP4OEData + numRequested from request body
- * - Creates an IFT_OP4OE mongoose document (stores required + optional fields)
- * - Pushes the configuration into the authenticated user's cart
- *
- * Note:
- * technicianNote is an optional field for internal/technician remarks only.
- * It does not affect any processing; it is stored just for reference.
- */
+
+// ============================================================
+// OP-40E - IN FLOOR TOW LINE
+// Product ID: IFT_OP4OE
+// POST /
+// Request Body:
+// {
+//   IFT_OP4OEData: {...},
+//   numRequested: number
+// }
+// ============================================================
+
 router.post("/", authenticate, async (req, res) => {
     try {
         const { IFT_OP4OEData, numRequested } = req.body;
 
+        // ====================================================
+        // BASIC REQUEST VALIDATION
+        // ====================================================
+
+        if (!IFT_OP4OEData) {
+            return res.status(400).json({
+                success: false,
+                message: "IFT_OP4OEData is required",
+            });
+        }
+
+
+        // ====================================================
+        // CREATE PRODUCT CONFIGURATION
+        // ====================================================
+
         const order = new IFT_OP4OE({
-            ...(IFT_OP4OEData.conveyorName && { conveyorName: IFT_OP4OEData.conveyorName }),
-            chainSize: IFT_OP4OEData.chainSize,
-            ...(IFT_OP4OEData.otherChainSize && { otherChainSize: IFT_OP4OEData.otherChainSize }),
-            industrialChainManufacturer: IFT_OP4OEData.industrialChainManufacturer,
-            ...(IFT_OP4OEData.otherChainManufacturer && { otherChainManufacturer: IFT_OP4OEData.otherChainManufacturer }),
-            wheelManufacturer: IFT_OP4OEData.wheelManufacturer,
-            ...(IFT_OP4OEData.otherWheelManufacturer && { otherWheelManufacturer: IFT_OP4OEData.otherWheelManufacturer }),
-            conveyorLength: IFT_OP4OEData.conveyorLength,
-            ...(IFT_OP4OEData.measurementUnit && { measurementUnit: IFT_OP4OEData.measurementUnit }),
-            conveyorSpeed: IFT_OP4OEData.conveyorSpeed,
-            ...(IFT_OP4OEData.speedUnit && { speedUnit: IFT_OP4OEData.speedUnit }),
-            conveyorIndex: IFT_OP4OEData.conveyorIndex,
-            ...(IFT_OP4OEData.travelDirection && { travelDirection: IFT_OP4OEData.travelDirection }),
-            appEnviroment: IFT_OP4OEData.appEnviroment,
-            ...(IFT_OP4OEData.ovenStatus && { ovenStatus: IFT_OP4OEData.ovenStatus }),
-            ...(IFT_OP4OEData.ovenTemp && { ovenTemp: IFT_OP4OEData.ovenTemp }),
-            ...(IFT_OP4OEData.otherAppEnviroment && { otherAppEnviroment: IFT_OP4OEData.otherAppEnviroment }),
-            ...(IFT_OP4OEData.surroundingTemp && { surroundingTemp: IFT_OP4OEData.surroundingTemp }),
-            ...(IFT_OP4OEData.conveyorLoaded && { conveyorLoaded: IFT_OP4OEData.conveyorLoaded }),
-            ...(IFT_OP4OEData.conveyorSwing && { conveyorSwing: IFT_OP4OEData.conveyorSwing }),
-            strandStatus: IFT_OP4OEData.strandStatus,
-            ...(IFT_OP4OEData.plantLayout && { plantLayout: IFT_OP4OEData.plantLayout }),
-            ...(IFT_OP4OEData.requiredPics && { requiredPics: IFT_OP4OEData.requiredPics }),
-            pointsOfLube: IFT_OP4OEData.pointsOfLube,
-            m12Plugs: IFT_OP4OEData.m12Plugs,
-            operatingVoltage: IFT_OP4OEData.operatingVoltage,
-            controlVoltage: IFT_OP4OEData.controlVoltage,
 
-            // technicianNote: Optional note added by technician for internal/reference use
-            ...(IFT_OP4OEData.technicianNote && { technicianNote: IFT_OP4OEData.technicianNote }),
+            // =================================================
+            // GENERAL INFORMATION
+            // =================================================
 
-            monitorData: {
-                existingMonitor: IFT_OP4OEData.templateA.existingMonitor,
-                newMonitor: IFT_OP4OEData.templateA.newMonitor,
-                ...(IFT_OP4OEData.templateA.dcuStatus && { dcuStatus: IFT_OP4OEData.templateA.dcuStatus }),
-                ...(IFT_OP4OEData.templateA.dcuNum && { dcuNum: IFT_OP4OEData.templateA.dcuNum }),
-                ...(IFT_OP4OEData.templateA.existingWindows && { existingWindows: IFT_OP4OEData.templateA.existingWindows }),
-                ...(IFT_OP4OEData.templateA.existingHeadUnit && { existingHeadUnit: IFT_OP4OEData.templateA.existingHeadUnit }),
-                ...(IFT_OP4OEData.templateA.existingDCU && { existingDCU: IFT_OP4OEData.templateA.existingDCU }),
-                ...(IFT_OP4OEData.templateA.existingPowerInterface && { existingPowerInterface: IFT_OP4OEData.templateA.existingPowerInterface }),
-                ...(IFT_OP4OEData.templateA.newReservoir && { newReservoir: IFT_OP4OEData.templateA.newReservoir }),
-                ...(IFT_OP4OEData.templateA.reservoirSize && { reservoirSize: IFT_OP4OEData.templateA.reservoirSize }),
-                ...(IFT_OP4OEData.templateA.otherReservoirSize && { otherReservoirSize: IFT_OP4OEData.templateA.otherReservoirSize }),
-                ...(IFT_OP4OEData.templateA.newReservoirNum && { newReservoirNum: IFT_OP4OEData.templateA.newReservoirNum }),
-                ...(IFT_OP4OEData.templateA.typeMonitor && { typeMonitor: IFT_OP4OEData.templateA.typeMonitor }),
-                ...(IFT_OP4OEData.templateA.driveMotorAmp && { driveMotorAmp: IFT_OP4OEData.templateA.driveMotorAmp }),
-                ...(IFT_OP4OEData.templateA.driveMotorAmpNum && { driveMotorAmpNum: IFT_OP4OEData.templateA.driveMotorAmpNum }),
-                ...(IFT_OP4OEData.templateA.driveTakeUpAir && { driveTakeUpAir: IFT_OP4OEData.templateA.driveTakeUpAir }),
-                ...(IFT_OP4OEData.templateA.driveTakeUpAirNum && { driveTakeUpAirNum: IFT_OP4OEData.templateA.driveTakeUpAirNum }),
-                ...(IFT_OP4OEData.templateA.takeUpDistance && { takeUpDistance: IFT_OP4OEData.templateA.takeUpDistance }),
-                ...(IFT_OP4OEData.templateA.takeUpDistanceNum && { takeUpDistanceNum: IFT_OP4OEData.templateA.takeUpDistanceNum }),
-                ...(IFT_OP4OEData.templateA.driveTemp && { driveTemp: IFT_OP4OEData.templateA.driveTemp }),
-                ...(IFT_OP4OEData.templateA.driveTempNum && { driveTempNum: IFT_OP4OEData.templateA.driveTempNum }),
-                ...(IFT_OP4OEData.templateA.driveVibration && { driveVibration: IFT_OP4OEData.templateA.driveVibration }),
-                ...(IFT_OP4OEData.templateA.driveVibrationNum && { driveVibrationNum: IFT_OP4OEData.templateA.driveVibrationNum }),
-                ...(IFT_OP4OEData.templateA.dogPitch && { dogPitch: IFT_OP4OEData.templateA.dogPitch }),
-                ...(IFT_OP4OEData.templateA.dogPitchNum && { dogPitchNum: IFT_OP4OEData.templateA.dogPitchNum }),
-                ...(IFT_OP4OEData.templateA.paintMarker && { paintMarker: IFT_OP4OEData.templateA.paintMarker }),
-                ...(IFT_OP4OEData.templateA.paintMarkerNum && { paintMarkerNum: IFT_OP4OEData.templateA.paintMarkerNum }),
-                ...(IFT_OP4OEData.templateA.chainVision && { chainVision: IFT_OP4OEData.templateA.chainVision }),
-                ...(IFT_OP4OEData.templateA.lubeVision && { lubeVision: IFT_OP4OEData.templateA.lubeVision }),
-                ...(IFT_OP4OEData.templateA.trolleyVision && { trolleyVision: IFT_OP4OEData.templateA.trolleyVision }),
-                ...(IFT_OP4OEData.templateA.trolleyDetect && { trolleyDetect: IFT_OP4OEData.templateA.trolleyDetect }),
-                ...(IFT_OP4OEData.templateA.omniView && { omniView: IFT_OP4OEData.templateA.omniView }),
-                ...(IFT_OP4OEData.templateA.dcuUpgradeNum && { dcuUpgradeNum: IFT_OP4OEData.templateA.dcuUpgradeNum }),
-                ...(IFT_OP4OEData.templateA.piuDistance && { piuDistance: IFT_OP4OEData.templateA.piuDistance }),
-                ...(IFT_OP4OEData.templateA.switchDistance && { switchDistance: IFT_OP4OEData.templateA.switchDistance }),
-                ...(IFT_OP4OEData.templateA.ampPickup && { ampPickup: IFT_OP4OEData.templateA.ampPickup }),
-                ...(IFT_OP4OEData.templateA.fromAirTakeUpDistance && { fromAirTakeUpDistance: IFT_OP4OEData.templateA.fromAirTakeUpDistance }),
-                ...(IFT_OP4OEData.templateA.specialControllerOptions && { specialControllerOptions: IFT_OP4OEData.templateA.specialControllerOptions }),
-                ...(IFT_OP4OEData.templateA.operatingVoltage && { operatingVoltage: IFT_OP4OEData.templateA.operatingVoltage })
-            },
+            conveyorName:
+                IFT_OP4OEData.conveyorName,
 
-            ...(IFT_OP4OEData.wheelOpenType && { wheelOpenType: IFT_OP4OEData.wheelOpenType }),
-            ...(IFT_OP4OEData.wheelClosedType && { wheelClosedType: IFT_OP4OEData.wheelClosedType }),
-            ...(IFT_OP4OEData.openStatus && { openStatus: IFT_OP4OEData.openStatus }),
-            ...(IFT_OP4OEData.freeWheelStatus && { freeWheelStatus: IFT_OP4OEData.freeWheelStatus }),
-            ...(IFT_OP4OEData.guideRollerStatus && { guideRollerStatus: IFT_OP4OEData.guideRollerStatus }),
-            ...(IFT_OP4OEData.openRaceStyle && { openRaceStyle: IFT_OP4OEData.openRaceStyle }),
-            ...(IFT_OP4OEData.closedRaceStyle && { closedRaceStyle: IFT_OP4OEData.closedRaceStyle }),
-            ...(IFT_OP4OEData.holeStatus && { holeStatus: IFT_OP4OEData.holeStatus }),
-            ...(IFT_OP4OEData.actuatorStatus && { actuatorStatus: IFT_OP4OEData.actuatorStatus }),
-            ...(IFT_OP4OEData.pivotStatus && { pivotStatus: IFT_OP4OEData.pivotStatus }),
-            ...(IFT_OP4OEData.kingPinStatus && { kingPinStatus: IFT_OP4OEData.kingPinStatus }),
-            ...(IFT_OP4OEData.outboardStatus && { outboardStatus: IFT_OP4OEData.outboardStatus }),
-            ...(IFT_OP4OEData.railLubeStatus && { railLubeStatus: IFT_OP4OEData.railLubeStatus }),
-            ...(IFT_OP4OEData.lubeBrand && { lubeBrand: IFT_OP4OEData.lubeBrand }),
-            ...(IFT_OP4OEData.lubeType && { lubeType: IFT_OP4OEData.lubeType }),
-            ...(IFT_OP4OEData.lubeViscosity && { lubeViscosity: IFT_OP4OEData.lubeViscosity }),
-            ...(IFT_OP4OEData.chainMaster && { chainMaster: IFT_OP4OEData.chainMaster }),
-            ...(IFT_OP4OEData.timerStatus && { timerStatus: IFT_OP4OEData.timerStatus }),
-            ...(IFT_OP4OEData.electricStatus && { electricStatus: IFT_OP4OEData.electricStatus }),
-            ...(IFT_OP4OEData.pneumaticStatus && { pneumaticStatus: IFT_OP4OEData.pneumaticStatus }),
-            ...(IFT_OP4OEData.mightyLubeMonitoring && { mightyLubeMonitoring: IFT_OP4OEData.mightyLubeMonitoring }),
-            ...(IFT_OP4OEData.plcConnection && { plcConnection: IFT_OP4OEData.plcConnection }),
-            ...(IFT_OP4OEData.otherControllerInfo && { otherControllerInfo: IFT_OP4OEData.otherControllerInfo }),
-            ...(IFT_OP4OEData.iftUnitType && { iftUnitType: IFT_OP4OEData.iftUnitType }),
-            ...(IFT_OP4OEData.iftPowerA && { iftPowerA: IFT_OP4OEData.iftPowerA }),
-            ...(IFT_OP4OEData.iftPowerB && { iftPowerB: IFT_OP4OEData.iftPowerB }),
-            ...(IFT_OP4OEData.iftPowerG && { iftPowerG: IFT_OP4OEData.iftPowerG }),
-            ...(IFT_OP4OEData.iftPowerH && { iftPowerH: IFT_OP4OEData.iftPowerH }),
-            ...(IFT_OP4OEData.iftPowerJ && { iftPowerJ: IFT_OP4OEData.iftPowerJ }),
-            ...(IFT_OP4OEData.iftPowerS1 && { iftPowerS1: IFT_OP4OEData.iftPowerS1 }),
-            ...(IFT_OP4OEData.iftPowerT1 && { iftPowerT1: IFT_OP4OEData.iftPowerT1 }),
-            ...(IFT_OP4OEData.iftPowerU1 && { iftPowerU1: IFT_OP4OEData.iftPowerU1 }),
-            ...(IFT_OP4OEData.iftPowerW1 && { iftPowerW1: IFT_OP4OEData.iftPowerW1 }),
-            ...(IFT_OP4OEData.iftPowerX1 && { iftPowerX1: IFT_OP4OEData.iftPowerX1 }),
+            conveyorChainSize:
+                IFT_OP4OEData.conveyorChainSize,
+
+            otherConveyorChainSize:
+                IFT_OP4OEData.otherConveyorChainSize,
+
+            chainManufacturer:
+                IFT_OP4OEData.chainManufacturer,
+
+            otherChainManufacturer:
+                IFT_OP4OEData.otherChainManufacturer,
+
+            conveyorLength:
+                IFT_OP4OEData.conveyorLength,
+
+            conveyorLengthUnit:
+                IFT_OP4OEData.conveyorLengthUnit,
+
+            conveyorSpeed:
+                IFT_OP4OEData.conveyorSpeed,
+
+            conveyorSpeedUnit:
+                IFT_OP4OEData.conveyorSpeedUnit,
+
+            indexingVariableSpeedConditions:
+                IFT_OP4OEData.indexingVariableSpeedConditions,
+
+            travelDirection:
+                IFT_OP4OEData.travelDirection,
+
+            applicationEnvironment:
+                IFT_OP4OEData.applicationEnvironment,
+
+            otherApplicationEnvironment:
+                IFT_OP4OEData.otherApplicationEnvironment,
+
+            surroundingTemperature:
+                IFT_OP4OEData.surroundingTemperature,
+
+            conveyorLoadedStatus:
+                IFT_OP4OEData.conveyorLoadedStatus,
+
+            conveyorSwingStatus:
+                IFT_OP4OEData.conveyorSwingStatus,
+
+            conveyorStrand:
+                IFT_OP4OEData.conveyorStrand,
+
+
+            // =================================================
+            // CUSTOMER POWER UTILITIES
+            // =================================================
+
+            operatingVoltage:
+                IFT_OP4OEData.operatingVoltage,
+
+            controlVoltage:
+                IFT_OP4OEData.controlVoltage,
+
+
+            // =================================================
+            // NEW / EXISTING MONITORING SYSTEM
+            // =================================================
+
+            existingMonitoring:
+                IFT_OP4OEData.existingMonitoring,
+
+            newMonitoringSystem:
+                IFT_OP4OEData.newMonitoringSystem,
+
+
+            // =================================================
+            // CONVEYOR SPECIFICATIONS
+            // =================================================
+
+            wheelOpenRaceStyle:
+                IFT_OP4OEData.wheelOpenRaceStyle,
+
+            wheelSealedStyle:
+                IFT_OP4OEData.wheelSealedStyle,
+
+            openInsideShieldedOutside:
+                IFT_OP4OEData.openInsideShieldedOutside,
+
+            freeTrolleyWheels:
+                IFT_OP4OEData.freeTrolleyWheels,
+
+            guideRollers:
+                IFT_OP4OEData.guideRollers,
+
+            guideRollersOpenRaceStyle:
+                IFT_OP4OEData.guideRollersOpenRaceStyle,
+
+            guideRollersSealedStyle:
+                IFT_OP4OEData.guideRollersSealedStyle,
+
+            openHole:
+                IFT_OP4OEData.openHole,
+
+            dogActuator:
+                IFT_OP4OEData.dogActuator,
+
+            pivotPoints:
+                IFT_OP4OEData.pivotPoints,
+
+            kingPin:
+                IFT_OP4OEData.kingPin,
+
+            outboardWheels:
+                IFT_OP4OEData.outboardWheels,
+
+            railLubrication:
+                IFT_OP4OEData.railLubrication,
+
+            currentLubricationEquipmentBrand:
+                IFT_OP4OEData.currentLubricationEquipmentBrand,
+
+            currentLubricantType:
+                IFT_OP4OEData.currentLubricantType,
+
+            currentLubricantViscosityGrade:
+                IFT_OP4OEData.currentLubricantViscosityGrade,
+
+
+            // =================================================
+            // CONTROLLER
+            // =================================================
+
+            chainMasterController:
+                IFT_OP4OEData.chainMasterController,
+
+            timer:
+                IFT_OP4OEData.timer,
+
+            electricOnOff:
+                IFT_OP4OEData.electricOnOff,
+
+            pneumaticOnOff:
+                IFT_OP4OEData.pneumaticOnOff,
+
+            mightyLubeMonitoring:
+                IFT_OP4OEData.mightyLubeMonitoring,
+
+            plcConnection:
+                IFT_OP4OEData.plcConnection,
+
+            otherControllerDescription:
+                IFT_OP4OEData.otherControllerDescription,
+
+            specialControllerOptions:
+                IFT_OP4OEData.specialControllerOptions,
+
+            controllerSpecify:
+                IFT_OP4OEData.controllerSpecify,
+
+
+            // =================================================
+            // IN FLOOR TOWLINE: MEASUREMENTS
+            // =================================================
+
+            measurementUnit:
+                IFT_OP4OEData.measurementUnit,
+
+            inFloorTowlineChainDropA:
+                IFT_OP4OEData.inFloorTowlineChainDropA,
+
+            inFloorTowlinePowerTrolleyWheelB:
+                IFT_OP4OEData.inFloorTowlinePowerTrolleyWheelB,
+
+            inFloorTowlinePowerRailG:
+                IFT_OP4OEData.inFloorTowlinePowerRailG,
+
+            inFloorTowlinePowerRailH:
+                IFT_OP4OEData.inFloorTowlinePowerRailH,
+
+            inFloorTowlineRailOffsetJ:
+                IFT_OP4OEData.inFloorTowlineRailOffsetJ,
+
+            inFloorTowlineConveyorHousingS1:
+                IFT_OP4OEData.inFloorTowlineConveyorHousingS1,
+
+            inFloorTowlineConveyorHousingT1:
+                IFT_OP4OEData.inFloorTowlineConveyorHousingT1,
+
+            inFloorTowlineConveyorHousingWallU1:
+                IFT_OP4OEData.inFloorTowlineConveyorHousingWallU1,
+
+            inFloorTowlineConveyorHousingFloorV1:
+                IFT_OP4OEData.inFloorTowlineConveyorHousingFloorV1,
+
+            inFloorTowlineConveyorHousingOffsetW1:
+                IFT_OP4OEData.inFloorTowlineConveyorHousingOffsetW1,
+
+            inFloorTowlineFloorX1:
+                IFT_OP4OEData.inFloorTowlineFloorX1,
+
+
+            // =================================================
+            // TECHNICIAN NOTE
+            // =================================================
+
+            technicianNote:
+                IFT_OP4OEData.technicianNote,
         });
 
-        req.user.cart.push({ numRequested, productConfigurationInfo: order, productType: "IFT_OP4OE" });
+
+        // ====================================================
+        // ADD CONFIGURATION TO AUTHENTICATED USER CART
+        // ====================================================
+
+        req.user.cart.push({
+            numRequested,
+            productConfigurationInfo: order,
+            productType: "IFT_OP4OE",
+        });
+
         await req.user.save();
 
-        return res.status(200).json({ message: "IFT_OP4OE entry added" });
+
+        // ====================================================
+        // SUCCESS RESPONSE
+        // ====================================================
+
+        return res.status(200).json({
+            message: "IFT_OP4OE entry added",
+        });
+
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: "Internal server error" });
+        console.error("IFT_OP4OE Error:", error);
+
+        return res.status(500).json({
+            error: "Internal server error",
+        });
     }
 });
 
-module.exports = router;
+
+module.exports = router

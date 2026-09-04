@@ -1,171 +1,192 @@
 const mongoose = require("mongoose");
+
 const OHP_PMLSchema = new mongoose.Schema({
+
+  // ============================================================
+  // GENERAL INFORMATION
+  // ============================================================
+
   conveyorName: {
     type: String,
-    required: true,
+    trim: true,
   },
 
-  chainSize: {
-    type: Number,
-    enum: [1, 2, 3, 4, 5],
-    required: true,
-  },
-
-  otherChainSize: {
+  conveyorChainSize: {
     type: String,
+    trim: true,
+  },
+
+  otherConveyorChainSize: {
+    type: String,
+    trim: true,
     required: function () {
-      return this.chainSize === 5;
+      return this.conveyorChainSize === "Other";
     },
   },
 
-  industrialChainManufacturer: {
-    type: Number,
-    enum: [1, 2, 3, 4, 5, 6, 7, 8, 9],
-    required: true,
+  chainManufacturer: {
+    type: String,
+    trim: true,
   },
 
   otherChainManufacturer: {
     type: String,
+    trim: true,
     required: function () {
-      return this.industrialChainManufacturer === 9;
+      return this.chainManufacturer === "Other";
     },
   },
+
   conveyorLength: {
-    type: Number,
-    required: true,
+    type: String,
+    trim: true,
   },
 
   conveyorLengthUnit: {
-    type: Number,
-    enum: [1, 2, 3, 4],
-    required: true,
+    type: String,
+    enum: [
+      "Feet",
+      "Inches",
+      "m Meter",
+      "mm Millimeter",
+    ],
   },
 
   conveyorSpeed: {
-    type: Number,
-    required: true,
+    type: String,
+    trim: true,
   },
 
   conveyorSpeedUnit: {
-    type: Number,
-    enum: [1, 2],
-    required: true,
-  },
-
-  conveyorIndex: {
-    type: Number,
-    required: true,
-  },
-
-  travelDirection: {
-    type: Number,
-    enum: [1, 2],
-    required: true,
-  },
-
-  appEnviroment: {
-    type: Number,
-    enum: [1, 2, 3, 4, 5, 6, 7],
-    required: true,
-  },
-
-  // ✅ NEW OPTIONAL FIELD
-  technicianNote: {
     type: String,
-    required: false,
+    enum: [
+      "Feet / minute",
+    ],
+  },
+
+  indexingOrVariableSpeedConditions: {
+    type: String,
     trim: true,
   },
-  
-  ovenStatus: {
-    type: Number,
-    enum: [1, 2],
-    required: function () {
-      return this.appEnviroment === 3;
-    },
-  },
 
-  ovenTemp: {
-    type: Number,
-    required: function () {
-      return this.appEnviroment === 3;
-    },
-  },
-
-  otherAppEnviroment: {
+  directionOfTravel: {
     type: String,
+    trim: true,
+  },
+
+  applicationEnvironment: {
+    type: String,
+    trim: true,
+    required: true,
+  },
+
+  otherApplicationEnvironment: {
+    type: String,
+    trim: true,
     required: function () {
-      return this.appEnviroment === 7;
+      return this.applicationEnvironment === "Other";
     },
   },
 
-  surroundingTemp: {
-    type: Number,
-    enum: [1, 2],
+  surroundingAreaTemperature: {
+    type: String,
+    trim: true,
+  },
+
+  conveyorLoadedOrUnloaded: {
+    type: String,
+    trim: true,
     required: true,
   },
 
-  conveyorLoaded: {
-    type: Number,
-    enum: [1, 2],
+  conveyorSwingSwaySurge: {
+    type: String,
+    trim: true,
     required: true,
   },
 
-  conveyorSwing: {
-    type: Number,
-    enum: [1, 2],
+
+  // ============================================================
+  // CUSTOMER POWER UTILITIES
+  // ============================================================
+
+  operatingVoltageSinglePhase: {
+    type: String,
+    trim: true,
     required: true,
   },
 
-  orientationType: {
-    type: Number,
-    enum: [1, 2, 3],
-    required: false,
+
+  // ============================================================
+  // MONITORING FEATURES REQUESTED
+  // ============================================================
+
+  paintMarkerSystem: {
+    type: String,
+    enum: [
+      "Yes",
+      "No",
+    ],
   },
 
-  paintMakerStatus: {
-    type: Number,
-    enum: [1, 2],
-    required: true,
+
+  // ============================================================
+  // CONVEYOR SPECIFICATIONS
+  // ============================================================
+
+  isConveyorClean: {
+    type: String,
+    trim: true,
   },
 
-  paintMarketNum: {
-    type: Number,
-    required: false,
-  },
 
-  chainCleanStatus: {
-    type: Number,
-    enum: [1, 2],
-    required: true,
-  },
+  // ============================================================
+  // OVERHEAD POWER RAIL MEASUREMENTS
+  // ============================================================
 
-  ohpUnitType: {
-    type: Number,
-    enum: [1, 2, 3, 4],
-    required: false,
+  measurementUnit: {
+    type: String,
+    enum: [
+      "Feet",
+    ],
   },
 
   chainDrop: {
-    type: Number,
-    required: true,
+    type: String,
+    trim: true,
   },
 
-  ohpDiameter: {
-    type: Number,
-    required: false,
+  powerTrolleyWheelDiameter: {
+    type: String,
+    trim: true,
   },
 
-  ohpWidth: {
-    type: Number,
-    required: true,
+  powerRailWidth: {
+    type: String,
+    trim: true,
   },
 
-  ohpHeight: {
-    type: Number,
-    required: true,
+  powerRailHeight: {
+    type: String,
+    trim: true,
   },
+
+
+  // ============================================================
+  // TECHNICIAN NOTE
+  // ============================================================
+
+  technicianNote: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+
 });
 
-const OHP_PML = mongoose.model("tblOHP_PML", OHP_PMLSchema);
+const OHP_PML = mongoose.model(
+  "tblOHP_PML",
+  OHP_PMLSchema
+);
 
-module.exports = OHP_PML;
+module.exports = OHP_PML

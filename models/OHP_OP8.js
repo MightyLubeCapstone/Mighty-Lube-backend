@@ -1,188 +1,198 @@
 const mongoose = require("mongoose");
-const templateA = require("./templateA.js");
-const OHP_OP8Schema = new mongoose.Schema({
-  conveyorName: {
-    type: String,
-    required: true,
-  },
 
-  chainSize: {
-    type: Number,
-    enum: [1, 2, 3, 4, 5],
-    required: true,
-  },
+const OHCCSOP8Schema = new mongoose.Schema(
+  {
+    // =========================================================
+    // GENERAL INFORMATION
+    // =========================================================
 
-  otherChainSize: {
-    type: String,
-    required: function () {
-      return this.chainSize === 5;
+    conveyorName: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    conveyorChainSize: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    chainManufacturer: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    conveyorLength: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    conveyorLengthUnit: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    directionOfTravel: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    applicationEnvironment: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    surroundingTemperatureOutsideRange: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    conveyorLoadState: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    // =========================================================
+    // CUSTOMER POWER UTILITIES
+    // =========================================================
+
+    operatingVoltage3Phase: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    controlVoltage: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    // =========================================================
+    // OP-SS
+    // =========================================================
+
+    poweredNonPoweredAvailable: {
+      type: String,
+      required: true,
+      trim: true,
+      enum: [
+        "Powered",
+        "Non-Powered",
+      ],
+    },
+
+    brushMaterialsAvailable: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    installationClearanceConfirmed: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    // =========================================================
+    // ADDITIONAL OPTIONS AVAILABLE
+    // =========================================================
+
+    washDown: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    foodIndustry: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    powerPanelWithTimer: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    threeStationPushButtonSwitch: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    shroud: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    otherAdditionalOptions: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    // =========================================================
+    // OVERHEAD POWER RAIL: MEASUREMENTS
+    // =========================================================
+
+    measurementUnit: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    chainDropA: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    overheadPowerMonoRailPowerTrolleyWheelB: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    overheadPowerMonoRailPowerRailG: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    overheadPowerMonoRailPowerRailH: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    // =========================================================
+    // TECHNICIAN NOTE
+    // =========================================================
+
+    technicianNote: {
+      type: String,
+      required: true,
+      trim: true,
     },
   },
+  {
+    timestamps: true,
+  }
+);
 
-  industrialChainManufacturer: {
-    type: Number,
-    enum: [1, 2, 3, 4, 5, 6, 7, 8, 9],
-    required: true,
-  },
+const OH_CCS_OP8 =
+  mongoose.models.OH_CCS_OP8 ||
+  mongoose.model("OH_CCS_OP8", OHCCSOP8Schema);
 
-  otherChainManufacturer: {
-    type: String,
-    required: function () {
-      return this.industrialChainManufacturer === 9;
-    },
-  },
-
-  appEnviroment: {
-    type: Number,
-    enum: [1, 2, 3, 4, 5, 6, 7],
-    required: false,
-  },
-
-  ovenStatus: {
-    type: Number,
-    enum: [1, 2],
-    required: function () {
-      return this.appEnviroment === 3;
-    },
-  },
-
-  ovenTemp: {
-    type: Number,
-    required: function () {
-      return this.appEnviroment === 3;
-    },
-  },
-
-  otherAppEnviroment: {
-    type: String,
-    required: function () {
-      return this.appEnviroment === 7;
-    },
-  },
-
-  surroundingTemp: {
-    type: Number,
-    enum: [1, 2],
-    required: false,
-  },
-
-  conveyorLoaded: {
-    type: Number,
-    enum: [1, 2],
-    required: false,
-  },
-
-  operatingVoltTriple: {
-    type: Number,
-    required: false,
-  },
-
-  // ✅ NEW OPTIONAL FIELD
-  technicianNote: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-  opPowerStatus: {
-    type: Number,
-    enum: [1, 2],
-    required: false,
-  },  
-
-  brushStatus: {
-    type: Number,
-    enum: [1, 2],
-    required: true,
-  },  
-
-  brushMaterialType: {
-    type: Number,
-    enum: [1, 2, 3, 4],
-    required: false,
-  },
-
-  otherBrushMaterialType: {
-    type: String,
-    required: function () {
-      return this.brushMaterialType === 4;
-    },
-  },
-
-  clearanceStatus: {
-    type: Number,
-    enum: [1, 2],
-    required: false,
-  },
-
-  washStatus: {
-    type: Number,
-    enum: [1, 2],
-    required: false,
-  },
-
-  foodIndustryStatus: {
-    type: Number,
-    enum: [1, 2],
-    required: false,
-  },
-
-  powerPanelType: {
-    type: Number,
-    enum: [1],
-    required: false,
-  },  
-
-  threeStationType: {
-    type: Number,
-    enum: [1],
-    required: false,
-  },  
-
-  shroudStatus: {
-    type: Number,
-    enum: [1, 2],
-    required: true,
-  },  
-
-  shroudType: {
-    type: Number,
-    enum: [1, 2],
-    required: false,
-  },
-
-  additionalInfo: {
-    type: String,
-    required: false,
-  },
-
-  ohpUnitType: {
-    type: Number,
-    enum: [1, 2, 3, 4],
-    required: false,
-  },
-
-  chainDrop: {
-    type: Number,
-    required: false,
-  },
-
-  ohpDiameter: {
-    type: Number,
-    required: false,
-  },
-
-  ohpWidth: {
-    type: Number,
-    required: false,
-  },
-
-  ohpHeight: {
-    type: Number,
-    required: false,
-  },
-});
-
-const OHP_OP8 =
-  mongoose.models.OHP_OP8 || mongoose.model("OHP_OP8", OHP_OP8Schema);
-module.exports = OHP_OP8;
+module.exports = OH_CCS_OP8;

@@ -1,271 +1,400 @@
-const mongoose = require('mongoose');
-const templateA = require("./templateA.js");
-const getDecodedInfo = require("./getDecodedInfo.js");  
+const mongoose = require("mongoose");
 
-const FRO_314_Schema = new mongoose.Schema({
+const FRO_314_Schema = new mongoose.Schema(
+  {
+    // =====================================================
+    // GENERAL INFORMATION
+    // =====================================================
+
     conveyorName: {
-        type: String,
-        required: false,
+      type: String,
+      required: false,
+      default: "",
+      trim: true,
     },
+
     wheelManufacturer: {
-        type: Number,
-        enum: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-        required: false,
+      type: String,
+      required: false,
+      default: "",
+      trim: true,
     },
-    // otherWheelManufacturer: {
-    //     type: String,
-    //     required: function () {
-    //         return this.wheelManufacturer === 10;
-    //     },
-    // },
+
+    otherWheelManufacturer: {
+      type: String,
+      required: false,
+      default: "",
+      trim: true,
+    },
+
     conveyorLength: {
-        type: Number,
-        required: false,
+      type: String,
+      required: false,
+      default: "",
+      trim: true,
     },
+
     conveyorLengthUnit: {
-
-        type: Number,
-        enum: [1, 2, 3, 4],
-        required: false,
-
+      type: String,
+      required: false,
+      default: "",
+      trim: true,
     },
+
     conveyorSpeed: {
-        type: Number,
-        required: false,
+      type: String,
+      required: false,
+      default: "",
+      trim: true,
     },
+
     conveyorSpeedUnit: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
+      type: String,
+      required: false,
+      default: "",
+      trim: true,
     },
+
+    indexingVariableSpeedConditions: {
+      type: String,
+      required: false,
+      default: "",
+      trim: true,
+    },
+
     travelDirection: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
+      type: String,
+      required: false,
+      default: "",
+      trim: true,
     },
 
-    // ✅ NEW OPTIONAL FIELD
-  technicianNote: {
-    type: String,
-    required: false,
-    trim: true,
-  },
+    applicationEnvironment: {
+      type: String,
+      required: true,
+      trim: true,
+    },
 
-  
-  appEnviroment: {
-    type: Number,
-    enum: [1, 2, 3, 4, 5, 6, 7],
-    required: true,
-  },
+    otherApplicationEnvironment: {
+      type: String,
+      required: false,
+      default: "",
+      trim: true,
+    },
 
-  ovenStatus: {
-    type: Number,
-    enum: [1, 2],
-    required: function () {
-      return this.appEnviroment === 3;
+    surroundingTemperature: {
+      type: String,
+      required: false,
+      default: "",
+      trim: true,
     },
-  },
 
-  ovenTemp: {
-    type: Number,
-    required: function () {
-      return this.appEnviroment === 3;
+    conveyorSwingStatus: {
+      type: String,
+      required: true,
+      trim: true,
     },
-  },
 
-  otherAppEnviroment: {
-    type: String,
-    required: function () {
-      return this.appEnviroment === 7;
+    conveyorOrientation: {
+      type: String,
+      required: false,
+      default: "",
+      trim: true,
     },
-  },
-    surroundingTemp: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
-    },
-    conveyorSwing: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
-    },
-    orientation: {
-        type: Number,
-        required: false,
-    },
+
+    // =====================================================
+    // CUSTOMER POWER UTILITIES
+    // =====================================================
+
     operatingVoltage: {
-        type: Number,
-        required: false,
+      type: String,
+      required: true,
+      trim: true,
     },
+
     controlVoltage: {
-        type: Number,
-        required: false,
-    },
-    compressedAir: {
-        type: Number,
-        required: false,
-    },
-    airSupply: {
-        type: Number,
-        required: false,
-    },
-    existingMonitor: {
-
-        type: Number,
-        enum: [1, 2],
-        required: false,
-
+      type: String,
+      required: true,
+      trim: true,
     },
 
-    newMonitor: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
-    
+    compressedAirSupply: {
+      type: String,
+      required: true,
+      trim: true,
     },
-   // monitorData: templateA,
 
+    compressedAirSupplyUnit: {
+      type: String,
+      required: false,
+      default: "",
+      trim: true,
+    },
 
+    // =====================================================
+    // MONITORING SYSTEM
+    // =====================================================
 
-    
-    freeWheelStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
+    existingMonitoring: {
+      type: String,
+      required: false,
+      default: "",
+      trim: true,
     },
-    actuatorStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
+
+    newMonitoringSystem: {
+      type: String,
+      required: false,
+      default: "",
+      trim: true,
     },
-    pivotStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
+
+    // =====================================================
+    // CONVEYOR SPECIFICATIONS
+    // =====================================================
+
+    freeTrolleyWheels: {
+      type: String,
+      required: false,
+      default: "",
+      trim: true,
     },
-    kingPinStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
+
+    dogActuator: {
+      type: String,
+      required: false,
+      default: "",
+      trim: true,
     },
-    lubeBrand: {
-        type: String,
-        required: false,
+
+    pivotPoints: {
+      type: String,
+      required: false,
+      default: "",
+      trim: true,
     },
-    lubeType: {
-        type: String,
-        required: false,
+
+    kingPin: {
+      type: String,
+      required: false,
+      default: "",
+      trim: true,
     },
-    lubeViscosity: {
-        type: String,
-        required: false,
+
+    currentLubricationEquipmentBrand: {
+      type: String,
+      required: false,
+      default: "",
+      trim: true,
     },
-    currentGrease: {
-        type: String,
-        required: false,
+
+    currentLubricantType: {
+      type: String,
+      required: false,
+      default: "",
+      trim: true,
     },
-    currentGreaseGrade: {
-        type: Number,
-        required: false,
+
+    currentLubricantViscosityGrade: {
+      type: String,
+      required: false,
+      default: "",
+      trim: true,
     },
-    zerkDirection: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
+
+    currentGreaseType: {
+      type: String,
+      required: false,
+      default: "",
+      trim: true,
     },
-    zerkLocation: {
-        type: Number,
-        required: false,
+
+    currentGreaseNlgiGrade: {
+      type: String,
+      required: false,
+      default: "",
+      trim: true,
     },
-    chainMaster: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
+
+    zerkFittingLocationSide: {
+      type: String,
+      required: false,
+      default: "",
+      trim: true,
     },
-    remoteStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
+
+    zerkFittingLocationOrientation: {
+      type: String,
+      required: false,
+      default: "",
+      trim: true,
     },
-    mountStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
+
+    // =====================================================
+    // CONTROLLER
+    // =====================================================
+
+    chainMasterController: {
+      type: String,
+      required: false,
+      default: "",
+      trim: true,
     },
-    otherUnitStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
+
+    remote: {
+      type: String,
+      required: false,
+      default: "",
+      trim: true,
     },
-    timerStatus: {
-        type: Number,
-        enum: [1, 2, 3],
-        required: false,
+
+    mountedOnGreaser: {
+      type: String,
+      required: false,
+      default: "",
+      trim: true,
     },
-    electricStatus: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
+
+    controlsOtherUnits: {
+      type: String,
+      required: false,
+      default: "",
+      trim: true,
     },
+
+    timer: {
+      type: String,
+      required: false,
+      default: "",
+      trim: true,
+    },
+
+    electricOnOff: {
+      type: String,
+      required: false,
+      default: "",
+      trim: true,
+    },
+
     mightyLubeMonitoring: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
+      type: String,
+      required: false,
+      default: "",
+      trim: true,
     },
-    preMountType: {
-        type: Number,
-        required: false,
-    },
-    plcConnection: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
-    },
-    otherControllerInfo: {
-        type: String,
-        required: false,
-    },
-    frUnitType: {
-        type: Number,
-        required: false,
-    },
-    frInvertedB: {
-        type: Number,
-        required: false,
-    },
-    frInvertedE: {
-        type: Number,
-        required: false,
-    },
-    frInvertedG: {
-        type: Number,
-        required: false,
-    },
-    frInvertedH: {
-        type: Number,
-        required: false,
-    },
-    frInvertedK: {
-        type: Number,
-        required: false,
-    },
-    frInvertedT: {
-        type: Number,
-        required: false,
-    },
-    frInvertedU: {
-        type: Number,
-        required: false,
-    },
-    frInvertedV: {
-        type: Number,
-        required: false,
-    },
-    frInvertedW: {
-        type: Number,
-        required: false,
-    },
-});
 
-const FRO_314 = mongoose.models.FRO_314 || mongoose.model('FRO_314', FRO_314_Schema);
-module.exports = FRO_314;
+    preMountingRequirements: {
+      type: String,
+      required: false,
+      default: "",
+      trim: true,
+    },
+
+    plcConnection: {
+      type: String,
+      required: false,
+      default: "",
+      trim: true,
+    },
+
+    otherControllerInfo: {
+      type: String,
+      required: false,
+      default: "",
+      trim: true,
+    },
+
+    // =====================================================
+    // INVERTED P&F: MEASUREMENTS
+    // =====================================================
+
+    measurementUnit: {
+      type: String,
+      required: false,
+      default: "",
+      trim: true,
+    },
+
+    invertedPowerTrolleyWheelB: {
+      type: String,
+      required: false,
+      default: "",
+      trim: true,
+    },
+
+    invertedZerkFittingVerticalE: {
+      type: String,
+      required: false,
+      default: "",
+      trim: true,
+    },
+
+    invertedRailG: {
+      type: String,
+      required: false,
+      default: "",
+      trim: true,
+    },
+
+    invertedRailH: {
+      type: String,
+      required: false,
+      default: "",
+      trim: true,
+    },
+
+    invertedTrolleyWheelPitchK: {
+      type: String,
+      required: false,
+      default: "",
+      trim: true,
+    },
+
+    invertedCarrierTrolleyPitchT: {
+      type: String,
+      required: false,
+      default: "",
+      trim: true,
+    },
+
+    invertedCarrierTrolleyPitchU: {
+      type: String,
+      required: false,
+      default: "",
+      trim: true,
+    },
+
+    invertedCarrierTrolleyPitchV: {
+      type: String,
+      required: false,
+      default: "",
+      trim: true,
+    },
+
+    invertedFreeTrolleyWheelOffsetW: {
+      type: String,
+      required: false,
+      default: "",
+      trim: true,
+    },
+
+    // =====================================================
+    // TECHNICIAN NOTE
+    // =====================================================
+
+    technicianNote: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+const FRO_314 =
+  mongoose.models.FRO_314 ||
+  mongoose.model("FRO_314", FRO_314_Schema);
+
+module.exports = FRO_314

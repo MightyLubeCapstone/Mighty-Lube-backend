@@ -1,89 +1,110 @@
 const mongoose = require("mongoose");
 
+const OHCCSIBEAMSchema = new mongoose.Schema(
+  {
+    // =========================================================
+    // GENERAL INFORMATION
+    // =========================================================
 
-const OHPCBSSchema = new mongoose.Schema({
-  conveyorName: {
-    type: String,
-    required: true,
-  },
+    conveyorName: {
+      type: String,
+      default: "",
+      trim: true,
+    },
 
-  chainSize: {
-    type: Number,
-    enum: [1, 2, 3, 4, 5],
-    required: true,
-  },
+    conveyorChainSize: {
+      type: String,
+      default: "",
+      trim: true,
+    },
 
-  otherChainSize: {
-    type: String,
-    required: function () {
-      return this.chainSize === 5;
+    otherConveyorChainSize: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    chainManufacturer: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    otherChainManufacturer: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    conveyorLength: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    conveyorLengthUnit: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    applicationEnvironment: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    otherApplicationEnvironment: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    // =========================================================
+    // OVERHEAD POWER RAIL MEASUREMENTS
+    // =========================================================
+
+    measurementUnit: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    overheadPowerRailChannelTrolleyWheelB: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    overheadPowerRailG: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    overheadPowerRailH: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    // =========================================================
+    // TECHNICIAN NOTE
+    // =========================================================
+
+    technicianNote: {
+      type: String,
+      required: true,
+      trim: true,
     },
   },
+  {
+    timestamps: true,
+  }
+);
 
-  railSize: {
-    type: Number,
-    enum: [1, 2, 3],
-    require: true,
-  },
+const OH_CCS_IBEAM =
+  mongoose.models.OH_CCS_IBEAM ||
+  mongoose.model("OH_CCS_IBEAM", OHCCSIBEAMSchema);
 
-  industrialChainManufacturer: {
-    type: Number,
-    enum: [1, 2, 3, 4, 5, 6, 7, 8, 9],
-    required: true,
-  },
-
-  otherChainManufacturer: {
-    type: String,
-    required: function () {
-      return this.industrialChainManufacturer === 9;
-    },
-  },
-  conveyorLength: {
-    type: Number,
-    required: false,
-  },
-
-  measurementUnit: {
-    type: Number,
-    enum: [1, 2, 3, 4],
-    required: false,
-  },
-
-  appEnviroment: {
-    type: Number,
-    enum: [1, 2, 3, 4, 5, 6, 7],
-    required: false,
-  },
-
-  // ✅ NEW OPTIONAL FIELD
-  technicianNote: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-  ovenStatus: {
-    type: Number,
-    enum: [1, 2],
-    required: function () {
-      return this.appEnviroment === 3;
-    },
-  },
-
-  ovenTemp: {
-    type: Number,
-    required: function () {
-      return this.appEnviroment === 3;
-    },
-  },
-
-  otherAppEnviroment: {
-    type: String,
-    required: function () {
-      return this.appEnviroment === 7;
-    },
-  },
-});
-
-const OHP_CBS = mongoose.models.OHP_CBS || mongoose.model("OHP_CBS", OHPCBSSchema);
-module.exports = OHP_CBS;
+module.exports = OH_CCS_IBEAM;

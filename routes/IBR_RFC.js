@@ -1,286 +1,233 @@
-// const express = require("express");
-// const { dbConnect } = require("../config/config");
-// const { authenticate } = require("./sessions");
-// const IBR_RFC = require("../models/IBR_RFC");
-// const templateA = require("../models/templateA");
-
-// const router = express.Router();
-
-// router.post("/", authenticate, async (req, res) => {
-//     //used for IBR_RFC form
-//     try {
-//         const { IBR_RFCData, numRequested } = req.body;
-//         const order = new IBR_RFC({
-//             conveyorName: IBR_RFCData.conveyorName ,
-//             chainSize: IBR_RFCData.chainSize ,
-//             ...(IBR_RFCData.otherChainSize && { otherChainSize: IBR_RFCData.otherChainSize }),
-//             industrialChainManufacturer: IBR_RFCData.industrialChainManufacturer,
-//             ...(IBR_RFCData.otherChainManufacturer && { otherChainManufacturer: IBR_RFCData.otherChainManufacturer }),
-//             conveyorLength: IBR_RFCData.conveyorLength ,
-//             conveyorLengthUnit: IBR_RFCData.conveyorLengthUnit,
-//             conveyorSpeed: IBR_RFCData.conveyorSpeed ,
-//             speedUnit: IBR_RFCData.speedUnit,
-//             conveyorIndex: IBR_RFCData.conveyorIndex ,
-//             travelDirection: IBR_RFCData.travelDirection,
-//             appEnviroment: IBR_RFCData.appEnviroment,
-//             ...(IBR_RFCData.ovenStatus && { ovenStatus: IBR_RFCData.ovenStatus }),
-//             ...(IBR_RFCData.ovenTemp && { ovenTemp: IBR_RFCData.ovenTemp }),
-//             ...(IBR_RFCData.otherAppEnviroment && { otherAppEnviroment: IBR_RFCData.otherAppEnviroment }),
-//             surroundingTemp: IBR_RFCData.surroundingTemp,
-//             conveyorLoaded: IBR_RFCData.conveyorLoaded,
-//             strandStatus: IBR_RFCData.strandStatus,
-//             plantLayout: IBR_RFCData.plantLayout,
-//             requiredPics: IBR_RFCData.requiredPics,
-//             operatingVoltage: IBR_RFCData.operatingVoltage,
-//         monitorData: 
-//         {
-//                 existingMonitor: IBR_RFCData.templateA.existingMonitor,
-//                 newMonitor: IBR_RFCData.templateA.newMonitor,		
-//                 ...(IBR_RFCData.templateA.dcuStatus && { dcuStatus: IBR_RFCData.templateA.dcuStatus }),
-//                 ...(IBR_RFCData.templateA.dcuNum && { dcuNum: IBR_RFCData.templateA.dcuNum }),
-//                 ...(IBR_RFCData.templateA.existingWindows && { existingWindows: IBR_RFCData.templateA.existingWindows }),
-//                 ...(IBR_RFCData.templateA.existingHeadUnit && { existingHeadUnit: IBR_RFCData.templateA.existingHeadUnit }),
-//                 ...(IBR_RFCData.templateA.existingDCU && { existingDCU: IBR_RFCData.templateA.existingDCU }),
-//                 ...(IBR_RFCData.templateA.existingPowerInterface && { existingPowerInterface: IBR_RFCData.templateA.existingPowerInterface }),
-//                 ...(IBR_RFCData.templateA.newReservoir && { newReservoir: IBR_RFCData.templateA.newReservoir }),
-//                 ...(IBR_RFCData.templateA.reservoirSize && { reservoirSize: IBR_RFCData.templateA.reservoirSize }),
-//                 ...(IBR_RFCData.templateA.otherReservoirSize && { otherReservoirSize: IBR_RFCData.templateA.otherReservoirSize }),
-//                 ...(IBR_RFCData.templateA.newReservoirNum && { newReservoirNum: IBR_RFCData.templateA.newReservoirNum }),
-//                 ...(IBR_RFCData.templateA.typeMonitor && { typeMonitor: IBR_RFCData.templateA.typeMonitor }),
-//                 ...(IBR_RFCData.templateA.driveMotorAmp && { driveMotorAmp: IBR_RFCData.templateA.driveMotorAmp }),
-//                 ...(IBR_RFCData.templateA.driveMotorAmpNum && { driveMotorAmpNum: IBR_RFCData.templateA.driveMotorAmpNum }),
-//                 ...(IBR_RFCData.templateA.driveTakeUpAir && { driveTakeUpAir: IBR_RFCData.templateA.driveTakeUpAir }),
-//                 ...(IBR_RFCData.templateA.driveTakeUpAirNum && { driveTakeUpAirNum: IBR_RFCData.templateA.driveTakeUpAirNum }),
-//                 ...(IBR_RFCData.templateA.takeUpDistance && { takeUpDistance: IBR_RFCData.templateA.takeUpDistance }),
-//                 ...(IBR_RFCData.templateA.takeUpDistanceNum && { takeUpDistanceNum: IBR_RFCData.templateA.takeUpDistanceNum }),
-//                 ...(IBR_RFCData.templateA.driveTemp && { driveTemp: IBR_RFCData.templateA.driveTemp }),
-//                 ...(IBR_RFCData.templateA.driveTempNum && { driveTempNum: IBR_RFCData.templateA.driveTempNum }),
-//                 ...(IBR_RFCData.templateA.driveVibration && { driveVibration: IBR_RFCData.templateA.driveVibration }),
-//                 ...(IBR_RFCData.templateA.driveVibrationNum && { driveVibrationNum: IBR_RFCData.templateA.driveVibrationNum }),
-//                 ...(IBR_RFCData.templateA.dogPitch && { dogPitch: IBR_RFCData.templateA.dogPitch }),
-//                 ...(IBR_RFCData.templateA.dogPitchNum && { dogPitchNum: IBR_RFCData.templateA.dogPitchNum }),
-//                 ...(IBR_RFCData.templateA.paintMarker && { paintMarker: IBR_RFCData.templateA.paintMarker }),
-//                 ...(IBR_RFCData.templateA.paintMarkerNum && { paintMarkerNum: IBR_RFCData.templateA.paintMarkerNum }),
-//                 ...(IBR_RFCData.templateA.chainVision && { chainVision: IBR_RFCData.templateA.chainVision }),
-//                 ...(IBR_RFCData.templateA.lubeVision && { lubeVision: IBR_RFCData.templateA.lubeVision }),
-//                 ...(IBR_RFCData.templateA.trolleyVision && { trolleyVision: IBR_RFCData.templateA.trolleyVision }),
-//                 ...(IBR_RFCData.templateA.trolleyDetect && { trolleyDetect: IBR_RFCData.templateA.trolleyDetect }),
-//                 ...(IBR_RFCData.templateA.omniView && { omniView: IBR_RFCData.templateA.omniView }),
-//                 ...(IBR_RFCData.templateA.dcuUpgradeNum && { dcuUpgradeNum: IBR_RFCData.templateA.dcuUpgradeNum }),
-//                 ...(IBR_RFCData.templateA.piuDistance && { piuDistance: IBR_RFCData.templateA.piuDistance }),
-//                 ...(IBR_RFCData.templateA.switchDistance && { switchDistance: IBR_RFCData.templateA.switchDistance }),
-//                 ...(IBR_RFCData.templateA.ampPickup && { ampPickup: IBR_RFCData.templateA.ampPickup }),
-//                 ...(IBR_RFCData.templateA.fromAirTakeUpDistance && { fromAirTakeUpDistance: IBR_RFCData.templateA.fromAirTakeUpDistance }),
-//                 ...(IBR_RFCData.templateA.specialControllerOptions && { specialControllerOptions: IBR_RFCData.templateA.specialControllerOptions }),
-//                 ...(IBR_RFCData.templateA.operatingVoltage && { operatingVoltage: IBR_RFCData.templateA.operatingVoltage })
-//             },
- 
-//             wheelOpenType: IBR_RFCData.wheelOpenType,
-//             wheelClosedType: IBR_RFCData.wheelClosedType,
-//             openStatus: IBR_RFCData.openStatus,
-//             powerChainStatus: IBR_RFCData.powerChainStatus,
-//             chainPinStatus: IBR_RFCData.chainPinStatus,
-//             sliderPlateStatus: IBR_RFCData.sliderPlateStatus,
-//             outBoardStatus: IBR_RFCData.outBoardStatus,
-//             railLubeStatus: IBR_RFCData.railLubeStatus,
-//             externalLubeStatus: IBR_RFCData.externalLubeStatus,
-//             lubeBrand: IBR_RFCData.lubeBrand,
-//             lubeType: IBR_RFCData.lubeType,
-//             lubeViscosity: IBR_RFCData.lubeViscosity,
-//             reservoirSize: IBR_RFCData.reservoirSize,
-//             ...(IBR_RFCData.otherReservoirSize && { otherReservoirSize: IBR_RFCData.otherReservoirSize }),
-//             reservoirSizeNum: IBR_RFCData.reservoirSizeNum,
-//             chainCleanStatus: IBR_RFCData.chainCleanStatus,
-//             mightyLubeMonitoring: IBR_RFCData.mightyLubeMonitoring,
-//             ctrController: IBR_RFCData.ctrController,
-//             plcConnection: IBR_RFCData.plcConnection,
-//             monitoringController: IBR_RFCData.monitoringController,
-//             otherControllerInfo: IBR_RFCData.otherControllerInfo,
-//             specialControllerOptions: IBR_RFCData.specialControllerOptions,
-//             measurementUnitType: IBR_RFCData.measurementUnitType,
-//             powerRailG: IBR_RFCData.powerRailG,
-//             powerRailH: IBR_RFCData.powerRailH,
-//             powerRailA1: IBR_RFCData.powerRailA1,
-//             powerRailB1: IBR_RFCData.powerRailB1,
-//             powerRailH1: IBR_RFCData.powerRailH1,
-//             powerRailJ1: IBR_RFCData.powerRailJ1,
-//             powerRailL1: IBR_RFCData.powerRailL1,
-//             powerRailM1: IBR_RFCData.powerRailM1,
-//             powerRailN1: IBR_RFCData.powerRailN1,
-//             powerRailP1: IBR_RFCData.powerRailP1,
-//             powerRailR1: IBR_RFCData.powerRailR1,
-//             wireMeasurementUnit: IBR_RFCData.wireMeasurementUnit,
-//             conductor2: IBR_RFCData.conductor2,
-//             conductor4: IBR_RFCData.conductor4,
-//             conductor7: IBR_RFCData.conductor7,
-//             conductor12: IBR_RFCData.conductor12,
-//             junctionBoxNum: IBR_RFCData.junctionBoxNum,
-
-
-//         });
-//         req.user.cart.push({ numRequested: numRequested, productConfigurationInfo: order, productType: "IBR_RFC" });
-//         await req.user.save();
-
-//         return res.status(200).json({ message: "IBR_RFC entry added" });
-
-//     } catch (error) {
-//         console.log(error);
-//         res.status(500).json({ error: "Internal server error" });
-//     }
-// });
-
-// module.exports = router;
-
-
-
-
-
-
-
-
 const express = require("express");
-const { dbConnect } = require("../config/config");
 const { authenticate } = require("./sessions");
 const IBR_RFC = require("../models/IBR_RFC");
-const templateA = require("../models/templateA");
 
 const router = express.Router();
 
-/**
- * IBR_RFC Create API
- *
- * - Receives IBR_RFCData + numRequested from request body
- * - Creates an IBR_RFC mongoose document (stores all required fields + optional spreads)
- * - Pushes the created configuration into the authenticated user's cart
- *
- * Note:
- * technicianNote is an optional field meant for internal/technician remarks.
- * It does not affect any form logic; it is stored only for reference.
- */
+// ============================================================
+// MIGHTY LUBE ROLLER FLIGHT CONVEYOR
+// Product ID: IBR_RFC
+// POST /api/ibr_rfc
+// ============================================================
+
 router.post("/", authenticate, async (req, res) => {
-    // used for IBR_RFC form
     try {
         const { IBR_RFCData, numRequested } = req.body;
 
+        // ====================================================
+        // BASIC REQUEST VALIDATION
+        // ====================================================
+
+        if (!IBR_RFCData) {
+            return res.status(400).json({
+                error: "IBR_RFCData is required",
+            });
+        }
+
+        // ====================================================
+        // CREATE PRODUCT CONFIGURATION
+        //
+        // Keys below match the new Flutter ProductDetailData
+        // contract directly.
+        // ====================================================
+
         const order = new IBR_RFC({
+            // ==================================================
+            // GENERAL INFORMATION
+            // ==================================================
+
             conveyorName: IBR_RFCData.conveyorName,
-            chainSize: IBR_RFCData.chainSize,
-            ...(IBR_RFCData.otherChainSize && { otherChainSize: IBR_RFCData.otherChainSize }),
-            industrialChainManufacturer: IBR_RFCData.industrialChainManufacturer,
-            ...(IBR_RFCData.otherChainManufacturer && { otherChainManufacturer: IBR_RFCData.otherChainManufacturer }),
-            conveyorLength: IBR_RFCData.conveyorLength,
-            conveyorLengthUnit: IBR_RFCData.conveyorLengthUnit,
-            conveyorSpeed: IBR_RFCData.conveyorSpeed,
-            speedUnit: IBR_RFCData.speedUnit,
-            conveyorIndex: IBR_RFCData.conveyorIndex,
-            travelDirection: IBR_RFCData.travelDirection,
-            appEnviroment: IBR_RFCData.appEnviroment,
-            ...(IBR_RFCData.ovenStatus && { ovenStatus: IBR_RFCData.ovenStatus }),
-            ...(IBR_RFCData.ovenTemp && { ovenTemp: IBR_RFCData.ovenTemp }),
-            ...(IBR_RFCData.otherAppEnviroment && { otherAppEnviroment: IBR_RFCData.otherAppEnviroment }),
-            surroundingTemp: IBR_RFCData.surroundingTemp,
-            conveyorLoaded: IBR_RFCData.conveyorLoaded,
-            strandStatus: IBR_RFCData.strandStatus,
-            plantLayout: IBR_RFCData.plantLayout,
-            requiredPics: IBR_RFCData.requiredPics,
-            operatingVoltage: IBR_RFCData.operatingVoltage,
 
-            // technicianNote: Optional note added by technician for internal/reference use
-            ...(IBR_RFCData.technicianNote && { technicianNote: IBR_RFCData.technicianNote }),
+            conveyorChainSize: IBR_RFCData.conveyorChainSize,
 
-            monitorData: {
-                existingMonitor: IBR_RFCData.templateA.existingMonitor,
-                newMonitor: IBR_RFCData.templateA.newMonitor,
-                ...(IBR_RFCData.templateA.dcuStatus && { dcuStatus: IBR_RFCData.templateA.dcuStatus }),
-                ...(IBR_RFCData.templateA.dcuNum && { dcuNum: IBR_RFCData.templateA.dcuNum }),
-                ...(IBR_RFCData.templateA.existingWindows && { existingWindows: IBR_RFCData.templateA.existingWindows }),
-                ...(IBR_RFCData.templateA.existingHeadUnit && { existingHeadUnit: IBR_RFCData.templateA.existingHeadUnit }),
-                ...(IBR_RFCData.templateA.existingDCU && { existingDCU: IBR_RFCData.templateA.existingDCU }),
-                ...(IBR_RFCData.templateA.existingPowerInterface && { existingPowerInterface: IBR_RFCData.templateA.existingPowerInterface }),
-                ...(IBR_RFCData.templateA.newReservoir && { newReservoir: IBR_RFCData.templateA.newReservoir }),
-                ...(IBR_RFCData.templateA.reservoirSize && { reservoirSize: IBR_RFCData.templateA.reservoirSize }),
-                ...(IBR_RFCData.templateA.otherReservoirSize && { otherReservoirSize: IBR_RFCData.templateA.otherReservoirSize }),
-                ...(IBR_RFCData.templateA.newReservoirNum && { newReservoirNum: IBR_RFCData.templateA.newReservoirNum }),
-                ...(IBR_RFCData.templateA.typeMonitor && { typeMonitor: IBR_RFCData.templateA.typeMonitor }),
-                ...(IBR_RFCData.templateA.driveMotorAmp && { driveMotorAmp: IBR_RFCData.templateA.driveMotorAmp }),
-                ...(IBR_RFCData.templateA.driveMotorAmpNum && { driveMotorAmpNum: IBR_RFCData.templateA.driveMotorAmpNum }),
-                ...(IBR_RFCData.templateA.driveTakeUpAir && { driveTakeUpAir: IBR_RFCData.templateA.driveTakeUpAir }),
-                ...(IBR_RFCData.templateA.driveTakeUpAirNum && { driveTakeUpAirNum: IBR_RFCData.templateA.driveTakeUpAirNum }),
-                ...(IBR_RFCData.templateA.takeUpDistance && { takeUpDistance: IBR_RFCData.templateA.takeUpDistance }),
-                ...(IBR_RFCData.templateA.takeUpDistanceNum && { takeUpDistanceNum: IBR_RFCData.templateA.takeUpDistanceNum }),
-                ...(IBR_RFCData.templateA.driveTemp && { driveTemp: IBR_RFCData.templateA.driveTemp }),
-                ...(IBR_RFCData.templateA.driveTempNum && { driveTempNum: IBR_RFCData.templateA.driveTempNum }),
-                ...(IBR_RFCData.templateA.driveVibration && { driveVibration: IBR_RFCData.templateA.driveVibration }),
-                ...(IBR_RFCData.templateA.driveVibrationNum && { driveVibrationNum: IBR_RFCData.templateA.driveVibrationNum }),
-                ...(IBR_RFCData.templateA.dogPitch && { dogPitch: IBR_RFCData.templateA.dogPitch }),
-                ...(IBR_RFCData.templateA.dogPitchNum && { dogPitchNum: IBR_RFCData.templateA.dogPitchNum }),
-                ...(IBR_RFCData.templateA.paintMarker && { paintMarker: IBR_RFCData.templateA.paintMarker }),
-                ...(IBR_RFCData.templateA.paintMarkerNum && { paintMarkerNum: IBR_RFCData.templateA.paintMarkerNum }),
-                ...(IBR_RFCData.templateA.chainVision && { chainVision: IBR_RFCData.templateA.chainVision }),
-                ...(IBR_RFCData.templateA.lubeVision && { lubeVision: IBR_RFCData.templateA.lubeVision }),
-                ...(IBR_RFCData.templateA.trolleyVision && { trolleyVision: IBR_RFCData.templateA.trolleyVision }),
-                ...(IBR_RFCData.templateA.trolleyDetect && { trolleyDetect: IBR_RFCData.templateA.trolleyDetect }),
-                ...(IBR_RFCData.templateA.omniView && { omniView: IBR_RFCData.templateA.omniView }),
-                ...(IBR_RFCData.templateA.dcuUpgradeNum && { dcuUpgradeNum: IBR_RFCData.templateA.dcuUpgradeNum }),
-                ...(IBR_RFCData.templateA.piuDistance && { piuDistance: IBR_RFCData.templateA.piuDistance }),
-                ...(IBR_RFCData.templateA.switchDistance && { switchDistance: IBR_RFCData.templateA.switchDistance }),
-                ...(IBR_RFCData.templateA.ampPickup && { ampPickup: IBR_RFCData.templateA.ampPickup }),
-                ...(IBR_RFCData.templateA.fromAirTakeUpDistance && { fromAirTakeUpDistance: IBR_RFCData.templateA.fromAirTakeUpDistance }),
-                ...(IBR_RFCData.templateA.specialControllerOptions && { specialControllerOptions: IBR_RFCData.templateA.specialControllerOptions }),
-                ...(IBR_RFCData.templateA.operatingVoltage && { operatingVoltage: IBR_RFCData.templateA.operatingVoltage })
-            },
+            otherConveyorChainSize:
+                IBR_RFCData.otherConveyorChainSize,
 
-            wheelOpenType: IBR_RFCData.wheelOpenType,
-            wheelClosedType: IBR_RFCData.wheelClosedType,
-            openStatus: IBR_RFCData.openStatus,
-            powerChainStatus: IBR_RFCData.powerChainStatus,
-            chainPinStatus: IBR_RFCData.chainPinStatus,
-            sliderPlateStatus: IBR_RFCData.sliderPlateStatus,
-            outBoardStatus: IBR_RFCData.outBoardStatus,
-            railLubeStatus: IBR_RFCData.railLubeStatus,
-            externalLubeStatus: IBR_RFCData.externalLubeStatus,
-            lubeBrand: IBR_RFCData.lubeBrand,
-            lubeType: IBR_RFCData.lubeType,
-            lubeViscosity: IBR_RFCData.lubeViscosity,
-            reservoirSize: IBR_RFCData.reservoirSize,
-            ...(IBR_RFCData.otherReservoirSize && { otherReservoirSize: IBR_RFCData.otherReservoirSize }),
-            reservoirSizeNum: IBR_RFCData.reservoirSizeNum,
-            chainCleanStatus: IBR_RFCData.chainCleanStatus,
-            mightyLubeMonitoring: IBR_RFCData.mightyLubeMonitoring,
-            ctrController: IBR_RFCData.ctrController,
-            plcConnection: IBR_RFCData.plcConnection,
-            monitoringController: IBR_RFCData.monitoringController,
-            otherControllerInfo: IBR_RFCData.otherControllerInfo,
-            specialControllerOptions: IBR_RFCData.specialControllerOptions,
-            measurementUnitType: IBR_RFCData.measurementUnitType,
-            powerRailG: IBR_RFCData.powerRailG,
-            powerRailH: IBR_RFCData.powerRailH,
-            powerRailA1: IBR_RFCData.powerRailA1,
-            powerRailB1: IBR_RFCData.powerRailB1,
-            powerRailH1: IBR_RFCData.powerRailH1,
-            powerRailJ1: IBR_RFCData.powerRailJ1,
-            powerRailL1: IBR_RFCData.powerRailL1,
-            powerRailM1: IBR_RFCData.powerRailM1,
-            powerRailN1: IBR_RFCData.powerRailN1,
-            powerRailP1: IBR_RFCData.powerRailP1,
-            powerRailR1: IBR_RFCData.powerRailR1,
-            wireMeasurementUnit: IBR_RFCData.wireMeasurementUnit,
-            conductor2: IBR_RFCData.conductor2,
-            conductor4: IBR_RFCData.conductor4,
-            conductor7: IBR_RFCData.conductor7,
-            conductor12: IBR_RFCData.conductor12,
-            junctionBoxNum: IBR_RFCData.junctionBoxNum,
+            chainManufacturer:
+                IBR_RFCData.chainManufacturer,
+
+            otherChainManufacturer:
+                IBR_RFCData.otherChainManufacturer,
+
+            conveyorLength:
+                IBR_RFCData.conveyorLength,
+
+            conveyorLengthUnit:
+                IBR_RFCData.conveyorLengthUnit,
+
+            conveyorSpeed:
+                IBR_RFCData.conveyorSpeed,
+
+            conveyorSpeedUnit:
+                IBR_RFCData.conveyorSpeedUnit,
+
+            indexingVariableSpeedConditions:
+                IBR_RFCData.indexingVariableSpeedConditions,
+
+            travelDirection:
+                IBR_RFCData.travelDirection,
+
+            applicationEnvironment:
+                IBR_RFCData.applicationEnvironment,
+
+            otherApplicationEnvironment:
+                IBR_RFCData.otherApplicationEnvironment,
+
+            surroundingTemperature:
+                IBR_RFCData.surroundingTemperature,
+
+            conveyorLoadedStatus:
+                IBR_RFCData.conveyorLoadedStatus,
+
+            conveyorSwingStatus:
+                IBR_RFCData.conveyorSwingStatus,
+
+            conveyorStrand:
+                IBR_RFCData.conveyorStrand,
+
+            // ==================================================
+            // CUSTOMER POWER UTILITIES
+            // ==================================================
+
+            operatingVoltage:
+                IBR_RFCData.operatingVoltage,
+
+            controlVoltage:
+                IBR_RFCData.controlVoltage,
+
+            // ==================================================
+            // NEW / EXISTING MONITORING SYSTEM
+            // ==================================================
+
+            existingMonitoring:
+                IBR_RFCData.existingMonitoring,
+
+            newMonitoringSystem:
+                IBR_RFCData.newMonitoringSystem,
+
+            // ==================================================
+            // CONVEYOR SPECIFICATIONS
+            // ==================================================
+
+            wheelOpenRaceStyle:
+                IBR_RFCData.wheelOpenRaceStyle,
+
+            wheelSealedStyle:
+                IBR_RFCData.wheelSealedStyle,
+
+            openInsideShieldedOutside:
+                IBR_RFCData.openInsideShieldedOutside,
+
+            powerChain:
+                IBR_RFCData.powerChain,
+
+            chainPins:
+                IBR_RFCData.chainPins,
+
+            sliderPlates:
+                IBR_RFCData.sliderPlates,
+
+            outboardWheels:
+                IBR_RFCData.outboardWheels,
+
+            caterpillarDrive:
+                IBR_RFCData.caterpillarDrive,
+
+            caterpillarDriveQuantity:
+                IBR_RFCData.caterpillarDriveQuantity,
+
+            railLubrication:
+                IBR_RFCData.railLubrication,
+
+            externalLubrication:
+                IBR_RFCData.externalLubrication,
+
+            currentLubricationEquipmentBrand:
+                IBR_RFCData.currentLubricationEquipmentBrand,
+
+            currentLubricantType:
+                IBR_RFCData.currentLubricantType,
+
+            currentLubricantViscosityGrade:
+                IBR_RFCData.currentLubricantViscosityGrade,
+
+            reservoirSize:
+                IBR_RFCData.reservoirSize,
+
+            reservoirSizeQuantity:
+                IBR_RFCData.reservoirSizeQuantity,
+
+            conveyorChainClean:
+                IBR_RFCData.conveyorChainClean,
+
+            // ==================================================
+            // CONTROLLER
+            // ==================================================
+
+            specialControllerOptions:
+                IBR_RFCData.specialControllerOptions,
+
+            controllerSpecify:
+                IBR_RFCData.controllerSpecify,
+
+            // ==================================================
+            // IN BOARD ROLLER CHAIN: MEASUREMENTS
+            // ==================================================
+
+            measurementUnit:
+                IBR_RFCData.measurementUnit,
+
+            inBoardRollerChainRollerWheelA1:
+                IBR_RFCData.inBoardRollerChainRollerWheelA1,
+
+            inBoardRollerChainRollerWheelB1:
+                IBR_RFCData.inBoardRollerChainRollerWheelB1,
+
+            inBoardRollerChainLinkC1:
+                IBR_RFCData.inBoardRollerChainLinkC1,
+
+            inBoardRollerChainLinkD1:
+                IBR_RFCData.inBoardRollerChainLinkD1,
+
+            inBoardRollerChainOuterLinkOffsetF1:
+                IBR_RFCData.inBoardRollerChainOuterLinkOffsetF1,
+
+            // ==================================================
+            // TECHNICIAN NOTE
+            // ==================================================
+
+            technicianNote:
+                IBR_RFCData.technicianNote,
         });
 
-        req.user.cart.push({ numRequested: numRequested, productConfigurationInfo: order, productType: "IBR_RFC" });
+        // ====================================================
+        // ADD CONFIGURATION TO USER CART
+        // ====================================================
+
+        req.user.cart.push({
+            numRequested,
+            productConfigurationInfo: order,
+            productType: "IBR_RFC",
+        });
+
         await req.user.save();
 
-        return res.status(200).json({ message: "IBR_RFC entry added" });
+        // ====================================================
+        // SUCCESS RESPONSE
+        // ====================================================
+
+        return res.status(200).json({
+            message: "IBR_RFC entry added",
+        });
 
     } catch (error) {
-        console.log(error);
-        res.status(500).json({ error: "Internal server error" });
+        console.error("IBR_RFC route error:");
+        console.error(error);
+
+        return res.status(500).json({
+            error: "Internal server error",
+        });
     }
 });
 
-module.exports = router;
+module.exports = router

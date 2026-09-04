@@ -1,64 +1,87 @@
 const mongoose = require("mongoose");
-const templateA = require("./templateA.js");
+
 const OHP_PMMSchema = new mongoose.Schema({
-  conveyorName: {
+
+  // ============================================================
+  // GENERAL INFORMATION
+  // ============================================================
+
+  conveyorChainSize: {
     type: String,
-    required: true,
+    enum: [
+      "Other",
+    ],
   },
 
-  chainSize: {
-    type: Number,
-    enum: [1, 2, 3, 4, 5],
-    required: true,
-  },
-
-  otherChainSize: {
+  otherConveyorChainSize: {
     type: String,
+    trim: true,
     required: function () {
-      return this.chainSize === 5;
+      return this.conveyorChainSize === "Other";
     },
   },
 
-  industrialChainManufacturer: {
-    type: Number,
-    enum: [1, 2, 3, 4, 5, 6, 7, 8, 9],
-    required: true,
+  chainManufacturer: {
+    type: String,
+    enum: [
+      "Other",
+    ],
   },
 
   otherChainManufacturer: {
     type: String,
+    trim: true,
     required: function () {
-      return this.industrialChainManufacturer === 9;
+      return this.chainManufacturer === "Other";
     },
   },
 
-  // ✅ NEW OPTIONAL FIELD
-  technicianNote: {
+
+  // ============================================================
+  // NEW MONITORING SYSTEM OR ADDING TO EXISTING
+  // ============================================================
+
+  connectingToExistingMonitoring: {
     type: String,
-    required: false,
+    enum: [
+      "Yes",
+      "No",
+    ],
+  },
+
+  addNewMonitoringSystem: {
+    type: String,
+    enum: [
+      "Yes",
+      "No",
+    ],
+  },
+
+
+  // ============================================================
+  // CONFIGURATION
+  // ============================================================
+
+  dcuQuantity: {
+    type: String,
     trim: true,
   },
-  
-  orientationType: {
-    type: Number,
-    enum: [1, 2, 3],
+
+
+  // ============================================================
+  // TECHNICIAN NOTE
+  // ============================================================
+
+  technicianNote: {
+    type: String,
     required: true,
+    trim: true,
   },
 
-  markerToUnitDistance: {
-    type: Number,
-    required: true,
-  },
-
-    monitorData: templateA,
-
-
-  dcuNum: {
-    type: Number,
-    required: false,
-  },
 });
 
-const OHP_PMM = mongoose.model("tblOHP_PMM", OHP_PMMSchema);
+const OHP_PMM =
+  mongoose.models.tblOHP_PMM ||
+  mongoose.model("tblOHP_PMM", OHP_PMMSchema);
 
-module.exports = OHP_PMM;
+module.exports = OHP_PMM

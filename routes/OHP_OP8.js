@@ -1,137 +1,132 @@
-// const express = require("express");
-// const { dbConnect } = require("../config/config");
-// const { authenticate } = require("./sessions");
-// const OHP_OP8 = require("../models/OHP_OP8");
+// routes/OH_CCS_OP8.js
 
-// const router = express.Router();
-
-// router.post("/", authenticate, async (req, res) => {
-//     try {
-        
-//         const { OHP_OP8Data, numRequested } = req.body;
-//         const order = new OHP_OP8({
-//             conveyorName: OHP_OP8Data.conveyorName,
-//             chainSize: OHP_OP8Data.chainSize,
-//             ...(OHP_OP8Data.otherChainSize && { otherChainSize: OHP_OP8Data.otherChainSize }),
-//             industrialChainManufacturer: OHP_OP8Data.industrialChainManufacturer,
-//             ...(OHP_OP8Data.otherChainManufacturer && { otherChainManufacturer: OHP_OP8Data.otherChainManufacturer }),
-//             ...(OHP_OP8Data.appEnviroment && { appEnviroment: OHP_OP8Data.appEnviroment }),
-//             ...(OHP_OP8Data.ovenStatus && { ovenStatus: OHP_OP8Data.ovenStatus }),
-//             ...(OHP_OP8Data.ovenTemp && { ovenTemp: OHP_OP8Data.ovenTemp }),
-//             ...(OHP_OP8Data.otherAppEnviroment && { otherAppEnviroment: OHP_OP8Data.otherAppEnviroment }),
-//             ...(OHP_OP8Data.surroundingTemp && { surroundingTemp: OHP_OP8Data.surroundingTemp }),
-//             ...(OHP_OP8Data.conveyorLoaded && { conveyorLoaded: OHP_OP8Data.conveyorLoaded }),
-//             ...(OHP_OP8Data.operatingVoltTriple && { operatingVoltTriple: OHP_OP8Data.operatingVoltTriple }),
-//             ...(OHP_OP8Data.opPowerStatus && { opPowerStatus: OHP_OP8Data.opPowerStatus }),
-//             brushStatus: OHP_OP8Data.brushStatus,
-//             ...(OHP_OP8Data.brushMaterialType && { brushMaterialType: OHP_OP8Data.brushMaterialType }),
-//             ...(OHP_OP8Data.otherBrushMaterialType && { otherBrushMaterialType: OHP_OP8Data.otherBrushMaterialType }),
-//             ...(OHP_OP8Data.clearanceStatus && { clearanceStatus: OHP_OP8Data.clearanceStatus }),
-//             ...(OHP_OP8Data.washStatus && { washStatus: OHP_OP8Data.washStatus }),
-//             ...(OHP_OP8Data.foodIndustryStatus && { foodIndustryStatus: OHP_OP8Data.foodIndustryStatus }),
-//             ...(OHP_OP8Data.powerPanelType && { powerPanelType: OHP_OP8Data.powerPanelType }),
-//             ...(OHP_OP8Data.threeStationType && { threeStationType: OHP_OP8Data.threeStationType }),
-//             shroudStatus: OHP_OP8Data.shroudStatus,
-//             ...(OHP_OP8Data.shroudType && { shroudType: OHP_OP8Data.shroudType }),
-//             ...(OHP_OP8Data.additionalInfo && { additionalInfo: OHP_OP8Data.additionalInfo }),
-//             ...(OHP_OP8Data.ohpUnit && { ohpUnit: OHP_OP8Data.ohpUnit }),
-//             ...(OHP_OP8Data.chainDrop && { chainDrop: OHP_OP8Data.chainDrop }),
-//             ...(OHP_OP8Data.ohpDiameter && { ohpDiameter: OHP_OP8Data.ohpDiameter }),
-//             ...(OHP_OP8Data.ohpWidth && { ohpWidth: OHP_OP8Data.ohpWidth }),
-//             ...(OHP_OP8Data.ohpHeight && { ohpHeight: OHP_OP8Data.ohpHeight }),
-//         });
-//         req.user.cart.push({
-//             numRequested,
-//             productConfigurationInfo: order,
-//             productType: "OHP_OP8"
-//         });
-//         await req.user.save();
-//         return res.status(200).json({ message: "OHP_OP8 entry added" });
-//     } catch (error) {
-//         console.error(error);
-//         res.status(500).json({ error: "Internal server error" });
-//     }
-// });
-
-// module.exports = router;
-
-
-
-
-
-
-
-
-
-// routes/OHP_OP8.js
 const express = require("express");
 const { dbConnect } = require("../config/config"); // kept (even if unused)
 const { authenticate } = require("./sessions");
-const OHP_OP8 = require("../models/OHP_OP8");
+const OH_CCS_OP8 = require("../models/OH_CCS_OP8");
 
 const router = express.Router();
 
 router.post("/", authenticate, async (req, res) => {
   try {
-    const { OHP_OP8Data, numRequested } = req.body;
+    const { OH_CCS_OP8Data, numRequested } = req.body;
 
-    const order = new OHP_OP8({
-      conveyorName: OHP_OP8Data.conveyorName,
-      chainSize: OHP_OP8Data.chainSize,
-      ...(OHP_OP8Data.otherChainSize && { otherChainSize: OHP_OP8Data.otherChainSize }),
+    const order = new OH_CCS_OP8({
+      // =====================================================
+      // GENERAL INFORMATION
+      // =====================================================
 
-      industrialChainManufacturer: OHP_OP8Data.industrialChainManufacturer,
-      ...(OHP_OP8Data.otherChainManufacturer && {
-        otherChainManufacturer: OHP_OP8Data.otherChainManufacturer,
-      }),
+      conveyorName: OH_CCS_OP8Data.conveyorName,
 
-      ...(OHP_OP8Data.appEnviroment && { appEnviroment: OHP_OP8Data.appEnviroment }),
-      ...(OHP_OP8Data.ovenStatus && { ovenStatus: OHP_OP8Data.ovenStatus }),
-      ...(OHP_OP8Data.ovenTemp && { ovenTemp: OHP_OP8Data.ovenTemp }),
-      ...(OHP_OP8Data.otherAppEnviroment && { otherAppEnviroment: OHP_OP8Data.otherAppEnviroment }),
+      conveyorChainSize: OH_CCS_OP8Data.conveyorChainSize,
 
-      ...(OHP_OP8Data.surroundingTemp && { surroundingTemp: OHP_OP8Data.surroundingTemp }),
-      ...(OHP_OP8Data.conveyorLoaded && { conveyorLoaded: OHP_OP8Data.conveyorLoaded }),
+      chainManufacturer: OH_CCS_OP8Data.chainManufacturer,
 
-      ...(OHP_OP8Data.operatingVoltTriple && { operatingVoltTriple: OHP_OP8Data.operatingVoltTriple }),
-      ...(OHP_OP8Data.opPowerStatus && { opPowerStatus: OHP_OP8Data.opPowerStatus }),
+      conveyorLength: OH_CCS_OP8Data.conveyorLength,
 
-      brushStatus: OHP_OP8Data.brushStatus,
-      ...(OHP_OP8Data.brushMaterialType && { brushMaterialType: OHP_OP8Data.brushMaterialType }),
-      ...(OHP_OP8Data.otherBrushMaterialType && {
-        otherBrushMaterialType: OHP_OP8Data.otherBrushMaterialType,
-      }),
+      conveyorLengthUnit: OH_CCS_OP8Data.conveyorLengthUnit,
 
-      ...(OHP_OP8Data.clearanceStatus && { clearanceStatus: OHP_OP8Data.clearanceStatus }),
-      ...(OHP_OP8Data.washStatus && { washStatus: OHP_OP8Data.washStatus }),
-      ...(OHP_OP8Data.foodIndustryStatus && { foodIndustryStatus: OHP_OP8Data.foodIndustryStatus }),
+      directionOfTravel: OH_CCS_OP8Data.directionOfTravel,
 
-      ...(OHP_OP8Data.powerPanelType && { powerPanelType: OHP_OP8Data.powerPanelType }),
-      ...(OHP_OP8Data.threeStationType && { threeStationType: OHP_OP8Data.threeStationType }),
+      applicationEnvironment:
+        OH_CCS_OP8Data.applicationEnvironment,
 
-      shroudStatus: OHP_OP8Data.shroudStatus,
-      ...(OHP_OP8Data.shroudType && { shroudType: OHP_OP8Data.shroudType }),
-      ...(OHP_OP8Data.additionalInfo && { additionalInfo: OHP_OP8Data.additionalInfo }),
+      surroundingTemperatureOutsideRange:
+        OH_CCS_OP8Data.surroundingTemperatureOutsideRange,
 
-      ...(OHP_OP8Data.ohpUnit && { ohpUnit: OHP_OP8Data.ohpUnit }),
-      ...(OHP_OP8Data.chainDrop && { chainDrop: OHP_OP8Data.chainDrop }),
-      ...(OHP_OP8Data.ohpDiameter && { ohpDiameter: OHP_OP8Data.ohpDiameter }),
-      ...(OHP_OP8Data.ohpWidth && { ohpWidth: OHP_OP8Data.ohpWidth }),
-      ...(OHP_OP8Data.ohpHeight && { ohpHeight: OHP_OP8Data.ohpHeight }),
+      conveyorLoadState:
+        OH_CCS_OP8Data.conveyorLoadState,
+
+      // =====================================================
+      // CUSTOMER POWER UTILITIES
+      // =====================================================
+
+      operatingVoltage3Phase:
+        OH_CCS_OP8Data.operatingVoltage3Phase,
+
+      controlVoltage:
+        OH_CCS_OP8Data.controlVoltage,
+
+      // =====================================================
+      // OP-SS
+      // =====================================================
+
+      poweredNonPoweredAvailable:
+        OH_CCS_OP8Data.poweredNonPoweredAvailable,
+
+      brushMaterialsAvailable:
+        OH_CCS_OP8Data.brushMaterialsAvailable,
+
+      installationClearanceConfirmed:
+        OH_CCS_OP8Data.installationClearanceConfirmed,
+
+      // =====================================================
+      // ADDITIONAL OPTIONS AVAILABLE
+      // =====================================================
+
+      washDown:
+        OH_CCS_OP8Data.washDown,
+
+      foodIndustry:
+        OH_CCS_OP8Data.foodIndustry,
+
+      powerPanelWithTimer:
+        OH_CCS_OP8Data.powerPanelWithTimer,
+
+      threeStationPushButtonSwitch:
+        OH_CCS_OP8Data.threeStationPushButtonSwitch,
+
+      shroud:
+        OH_CCS_OP8Data.shroud,
+
+      otherAdditionalOptions:
+        OH_CCS_OP8Data.otherAdditionalOptions,
+
+      // =====================================================
+      // OVERHEAD POWER RAIL: MEASUREMENTS
+      // =====================================================
+
+      measurementUnit:
+        OH_CCS_OP8Data.measurementUnit,
+
+      chainDropA:
+        OH_CCS_OP8Data.chainDropA,
+
+      overheadPowerMonoRailPowerTrolleyWheelB:
+        OH_CCS_OP8Data.overheadPowerMonoRailPowerTrolleyWheelB,
+
+      overheadPowerMonoRailPowerRailG:
+        OH_CCS_OP8Data.overheadPowerMonoRailPowerRailG,
+
+      overheadPowerMonoRailPowerRailH:
+        OH_CCS_OP8Data.overheadPowerMonoRailPowerRailH,
+
+      // =====================================================
+      // TECHNICIAN NOTE
+      // =====================================================
+
+      technicianNote:
+        OH_CCS_OP8Data.technicianNote,
     });
 
     req.user.cart.push({
       numRequested,
       productConfigurationInfo: order,
-      productType: "OHP_OP8",
+      productType: "OH_CCS_OP8",
     });
 
     await req.user.save();
-    return res.status(200).json({ message: "OHP_OP8 entry added" });
+
+    return res.status(200).json({
+      message: "OH_CCS_OP8 entry added",
+    });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ error: "Internal server error" });
+
+    return res.status(500).json({
+      error: "Internal server error",
+    });
   }
 });
 
-module.exports = router;
+module.exports = router

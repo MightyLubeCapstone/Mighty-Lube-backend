@@ -1,132 +1,150 @@
-const mongoose = require('mongoose');
-const templateA = require("./templateA.js");
-const getDecodedInfo = require("./getDecodedInfo.js");  
+const mongoose = require("mongoose");
 
-const FRO_OEB_Schema = new mongoose.Schema({
+const FRO_OEB_Schema = new mongoose.Schema(
+  {
+    // =====================================================
+    // GENERAL INFORMATION
+    // =====================================================
+
     conveyorName: {
-        type: String,
-        required: false,
+      type: String,
+      required: false,
+      default: "",
+      trim: true,
     },
-    chainSize: {
-        type: Number,
-        enum: [1, 2, 3, 4, 5],
-        required: false,
+
+    conveyorChainSize: {
+      type: String,
+      required: false,
+      default: "",
     },
-    // add enum and check
-    // otherChainSize: {
-    //     type: String,
-    //     required: function () {
-    //         return this.chainSize === 5;
-    //     },
-    // },
-    industrialChainManufacturer: {
-        type: Number,
-        enum: [1, 2, 3, 4, 5, 6, 7, 8, 9],
-        required: true,
+
+    chainManufacturer: {
+      type: String,
+      required: false,
+      default: "",
     },
-    otherChainManufacturer: {
-        type: String,
-        required: function () {
-            return this.industrialChainManufacturer === 9;
-        },
-    },    conveyorLength: {
-        type: Number,
-        required: false,
+
+    conveyorLength: {
+      type: String,
+      required: false,
+      default: "",
     },
+
     conveyorLengthUnit: {
-
-        type: Number,
-        enum: [1, 2, 3, 4],
-        required: false,
-
+      type: String,
+      required: false,
+      default: "",
     },
-  appEnviroment: {
-    type: Number,
-    enum: [1, 2, 3, 4, 5, 6, 7],
-    required: true,
+
+    applicationEnvironment: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    otherApplicationEnvironment: {
+      type: String,
+      required: false,
+      default: "",
+      trim: true,
+    },
+
+    surroundingTemperature: {
+      type: String,
+      required: false,
+      default: "",
+    },
+
+    // =====================================================
+    // FREE RAIL: MEASUREMENTS
+    // =====================================================
+
+    measurementUnit: {
+      type: String,
+      required: false,
+      default: "",
+    },
+
+    overheadFreeRailChainDropA: {
+      type: String,
+      required: false,
+      default: "",
+    },
+
+    overheadFreeRailPowerTrolleyWheelB: {
+      type: String,
+      required: false,
+      default: "",
+    },
+
+    overheadFreeRailRailG: {
+      type: String,
+      required: false,
+      default: "",
+    },
+
+    overheadFreeRailRailH: {
+      type: String,
+      required: false,
+      default: "",
+    },
+
+    overheadFreeRailTrolleyWheelVerticalL: {
+      type: String,
+      required: false,
+      default: "",
+    },
+
+    invertedPowerFreeChainDropA: {
+      type: String,
+      required: false,
+      default: "",
+    },
+
+    invertedPowerFreePowerTrolleyWheelB: {
+      type: String,
+      required: false,
+      default: "",
+    },
+
+    invertedPowerFreeRailG: {
+      type: String,
+      required: false,
+      default: "",
+    },
+
+    invertedPowerFreeRailH: {
+      type: String,
+      required: false,
+      default: "",
+    },
+
+    invertedPowerFreeTrolleyWheelPitchK: {
+      type: String,
+      required: false,
+      default: "",
+    },
+
+    // =====================================================
+    // TECHNICIAN NOTE
+    // Retained from legacy flow
+    // =====================================================
+
+    technicianNote: {
+      type: String,
+      required: false,
+      default: "",
+      trim: true,
+    },
   },
+  {
+    timestamps: true,
+  }
+);
 
-  ovenStatus: {
-    type: Number,
-    enum: [1, 2],
-    required: function () {
-      return this.appEnviroment === 3;
-    },
-  },
+const FRO_OEB =
+  mongoose.models.FRO_OEB ||
+  mongoose.model("FRO_OEB", FRO_OEB_Schema);
 
-  ovenTemp: {
-    type: Number,
-    required: function () {
-      return this.appEnviroment === 3;
-    },
-  },
-
-  otherAppEnviroment: {
-    type: String,
-    required: function () {
-      return this.appEnviroment === 7;
-    },
-  },
-    surroundingTemp: {
-        type: Number,
-        enum: [1, 2],
-        required: false,
-    },
-
-    // ✅ NEW OPTIONAL FIELD
-  technicianNote: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-  
-    frUnitType: {
-        type: Number,
-        enum: [1, 2, 3, 4],
-        required: false,
-
-    },
-    frOverheadA: {
-        type: Number,
-        required: false,
-    },
-    frOverheadB: {
-        type: Number,
-        required: false,
-    },
-    frOverheadG: {
-        type: Number,
-        required: false,
-    },
-    frOverheadH: {
-        type: Number,
-        required: false,
-    },
-    frOverheadL: {
-        type: Number,
-        required: false,
-    },
-    frInvertedA: {
-        type: Number,
-        required: false,
-    },
-    frInvertedB: {
-        type: Number,
-        required: false,
-    },
-    frInvertedG: {
-        type: Number,
-        required: false,
-    },
-    frInvertedH: {
-        type: Number,
-        required: false,
-    },
-    frInvertedK: {
-        type: Number,
-        required: false,
-    },
-});
-
-const FRO_OEB = mongoose.models.FRO_OEB || mongoose.model('FRO_OEB', FRO_OEB_Schema);
-module.exports = FRO_OEB;
+module.exports = FRO_OEB

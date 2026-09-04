@@ -1,262 +1,421 @@
 const mongoose = require("mongoose");
-const templateA = require("./templateA.js");
-const templateB = require("./templateB.js");
-const templateC = require("./templateC.js");
-const templateE = require("./templateE.js");
-const getDecodedInfo = require("./getDecodedInfo.js");
 
-const ETI_9000INVL_Schema = new mongoose.Schema({
-  conveyorName: {
-    type: String,
-    required: true,
-  },
-  industrialChainManufacturer: {
-    type: Number,
-    enum: [1, 2, 3, 4, 5],
-    required: true,
-  },
-  otherIndustrialChainManufacturer: {
-    type: String,
-    required: function () {
-      return this.industrialChainManufacturer === 5;
+const ETI_9000INVL_Schema = new mongoose.Schema(
+  {
+    // =====================================================
+    // GENERAL INFORMATION
+    // =====================================================
+
+    conveyorName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    chainSize: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    otherChainSize: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+
+    industrialChainManufacturer: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    otherIndustrialChainManufacturer: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+
+    conveyorLength: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    conveyorLengthUnit: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    conveyorSpeed: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    conveyorSpeedUnit: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    conveyorIndex: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+
+    travelDirection: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    appEnviroment: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    otherAppEnviroment: {
+      type: String,
+      required: function () {
+        return this.appEnviroment === "Other";
+      },
+      trim: true,
+    },
+
+    ovenStatus: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+
+    ovenTemp: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+
+    surroundingTemp: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    conveyorLoaded: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    conveyorSwing: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    // =====================================================
+    // CUSTOMER POWER UTILITIES
+    // =====================================================
+
+    operatingVoltage: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    controlVoltage: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    // =====================================================
+    // MONITORING SYSTEM
+    // =====================================================
+
+    existingMonitoring: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    newMonitoringSystem: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    // =====================================================
+    // CONVEYOR SPECIFICATIONS
+    // =====================================================
+
+    openRaceStyle: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+
+    sealedStyle: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+
+    powerChain: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+
+    chainPins: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+
+    catDriveStatus: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+
+    catDriveNum: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+
+    railLubrication: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+
+    externalLubeStatus: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+
+    lubeBrand: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+
+    lubeType: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+
+    lubeViscosity: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+
+    sideLubeStatus: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+
+    topLubeStatus: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+
+    reservoirSize: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+
+    reservoirQuantity: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+
+    chainCleanStatus: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+
+    // =====================================================
+    // CONTROLLER
+    // =====================================================
+
+    mightyLubeMonitoring: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+
+    ctrStatus: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+
+    plcConnection: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+
+    monitorControlStatus: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+
+    otherControllerInfo: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+
+    controllerSpecialOptions: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+
+    controllerSpecialOptionsSpecify: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+
+    // =====================================================
+    // WIRE
+    // =====================================================
+
+    wireMeasurementUnit: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    conductor2: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+
+    conductor4: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+
+    conductor7: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+
+    conductor12: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+
+    junctionBoxNum: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+
+    // =====================================================
+    // ENCLOSED TRACK INVERTED MEASUREMENTS
+    // =====================================================
+
+    enclosedUnitType: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    enclosedTrackB: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    enclosedTrackG: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    enclosedTrackH: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    enclosedTrackS: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    enclosedTrackK2: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    enclosedTrackL2: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    enclosedTrackM2: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    enclosedTrackN2: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    enclosedTrackS2: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    // =====================================================
+    // TECHNICIAN NOTE
+    // =====================================================
+
+    technicianNote: {
+      type: String,
+      required: false,
+      trim: true,
+      default: null,
     },
   },
-  conveyorLength: {
-    type: Number,
-    required: false,
-  },
-  conveyorLengthUnit: {
-    type: Number,
-    enum: [1, 2, 3, 4],
-    required: false,
-  },
-  conveyorSpeed: {
-    type: Number,
-    required: false,
-  },
-  conveyorSpeedUnit: {
-    type: Number,
-    enum: [1, 2],
-    required: false,
-  },
-  conveyorIndex: {
-    type: Number,
-    required: false, 
-  },
-  travelDirection: {
-    type: Number,
-    enum: [1, 2],
-    required: false,
-  },
-  appEnviroment: {
-    type: Number,
-    enum: [1, 2, 3, 4, 5, 6, 7],
-    required: true,
-  },
-
-  ovenStatus: {
-    type: Number,
-    enum: [1, 2],
-    required: function () {
-      return this.appEnviroment === 3;
-    },
-  },
-
-  ovenTemp: {
-    type: Number,
-    required: function () {
-      return this.appEnviroment === 3;
-    },
-  },
-
-  otherAppEnviroment: {
-    type: String,
-    required: function () {
-      return this.appEnviroment === 7;
-    },
-  },
-  surroundingTemp: {
-    type: Number,
-    enum: [1, 2],
-    required: false,
-  },
-  conveyorLoaded: {
-    type: Number,
-    enum: [1, 2],
-    required: false,
-  },
-  conveyorSwing: {
-    type: Number,
-    enum: [1, 2],
-    required: false,
-  },
-  operatingVoltage: {
-    type: Number,
-    required: true,
-  },
-
-  // ✅ NEW OPTIONAL FIELD
-  technicianNote: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-  
-
-  monitorData: templateA,
-  
-  addFreeCarrier: {
-    type: Number,
-    enum: [1, 2, 3],
-    required: true,
-  },
-
-  templateBData: {
-    type: templateB,
-    required: function () {
-      return this.addFreeCarrier === 1 || this.addFreeCarrier === 3;
-    },
-  },
-
-  templateCData: {
-    type: templateC,
-    required: function () {
-      return this.addFreeCarrier === 2 || this.addFreeCarrier === 3;
-    },
-  },
-
-  catDriveStatus: {
-    type: Number,
-    enum: [1, 2],
-    required: true,
-  },
-
-  templateEData: templateE,
-
-  catDriveNum: {
-    type: Number,
-    required: false,
-  },
-  externalLubeStatus: {
-    type: Number,
-    enum: [1, 2],
-    required: false,
-  },
-  lubeBrand: {
-    type: String,
-    required: false,
-  },
-  lubeType: {
-    type: String,
-    required: false,
-  },
-  lubeViscosity: {
-    type: String,
-    required: false,
-  },
-  sideLubeStatus: {
-    type: Number,
-    enum: [1, 2],
-    required: false,
-  },
-  chainCleanStatus: {
-    type: Number,
-    enum: [1, 2],
-    required: false,
-  },
-  mightyLubeMonitoring: {
-    type: Number,
-    enum: [1, 2],
-    required: false,
-  },
-  ctrStatus: {
-    type: Number,
-    enum: [1, 2],
-    required: false,
-  },
-  plcConnection: {
-    type: Number,
-    enum: [1, 2],
-    required: false,
-  },
-  monitorControlStatus: {
-    type: Number,
-    enum: [1, 2],
-    required: false,
-  },
-  otherControllerInfo: {
-    type: String,
-    required: false,
-  },
-  wireMeasurementUnit: {
-    type: Number,
-    enum: [1, 2, 3, 4],
-    required: false,
-  },
-  conductor2: {
-    type: Number,
-    required: false,
-  },
-  conductor4: {
-    type: Number,
-    required: false,
-  },
-  conductor7: {
-    type: Number,
-    required: false,
-  },
-  conductor12: {
-    type: Number,
-    required: false,
-  },
-  junctionBoxNum: {
-    type: Number,
-    required: false,
-  },
-  enclosedUnitType: {
-    type: Number,
-    enum: [1, 2, 3, 4],
-    required: false,
-  },
-  enclosedTrackB: {
-    type: Number,
-    required: false,
-  },
-  enclosedTrackG: {
-    type: Number,
-    required: false,
-  },
-  enclosedTrackH: {
-    type: Number,
-    required: false,
-  },
-  enclosedTrackS: {
-    type: Number,
-    required: false,
-  },
-  enclosedTrackK2: {
-    type: Number,
-    required: false,
-  },
-  enclosedTrackL2: {
-    type: Number,
-    required: false,
-  },
-  enclosedTrackM2: {
-    type: Number,
-    required: false,
-  },
-  enclosedTrackN2: {
-    type: Number,
-    required: false,
-  },
-  enclosedTrackS2: {
-    type: Number,
-    required: false,
-  },
-});
+  {
+    timestamps: true,
+  }
+);
 
 const ETI_9000INVL =
   mongoose.models.ETI_9000INVL ||
-  mongoose.model("ETI_9000INVL", ETI_9000INVL_Schema);
-module.exports = ETI_9000INVL;
+  mongoose.model("ETI_9000INVL", ETI_9000INVL_Schema)
+
+module.exports = ETI_9000INVL

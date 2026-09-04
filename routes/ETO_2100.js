@@ -1,369 +1,6 @@
-// const express = require("express");
-// const { dbConnect } = require("../config/config");
-// const { authenticate } = require("./sessions");
-// const ETO_2100 = require("../models/ETO_2100");
-// const templateA = require("../models/templateA");
-// const templateB = require("../models/templateB");
-// const templateC = require("../models/templateC");
-// const templateE= require("../models/templateE");
-// const router = express.Router();
-
-// router.post("/", authenticate, async (req, res) => {
-//     try {
-//         const { ETO_2100Data, numRequested } = req.body;
-//         const order = new ETO_2100({
-//             ...(ETO_2100Data.chainSize && { chainSize: ETO_2100Data.chainSize }),
-//             ...(ETO_2100Data.otherChainSize && { otherChainSize: ETO_2100Data.otherChainSize }),
-//             industrialChainManufacturer: ETO_2100Data.industrialChainManufacturer,
-//             ...(ETO_2100Data.otherIndustrialChainManufacturer && { otherIndustrialChainManufacturer: ETO_2100Data.otherIndustrialChainManufacturer }),
-//             ...(ETO_2100Data.conveyorLength && { conveyorLength: ETO_2100Data.conveyorLength }),
-//             ...(ETO_2100Data.conveyorLengthUnit && { conveyorLengthUnit: ETO_2100Data.conveyorLengthUnit }),
-//             ...(ETO_2100Data.conveyorSpeed && { conveyorSpeed: ETO_2100Data.conveyorSpeed }),
-//             ...(ETO_2100Data.conveyorSpeedUnit && { conveyorSpeedUnit: ETO_2100Data.conveyorSpeedUnit }),
-//             ...(ETO_2100Data.conveyorIndex && { conveyorIndex: ETO_2100Data.conveyorIndex }),
-//             ...(ETO_2100Data.travelDirection && { travelDirection: ETO_2100Data.travelDirection }),
-//             appEnviroment: ETO_2100Data.appEnviroment,
-//             ...(ETO_2100Data.ovenStatus && { ovenStatus: ETO_2100Data.ovenStatus }),
-//             ...(ETO_2100Data.ovenTemp && { ovenTemp: ETO_2100Data.ovenTemp }),
-//             ...(ETO_2100Data.otherAppEnviroment && { otherAppEnviroment: ETO_2100Data.otherAppEnviroment }),
-//             ...(ETO_2100Data.surroundingTemp && { surroundingTemp: ETO_2100Data.surroundingTemp }),
-//             ...(ETO_2100Data.conveyorLoaded && { conveyorLoaded: ETO_2100Data.conveyorLoaded }),
-//             ...(ETO_2100Data.conveyorSwing && { conveyorSwing: ETO_2100Data.conveyorSwing }),
-//             operatingVoltage: ETO_2100Data.operatingVoltage,
-
-//         monitorData: 
-//         {
-//                 existingMonitor: ETO_2100Data.templateA.existingMonitor,
-//                 newMonitor: ETO_2100Data.templateA.newMonitor,		
-//                 ...(ETO_2100Data.templateA.dcuStatus && { dcuStatus: ETO_2100Data.templateA.dcuStatus }),
-//                 ...(ETO_2100Data.templateA.dcuNum && { dcuNum: ETO_2100Data.templateA.dcuNum }),
-//                 ...(ETO_2100Data.templateA.existingWindows && { existingWindows: ETO_2100Data.templateA.existingWindows }),
-//                 ...(ETO_2100Data.templateA.existingHeadUnit && { existingHeadUnit: ETO_2100Data.templateA.existingHeadUnit }),
-//                 ...(ETO_2100Data.templateA.existingDCU && { existingDCU: ETO_2100Data.templateA.existingDCU }),
-//                 ...(ETO_2100Data.templateA.existingPowerInterface && { existingPowerInterface: ETO_2100Data.templateA.existingPowerInterface }),
-//                 ...(ETO_2100Data.templateA.newReservoir && { newReservoir: ETO_2100Data.templateA.newReservoir }),
-//                 ...(ETO_2100Data.templateA.reservoirSize && { reservoirSize: ETO_2100Data.templateA.reservoirSize }),
-//                 ...(ETO_2100Data.templateA.otherReservoirSize && { otherReservoirSize: ETO_2100Data.templateA.otherReservoirSize }),
-//                 ...(ETO_2100Data.templateA.newReservoirNum && { newReservoirNum: ETO_2100Data.templateA.newReservoirNum }),
-//                 ...(ETO_2100Data.templateA.typeMonitor && { typeMonitor: ETO_2100Data.templateA.typeMonitor }),
-//                 ...(ETO_2100Data.templateA.driveMotorAmp && { driveMotorAmp: ETO_2100Data.templateA.driveMotorAmp }),
-//                 ...(ETO_2100Data.templateA.driveMotorAmpNum && { driveMotorAmpNum: ETO_2100Data.templateA.driveMotorAmpNum }),
-//                 ...(ETO_2100Data.templateA.driveTakeUpAir && { driveTakeUpAir: ETO_2100Data.templateA.driveTakeUpAir }),
-//                 ...(ETO_2100Data.templateA.driveTakeUpAirNum && { driveTakeUpAirNum: ETO_2100Data.templateA.driveTakeUpAirNum }),
-//                 ...(ETO_2100Data.templateA.takeUpDistance && { takeUpDistance: ETO_2100Data.templateA.takeUpDistance }),
-//                 ...(ETO_2100Data.templateA.takeUpDistanceNum && { takeUpDistanceNum: ETO_2100Data.templateA.takeUpDistanceNum }),
-//                 ...(ETO_2100Data.templateA.driveTemp && { driveTemp: ETO_2100Data.templateA.driveTemp }),
-//                 ...(ETO_2100Data.templateA.driveTempNum && { driveTempNum: ETO_2100Data.templateA.driveTempNum }),
-//                 ...(ETO_2100Data.templateA.driveVibration && { driveVibration: ETO_2100Data.templateA.driveVibration }),
-//                 ...(ETO_2100Data.templateA.driveVibrationNum && { driveVibrationNum: ETO_2100Data.templateA.driveVibrationNum }),
-//                 ...(ETO_2100Data.templateA.dogPitch && { dogPitch: ETO_2100Data.templateA.dogPitch }),
-//                 ...(ETO_2100Data.templateA.dogPitchNum && { dogPitchNum: ETO_2100Data.templateA.dogPitchNum }),
-//                 ...(ETO_2100Data.templateA.paintMarker && { paintMarker: ETO_2100Data.templateA.paintMarker }),
-//                 ...(ETO_2100Data.templateA.paintMarkerNum && { paintMarkerNum: ETO_2100Data.templateA.paintMarkerNum }),
-//                 ...(ETO_2100Data.templateA.chainVision && { chainVision: ETO_2100Data.templateA.chainVision }),
-//                 ...(ETO_2100Data.templateA.lubeVision && { lubeVision: ETO_2100Data.templateA.lubeVision }),
-//                 ...(ETO_2100Data.templateA.trolleyVision && { trolleyVision: ETO_2100Data.templateA.trolleyVision }),
-//                 ...(ETO_2100Data.templateA.trolleyDetect && { trolleyDetect: ETO_2100Data.templateA.trolleyDetect }),
-//                 ...(ETO_2100Data.templateA.omniView && { omniView: ETO_2100Data.templateA.omniView }),
-//                 ...(ETO_2100Data.templateA.dcuUpgradeNum && { dcuUpgradeNum: ETO_2100Data.templateA.dcuUpgradeNum }),
-//                 ...(ETO_2100Data.templateA.piuDistance && { piuDistance: ETO_2100Data.templateA.piuDistance }),
-//                 ...(ETO_2100Data.templateA.switchDistance && { switchDistance: ETO_2100Data.templateA.switchDistance }),
-//                 ...(ETO_2100Data.templateA.ampPickup && { ampPickup: ETO_2100Data.templateA.ampPickup }),
-//                 ...(ETO_2100Data.templateA.fromAirTakeUpDistance && { fromAirTakeUpDistance: ETO_2100Data.templateA.fromAirTakeUpDistance }),
-//                 ...(ETO_2100Data.templateA.specialControllerOptions && { specialControllerOptions: ETO_2100Data.templateA.specialControllerOptions }),
-//                 ...(ETO_2100Data.templateA.operatingVoltage && { operatingVoltage: ETO_2100Data.templateA.operatingVoltage })
-//             },
-
-//             addFreeCarrier: ETO_2100Data.addFreeCarrier,
-
-//             templateBData: 
-//             {
-                
-//                 conveyorName: ETO_2100Data.templateB.conveyorName,
-//                 industrialChainManufacturer: ETO_2100Data.templateB.industrialChainManufacturer,
-//                 ...(ETO_2100Data.templateB.otherChainManufacturer && { otherChainManufacturer: ETO_2100Data.templateB.otherChainManufacturer }),
-//                 wheelManufacturer: ETO_2100Data.templateB.wheelManufacturer,
-//                 ...(ETO_2100Data.templateB.wheelManufacturer && { wheelManufacturer: ETO_2100Data.templateB.wheelManufacturer}),
-//                 conveyorSpeed: ETO_2100Data.templateB.conveyorSpeed,
-//                 conveyorSpeedUnit: ETO_2100Data.templateB.conveyorSpeedUnit,
-//                 conveyorIndex: ETO_2100Data.templateB.conveyorIndex,
-//                 ...(ETO_2100Data.templateB.travelDirection && { travelDirection: ETO_2100Data.templateB.travelDirection}),
-//                 appEnviroment: ETO_2100Data.templateB.appEnviroment,
-//                 ...(ETO_2100Data.templateB.otherAppEnviroment && { otherAppEnviroment: ETO_2100Data.templateB.otherAppEnviroment}),
-//                 surroundingTemp: ETO_2100Data.templateB.surroundingTemp,
-//                 orientationType: ETO_2100Data.templateB.orientationType,
-//                 operatingVoltage: ETO_2100Data.templateB.operatingVoltage,
-//                 controlVoltSingle: ETO_2100Data.templateB.controlVoltSingle,
-//                 compressedAir: ETO_2100Data.templateB.compressedAir,
-//                 ...(ETO_2100Data.templateB.airSupplyType && { airSupplyType: ETO_2100Data.templateB.airSupplyType}),
-
-//                 templateA_BData: {
-                    
-//                     existingMonitor: ETO_2100Data.templateA.existingMonitor,
-//                     newMonitor: ETO_2100Data.templateA.newMonitor,		
-//                     ...(ETO_2100Data.templateA.dcuStatus && { dcuStatus: ETO_2100Data.templateA.dcuStatus }),
-//                     ...(ETO_2100Data.templateA.dcuNum && { dcuNum: ETO_2100Data.templateA.dcuNum }),
-//                     ...(ETO_2100Data.templateA.existingWindows && { existingWindows: ETO_2100Data.templateA.existingWindows }),
-//                     ...(ETO_2100Data.templateA.existingHeadUnit && { existingHeadUnit: ETO_2100Data.templateA.existingHeadUnit }),
-//                     ...(ETO_2100Data.templateA.existingDCU && { existingDCU: ETO_2100Data.templateA.existingDCU }),
-//                     ...(ETO_2100Data.templateA.existingPowerInterface && { existingPowerInterface: ETO_2100Data.templateA.existingPowerInterface }),
-//                     ...(ETO_2100Data.templateA.newReservoir && { newReservoir: ETO_2100Data.templateA.newReservoir }),
-//                     ...(ETO_2100Data.templateA.reservoirSize && { reservoirSize: ETO_2100Data.templateA.reservoirSize }),
-//                     ...(ETO_2100Data.templateA.otherReservoirSize && { otherReservoirSize: ETO_2100Data.templateA.otherReservoirSize }),
-//                     ...(ETO_2100Data.templateA.newReservoirNum && { newReservoirNum: ETO_2100Data.templateA.newReservoirNum }),
-//                     ...(ETO_2100Data.templateA.typeMonitor && { typeMonitor: ETO_2100Data.templateA.typeMonitor }),
-//                     ...(ETO_2100Data.templateA.driveMotorAmp && { driveMotorAmp: ETO_2100Data.templateA.driveMotorAmp }),
-//                     ...(ETO_2100Data.templateA.driveMotorAmpNum && { driveMotorAmpNum: ETO_2100Data.templateA.driveMotorAmpNum }),
-//                     ...(ETO_2100Data.templateA.driveTakeUpAir && { driveTakeUpAir: ETO_2100Data.templateA.driveTakeUpAir }),
-//                     ...(ETO_2100Data.templateA.driveTakeUpAirNum && { driveTakeUpAirNum: ETO_2100Data.templateA.driveTakeUpAirNum }),
-//                     ...(ETO_2100Data.templateA.takeUpDistance && { takeUpDistance: ETO_2100Data.templateA.takeUpDistance }),
-//                     ...(ETO_2100Data.templateA.takeUpDistanceNum && { takeUpDistanceNum: ETO_2100Data.templateA.takeUpDistanceNum }),
-//                     ...(ETO_2100Data.templateA.driveTemp && { driveTemp: ETO_2100Data.templateA.driveTemp }),
-//                     ...(ETO_2100Data.templateA.driveTempNum && { driveTempNum: ETO_2100Data.templateA.driveTempNum }),
-//                     ...(ETO_2100Data.templateA.driveVibration && { driveVibration: ETO_2100Data.templateA.driveVibration }),
-//                     ...(ETO_2100Data.templateA.driveVibrationNum && { driveVibrationNum: ETO_2100Data.templateA.driveVibrationNum }),
-//                     ...(ETO_2100Data.templateA.dogPitch && { dogPitch: ETO_2100Data.templateA.dogPitch }),
-//                     ...(ETO_2100Data.templateA.dogPitchNum && { dogPitchNum: ETO_2100Data.templateA.dogPitchNum }),
-//                     ...(ETO_2100Data.templateA.paintMarker && { paintMarker: ETO_2100Data.templateA.paintMarker }),
-//                     ...(ETO_2100Data.templateA.paintMarkerNum && { paintMarkerNum: ETO_2100Data.templateA.paintMarkerNum }),
-//                     ...(ETO_2100Data.templateA.chainVision && { chainVision: ETO_2100Data.templateA.chainVision }),
-//                     ...(ETO_2100Data.templateA.lubeVision && { lubeVision: ETO_2100Data.templateA.lubeVision }),
-//                     ...(ETO_2100Data.templateA.trolleyVision && { trolleyVision: ETO_2100Data.templateA.trolleyVision }),
-//                     ...(ETO_2100Data.templateA.trolleyDetect && { trolleyDetect: ETO_2100Data.templateA.trolleyDetect }),
-//                     ...(ETO_2100Data.templateA.omniView && { omniView: ETO_2100Data.templateA.omniView }),
-//                     ...(ETO_2100Data.templateA.dcuUpgradeNum && { dcuUpgradeNum: ETO_2100Data.templateA.dcuUpgradeNum }),
-//                     ...(ETO_2100Data.templateA.piuDistance && { piuDistance: ETO_2100Data.templateA.piuDistance }),
-//                     ...(ETO_2100Data.templateA.switchDistance && { switchDistance: ETO_2100Data.templateA.switchDistance }),
-//                     ...(ETO_2100Data.templateA.ampPickup && { ampPickup: ETO_2100Data.templateA.ampPickup }),
-//                     ...(ETO_2100Data.templateA.fromAirTakeUpDistance && { fromAirTakeUpDistance: ETO_2100Data.templateA.fromAirTakeUpDistance }),
-//                     ...(ETO_2100Data.templateA.specialControllerOptions && { specialControllerOptions: ETO_2100Data.templateA.specialControllerOptions }),
-//                     ...(ETO_2100Data.templateA.operatingVoltage && { operatingVoltage: ETO_2100Data.templateA.operatingVoltage })
-
-//                 },
-
-//                 freeWheelStatus: ETO_2100Data.templateB.freeWheelStatus,
-//                 actuatorStatus: ETO_2100Data.templateB.actuatorStatus,
-//                 ...(ETO_2100Data.templateB.pivotStatus && { pivotStatus: ETO_2100Data.templateB.pivotStatus}),
-//                 kingPinStatus: ETO_2100Data.templateB.kingPinStatus,
-//                 lubeBrand: ETO_2100Data.templateB.lubeBrand,
-//                 lubeViscosity: ETO_2100Data.templateB.lubeViscosity,
-//                 ...(ETO_2100Data.templateB.lubeType && { lubeType: ETO_2100Data.templateB.lubeType}),
-//                 currentGrease: ETO_2100Data.templateB.currentGrease,
-//                 currentGreaseGrade: ETO_2100Data.templateB.currentGreaseGrade,
-//                 zerkDirection: ETO_2100Data.templateB.zerkDirection,
-//                 zerkLocationType: ETO_2100Data.templateB.zerkLocationType,
-//                 wheelDiameter: ETO_2100Data.templateB.wheelDiameter,
-//                 conveyorSwing: ETO_2100Data.templateB.conveyorSwing,
-//                 ...(ETO_2100Data.templateB.chainMaster && { chainMaster: ETO_2100Data.templateB.chainMaster}),
-//                 ...(ETO_2100Data.templateB.remoteStatus && { remoteStatus: ETO_2100Data.templateB.remoteStatus}),
-//                 ...(ETO_2100Data.templateB.mountStatus && { mountStatus: ETO_2100Data.templateB.mountStatus}),
-//                 ...(ETO_2100Data.templateB.otherUnitStatus && { otherUnitStatus: ETO_2100Data.templateB.otherUnitStatus}),
-//                 ...(ETO_2100Data.templateB.timerStatus && { timerStatus: ETO_2100Data.templateB.timerStatus}),
-//                 ...(ETO_2100Data.templateB.electricStatus && { electricStatus: ETO_2100Data.templateB.electricStatus}),
-//                 ...(ETO_2100Data.templateB.mightyLubeMonitoring && { mightyLubeMonitoring: ETO_2100Data.templateB.mightyLubeMonitoring}),
-//                 ...(ETO_2100Data.templateB.preMountType && { preMountType: ETO_2100Data.templateB.preMountType}),
-//                 ...(ETO_2100Data.templateB.otherPreMountType && { otherPreMountType: ETO_2100Data.templateB.otherPreMountType}),
-//                 ...(ETO_2100Data.templateB.plcConnection && { plcConnection: ETO_2100Data.templateB.plcConnection}),
-//                 ...(ETO_2100Data.templateB.otherControllerNotes && { otherControllerNotes: ETO_2100Data.templateB.otherControllerNotes}),
-//                 ...(ETO_2100Data.templateB.templateB_UnitType && { templateB_UnitType: ETO_2100Data.templateB.templateB_UnitType}),
-//                 ...(ETO_2100Data.templateB.templateB_InvertedB && { templateB_InvertedB: ETO_2100Data.templateB.templateB_InvertedB}),
-//                 ...(ETO_2100Data.templateB.templateB_InvertedE && { templateB_InvertedE: ETO_2100Data.templateB.templateB_InvertedE}),
-//                 ...(ETO_2100Data.templateB.templateB_InvertedG && { templateB_InvertedG: ETO_2100Data.templateB.templateB_InvertedG}),
-//                 ...(ETO_2100Data.templateB.templateB_InvertedH && { templateB_InvertedH: ETO_2100Data.templateB.templateB_InvertedH}),
-//                 ...(ETO_2100Data.templateB.templateB_InvertedK && { templateB_InvertedK: ETO_2100Data.templateB.templateB_InvertedK}),
-//                 ...(ETO_2100Data.templateB.templateB_InvertedT && { templateB_InvertedT: ETO_2100Data.templateB.templateB_InvertedT}),
-//                 ...(ETO_2100Data.templateB.templateB_InvertedU && { templateB_InvertedU: ETO_2100Data.templateB.templateB_InvertedU}),
-//                 ...(ETO_2100Data.templateB.templateB_InvertedV && { templateB_InvertedV: ETO_2100Data.templateB.templateB_InvertedV}),
-//                 ...(ETO_2100Data.templateB.templateB_InvertedW && { templateB_InvertedW: ETO_2100Data.templateB.templateB_InvertedW}),
-
-//             },
-
-//             templateCData: 
-//             {
-//             conveyorName: ETO_2100Data.templateC.conveyorName,
-//             industrialChainManufacturer: ETO_2100Data.templateC.industrialChainManufacturer,
-//             ...(ETO_2100Data.templateC.otherChainManufacturer && { otherChainManufacturer: ETO_2100Data.templateC.otherChainManufacturer }),
-//             wheelManufacturer: ETO_2100Data.templateC.wheelManufacturer,
-//             ...(ETO_2100Data.templateC.wheelManufacturer && { wheelManufacturer: ETO_2100Data.templateC.wheelManufacturer}),
-//             conveyorSpeed: ETO_2100Data.templateC.conveyorSpeed,
-//             conveyorSpeedUnit: ETO_2100Data.templateC.conveyorSpeedUnit,
-//             conveyorIndex: ETO_2100Data.templateC.conveyorIndex,
-//             ...(ETO_2100Data.templateC.travelDirection && { travelDirection: ETO_2100Data.templateC.travelDirection}),
-//             appEnviroment: ETO_2100Data.templateC.appEnviroment,
-//             ...(ETO_2100Data.templateC.otherAppEnviroment && { otherAppEnviroment: ETO_2100Data.templateC.otherAppEnviroment}),
-//             surroundingTemp: ETO_2100Data.templateC.surroundingTemp,
-//             orientationType: ETO_2100Data.templateC.orientationType,
-//             guideWheelsEven: ETO_2100Data.templateC.guideWheelsEven,
-//             operatingVoltage: ETO_2100Data.templateC.operatingVoltage,
-//             controlVoltSingle: ETO_2100Data.templateC.controlVoltSingle,
-//             compressedAir: ETO_2100Data.templateC.compressedAir,
-//             ...(ETO_2100Data.templateC.airSupplyType && { airSupplyType: ETO_2100Data.templateC.airSupplyType}),
-
-//             templateA_CData: 
-//             {
-//                 existingMonitor: ETO_2100Data.templateA.existingMonitor,
-//                 newMonitor: ETO_2100Data.templateA.newMonitor,		
-//                 ...(ETO_2100Data.templateA.dcuStatus && { dcuStatus: ETO_2100Data.templateA.dcuStatus }),
-//                 ...(ETO_2100Data.templateA.dcuNum && { dcuNum: ETO_2100Data.templateA.dcuNum }),
-//                 ...(ETO_2100Data.templateA.existingWindows && { existingWindows: ETO_2100Data.templateA.existingWindows }),
-//                 ...(ETO_2100Data.templateA.existingHeadUnit && { existingHeadUnit: ETO_2100Data.templateA.existingHeadUnit }),
-//                 ...(ETO_2100Data.templateA.existingDCU && { existingDCU: ETO_2100Data.templateA.existingDCU }),
-//                 ...(ETO_2100Data.templateA.existingPowerInterface && { existingPowerInterface: ETO_2100Data.templateA.existingPowerInterface }),
-//                 ...(ETO_2100Data.templateA.newReservoir && { newReservoir: ETO_2100Data.templateA.newReservoir }),
-//                 ...(ETO_2100Data.templateA.reservoirSize && { reservoirSize: ETO_2100Data.templateA.reservoirSize }),
-//                 ...(ETO_2100Data.templateA.otherReservoirSize && { otherReservoirSize: ETO_2100Data.templateA.otherReservoirSize }),
-//                 ...(ETO_2100Data.templateA.newReservoirNum && { newReservoirNum: ETO_2100Data.templateA.newReservoirNum }),
-//                 ...(ETO_2100Data.templateA.typeMonitor && { typeMonitor: ETO_2100Data.templateA.typeMonitor }),
-//                 ...(ETO_2100Data.templateA.driveMotorAmp && { driveMotorAmp: ETO_2100Data.templateA.driveMotorAmp }),
-//                 ...(ETO_2100Data.templateA.driveMotorAmpNum && { driveMotorAmpNum: ETO_2100Data.templateA.driveMotorAmpNum }),
-//                 ...(ETO_2100Data.templateA.driveTakeUpAir && { driveTakeUpAir: ETO_2100Data.templateA.driveTakeUpAir }),
-//                 ...(ETO_2100Data.templateA.driveTakeUpAirNum && { driveTakeUpAirNum: ETO_2100Data.templateA.driveTakeUpAirNum }),
-//                 ...(ETO_2100Data.templateA.takeUpDistance && { takeUpDistance: ETO_2100Data.templateA.takeUpDistance }),
-//                 ...(ETO_2100Data.templateA.takeUpDistanceNum && { takeUpDistanceNum: ETO_2100Data.templateA.takeUpDistanceNum }),
-//                 ...(ETO_2100Data.templateA.driveTemp && { driveTemp: ETO_2100Data.templateA.driveTemp }),
-//                 ...(ETO_2100Data.templateA.driveTempNum && { driveTempNum: ETO_2100Data.templateA.driveTempNum }),
-//                 ...(ETO_2100Data.templateA.driveVibration && { driveVibration: ETO_2100Data.templateA.driveVibration }),
-//                 ...(ETO_2100Data.templateA.driveVibrationNum && { driveVibrationNum: ETO_2100Data.templateA.driveVibrationNum }),
-//                 ...(ETO_2100Data.templateA.dogPitch && { dogPitch: ETO_2100Data.templateA.dogPitch }),
-//                 ...(ETO_2100Data.templateA.dogPitchNum && { dogPitchNum: ETO_2100Data.templateA.dogPitchNum }),
-//                 ...(ETO_2100Data.templateA.paintMarker && { paintMarker: ETO_2100Data.templateA.paintMarker }),
-//                 ...(ETO_2100Data.templateA.paintMarkerNum && { paintMarkerNum: ETO_2100Data.templateA.paintMarkerNum }),
-//                 ...(ETO_2100Data.templateA.chainVision && { chainVision: ETO_2100Data.templateA.chainVision }),
-//                 ...(ETO_2100Data.templateA.lubeVision && { lubeVision: ETO_2100Data.templateA.lubeVision }),
-//                 ...(ETO_2100Data.templateA.trolleyVision && { trolleyVision: ETO_2100Data.templateA.trolleyVision }),
-//                 ...(ETO_2100Data.templateA.trolleyDetect && { trolleyDetect: ETO_2100Data.templateA.trolleyDetect }),
-//                 ...(ETO_2100Data.templateA.omniView && { omniView: ETO_2100Data.templateA.omniView }),
-//                 ...(ETO_2100Data.templateA.dcuUpgradeNum && { dcuUpgradeNum: ETO_2100Data.templateA.dcuUpgradeNum }),
-//                 ...(ETO_2100Data.templateA.piuDistance && { piuDistance: ETO_2100Data.templateA.piuDistance }),
-//                 ...(ETO_2100Data.templateA.switchDistance && { switchDistance: ETO_2100Data.templateA.switchDistance }),
-//                 ...(ETO_2100Data.templateA.ampPickup && { ampPickup: ETO_2100Data.templateA.ampPickup }),
-//                 ...(ETO_2100Data.templateA.fromAirTakeUpDistance && { fromAirTakeUpDistance: ETO_2100Data.templateA.fromAirTakeUpDistance }),
-//                 ...(ETO_2100Data.templateA.specialControllerOptions && { specialControllerOptions: ETO_2100Data.templateA.specialControllerOptions }),
-//                 ...(ETO_2100Data.templateA.operatingVoltage && { operatingVoltage: ETO_2100Data.templateA.operatingVoltage })
-//             },
-            
-//             freeWheelStatus: ETO_2100Data.templateC.freeWheelStatus,
-//             actuatorStatus: ETO_2100Data.templateC.actuatorStatus,
-//             ...(ETO_2100Data.templateC.pivotStatus && { pivotStatus: ETO_2100Data.templateC.pivotStatus}),
-//             kingPinStatus: ETO_2100Data.templateC.kingPinStatus,
-//             lubeBrand: ETO_2100Data.templateC.lubeBrand,
-//             lubeViscosity: ETO_2100Data.templateC.lubeViscosity,
-//             ...(ETO_2100Data.templateC.lubeType && { lubeType: ETO_2100Data.templateC.lubeType}),
-//             currentGrease: ETO_2100Data.templateC.currentGrease,
-//             currentGreaseGrade: ETO_2100Data.templateC.currentGreaseGrade,
-//             zerkDirection: ETO_2100Data.templateC.zerkDirection,
-//             zerkLocationType: ETO_2100Data.templateC.zerkLocationType,
-//             wheelDiameter: ETO_2100Data.templateC.wheelDiameter,
-//             conveyorSwing: ETO_2100Data.templateC.conveyorSwing,
-//             ...(ETO_2100Data.templateC.chainMaster && { lubeType: ETO_2100Data.templateC.chainMaster}),
-//             ...(ETO_2100Data.templateC.remoteStatus && { lubeType: ETO_2100Data.templateC.remoteStatus}),
-//             ...(ETO_2100Data.templateC.mountStatus && { lubeType: ETO_2100Data.templateC.mountStatus}),
-//             ...(ETO_2100Data.templateC.otherUnitStatus && { lubeType: ETO_2100Data.templateC.otherUnitStatus}),
-//             ...(ETO_2100Data.templateC.timerStatus && { lubeType: ETO_2100Data.templateC.timerStatus}),
-//             ...(ETO_2100Data.templateC.electricStatus && { lubeType: ETO_2100Data.templateC.electricStatus}),
-//             ...(ETO_2100Data.templateC.mightyLubeMonitoring && { lubeType: ETO_2100Data.templateC.mightyLubeMonitoring}),
-//             ...(ETO_2100Data.templateC.preMountType && { lubeType: ETO_2100Data.templateC.preMountType}),
-//             ...(ETO_2100Data.templateC.otherPreMountType && { lubeType: ETO_2100Data.templateC.otherPreMountType}),
-//             ...(ETO_2100Data.templateC.plcConnection && { lubeType: ETO_2100Data.templateC.plcConnection}),
-//             ...(ETO_2100Data.templateC.otherControllerNotes && { lubeType: ETO_2100Data.templateC.otherControllerNotes}),
-//             ...(ETO_2100Data.templateC.templateC_UnitType && { lubeType: ETO_2100Data.templateC.templateC_UnitType}),
-//             templateC_InvertedA: ETO_2100Data.templateC.templateC_InvertedA,
-//             templateC_InvertedB: ETO_2100Data.templateC.templateC_InvertedB,
-//             templateC_InvertedE: ETO_2100Data.templateC.templateC_InvertedE,
-//             templateC_InvertedS: ETO_2100Data.templateC.templateC_InvertedS,
-//         },
-        
-
-//             catDriveStatus: ETO_2100Data.catDriveStatus,
-
-//             templateEData: 
-//             {
-//                 conveyorName: ETO_2100Data.templateE.conveyorName,
-//                 ...(ETO_2100Data.templateE.chainSize && { chainSize: ETO_2100Data.templateE.chainSize }),
-//                 ...(ETO_2100Data.templateE.otherChainSize && { otherChainSize: ETO_2100Data.templateE.otherChainSize }),
-//                 ...(ETO_2100Data.templateE.industrialChainManufacturer && { industrialChainManufacturer: ETO_2100Data.templateE.industrialChainManufacturer }),
-//                 ...(ETO_2100Data.templateE.otherChainManufacturer && { otherChainManufacturer: ETO_2100Data.templateE.otherChainManufacturer }),
-//                 ...(ETO_2100Data.templateE.conveyorLength && { conveyorLength: ETO_2100Data.templateE.conveyorLength }),
-//                 ...(ETO_2100Data.templateE.conveyorLengthUnit && { conveyorLengthUnit: ETO_2100Data.templateE.conveyorLengthUnit }),
-//                 ...(ETO_2100Data.templateE.appEnviroment && { appEnviroment: ETO_2100Data.templateE.appEnviroment }),
-//                 ...(ETO_2100Data.templateE.otherAppEnviroment && { otherAppEnviroment: ETO_2100Data.templateE.otherAppEnviroment }),
-//                 ...(ETO_2100Data.templateE.lubeBrand && { lubeBrand: ETO_2100Data.templateE.lubeBrand }),
-//                 ...(ETO_2100Data.templateE.lubeType && { lubeType: ETO_2100Data.templateE.lubeType }),
-//                 ...(ETO_2100Data.templateE.lubeViscosity && { lubeViscosity: ETO_2100Data.templateE.lubeViscosity }),
-//                 ...(ETO_2100Data.templateE.specialControllerOptions && { specialControllerOptions: ETO_2100Data.templateE.specialControllerOptions }),
-//                 ...(ETO_2100Data.templateE.wireMeasurementUnit && { wireMeasurementUnit: ETO_2100Data.templateE.wireMeasurementUnit }),
-//                 ...(ETO_2100Data.templateE.conductor2 && { conductor2: ETO_2100Data.templateE.conductor2 }),
-//                 ...(ETO_2100Data.templateE.conductor4 && { conductor4: ETO_2100Data.templateE.conductor4 }),
-//                 ...(ETO_2100Data.templateE.conductor7 && { conductor7: ETO_2100Data.templateE.conductor7 }),
-//                 ...(ETO_2100Data.templateE.conductor12 && { conductor12: ETO_2100Data.templateE.conductor12 }),
-//                 ...(ETO_2100Data.templateE.junctionBoxNum && { junctionBoxNum: ETO_2100Data.templateE.junctionBoxNum }),
-
-//             },
-            
-//             ...(ETO_2100Data.catDriveNum && { catDriveNum: ETO_2100Data.catDriveNum }),
-//             ...(ETO_2100Data.lubeBrand && { lubeBrand: ETO_2100Data.lubeBrand }),
-//             ...(ETO_2100Data.lubeType && { lubeType: ETO_2100Data.lubeType }),
-//             ...(ETO_2100Data.lubeViscosity && { lubeViscosity: ETO_2100Data.lubeViscosity }),
-//             ...(ETO_2100Data.chainCleanStatus && { chainCleanStatus: ETO_2100Data.chainCleanStatus }),
-//             ...(ETO_2100Data.wireMeasurementUnit && { wireMeasurementUnit: ETO_2100Data.wireMeasurementUnit }),
-//             ...(ETO_2100Data.conductor2 && { conductor2: ETO_2100Data.conductor2 }),
-//             ...(ETO_2100Data.conductor4 && { conductor4: ETO_2100Data.conductor4 }),
-//             ...(ETO_2100Data.conductor7 && { conductor7: ETO_2100Data.conductor7 }),
-//             ...(ETO_2100Data.conductor12 && { conductor12: ETO_2100Data.conductor12 }),
-//             ...(ETO_2100Data.junctionBoxNum && { junctionBoxNum: ETO_2100Data.junctionBoxNum }),
-//             ...(ETO_2100Data.etUnitType && { etUnitType: ETO_2100Data.etUnitType }),
-//             ...(ETO_2100Data.etOverheadB && { etOverheadB: ETO_2100Data.etOverheadB }),
-//             ...(ETO_2100Data.etOverheadG && { etOverheadG: ETO_2100Data.etOverheadG }),
-//             ...(ETO_2100Data.etOverheadH && { etOverheadH: ETO_2100Data.etOverheadH }),
-//             ...(ETO_2100Data.etOverheadS && { etOverheadS: ETO_2100Data.etOverheadS }),
-//             ...(ETO_2100Data.etOverheadK2 && { etOverheadK2: ETO_2100Data.etOverheadK2 }),
-//             ...(ETO_2100Data.etOverheadLS && { etOverheadLS: ETO_2100Data.etOverheadLS }),
-//             ...(ETO_2100Data.etOverheadM2 && { etOverheadM2: ETO_2100Data.etOverheadM2 }),
-//             ...(ETO_2100Data.etOverheadN2 && { etOverheadN2: ETO_2100Data.etOverheadN2 }),
-//             ...(ETO_2100Data.etOverheadS2 && { etOverheadS2: ETO_2100Data.etOverheadS2 })
-//         });
-//         req.user.cart.push({
-//             numRequested,
-//             productConfigurationInfo: order,
-//             productType: "ETO_2100"
-//         });
-//         await req.user.save();
-//         return res.status(200).json({ message: "ETO_2100 entry added" });
-//     } catch (error) {
-//         console.error(error);
-//         res.status(500).json({ error: "Internal server error" });
-//     }
-// });
-
-// module.exports = router;
-
-
-
-
-
-
-/**
- * routes/ETO_2100.js
- * ------------------
- * ✅ Adds ETO_2100 configuration into authenticated user's cart
- * ✅ NEW: technicianNote (optional)
- *
- * NOTE:
- * 1) Add `technicianNote` in ETO_2100 mongoose schema:
- *    technicianNote: { type: String, required: false }
- * 2) `dbConnect` + template imports are not used directly here (optional cleanup).
- */
-
 const express = require("express");
-const { dbConnect } = require("../config/config"); // not used directly
 const { authenticate } = require("./sessions");
 const ETO_2100 = require("../models/ETO_2100");
-
-// Unused (optional cleanup)
-// const templateA = require("../models/templateA");
-// const templateB = require("../models/templateB");
-// const templateC = require("../models/templateC");
-// const templateE = require("../models/templateE");
 
 const router = express.Router();
 
@@ -371,366 +8,308 @@ router.post("/", authenticate, async (req, res) => {
   try {
     const { ETO_2100Data, numRequested } = req.body || {};
 
-    if (!ETO_2100Data) {
-      return res.status(400).json({ error: "ETO_2100Data is required" });
+    // =========================================================
+    // BASIC REQUEST VALIDATION
+    // =========================================================
+
+    if (
+      !ETO_2100Data ||
+      typeof ETO_2100Data !== "object" ||
+      Array.isArray(ETO_2100Data)
+    ) {
+      return res.status(400).json({
+        error: "ETO_2100Data is required",
+      });
     }
 
-    const order = new ETO_2100({
-      ...(ETO_2100Data.chainSize && { chainSize: ETO_2100Data.chainSize }),
-      ...(ETO_2100Data.otherChainSize && { otherChainSize: ETO_2100Data.otherChainSize }),
-      industrialChainManufacturer: ETO_2100Data.industrialChainManufacturer,
-      ...(ETO_2100Data.otherIndustrialChainManufacturer && {
-        otherIndustrialChainManufacturer: ETO_2100Data.otherIndustrialChainManufacturer,
-      }),
-      ...(ETO_2100Data.conveyorLength && { conveyorLength: ETO_2100Data.conveyorLength }),
-      ...(ETO_2100Data.conveyorLengthUnit && { conveyorLengthUnit: ETO_2100Data.conveyorLengthUnit }),
-      ...(ETO_2100Data.conveyorSpeed && { conveyorSpeed: ETO_2100Data.conveyorSpeed }),
-      ...(ETO_2100Data.conveyorSpeedUnit && { conveyorSpeedUnit: ETO_2100Data.conveyorSpeedUnit }),
-      ...(ETO_2100Data.conveyorIndex && { conveyorIndex: ETO_2100Data.conveyorIndex }),
-      ...(ETO_2100Data.travelDirection && { travelDirection: ETO_2100Data.travelDirection }),
+    const quantity = Number(numRequested);
+
+    if (!Number.isFinite(quantity) || quantity <= 0) {
+      return res.status(400).json({
+        error: "numRequested must be a positive number",
+      });
+    }
+
+    // =========================================================
+    // CURRENT WEBSITE / REUSABLE FLUTTER DATA
+    // =========================================================
+
+    const orderData = {
+      // -------------------------------------------------------
+      // GENERAL INFORMATION
+      // -------------------------------------------------------
+
+      conveyorName: ETO_2100Data.conveyorName,
+
+      chainSize: ETO_2100Data.chainSize,
+      otherChainSize: ETO_2100Data.otherChainSize,
+
+      industrialChainManufacturer:
+        ETO_2100Data.industrialChainManufacturer,
+
+      otherIndustrialChainManufacturer:
+        ETO_2100Data.otherIndustrialChainManufacturer,
+
+      conveyorLength: ETO_2100Data.conveyorLength,
+      conveyorLengthUnit: ETO_2100Data.conveyorLengthUnit,
+
+      conveyorSpeed: ETO_2100Data.conveyorSpeed,
+      conveyorSpeedUnit: ETO_2100Data.conveyorSpeedUnit,
+
+      conveyorIndex: ETO_2100Data.conveyorIndex,
+      travelDirection: ETO_2100Data.travelDirection,
+
       appEnviroment: ETO_2100Data.appEnviroment,
-      ...(ETO_2100Data.ovenStatus && { ovenStatus: ETO_2100Data.ovenStatus }),
-      ...(ETO_2100Data.ovenTemp && { ovenTemp: ETO_2100Data.ovenTemp }),
-      ...(ETO_2100Data.otherAppEnviroment && { otherAppEnviroment: ETO_2100Data.otherAppEnviroment }),
-      ...(ETO_2100Data.surroundingTemp && { surroundingTemp: ETO_2100Data.surroundingTemp }),
-      ...(ETO_2100Data.conveyorLoaded && { conveyorLoaded: ETO_2100Data.conveyorLoaded }),
-      ...(ETO_2100Data.conveyorSwing && { conveyorSwing: ETO_2100Data.conveyorSwing }),
+      otherAppEnviroment: ETO_2100Data.otherAppEnviroment,
+
+      surroundingTemp: ETO_2100Data.surroundingTemp,
+      conveyorLoaded: ETO_2100Data.conveyorLoaded,
+      conveyorSwing: ETO_2100Data.conveyorSwing,
+
+      // -------------------------------------------------------
+      // CUSTOMER POWER UTILITIES
+      // -------------------------------------------------------
+
       operatingVoltage: ETO_2100Data.operatingVoltage,
+      controlVoltage: ETO_2100Data.controlVoltage,
 
-      monitorData: {
-        existingMonitor: ETO_2100Data.templateA?.existingMonitor,
-        newMonitor: ETO_2100Data.templateA?.newMonitor,
+      // -------------------------------------------------------
+      // NEW / EXISTING MONITORING
+      // -------------------------------------------------------
 
-        ...(ETO_2100Data.templateA?.dcuStatus && { dcuStatus: ETO_2100Data.templateA.dcuStatus }),
-        ...(ETO_2100Data.templateA?.dcuNum && { dcuNum: ETO_2100Data.templateA.dcuNum }),
-        ...(ETO_2100Data.templateA?.existingWindows && { existingWindows: ETO_2100Data.templateA.existingWindows }),
-        ...(ETO_2100Data.templateA?.existingHeadUnit && { existingHeadUnit: ETO_2100Data.templateA.existingHeadUnit }),
-        ...(ETO_2100Data.templateA?.existingDCU && { existingDCU: ETO_2100Data.templateA.existingDCU }),
-        ...(ETO_2100Data.templateA?.existingPowerInterface && {
-          existingPowerInterface: ETO_2100Data.templateA.existingPowerInterface,
-        }),
-        ...(ETO_2100Data.templateA?.newReservoir && { newReservoir: ETO_2100Data.templateA.newReservoir }),
-        ...(ETO_2100Data.templateA?.reservoirSize && { reservoirSize: ETO_2100Data.templateA.reservoirSize }),
-        ...(ETO_2100Data.templateA?.otherReservoirSize && { otherReservoirSize: ETO_2100Data.templateA.otherReservoirSize }),
-        ...(ETO_2100Data.templateA?.newReservoirNum && { newReservoirNum: ETO_2100Data.templateA.newReservoirNum }),
-        ...(ETO_2100Data.templateA?.typeMonitor && { typeMonitor: ETO_2100Data.templateA.typeMonitor }),
-        ...(ETO_2100Data.templateA?.driveMotorAmp && { driveMotorAmp: ETO_2100Data.templateA.driveMotorAmp }),
-        ...(ETO_2100Data.templateA?.driveMotorAmpNum && { driveMotorAmpNum: ETO_2100Data.templateA.driveMotorAmpNum }),
-        ...(ETO_2100Data.templateA?.driveTakeUpAir && { driveTakeUpAir: ETO_2100Data.templateA.driveTakeUpAir }),
-        ...(ETO_2100Data.templateA?.driveTakeUpAirNum && { driveTakeUpAirNum: ETO_2100Data.templateA.driveTakeUpAirNum }),
-        ...(ETO_2100Data.templateA?.takeUpDistance && { takeUpDistance: ETO_2100Data.templateA.takeUpDistance }),
-        ...(ETO_2100Data.templateA?.takeUpDistanceNum && { takeUpDistanceNum: ETO_2100Data.templateA.takeUpDistanceNum }),
-        ...(ETO_2100Data.templateA?.driveTemp && { driveTemp: ETO_2100Data.templateA.driveTemp }),
-        ...(ETO_2100Data.templateA?.driveTempNum && { driveTempNum: ETO_2100Data.templateA.driveTempNum }),
-        ...(ETO_2100Data.templateA?.driveVibration && { driveVibration: ETO_2100Data.templateA.driveVibration }),
-        ...(ETO_2100Data.templateA?.driveVibrationNum && { driveVibrationNum: ETO_2100Data.templateA.driveVibrationNum }),
-        ...(ETO_2100Data.templateA?.dogPitch && { dogPitch: ETO_2100Data.templateA.dogPitch }),
-        ...(ETO_2100Data.templateA?.dogPitchNum && { dogPitchNum: ETO_2100Data.templateA.dogPitchNum }),
-        ...(ETO_2100Data.templateA?.paintMarker && { paintMarker: ETO_2100Data.templateA.paintMarker }),
-        ...(ETO_2100Data.templateA?.paintMarkerNum && { paintMarkerNum: ETO_2100Data.templateA.paintMarkerNum }),
-        ...(ETO_2100Data.templateA?.chainVision && { chainVision: ETO_2100Data.templateA.chainVision }),
-        ...(ETO_2100Data.templateA?.lubeVision && { lubeVision: ETO_2100Data.templateA.lubeVision }),
-        ...(ETO_2100Data.templateA?.trolleyVision && { trolleyVision: ETO_2100Data.templateA.trolleyVision }),
-        ...(ETO_2100Data.templateA?.trolleyDetect && { trolleyDetect: ETO_2100Data.templateA.trolleyDetect }),
-        ...(ETO_2100Data.templateA?.omniView && { omniView: ETO_2100Data.templateA.omniView }),
-        ...(ETO_2100Data.templateA?.dcuUpgradeNum && { dcuUpgradeNum: ETO_2100Data.templateA.dcuUpgradeNum }),
-        ...(ETO_2100Data.templateA?.piuDistance && { piuDistance: ETO_2100Data.templateA.piuDistance }),
-        ...(ETO_2100Data.templateA?.switchDistance && { switchDistance: ETO_2100Data.templateA.switchDistance }),
-        ...(ETO_2100Data.templateA?.ampPickup && { ampPickup: ETO_2100Data.templateA.ampPickup }),
-        ...(ETO_2100Data.templateA?.fromAirTakeUpDistance && {
-          fromAirTakeUpDistance: ETO_2100Data.templateA.fromAirTakeUpDistance,
-        }),
-        ...(ETO_2100Data.templateA?.specialControllerOptions && {
-          specialControllerOptions: ETO_2100Data.templateA.specialControllerOptions,
-        }),
-        ...(ETO_2100Data.templateA?.operatingVoltage && { operatingVoltage: ETO_2100Data.templateA.operatingVoltage }),
-      },
+      existingMonitoring: ETO_2100Data.existingMonitoring,
+      newMonitoringSystem: ETO_2100Data.newMonitoringSystem,
 
-      addFreeCarrier: ETO_2100Data.addFreeCarrier,
+      // -------------------------------------------------------
+      // CONVEYOR SPECIFICATIONS
+      // -------------------------------------------------------
 
-      templateBData: {
-        conveyorName: ETO_2100Data.templateB?.conveyorName,
-        industrialChainManufacturer: ETO_2100Data.templateB?.industrialChainManufacturer,
-        ...(ETO_2100Data.templateB?.otherChainManufacturer && {
-          otherChainManufacturer: ETO_2100Data.templateB.otherChainManufacturer,
-        }),
-        wheelManufacturer: ETO_2100Data.templateB?.wheelManufacturer,
-        conveyorSpeed: ETO_2100Data.templateB?.conveyorSpeed,
-        conveyorSpeedUnit: ETO_2100Data.templateB?.conveyorSpeedUnit,
-        conveyorIndex: ETO_2100Data.templateB?.conveyorIndex,
-        ...(ETO_2100Data.templateB?.travelDirection && { travelDirection: ETO_2100Data.templateB.travelDirection }),
-        appEnviroment: ETO_2100Data.templateB?.appEnviroment,
-        ...(ETO_2100Data.templateB?.otherAppEnviroment && { otherAppEnviroment: ETO_2100Data.templateB.otherAppEnviroment }),
-        surroundingTemp: ETO_2100Data.templateB?.surroundingTemp,
-        orientationType: ETO_2100Data.templateB?.orientationType,
-        operatingVoltage: ETO_2100Data.templateB?.operatingVoltage,
-        controlVoltSingle: ETO_2100Data.templateB?.controlVoltSingle,
-        compressedAir: ETO_2100Data.templateB?.compressedAir,
-        ...(ETO_2100Data.templateB?.airSupplyType && { airSupplyType: ETO_2100Data.templateB.airSupplyType }),
+      wheelOpenType: ETO_2100Data.wheelOpenType,
+      wheelClosedType: ETO_2100Data.wheelClosedType,
 
-        templateA_BData: {
-          existingMonitor: ETO_2100Data.templateA?.existingMonitor,
-          newMonitor: ETO_2100Data.templateA?.newMonitor,
-
-          ...(ETO_2100Data.templateA?.dcuStatus && { dcuStatus: ETO_2100Data.templateA.dcuStatus }),
-          ...(ETO_2100Data.templateA?.dcuNum && { dcuNum: ETO_2100Data.templateA.dcuNum }),
-          ...(ETO_2100Data.templateA?.existingWindows && { existingWindows: ETO_2100Data.templateA.existingWindows }),
-          ...(ETO_2100Data.templateA?.existingHeadUnit && { existingHeadUnit: ETO_2100Data.templateA.existingHeadUnit }),
-          ...(ETO_2100Data.templateA?.existingDCU && { existingDCU: ETO_2100Data.templateA.existingDCU }),
-          ...(ETO_2100Data.templateA?.existingPowerInterface && {
-            existingPowerInterface: ETO_2100Data.templateA.existingPowerInterface,
-          }),
-          ...(ETO_2100Data.templateA?.newReservoir && { newReservoir: ETO_2100Data.templateA.newReservoir }),
-          ...(ETO_2100Data.templateA?.reservoirSize && { reservoirSize: ETO_2100Data.templateA.reservoirSize }),
-          ...(ETO_2100Data.templateA?.otherReservoirSize && { otherReservoirSize: ETO_2100Data.templateA.otherReservoirSize }),
-          ...(ETO_2100Data.templateA?.newReservoirNum && { newReservoirNum: ETO_2100Data.templateA.newReservoirNum }),
-          ...(ETO_2100Data.templateA?.typeMonitor && { typeMonitor: ETO_2100Data.templateA.typeMonitor }),
-          ...(ETO_2100Data.templateA?.driveMotorAmp && { driveMotorAmp: ETO_2100Data.templateA.driveMotorAmp }),
-          ...(ETO_2100Data.templateA?.driveMotorAmpNum && { driveMotorAmpNum: ETO_2100Data.templateA.driveMotorAmpNum }),
-          ...(ETO_2100Data.templateA?.driveTakeUpAir && { driveTakeUpAir: ETO_2100Data.templateA.driveTakeUpAir }),
-          ...(ETO_2100Data.templateA?.driveTakeUpAirNum && { driveTakeUpAirNum: ETO_2100Data.templateA.driveTakeUpAirNum }),
-          ...(ETO_2100Data.templateA?.takeUpDistance && { takeUpDistance: ETO_2100Data.templateA.takeUpDistance }),
-          ...(ETO_2100Data.templateA?.takeUpDistanceNum && { takeUpDistanceNum: ETO_2100Data.templateA.takeUpDistanceNum }),
-          ...(ETO_2100Data.templateA?.driveTemp && { driveTemp: ETO_2100Data.templateA.driveTemp }),
-          ...(ETO_2100Data.templateA?.driveTempNum && { driveTempNum: ETO_2100Data.templateA.driveTempNum }),
-          ...(ETO_2100Data.templateA?.driveVibration && { driveVibration: ETO_2100Data.templateA.driveVibration }),
-          ...(ETO_2100Data.templateA?.driveVibrationNum && { driveVibrationNum: ETO_2100Data.templateA.driveVibrationNum }),
-          ...(ETO_2100Data.templateA?.dogPitch && { dogPitch: ETO_2100Data.templateA.dogPitch }),
-          ...(ETO_2100Data.templateA?.dogPitchNum && { dogPitchNum: ETO_2100Data.templateA.dogPitchNum }),
-          ...(ETO_2100Data.templateA?.paintMarker && { paintMarker: ETO_2100Data.templateA.paintMarker }),
-          ...(ETO_2100Data.templateA?.paintMarkerNum && { paintMarkerNum: ETO_2100Data.templateA.paintMarkerNum }),
-          ...(ETO_2100Data.templateA?.chainVision && { chainVision: ETO_2100Data.templateA.chainVision }),
-          ...(ETO_2100Data.templateA?.lubeVision && { lubeVision: ETO_2100Data.templateA.lubeVision }),
-          ...(ETO_2100Data.templateA?.trolleyVision && { trolleyVision: ETO_2100Data.templateA.trolleyVision }),
-          ...(ETO_2100Data.templateA?.trolleyDetect && { trolleyDetect: ETO_2100Data.templateA.trolleyDetect }),
-          ...(ETO_2100Data.templateA?.omniView && { omniView: ETO_2100Data.templateA.omniView }),
-          ...(ETO_2100Data.templateA?.dcuUpgradeNum && { dcuUpgradeNum: ETO_2100Data.templateA.dcuUpgradeNum }),
-          ...(ETO_2100Data.templateA?.piuDistance && { piuDistance: ETO_2100Data.templateA.piuDistance }),
-          ...(ETO_2100Data.templateA?.switchDistance && { switchDistance: ETO_2100Data.templateA.switchDistance }),
-          ...(ETO_2100Data.templateA?.ampPickup && { ampPickup: ETO_2100Data.templateA.ampPickup }),
-          ...(ETO_2100Data.templateA?.fromAirTakeUpDistance && {
-            fromAirTakeUpDistance: ETO_2100Data.templateA.fromAirTakeUpDistance,
-          }),
-          ...(ETO_2100Data.templateA?.specialControllerOptions && {
-            specialControllerOptions: ETO_2100Data.templateA.specialControllerOptions,
-          }),
-          ...(ETO_2100Data.templateA?.operatingVoltage && { operatingVoltage: ETO_2100Data.templateA.operatingVoltage }),
-        },
-
-        freeWheelStatus: ETO_2100Data.templateB?.freeWheelStatus,
-        actuatorStatus: ETO_2100Data.templateB?.actuatorStatus,
-        ...(ETO_2100Data.templateB?.pivotStatus && { pivotStatus: ETO_2100Data.templateB.pivotStatus }),
-        kingPinStatus: ETO_2100Data.templateB?.kingPinStatus,
-        lubeBrand: ETO_2100Data.templateB?.lubeBrand,
-        lubeViscosity: ETO_2100Data.templateB?.lubeViscosity,
-        ...(ETO_2100Data.templateB?.lubeType && { lubeType: ETO_2100Data.templateB.lubeType }),
-        currentGrease: ETO_2100Data.templateB?.currentGrease,
-        currentGreaseGrade: ETO_2100Data.templateB?.currentGreaseGrade,
-        zerkDirection: ETO_2100Data.templateB?.zerkDirection,
-        zerkLocationType: ETO_2100Data.templateB?.zerkLocationType,
-        wheelDiameter: ETO_2100Data.templateB?.wheelDiameter,
-        conveyorSwing: ETO_2100Data.templateB?.conveyorSwing,
-
-        ...(ETO_2100Data.templateB?.chainMaster && { chainMaster: ETO_2100Data.templateB.chainMaster }),
-        ...(ETO_2100Data.templateB?.remoteStatus && { remoteStatus: ETO_2100Data.templateB.remoteStatus }),
-        ...(ETO_2100Data.templateB?.mountStatus && { mountStatus: ETO_2100Data.templateB.mountStatus }),
-        ...(ETO_2100Data.templateB?.otherUnitStatus && { otherUnitStatus: ETO_2100Data.templateB.otherUnitStatus }),
-        ...(ETO_2100Data.templateB?.timerStatus && { timerStatus: ETO_2100Data.templateB.timerStatus }),
-        ...(ETO_2100Data.templateB?.electricStatus && { electricStatus: ETO_2100Data.templateB.electricStatus }),
-        ...(ETO_2100Data.templateB?.mightyLubeMonitoring && { mightyLubeMonitoring: ETO_2100Data.templateB.mightyLubeMonitoring }),
-        ...(ETO_2100Data.templateB?.preMountType && { preMountType: ETO_2100Data.templateB.preMountType }),
-        ...(ETO_2100Data.templateB?.otherPreMountType && { otherPreMountType: ETO_2100Data.templateB.otherPreMountType }),
-        ...(ETO_2100Data.templateB?.plcConnection && { plcConnection: ETO_2100Data.templateB.plcConnection }),
-        ...(ETO_2100Data.templateB?.otherControllerNotes && { otherControllerNotes: ETO_2100Data.templateB.otherControllerNotes }),
-
-        ...(ETO_2100Data.templateB?.templateB_UnitType && { templateB_UnitType: ETO_2100Data.templateB.templateB_UnitType }),
-        ...(ETO_2100Data.templateB?.templateB_InvertedB && { templateB_InvertedB: ETO_2100Data.templateB.templateB_InvertedB }),
-        ...(ETO_2100Data.templateB?.templateB_InvertedE && { templateB_InvertedE: ETO_2100Data.templateB.templateB_InvertedE }),
-        ...(ETO_2100Data.templateB?.templateB_InvertedG && { templateB_InvertedG: ETO_2100Data.templateB.templateB_InvertedG }),
-        ...(ETO_2100Data.templateB?.templateB_InvertedH && { templateB_InvertedH: ETO_2100Data.templateB.templateB_InvertedH }),
-        ...(ETO_2100Data.templateB?.templateB_InvertedK && { templateB_InvertedK: ETO_2100Data.templateB.templateB_InvertedK }),
-        ...(ETO_2100Data.templateB?.templateB_InvertedT && { templateB_InvertedT: ETO_2100Data.templateB.templateB_InvertedT }),
-        ...(ETO_2100Data.templateB?.templateB_InvertedU && { templateB_InvertedU: ETO_2100Data.templateB.templateB_InvertedU }),
-        ...(ETO_2100Data.templateB?.templateB_InvertedV && { templateB_InvertedV: ETO_2100Data.templateB.templateB_InvertedV }),
-        ...(ETO_2100Data.templateB?.templateB_InvertedW && { templateB_InvertedW: ETO_2100Data.templateB.templateB_InvertedW }),
-      },
-
-      templateCData: {
-        conveyorName: ETO_2100Data.templateC?.conveyorName,
-        industrialChainManufacturer: ETO_2100Data.templateC?.industrialChainManufacturer,
-        ...(ETO_2100Data.templateC?.otherChainManufacturer && {
-          otherChainManufacturer: ETO_2100Data.templateC.otherChainManufacturer,
-        }),
-        wheelManufacturer: ETO_2100Data.templateC?.wheelManufacturer,
-        conveyorSpeed: ETO_2100Data.templateC?.conveyorSpeed,
-        conveyorSpeedUnit: ETO_2100Data.templateC?.conveyorSpeedUnit,
-        conveyorIndex: ETO_2100Data.templateC?.conveyorIndex,
-        ...(ETO_2100Data.templateC?.travelDirection && { travelDirection: ETO_2100Data.templateC.travelDirection }),
-        appEnviroment: ETO_2100Data.templateC?.appEnviroment,
-        ...(ETO_2100Data.templateC?.otherAppEnviroment && { otherAppEnviroment: ETO_2100Data.templateC.otherAppEnviroment }),
-        surroundingTemp: ETO_2100Data.templateC?.surroundingTemp,
-        orientationType: ETO_2100Data.templateC?.orientationType,
-        guideWheelsEven: ETO_2100Data.templateC?.guideWheelsEven,
-        operatingVoltage: ETO_2100Data.templateC?.operatingVoltage,
-        controlVoltSingle: ETO_2100Data.templateC?.controlVoltSingle,
-        compressedAir: ETO_2100Data.templateC?.compressedAir,
-        ...(ETO_2100Data.templateC?.airSupplyType && { airSupplyType: ETO_2100Data.templateC.airSupplyType }),
-
-        templateA_CData: {
-          existingMonitor: ETO_2100Data.templateA?.existingMonitor,
-          newMonitor: ETO_2100Data.templateA?.newMonitor,
-
-          ...(ETO_2100Data.templateA?.dcuStatus && { dcuStatus: ETO_2100Data.templateA.dcuStatus }),
-          ...(ETO_2100Data.templateA?.dcuNum && { dcuNum: ETO_2100Data.templateA.dcuNum }),
-          ...(ETO_2100Data.templateA?.existingWindows && { existingWindows: ETO_2100Data.templateA.existingWindows }),
-          ...(ETO_2100Data.templateA?.existingHeadUnit && { existingHeadUnit: ETO_2100Data.templateA.existingHeadUnit }),
-          ...(ETO_2100Data.templateA?.existingDCU && { existingDCU: ETO_2100Data.templateA.existingDCU }),
-          ...(ETO_2100Data.templateA?.existingPowerInterface && {
-            existingPowerInterface: ETO_2100Data.templateA.existingPowerInterface,
-          }),
-          ...(ETO_2100Data.templateA?.newReservoir && { newReservoir: ETO_2100Data.templateA.newReservoir }),
-          ...(ETO_2100Data.templateA?.reservoirSize && { reservoirSize: ETO_2100Data.templateA.reservoirSize }),
-          ...(ETO_2100Data.templateA?.otherReservoirSize && { otherReservoirSize: ETO_2100Data.templateA.otherReservoirSize }),
-          ...(ETO_2100Data.templateA?.newReservoirNum && { newReservoirNum: ETO_2100Data.templateA.newReservoirNum }),
-          ...(ETO_2100Data.templateA?.typeMonitor && { typeMonitor: ETO_2100Data.templateA.typeMonitor }),
-          ...(ETO_2100Data.templateA?.driveMotorAmp && { driveMotorAmp: ETO_2100Data.templateA.driveMotorAmp }),
-          ...(ETO_2100Data.templateA?.driveMotorAmpNum && { driveMotorAmpNum: ETO_2100Data.templateA.driveMotorAmpNum }),
-          ...(ETO_2100Data.templateA?.driveTakeUpAir && { driveTakeUpAir: ETO_2100Data.templateA.driveTakeUpAir }),
-          ...(ETO_2100Data.templateA?.driveTakeUpAirNum && { driveTakeUpAirNum: ETO_2100Data.templateA.driveTakeUpAirNum }),
-          ...(ETO_2100Data.templateA?.takeUpDistance && { takeUpDistance: ETO_2100Data.templateA.takeUpDistance }),
-          ...(ETO_2100Data.templateA?.takeUpDistanceNum && { takeUpDistanceNum: ETO_2100Data.templateA.takeUpDistanceNum }),
-          ...(ETO_2100Data.templateA?.driveTemp && { driveTemp: ETO_2100Data.templateA.driveTemp }),
-          ...(ETO_2100Data.templateA?.driveTempNum && { driveTempNum: ETO_2100Data.templateA.driveTempNum }),
-          ...(ETO_2100Data.templateA?.driveVibration && { driveVibration: ETO_2100Data.templateA.driveVibration }),
-          ...(ETO_2100Data.templateA?.driveVibrationNum && { driveVibrationNum: ETO_2100Data.templateA.driveVibrationNum }),
-          ...(ETO_2100Data.templateA?.dogPitch && { dogPitch: ETO_2100Data.templateA.dogPitch }),
-          ...(ETO_2100Data.templateA?.dogPitchNum && { dogPitchNum: ETO_2100Data.templateA.dogPitchNum }),
-          ...(ETO_2100Data.templateA?.paintMarker && { paintMarker: ETO_2100Data.templateA.paintMarker }),
-          ...(ETO_2100Data.templateA?.paintMarkerNum && { paintMarkerNum: ETO_2100Data.templateA.paintMarkerNum }),
-          ...(ETO_2100Data.templateA?.chainVision && { chainVision: ETO_2100Data.templateA.chainVision }),
-          ...(ETO_2100Data.templateA?.lubeVision && { lubeVision: ETO_2100Data.templateA.lubeVision }),
-          ...(ETO_2100Data.templateA?.trolleyVision && { trolleyVision: ETO_2100Data.templateA.trolleyVision }),
-          ...(ETO_2100Data.templateA?.trolleyDetect && { trolleyDetect: ETO_2100Data.templateA.trolleyDetect }),
-          ...(ETO_2100Data.templateA?.omniView && { omniView: ETO_2100Data.templateA.omniView }),
-          ...(ETO_2100Data.templateA?.dcuUpgradeNum && { dcuUpgradeNum: ETO_2100Data.templateA.dcuUpgradeNum }),
-          ...(ETO_2100Data.templateA?.piuDistance && { piuDistance: ETO_2100Data.templateA.piuDistance }),
-          ...(ETO_2100Data.templateA?.switchDistance && { switchDistance: ETO_2100Data.templateA.switchDistance }),
-          ...(ETO_2100Data.templateA?.ampPickup && { ampPickup: ETO_2100Data.templateA.ampPickup }),
-          ...(ETO_2100Data.templateA?.fromAirTakeUpDistance && {
-            fromAirTakeUpDistance: ETO_2100Data.templateA.fromAirTakeUpDistance,
-          }),
-          ...(ETO_2100Data.templateA?.specialControllerOptions && {
-            specialControllerOptions: ETO_2100Data.templateA.specialControllerOptions,
-          }),
-          ...(ETO_2100Data.templateA?.operatingVoltage && { operatingVoltage: ETO_2100Data.templateA.operatingVoltage }),
-        },
-
-        freeWheelStatus: ETO_2100Data.templateC?.freeWheelStatus,
-        actuatorStatus: ETO_2100Data.templateC?.actuatorStatus,
-        ...(ETO_2100Data.templateC?.pivotStatus && { pivotStatus: ETO_2100Data.templateC.pivotStatus }),
-        kingPinStatus: ETO_2100Data.templateC?.kingPinStatus,
-        lubeBrand: ETO_2100Data.templateC?.lubeBrand,
-        lubeViscosity: ETO_2100Data.templateC?.lubeViscosity,
-        ...(ETO_2100Data.templateC?.lubeType && { lubeType: ETO_2100Data.templateC.lubeType }),
-        currentGrease: ETO_2100Data.templateC?.currentGrease,
-        currentGreaseGrade: ETO_2100Data.templateC?.currentGreaseGrade,
-        zerkDirection: ETO_2100Data.templateC?.zerkDirection,
-        zerkLocationType: ETO_2100Data.templateC?.zerkLocationType,
-        wheelDiameter: ETO_2100Data.templateC?.wheelDiameter,
-        conveyorSwing: ETO_2100Data.templateC?.conveyorSwing,
-
-        // ⚠️ your original code maps these into `lubeType` (bug). Kept them correct here:
-        ...(ETO_2100Data.templateC?.chainMaster && { chainMaster: ETO_2100Data.templateC.chainMaster }),
-        ...(ETO_2100Data.templateC?.remoteStatus && { remoteStatus: ETO_2100Data.templateC.remoteStatus }),
-        ...(ETO_2100Data.templateC?.mountStatus && { mountStatus: ETO_2100Data.templateC.mountStatus }),
-        ...(ETO_2100Data.templateC?.otherUnitStatus && { otherUnitStatus: ETO_2100Data.templateC.otherUnitStatus }),
-        ...(ETO_2100Data.templateC?.timerStatus && { timerStatus: ETO_2100Data.templateC.timerStatus }),
-        ...(ETO_2100Data.templateC?.electricStatus && { electricStatus: ETO_2100Data.templateC.electricStatus }),
-        ...(ETO_2100Data.templateC?.mightyLubeMonitoring && { mightyLubeMonitoring: ETO_2100Data.templateC.mightyLubeMonitoring }),
-        ...(ETO_2100Data.templateC?.preMountType && { preMountType: ETO_2100Data.templateC.preMountType }),
-        ...(ETO_2100Data.templateC?.otherPreMountType && { otherPreMountType: ETO_2100Data.templateC.otherPreMountType }),
-        ...(ETO_2100Data.templateC?.plcConnection && { plcConnection: ETO_2100Data.templateC.plcConnection }),
-        ...(ETO_2100Data.templateC?.otherControllerNotes && { otherControllerNotes: ETO_2100Data.templateC.otherControllerNotes }),
-        ...(ETO_2100Data.templateC?.templateC_UnitType && { templateC_UnitType: ETO_2100Data.templateC.templateC_UnitType }),
-
-        templateC_InvertedA: ETO_2100Data.templateC?.templateC_InvertedA,
-        templateC_InvertedB: ETO_2100Data.templateC?.templateC_InvertedB,
-        templateC_InvertedE: ETO_2100Data.templateC?.templateC_InvertedE,
-        templateC_InvertedS: ETO_2100Data.templateC?.templateC_InvertedS,
-      },
+      powerChain: ETO_2100Data.powerChain,
+      chainPins: ETO_2100Data.chainPins,
 
       catDriveStatus: ETO_2100Data.catDriveStatus,
+      catDriveNum: ETO_2100Data.catDriveNum,
 
-      templateEData: {
-        conveyorName: ETO_2100Data.templateE?.conveyorName,
-        ...(ETO_2100Data.templateE?.chainSize && { chainSize: ETO_2100Data.templateE.chainSize }),
-        ...(ETO_2100Data.templateE?.otherChainSize && { otherChainSize: ETO_2100Data.templateE.otherChainSize }),
-        ...(ETO_2100Data.templateE?.industrialChainManufacturer && {
-          industrialChainManufacturer: ETO_2100Data.templateE.industrialChainManufacturer,
-        }),
-        ...(ETO_2100Data.templateE?.otherChainManufacturer && {
-          otherChainManufacturer: ETO_2100Data.templateE.otherChainManufacturer,
-        }),
-        ...(ETO_2100Data.templateE?.conveyorLength && { conveyorLength: ETO_2100Data.templateE.conveyorLength }),
-        ...(ETO_2100Data.templateE?.conveyorLengthUnit && { conveyorLengthUnit: ETO_2100Data.templateE.conveyorLengthUnit }),
-        ...(ETO_2100Data.templateE?.appEnviroment && { appEnviroment: ETO_2100Data.templateE.appEnviroment }),
-        ...(ETO_2100Data.templateE?.otherAppEnviroment && { otherAppEnviroment: ETO_2100Data.templateE.otherAppEnviroment }),
-        ...(ETO_2100Data.templateE?.lubeBrand && { lubeBrand: ETO_2100Data.templateE.lubeBrand }),
-        ...(ETO_2100Data.templateE?.lubeType && { lubeType: ETO_2100Data.templateE.lubeType }),
-        ...(ETO_2100Data.templateE?.lubeViscosity && { lubeViscosity: ETO_2100Data.templateE.lubeViscosity }),
-        ...(ETO_2100Data.templateE?.specialControllerOptions && {
-          specialControllerOptions: ETO_2100Data.templateE.specialControllerOptions,
-        }),
-        ...(ETO_2100Data.templateE?.wireMeasurementUnit && { wireMeasurementUnit: ETO_2100Data.templateE.wireMeasurementUnit }),
-        ...(ETO_2100Data.templateE?.conductor2 && { conductor2: ETO_2100Data.templateE.conductor2 }),
-        ...(ETO_2100Data.templateE?.conductor4 && { conductor4: ETO_2100Data.templateE.conductor4 }),
-        ...(ETO_2100Data.templateE?.conductor7 && { conductor7: ETO_2100Data.templateE.conductor7 }),
-        ...(ETO_2100Data.templateE?.conductor12 && { conductor12: ETO_2100Data.templateE.conductor12 }),
-        ...(ETO_2100Data.templateE?.junctionBoxNum && { junctionBoxNum: ETO_2100Data.templateE.junctionBoxNum }),
-      },
+      railLubeStatus: ETO_2100Data.railLubeStatus,
+      externalLubeStatus: ETO_2100Data.externalLubeStatus,
 
-      ...(ETO_2100Data.catDriveNum && { catDriveNum: ETO_2100Data.catDriveNum }),
-      ...(ETO_2100Data.lubeBrand && { lubeBrand: ETO_2100Data.lubeBrand }),
-      ...(ETO_2100Data.lubeType && { lubeType: ETO_2100Data.lubeType }),
-      ...(ETO_2100Data.lubeViscosity && { lubeViscosity: ETO_2100Data.lubeViscosity }),
-      ...(ETO_2100Data.chainCleanStatus && { chainCleanStatus: ETO_2100Data.chainCleanStatus }),
+      lubeBrand: ETO_2100Data.lubeBrand,
+      lubeType: ETO_2100Data.lubeType,
+      lubeViscosity: ETO_2100Data.lubeViscosity,
 
-      ...(ETO_2100Data.wireMeasurementUnit && { wireMeasurementUnit: ETO_2100Data.wireMeasurementUnit }),
-      ...(ETO_2100Data.conductor2 && { conductor2: ETO_2100Data.conductor2 }),
-      ...(ETO_2100Data.conductor4 && { conductor4: ETO_2100Data.conductor4 }),
-      ...(ETO_2100Data.conductor7 && { conductor7: ETO_2100Data.conductor7 }),
-      ...(ETO_2100Data.conductor12 && { conductor12: ETO_2100Data.conductor12 }),
-      ...(ETO_2100Data.junctionBoxNum && { junctionBoxNum: ETO_2100Data.junctionBoxNum }),
+      sideLubeStatus: ETO_2100Data.sideLubeStatus,
+      topLubeStatus: ETO_2100Data.topLubeStatus,
+      chainCleanStatus: ETO_2100Data.chainCleanStatus,
 
-      ...(ETO_2100Data.etUnitType && { etUnitType: ETO_2100Data.etUnitType }),
-      ...(ETO_2100Data.etOverheadB && { etOverheadB: ETO_2100Data.etOverheadB }),
-      ...(ETO_2100Data.etOverheadG && { etOverheadG: ETO_2100Data.etOverheadG }),
-      ...(ETO_2100Data.etOverheadH && { etOverheadH: ETO_2100Data.etOverheadH }),
-      ...(ETO_2100Data.etOverheadS && { etOverheadS: ETO_2100Data.etOverheadS }),
-      ...(ETO_2100Data.etOverheadK2 && { etOverheadK2: ETO_2100Data.etOverheadK2 }),
-      ...(ETO_2100Data.etOverheadLS && { etOverheadLS: ETO_2100Data.etOverheadLS }),
-      ...(ETO_2100Data.etOverheadM2 && { etOverheadM2: ETO_2100Data.etOverheadM2 }),
-      ...(ETO_2100Data.etOverheadN2 && { etOverheadN2: ETO_2100Data.etOverheadN2 }),
-      ...(ETO_2100Data.etOverheadS2 && { etOverheadS2: ETO_2100Data.etOverheadS2 }),
+      // -------------------------------------------------------
+      // WIRE
+      // -------------------------------------------------------
 
-      // ✅ NEW FIELD
-      ...(ETO_2100Data.technicianNote && ETO_2100Data.technicianNote.trim() && {
-        technicianNote: ETO_2100Data.technicianNote.trim(),
-      }),
-    });
+      wireMeasurementUnit: ETO_2100Data.wireMeasurementUnit,
+
+      conductor2: ETO_2100Data.conductor2,
+      conductor4: ETO_2100Data.conductor4,
+      conductor7: ETO_2100Data.conductor7,
+      conductor12: ETO_2100Data.conductor12,
+
+      junctionBoxNum: ETO_2100Data.junctionBoxNum,
+
+      // -------------------------------------------------------
+      // ENCLOSED TRACK OVERHEAD MEASUREMENTS
+      // -------------------------------------------------------
+
+      etUnitType: ETO_2100Data.etUnitType,
+
+      etOverheadB: ETO_2100Data.etOverheadB,
+      etOverheadG: ETO_2100Data.etOverheadG,
+      etOverheadH: ETO_2100Data.etOverheadH,
+      etOverheadS: ETO_2100Data.etOverheadS,
+
+      etOverheadK2: ETO_2100Data.etOverheadK2,
+
+      // Current reusable Flutter / website key
+      etOverheadL2: ETO_2100Data.etOverheadL2,
+
+      etOverheadM2: ETO_2100Data.etOverheadM2,
+
+      measurementDropdown:
+        ETO_2100Data.measurementDropdown,
+
+      etOverheadN2: ETO_2100Data.etOverheadN2,
+      etOverheadS2: ETO_2100Data.etOverheadS2,
+    };
+
+    // =========================================================
+    // LEGACY COMPATIBILITY
+    //
+    // Keep support for fields sent by the old Flutter app.
+    // These are no longer required by the new reusable form.
+    // =========================================================
+
+    if (ETO_2100Data.ovenStatus !== undefined) {
+      orderData.ovenStatus = ETO_2100Data.ovenStatus;
+    }
+
+    if (ETO_2100Data.ovenTemp !== undefined) {
+      orderData.ovenTemp = ETO_2100Data.ovenTemp;
+    }
+
+    if (ETO_2100Data.freeCarrierSystem !== undefined) {
+      orderData.freeCarrierSystem =
+        ETO_2100Data.freeCarrierSystem;
+    }
+
+    if (ETO_2100Data.addFreeCarrier !== undefined) {
+      orderData.addFreeCarrier =
+        ETO_2100Data.addFreeCarrier;
+    }
+
+    /*
+     * Old measurement key.
+     *
+     * Old code used etOverheadLS.
+     * Current reusable Flutter uses etOverheadL2.
+     */
+    if (ETO_2100Data.etOverheadLS !== undefined) {
+      orderData.etOverheadLS =
+        ETO_2100Data.etOverheadLS;
+
+      /*
+       * If an old client sends LS but not L2,
+       * also populate the new L2 field.
+       */
+      if (orderData.etOverheadL2 === undefined) {
+        orderData.etOverheadL2 =
+          ETO_2100Data.etOverheadLS;
+      }
+    }
+
+    // ---------------------------------------------------------
+    // LEGACY MONITORING TEMPLATE
+    // ---------------------------------------------------------
+
+    if (
+      ETO_2100Data.monitorData &&
+      typeof ETO_2100Data.monitorData === "object"
+    ) {
+      orderData.monitorData =
+        ETO_2100Data.monitorData;
+    } else if (
+      ETO_2100Data.templateA &&
+      typeof ETO_2100Data.templateA === "object"
+    ) {
+      orderData.monitorData =
+        ETO_2100Data.templateA;
+    }
+
+    // ---------------------------------------------------------
+    // LEGACY TEMPLATE B
+    // ---------------------------------------------------------
+
+    if (
+      ETO_2100Data.templateBData &&
+      typeof ETO_2100Data.templateBData === "object"
+    ) {
+      orderData.templateBData =
+        ETO_2100Data.templateBData;
+    } else if (
+      ETO_2100Data.templateB &&
+      typeof ETO_2100Data.templateB === "object"
+    ) {
+      orderData.templateBData =
+        ETO_2100Data.templateB;
+    }
+
+    // ---------------------------------------------------------
+    // LEGACY TEMPLATE C
+    // ---------------------------------------------------------
+
+    if (
+      ETO_2100Data.templateCData &&
+      typeof ETO_2100Data.templateCData === "object"
+    ) {
+      orderData.templateCData =
+        ETO_2100Data.templateCData;
+    } else if (
+      ETO_2100Data.templateC &&
+      typeof ETO_2100Data.templateC === "object"
+    ) {
+      orderData.templateCData =
+        ETO_2100Data.templateC;
+    }
+
+    // ---------------------------------------------------------
+    // LEGACY TEMPLATE E
+    // ---------------------------------------------------------
+
+    if (
+      ETO_2100Data.templateEData &&
+      typeof ETO_2100Data.templateEData === "object"
+    ) {
+      orderData.templateEData =
+        ETO_2100Data.templateEData;
+    } else if (
+      ETO_2100Data.templateE &&
+      typeof ETO_2100Data.templateE === "object"
+    ) {
+      orderData.templateEData =
+        ETO_2100Data.templateE;
+    }
+
+    // ---------------------------------------------------------
+    // LEGACY TECHNICIAN NOTE
+    // Not present on current website.
+    // Preserve only when an old client sends it.
+    // ---------------------------------------------------------
+
+    if (
+      typeof ETO_2100Data.technicianNote === "string" &&
+      ETO_2100Data.technicianNote.trim()
+    ) {
+      orderData.technicianNote =
+        ETO_2100Data.technicianNote.trim();
+    }
+
+    // =========================================================
+    // CREATE + VALIDATE CONFIGURATION
+    // =========================================================
+
+    const order = new ETO_2100(orderData);
+
+    await order.validate();
+
+    // =========================================================
+    // ADD TO AUTHENTICATED USER CART
+    // =========================================================
 
     req.user.cart.push({
-      numRequested,
+      numRequested: quantity,
       productConfigurationInfo: order,
       productType: "ETO_2100",
     });
 
     await req.user.save();
-    return res.status(200).json({ message: "ETO_2100 entry added" });
+
+    return res.status(200).json({
+      message: "ETO_2100 entry added",
+    });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: "Internal server error" });
+    console.error("ETO_2100 error:", error);
+
+    if (error?.name === "ValidationError") {
+      return res.status(400).json({
+        error: "Invalid ETO_2100 configuration",
+        details: error.message,
+      });
+    }
+
+    return res.status(500).json({
+      error: "Internal server error",
+    });
   }
 });
 
-module.exports = router;
+module.exports = router

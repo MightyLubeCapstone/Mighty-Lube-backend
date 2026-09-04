@@ -1,267 +1,305 @@
 const mongoose = require("mongoose");
-const templateA = require("./templateA.js");
-const templateB = require("./templateB.js");
-const templateC = require("./templateC.js");
-const templateE = require("./templateE.js");
-const getDecodedInfo = require("./getDecodedInfo.js");
 
 const ETO_9000E_Schema = new mongoose.Schema({
-  chainSize: {
-    type: Number,
-    enum: [1, 2, 3, 4, 5],
-    required: false,
-  },
+  // =========================================================
+  // GENERAL INFORMATION
+  // =========================================================
 
-  otherChainSize: {
-    type: String,
-    required: function () {
-      return this.chainSize === 5;
-    },
-  },
-  industrialChainManufacturer: {
-    type: Number,
-    enum: [1, 2, 3, 4, 5],
-    required: true,
-  },
-  otherIndustrialChainManufacturer: {
-    type: String,
-    required: function () {
-      return this.industrialChainManufacturer === 5;
-    },
-  },
-  conveyorLength: {
-    type: Number,
-    required: false,
-  },
-  conveyorLengthUnit: {
-    type: Number,
-    enum: [1, 2, 3, 4],
-    required: false,
-  },
-  conveyorSpeed: {
-    type: Number,
-    required: false,
-  },
-  conveyorSpeedUnit: {
-    type: Number,
-    enum: [1, 2],
-    required: false,
-  },
-  conveyorIndex: {
-    type: Number,
-    required: false,
-  },
-  travelDirection: {
-    type: Number,
-    enum: [1, 2],
-    required: false,
-  },
-  appEnviroment: {
-    type: Number,
-    enum: [1, 2, 3, 4, 5, 6, 7],
-    required: true,
-  },
-
-  ovenStatus: {
-    type: Number,
-    enum: [1, 2],
-    required: function () {
-      return this.appEnviroment === 3;
-    },
-  },
-
-  ovenTemp: {
-    type: Number,
-    required: function () {
-      return this.appEnviroment === 3;
-    },
-  },
-
-  otherAppEnviroment: {
-    type: String,
-    required: function () {
-      return this.appEnviroment === 7;
-    },
-  },
-  surroundingTemp: {
-    type: Number,
-    enum: [1, 2],
-    required: false,
-  },
-  conveyorLoaded: {
-    type: Number,
-    enum: [1, 2],
-    required: false,
-  },
-  conveyorSwing: {
-    type: Number,
-    enum: [1, 2],
-    required: false,
-  },
-  operatingVoltage: {
-    type: Number,
-    required: true,
-  },
-
-  // ✅ NEW OPTIONAL FIELD
-  technicianNote: {
+  conveyorName: {
     type: String,
     required: false,
     trim: true,
   },
 
-  monitorData: templateA,
-  addFreeCarrier: {
-    type: Number,
-    enum: [1, 2, 3],
-    required: true,
+  chainSize: {
+    type: mongoose.Schema.Types.Mixed,
+    required: false,
   },
 
-  templateBData: {
-    type: templateB,
-    required: function () {
-      return this.addFreeCarrier === 1 || this.addFreeCarrier === 3;
-    },
+  otherChainSize: {
+    type: String,
+    required: false,
+    trim: true,
   },
 
-  templateCData: {
-    type: templateC,
-    required: function () {
-      return this.addFreeCarrier === 2 || this.addFreeCarrier === 3;
-    },
+  industrialChainManufacturer: {
+    type: mongoose.Schema.Types.Mixed,
+    required: false,
+  },
+
+  otherIndustrialChainManufacturer: {
+    type: String,
+    required: false,
+    trim: true,
+  },
+
+  conveyorLength: {
+    type: mongoose.Schema.Types.Mixed,
+    required: false,
+  },
+
+  conveyorLengthUnit: {
+    type: mongoose.Schema.Types.Mixed,
+    required: false,
+  },
+
+  conveyorSpeed: {
+    type: mongoose.Schema.Types.Mixed,
+    required: false,
+  },
+
+  conveyorSpeedUnit: {
+    type: mongoose.Schema.Types.Mixed,
+    required: false,
+  },
+
+  conveyorIndex: {
+    type: mongoose.Schema.Types.Mixed,
+    required: false,
+  },
+
+  travelDirection: {
+    type: mongoose.Schema.Types.Mixed,
+    required: false,
+  },
+
+  appEnviroment: {
+    type: mongoose.Schema.Types.Mixed,
+    required: false,
+  },
+
+  otherAppEnviroment: {
+    type: String,
+    required: false,
+    trim: true,
+  },
+
+  surroundingTemp: {
+    type: mongoose.Schema.Types.Mixed,
+    required: false,
+  },
+
+  // =========================================================
+  // CUSTOMER POWER UTILITIES
+  // =========================================================
+
+  operatingVoltage: {
+    type: mongoose.Schema.Types.Mixed,
+    required: false,
+  },
+
+  controlVoltage: {
+    type: mongoose.Schema.Types.Mixed,
+    required: false,
+  },
+
+  // =========================================================
+  // MONITORING
+  // =========================================================
+
+  existingMonitoring: {
+    type: mongoose.Schema.Types.Mixed,
+    required: false,
+  },
+
+  newMonitoringSystem: {
+    type: mongoose.Schema.Types.Mixed,
+    required: false,
+  },
+
+  // =========================================================
+  // CONVEYOR SPECIFICATIONS
+  // =========================================================
+
+  wheelOpenType: {
+    type: mongoose.Schema.Types.Mixed,
+    required: false,
+  },
+
+  wheelClosedType: {
+    type: mongoose.Schema.Types.Mixed,
+    required: false,
+  },
+
+  powerChain: {
+    type: mongoose.Schema.Types.Mixed,
+    required: false,
+  },
+
+  chainPins: {
+    type: mongoose.Schema.Types.Mixed,
+    required: false,
   },
 
   catDriveStatus: {
-    type: Number,
-    enum: [1, 2],
-    required: true,
+    type: mongoose.Schema.Types.Mixed,
+    required: false,
   },
 
-  templateEData: templateE,
-  
   catDriveNum: {
-    type: Number,
+    type: mongoose.Schema.Types.Mixed,
     required: false,
   },
+
+  railLubeStatus: {
+    type: mongoose.Schema.Types.Mixed,
+    required: false,
+  },
+
   externalLubeStatus: {
-    type: Number,
-    enum: [1, 2],
+    type: mongoose.Schema.Types.Mixed,
     required: false,
   },
+
   lubeBrand: {
     type: String,
     required: false,
+    trim: true,
   },
+
   lubeType: {
     type: String,
     required: false,
+    trim: true,
   },
+
   lubeViscosity: {
     type: String,
     required: false,
+    trim: true,
   },
-  chainMaster: {
-    type: Number,
-    enum: [1, 2],
+
+  sideLubeStatus: {
+    type: mongoose.Schema.Types.Mixed,
     required: false,
   },
-  timerStatus: {
-    type: Number,
-    enum: [1, 2, 3],
+
+  topLubeStatus: {
+    type: mongoose.Schema.Types.Mixed,
     required: false,
   },
-  electricStatus: {
-    type: Number,
-    enum: [1, 2],
+
+  reservoirSize: {
+    type: mongoose.Schema.Types.Mixed,
     required: false,
   },
-  pneumaticStatus: {
-    type: Number,
-    enum: [1, 2],
+
+  reservoirSizeQuantity: {
+    type: mongoose.Schema.Types.Mixed,
     required: false,
   },
-  mightyLubeMonitoring: {
-    type: Number,
-    enum: [1, 2],
+
+  chainCleanStatus: {
+    type: mongoose.Schema.Types.Mixed,
     required: false,
   },
-  plcConnection: {
-    type: Number,
-    enum: [1, 2],
+
+  // =========================================================
+  // CONTROLLER
+  // =========================================================
+
+  specialControllerOptions: {
+    type: mongoose.Schema.Types.Mixed,
     required: false,
   },
-  otherControllerInfo: {
+
+  controllerPleaseSpecify: {
     type: String,
     required: false,
+    trim: true,
   },
+
+  // =========================================================
+  // WIRE
+  // =========================================================
+
   wireMeasurementUnit: {
-    type: Number,
-    enum: [1, 2, 3, 4],
+    type: mongoose.Schema.Types.Mixed,
     required: false,
   },
+
   conductor2: {
-    type: Number,
+    type: mongoose.Schema.Types.Mixed,
     required: false,
   },
+
   conductor4: {
-    type: Number,
+    type: mongoose.Schema.Types.Mixed,
     required: false,
   },
+
   conductor7: {
-    type: Number,
+    type: mongoose.Schema.Types.Mixed,
     required: false,
   },
+
   conductor12: {
-    type: Number,
+    type: mongoose.Schema.Types.Mixed,
     required: false,
   },
+
   junctionBoxNum: {
-    type: Number,
+    type: mongoose.Schema.Types.Mixed,
     required: false,
   },
+
+  // =========================================================
+  // ENCLOSED TRACK OVERHEAD MEASUREMENTS
+  // =========================================================
+
   enclosedUnitType: {
-    type: Number,
-    enum: [1, 2, 3, 4],
+    type: mongoose.Schema.Types.Mixed,
     required: false,
   },
+
   enclosedTrackB: {
-    type: Number,
+    type: mongoose.Schema.Types.Mixed,
     required: false,
   },
+
   enclosedTrackG: {
-    type: Number,
+    type: mongoose.Schema.Types.Mixed,
     required: false,
   },
+
   enclosedTrackH: {
-    type: Number,
+    type: mongoose.Schema.Types.Mixed,
     required: false,
   },
+
   enclosedTrackS: {
-    type: Number,
+    type: mongoose.Schema.Types.Mixed,
     required: false,
   },
+
   enclosedTrackK2: {
-    type: Number,
+    type: mongoose.Schema.Types.Mixed,
     required: false,
   },
+
   enclosedTrackL2: {
-    type: Number,
+    type: mongoose.Schema.Types.Mixed,
     required: false,
   },
+
   enclosedTrackM2: {
-    type: Number,
+    type: mongoose.Schema.Types.Mixed,
     required: false,
   },
+
   enclosedTrackN2: {
-    type: Number,
+    type: mongoose.Schema.Types.Mixed,
     required: false,
   },
+
   enclosedTrackS2: {
-    type: Number,
+    type: mongoose.Schema.Types.Mixed,
     required: false,
   },
 });
 
 const ETO_9000E =
-  mongoose.models.ETO_9000E || mongoose.model("ETO_9000E", ETO_9000E_Schema);
-module.exports = ETO_9000E;
+  mongoose.models.ETO_9000E ||
+  mongoose.model("ETO_9000E", ETO_9000E_Schema);
+
+module.exports = ETO_9000E

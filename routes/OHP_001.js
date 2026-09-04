@@ -1,53 +1,3 @@
-// const express = require("express");
-// const { dbConnect } = require("../config/config");
-// const { authenticate } = require("./sessions");
-// const OHP_001 = require("../models/OHP_001");
-
-// const router = express.Router();
-
-// router.post("/", authenticate, async (req, res) => {
-//     try {
-
-//         const { OHP_001Data, numRequested } = req.body;
-//         const order = new OHP_001({
-//             conveyorName: OHP_001Data.conveyorName,
-//             chainSize: OHP_001Data.chainSize,
-//             ...(OHP_001Data.otherChainSize && { otherChainSize: OHP_001Data.otherChainSize }),
-//             industrialChainManufacturer: OHP_001Data.industrialChainManufacturer,
-//             ...(OHP_001Data.otherChainManufacturer && { otherChainManufacturer: OHP_001Data.otherChainManufacturer }),
-//             railSize: OHP_001Data.railSize,
-//             ...(OHP_001Data.appEnviroment && { appEnviroment: OHP_001Data.appEnviroment }),
-//             ...(OHP_001Data.ovenStatus && { ovenStatus: OHP_001Data.ovenStatus }),
-//             ...(OHP_001Data.ovenTemp && { ovenTemp: OHP_001Data.ovenTemp }),
-//             ...(OHP_001Data.otherAppEnviroment && { otherAppEnviroment: OHP_001Data.otherAppEnviroment }),
-//             operatingVoltage: OHP_001Data.operatingVoltage,
-//             ...(OHP_001Data.surroundingTemp && { surroundingTemp: OHP_001Data.surroundingTemp }),
-//             ...(OHP_001Data.ohpUnit && { ohpUnit: OHP_001Data.ohpUnit }),
-//             ...(OHP_001Data.chainDrop && { chainDrop: OHP_001Data.chainDrop }),
-//             ohpDiameter: OHP_001Data.ohpDiameter,
-//             ohpWidth: OHP_001Data.ohpWidth,
-//             ohpHeight: OHP_001Data.ohpHeight,
-//         });
-//         req.user.cart.push({
-//             numRequested,
-//             productConfigurationInfo: order,
-//             productType: "OHP_001"
-//         });
-//         await req.user.save();
-//         return res.status(200).json({ message: "OHP_001 entry added" });
-//     } catch (error) {
-//         console.error(error);
-//         res.status(500).json({ error: "Internal server error" });
-//     }
-// });
-
-// module.exports = router;
-
-
-
-
-
-
 const express = require("express");
 const { dbConnect } = require("../config/config");
 const { authenticate } = require("./sessions");
@@ -55,42 +5,121 @@ const OHP_001 = require("../models/OHP_001");
 
 const router = express.Router();
 
-/**
- * OHP_001 Create API
- *
- * - Receives OHP_001Data + numRequested from request body
- * - Creates an OHP_001 mongoose document (stores required + optional fields)
- * - Pushes the created configuration into the authenticated user's cart
- *
- * Note:
- * technicianNote is an optional field for internal/technician remarks only.
- * It does not affect any processing; it is stored just for reference.
- */
 router.post("/", authenticate, async (req, res) => {
     try {
         const { OHP_001Data, numRequested } = req.body;
 
         const order = new OHP_001({
-            conveyorName: OHP_001Data.conveyorName,
-            chainSize: OHP_001Data.chainSize,
-            ...(OHP_001Data.otherChainSize && { otherChainSize: OHP_001Data.otherChainSize }),
-            industrialChainManufacturer: OHP_001Data.industrialChainManufacturer,
-            ...(OHP_001Data.otherChainManufacturer && { otherChainManufacturer: OHP_001Data.otherChainManufacturer }),
-            railSize: OHP_001Data.railSize,
-            ...(OHP_001Data.appEnviroment && { appEnviroment: OHP_001Data.appEnviroment }),
-            ...(OHP_001Data.ovenStatus && { ovenStatus: OHP_001Data.ovenStatus }),
-            ...(OHP_001Data.ovenTemp && { ovenTemp: OHP_001Data.ovenTemp }),
-            ...(OHP_001Data.otherAppEnviroment && { otherAppEnviroment: OHP_001Data.otherAppEnviroment }),
-            operatingVoltage: OHP_001Data.operatingVoltage,
-            ...(OHP_001Data.surroundingTemp && { surroundingTemp: OHP_001Data.surroundingTemp }),
-            ...(OHP_001Data.ohpUnit && { ohpUnit: OHP_001Data.ohpUnit }),
-            ...(OHP_001Data.chainDrop && { chainDrop: OHP_001Data.chainDrop }),
-            ohpDiameter: OHP_001Data.ohpDiameter,
-            ohpWidth: OHP_001Data.ohpWidth,
-            ohpHeight: OHP_001Data.ohpHeight,
 
-            // technicianNote: Optional note added by technician for internal/reference use
-            ...(OHP_001Data.technicianNote && { technicianNote: OHP_001Data.technicianNote }),
+            // ============================================================
+            // GENERAL INFORMATION
+            // ============================================================
+
+            conveyorName: OHP_001Data.conveyorName,
+
+            conveyorChainSize: OHP_001Data.conveyorChainSize,
+
+            ...(OHP_001Data.conveyorChainSize === "Other" &&
+                OHP_001Data.otherConveyorChainSize && {
+                    otherConveyorChainSize:
+                        OHP_001Data.otherConveyorChainSize
+                }),
+
+            chainManufacturer: OHP_001Data.chainManufacturer,
+
+            ...(OHP_001Data.chainManufacturer === "Other" &&
+                OHP_001Data.otherChainManufacturer && {
+                    otherChainManufacturer:
+                        OHP_001Data.otherChainManufacturer
+                }),
+
+            conveyorLength:
+                OHP_001Data.conveyorLength,
+
+            conveyorLengthUnit:
+                OHP_001Data.conveyorLengthUnit,
+
+            conveyorSpeed:
+                OHP_001Data.conveyorSpeed,
+
+            conveyorSpeedUnit:
+                OHP_001Data.conveyorSpeedUnit,
+
+            indexingOrVariableSpeedConditions:
+                OHP_001Data.indexingOrVariableSpeedConditions,
+
+            directionOfTravel:
+                OHP_001Data.directionOfTravel,
+
+            applicationEnvironment:
+                OHP_001Data.applicationEnvironment,
+
+            ...(OHP_001Data.applicationEnvironment === "Other" &&
+                OHP_001Data.otherApplicationEnvironment && {
+                    otherApplicationEnvironment:
+                        OHP_001Data.otherApplicationEnvironment
+                }),
+
+            surroundingAreaTemperature:
+                OHP_001Data.surroundingAreaTemperature,
+
+            conveyorLoadedOrUnloaded:
+                OHP_001Data.conveyorLoadedOrUnloaded,
+
+            conveyorSwingSwaySurge:
+                OHP_001Data.conveyorSwingSwaySurge,
+
+
+            // ============================================================
+            // CUSTOMER POWER UTILITIES
+            // ============================================================
+
+            operatingVoltageSinglePhase:
+                OHP_001Data.operatingVoltageSinglePhase,
+
+            controlVoltage:
+                OHP_001Data.controlVoltage,
+
+
+            // ============================================================
+            // MONITORING FEATURES REQUESTED
+            // ============================================================
+
+            paintMarkerSystem:
+                OHP_001Data.paintMarkerSystem,
+
+
+            // ============================================================
+            // CONVEYOR SPECIFICATIONS
+            // ============================================================
+
+            isConveyorChainClean:
+                OHP_001Data.isConveyorChainClean,
+
+
+            // ============================================================
+            // OVERHEAD POWER RAIL MEASUREMENTS
+            // ============================================================
+
+            measurementUnit:
+                OHP_001Data.measurementUnit,
+
+            powerTrolleyWheelDiameter:
+                OHP_001Data.powerTrolleyWheelDiameter,
+
+            powerRailWidth:
+                OHP_001Data.powerRailWidth,
+
+            powerRailHeight:
+                OHP_001Data.powerRailHeight,
+
+
+            // ============================================================
+            // TECHNICIAN NOTE
+            // ============================================================
+
+            technicianNote:
+                OHP_001Data.technicianNote
         });
 
         req.user.cart.push({
@@ -100,11 +129,18 @@ router.post("/", authenticate, async (req, res) => {
         });
 
         await req.user.save();
-        return res.status(200).json({ message: "OHP_001 entry added" });
+
+        return res.status(200).json({
+            message: "OHP_001 entry added"
+        });
+
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: "Internal server error" });
+
+        return res.status(500).json({
+            error: "Internal server error"
+        });
     }
 });
 
-module.exports = router;
+module.exports = router

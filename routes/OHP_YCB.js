@@ -1,95 +1,83 @@
-// const express = require("express");
-// const { dbConnect } = require("../config/config");
-// const { authenticate } = require("./sessions");
-// const OHP_YCB = require("../models/OHP_YCB");
-
-// const router = express.Router();
- 
-// router.post("/", authenticate, async (req, res) => {
-//     try {
-//         const { OHP_YCBData, numRequested } = req.body;
-//         const order = new OHP_YCB({
-//             conveyorName: OHP_YCBData.conveyorName,
-//             chainSize: OHP_YCBData.chainSize,
-//             ...(OHP_YCBData.otherChainSize && { otherChainSize: OHP_YCBData.otherChainSize }),
-//             industrialChainManufacturer: OHP_YCBData.industrialChainManufacturer,
-//             ...(OHP_YCBData.otherChainManufacturer && { otherChainManufacturer: OHP_YCBData.otherChainManufacturer }),
-//             ...(OHP_YCBData.conveyorLength && { conveyorLength: OHP_YCBData.conveyorLength }),
-//             ...(OHP_YCBData.conveyorLengthUnit && { conveyorLengthUnit: OHP_YCBData.conveyorLengthUnit }),
-//             ...(OHP_YCBData.appEnviroment && { appEnviroment: OHP_YCBData.appEnviroment }),
-//             ...(OHP_YCBData.ovenStatus && { ovenStatus: OHP_YCBData.ovenStatus }),
-//             ...(OHP_YCBData.ovenTemp && { ovenTemp: OHP_YCBData.ovenTemp }),
-//             ...(OHP_YCBData.otherAppEnviroment && { otherAppEnviroment: OHP_YCBData.otherAppEnviroment }),
-//             ...(OHP_YCBData.ohpUnitType && { ohpUnitType: OHP_YCBData.ohpUnitType }),
-//             ...(OHP_YCBData.ohpHeight && { ohpHeight: OHP_YCBData.ohpHeight }),
-
-//         });
-//         req.user.cart.push({
-//             numRequested,
-//             productConfigurationInfo: order,
-//             productType: "OHP_YCB"
-//         });
-//         await req.user.save();
-//         return res.status(200).json({ message: "OHP_YCB entry added" });
-//     } catch (error) {
-//         console.error(error);
-//         res.status(500).json({ error: "Internal server error" });
-//     }
-// });
-
-// module.exports = router;
-
-
-
-
-
-
-
-
-
-
 const express = require("express");
 const { dbConnect } = require("../config/config");
 const { authenticate } = require("./sessions");
-const OHP_YCB = require("../models/OHP_YCB");
+const OH_CCS_CLEANING_BRUSH = require("../models/OH_CCS_CLEANING_BRUSH");
 
 const router = express.Router();
 
 router.post("/", authenticate, async (req, res) => {
     try {
-        const { OHP_YCBData, numRequested } = req.body;
+        const { OH_CCS_CLEANING_BRUSHData, numRequested } = req.body;
 
-        const order = new OHP_YCB({
-            conveyorName: OHP_YCBData.conveyorName,
-            chainSize: OHP_YCBData.chainSize,
-            ...(OHP_YCBData.otherChainSize && { otherChainSize: OHP_YCBData.otherChainSize }),
-            industrialChainManufacturer: OHP_YCBData.industrialChainManufacturer,
-            ...(OHP_YCBData.otherChainManufacturer && { otherChainManufacturer: OHP_YCBData.otherChainManufacturer }),
-            ...(OHP_YCBData.conveyorLength && { conveyorLength: OHP_YCBData.conveyorLength }),
-            ...(OHP_YCBData.conveyorLengthUnit && { conveyorLengthUnit: OHP_YCBData.conveyorLengthUnit }),
-            ...(OHP_YCBData.appEnviroment && { appEnviroment: OHP_YCBData.appEnviroment }),
-            ...(OHP_YCBData.ovenStatus && { ovenStatus: OHP_YCBData.ovenStatus }),
-            ...(OHP_YCBData.ovenTemp && { ovenTemp: OHP_YCBData.ovenTemp }),
-            ...(OHP_YCBData.otherAppEnviroment && { otherAppEnviroment: OHP_YCBData.otherAppEnviroment }),
-            ...(OHP_YCBData.ohpUnitType && { ohpUnitType: OHP_YCBData.ohpUnitType }),
-            ...(OHP_YCBData.ohpHeight && { ohpHeight: OHP_YCBData.ohpHeight }),
+        const order = new OH_CCS_CLEANING_BRUSH({
+            ...(OH_CCS_CLEANING_BRUSHData.conveyorName && {
+                conveyorName: OH_CCS_CLEANING_BRUSHData.conveyorName
+            }),
 
-            // ✅ NEW OPTIONAL FIELD
-            ...(OHP_YCBData.technicianNote && { technicianNote: OHP_YCBData.technicianNote })
+            ...(OH_CCS_CLEANING_BRUSHData.conveyorChainSize && {
+                conveyorChainSize: OH_CCS_CLEANING_BRUSHData.conveyorChainSize
+            }),
+
+            ...(OH_CCS_CLEANING_BRUSHData.otherConveyorChainSize && {
+                otherConveyorChainSize: OH_CCS_CLEANING_BRUSHData.otherConveyorChainSize
+            }),
+
+            ...(OH_CCS_CLEANING_BRUSHData.chainManufacturer && {
+                chainManufacturer: OH_CCS_CLEANING_BRUSHData.chainManufacturer
+            }),
+
+            ...(OH_CCS_CLEANING_BRUSHData.otherChainManufacturer && {
+                otherChainManufacturer: OH_CCS_CLEANING_BRUSHData.otherChainManufacturer
+            }),
+
+            ...(OH_CCS_CLEANING_BRUSHData.conveyorLength && {
+                conveyorLength: OH_CCS_CLEANING_BRUSHData.conveyorLength
+            }),
+
+            ...(OH_CCS_CLEANING_BRUSHData.conveyorLengthUnit && {
+                conveyorLengthUnit: OH_CCS_CLEANING_BRUSHData.conveyorLengthUnit
+            }),
+
+            applicationEnvironment:
+                OH_CCS_CLEANING_BRUSHData.applicationEnvironment,
+
+            ...(OH_CCS_CLEANING_BRUSHData.otherApplicationEnvironment && {
+                otherApplicationEnvironment:
+                    OH_CCS_CLEANING_BRUSHData.otherApplicationEnvironment
+            }),
+
+            ...(OH_CCS_CLEANING_BRUSHData.measurementUnit && {
+                measurementUnit: OH_CCS_CLEANING_BRUSHData.measurementUnit
+            }),
+
+            ...(OH_CCS_CLEANING_BRUSHData.overheadPowerRailYokeRailH1 && {
+                overheadPowerRailYokeRailH1:
+                    OH_CCS_CLEANING_BRUSHData.overheadPowerRailYokeRailH1
+            }),
+
+            technicianNote:
+                OH_CCS_CLEANING_BRUSHData.technicianNote
         });
 
         req.user.cart.push({
             numRequested,
             productConfigurationInfo: order,
-            productType: "OHP_YCB"
+            productType: "OH_CCS_CLEANING_BRUSH"
         });
 
         await req.user.save();
-        return res.status(200).json({ message: "OHP_YCB entry added" });
+
+        return res.status(200).json({
+            message: "OH_CCS_CLEANING_BRUSH entry added"
+        });
+
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: "Internal server error" });
+
+        res.status(500).json({
+            error: "Internal server error"
+        });
     }
 });
 
-module.exports = router;
+module.exports = router

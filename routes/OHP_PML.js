@@ -1,108 +1,124 @@
-// const express = require("express");
-// const { dbConnect } = require("../config/config");
-// const { authenticate } = require("./sessions");
-// const OHP_PML = require("../models/OHP_PML");
-
-// const router = express.Router();
-
-// router.post("/", authenticate, async (req, res) => {
-//     try { 
-//         const { OHP_PMLData, numRequested } = req.body;
-//         const order = new OHP_PML({
-//             conveyorName: OHP_PMLData.conveyorName,
-//             chainSize: OHP_PMLData.chainSize,
-//             ...(OHP_PMLData.otherChainSize && { otherChainSize: OHP_PMLData.otherChainSize }),
-//             industrialChainManufacturer: OHP_PMLData.industrialChainManufacturer,
-//             ...(OHP_PMLData.otherChainManufacturer && { otherChainManufacturer: OHP_PMLData.otherChainManufacturer }),
-//             conveyorLength: OHP_PMLData.conveyorLength,
-//             conveyorLengthUnit: OHP_PMLData.conveyorLengthUnit,
-//             conveyorSpeed: OHP_PMLData.conveyorSpeed,
-//             conveyorSpeedUnit: OHP_PMLData.conveyorSpeedUnit,
-//             conveyorIndex: OHP_PMLData.conveyorIndex,
-//             travelDirection: OHP_PMLData.travelDirection,
-//             appEnviroment: OHP_PMLData.appEnviroment,
-//             ...(OHP_PMLData.ovenStatus && { ovenStatus: OHP_PMLData.ovenStatus }),
-//             ...(OHP_PMLData.ovenTemp && { ovenTemp: OHP_PMLData.ovenTemp }),
-//             ...(OHP_PMLData.otherAppEnviroment && { otherAppEnviroment: OHP_PMLData.otherAppEnviroment }),
-//             surroundingTemp: OHP_PMLData.surroundingTemp,
-//             conveyorLoaded: OHP_PMLData.conveyorLoaded,
-//             conveyorSwing: OHP_PMLData.conveyorSwing,
-//             ...(OHP_PMLData.orientationType && { orientationType: OHP_PMLData.orientationType }),
-//             paintMakerStatus: OHP_PMLData.paintMakerStatus,
-//             ...(OHP_PMLData.paintMarketNum && { paintMarketNum: OHP_PMLData.paintMarketNum }),
-//             chainCleanStatus: OHP_PMLData.chainCleanStatus,
-//             ...(OHP_PMLData.ohpUnitType && { ohpUnitType: OHP_PMLData.ohpUnitType }),
-//             chainDrop: OHP_PMLData.chainDrop,
-//             ...(OHP_PMLData.ohpDiameter && { ohpDiameter: OHP_PMLData.ohpDiameter }),
-//             ohpWidth: OHP_PMLData.ohpWidth,
-//             ohpHeight: OHP_PMLData.ohpHeight
-//         });
-//         req.user.cart.push({
-//             numRequested,
-//             productConfigurationInfo: order,
-//             productType: "OHP_PML"
-//         });
-//         await req.user.save();
-//         return res.status(200).json({ message: "OHP_PML entry added" });
-//     } catch (error) {
-//         console.error(error);
-//         res.status(500).json({ error: "Internal server error" });
-//     }
-// });
-
-// module.exports = router;
-
-
-
-
-
-
-
-
-
-
-
 const express = require("express");
-const { dbConnect } = require("../config/config");
+const { dbConnect } = require("../config/config"); // kept as existing
 const { authenticate } = require("./sessions");
 const OHP_PML = require("../models/OHP_PML");
 
 const router = express.Router();
 
 router.post("/", authenticate, async (req, res) => {
-    try { 
+    try {
         const { OHP_PMLData, numRequested } = req.body;
-        const order = new OHP_PML({
-            conveyorName: OHP_PMLData.conveyorName,
-            chainSize: OHP_PMLData.chainSize,
-            ...(OHP_PMLData.otherChainSize && { otherChainSize: OHP_PMLData.otherChainSize }),
-            industrialChainManufacturer: OHP_PMLData.industrialChainManufacturer,
-            ...(OHP_PMLData.otherChainManufacturer && { otherChainManufacturer: OHP_PMLData.otherChainManufacturer }),
-            conveyorLength: OHP_PMLData.conveyorLength,
-            conveyorLengthUnit: OHP_PMLData.conveyorLengthUnit,
-            conveyorSpeed: OHP_PMLData.conveyorSpeed,
-            conveyorSpeedUnit: OHP_PMLData.conveyorSpeedUnit,
-            conveyorIndex: OHP_PMLData.conveyorIndex,
-            travelDirection: OHP_PMLData.travelDirection,
-            appEnviroment: OHP_PMLData.appEnviroment,
-            ...(OHP_PMLData.ovenStatus && { ovenStatus: OHP_PMLData.ovenStatus }),
-            ...(OHP_PMLData.ovenTemp && { ovenTemp: OHP_PMLData.ovenTemp }),
-            ...(OHP_PMLData.otherAppEnviroment && { otherAppEnviroment: OHP_PMLData.otherAppEnviroment }),
-            surroundingTemp: OHP_PMLData.surroundingTemp,
-            conveyorLoaded: OHP_PMLData.conveyorLoaded,
-            conveyorSwing: OHP_PMLData.conveyorSwing,
-            ...(OHP_PMLData.orientationType && { orientationType: OHP_PMLData.orientationType }),
-            paintMakerStatus: OHP_PMLData.paintMakerStatus,
-            ...(OHP_PMLData.paintMarketNum && { paintMarketNum: OHP_PMLData.paintMarketNum }),
-            chainCleanStatus: OHP_PMLData.chainCleanStatus,
-            ...(OHP_PMLData.ohpUnitType && { ohpUnitType: OHP_PMLData.ohpUnitType }),
-            chainDrop: OHP_PMLData.chainDrop,
-            ...(OHP_PMLData.ohpDiameter && { ohpDiameter: OHP_PMLData.ohpDiameter }),
-            ohpWidth: OHP_PMLData.ohpWidth,
-            ohpHeight: OHP_PMLData.ohpHeight,
 
-            // ✅ NEW FIELD ADDED
-            ...(OHP_PMLData.technicianNote && { technicianNote: OHP_PMLData.technicianNote })
+        const order = new OHP_PML({
+
+            // ============================================================
+            // GENERAL INFORMATION
+            // ============================================================
+
+            conveyorName: OHP_PMLData.conveyorName,
+
+            conveyorChainSize: OHP_PMLData.conveyorChainSize,
+
+            ...(OHP_PMLData.conveyorChainSize === "Other" &&
+                OHP_PMLData.otherConveyorChainSize && {
+                    otherConveyorChainSize:
+                        OHP_PMLData.otherConveyorChainSize
+                }),
+
+            chainManufacturer: OHP_PMLData.chainManufacturer,
+
+            ...(OHP_PMLData.chainManufacturer === "Other" &&
+                OHP_PMLData.otherChainManufacturer && {
+                    otherChainManufacturer:
+                        OHP_PMLData.otherChainManufacturer
+                }),
+
+            conveyorLength: OHP_PMLData.conveyorLength,
+
+            conveyorLengthUnit:
+                OHP_PMLData.conveyorLengthUnit,
+
+            conveyorSpeed:
+                OHP_PMLData.conveyorSpeed,
+
+            conveyorSpeedUnit:
+                OHP_PMLData.conveyorSpeedUnit,
+
+            indexingOrVariableSpeedConditions:
+                OHP_PMLData.indexingOrVariableSpeedConditions,
+
+            directionOfTravel:
+                OHP_PMLData.directionOfTravel,
+
+            applicationEnvironment:
+                OHP_PMLData.applicationEnvironment,
+
+            ...(OHP_PMLData.applicationEnvironment === "Other" &&
+                OHP_PMLData.otherApplicationEnvironment && {
+                    otherApplicationEnvironment:
+                        OHP_PMLData.otherApplicationEnvironment
+                }),
+
+            surroundingAreaTemperature:
+                OHP_PMLData.surroundingAreaTemperature,
+
+            conveyorLoadedOrUnloaded:
+                OHP_PMLData.conveyorLoadedOrUnloaded,
+
+            conveyorSwingSwaySurge:
+                OHP_PMLData.conveyorSwingSwaySurge,
+
+
+            // ============================================================
+            // CUSTOMER POWER UTILITIES
+            // ============================================================
+
+            operatingVoltageSinglePhase:
+                OHP_PMLData.operatingVoltageSinglePhase,
+
+
+            // ============================================================
+            // MONITORING FEATURES REQUESTED
+            // ============================================================
+
+            paintMarkerSystem:
+                OHP_PMLData.paintMarkerSystem,
+
+
+            // ============================================================
+            // CONVEYOR SPECIFICATIONS
+            // ============================================================
+
+            isConveyorClean:
+                OHP_PMLData.isConveyorClean,
+
+
+            // ============================================================
+            // OVERHEAD POWER RAIL MEASUREMENTS
+            // ============================================================
+
+            measurementUnit:
+                OHP_PMLData.measurementUnit,
+
+            chainDrop:
+                OHP_PMLData.chainDrop,
+
+            powerTrolleyWheelDiameter:
+                OHP_PMLData.powerTrolleyWheelDiameter,
+
+            powerRailWidth:
+                OHP_PMLData.powerRailWidth,
+
+            powerRailHeight:
+                OHP_PMLData.powerRailHeight,
+
+
+            // ============================================================
+            // TECHNICIAN NOTE
+            // ============================================================
+
+            technicianNote:
+                OHP_PMLData.technicianNote
         });
 
         req.user.cart.push({
@@ -110,12 +126,20 @@ router.post("/", authenticate, async (req, res) => {
             productConfigurationInfo: order,
             productType: "OHP_PML"
         });
+
         await req.user.save();
-        return res.status(200).json({ message: "OHP_PML entry added" });
+
+        return res.status(200).json({
+            message: "OHP_PML entry added"
+        });
+
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: "Internal server error" });
+
+        return res.status(500).json({
+            error: "Internal server error"
+        });
     }
 });
 
-module.exports = router;
+module.exports = router

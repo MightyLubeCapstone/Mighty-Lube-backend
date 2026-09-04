@@ -1,93 +1,105 @@
 const mongoose = require("mongoose");
-const OHP_YCBSchema = new mongoose.Schema({
-  conveyorName: {
-    type: String,
-    required: true,
-  },
 
-  chainSize: {
-    type: Number,
-    enum: [1, 2, 3, 4, 5],
-    required: true,
-  },
+const OHCCSCleaningBrushSchema = new mongoose.Schema(
+  {
+    // =======================================================
+    // GENERAL INFORMATION
+    // =======================================================
 
-  otherChainSize: {
-    type: String,
-    required: function () {
-      return this.chainSize === 5;
+    conveyorName: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+
+    conveyorChainSize: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+
+    otherConveyorChainSize: {
+      type: String,
+      required: function () {
+        return this.conveyorChainSize === "Other";
+      },
+      trim: true,
+    },
+
+    chainManufacturer: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+
+    otherChainManufacturer: {
+      type: String,
+      required: function () {
+        return this.chainManufacturer === "Other";
+      },
+      trim: true,
+    },
+
+    conveyorLength: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+
+    conveyorLengthUnit: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+
+    applicationEnvironment: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    otherApplicationEnvironment: {
+      type: String,
+      required: function () {
+        return this.applicationEnvironment === "Other";
+      },
+      trim: true,
+    },
+
+    // =======================================================
+    // OVERHEAD POWER RAIL MEASUREMENTS
+    // =======================================================
+
+    measurementUnit: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+
+    overheadPowerRailYokeRailH1: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+
+    // =======================================================
+    // TECHNICIAN NOTE
+    // =======================================================
+
+    technicianNote: {
+      type: String,
+      required: true,
+      trim: true,
     },
   },
+  {
+    timestamps: true,
+  }
+);
 
-  industrialChainManufacturer: {
-    type: Number,
-    enum: [1, 2, 3, 4, 5, 6, 7, 8, 9],
-    required: true,
-  },
+const OH_CCS_CLEANING_BRUSH = mongoose.model(
+  "tblOH_CCS_CLEANING_BRUSH",
+  OHCCSCleaningBrushSchema
+);
 
-  otherChainManufacturer: {
-    type: String,
-    required: function () {
-      return this.industrialChainManufacturer === 9;
-    },
-  },
-  conveyorLength: {
-    type: Number,
-    required: false,
-  },
-
-  conveyorLengthUnit: {
-    type: Number,
-    enum: [1, 2, 3, 4],
-    required: false,
-  },
-
-  appEnviroment: {
-    type: Number,
-    enum: [1, 2, 3, 4, 5, 6, 7],
-    required: false,
-  },
-
-  ovenStatus: {
-    type: Number,
-    enum: [1, 2],
-    required: function () {
-      return this.appEnviroment === 3;
-    },
-  },
-
-  ovenTemp: {
-    type: Number,
-    required: function () {
-      return this.appEnviroment === 3;
-    },
-  },
-
-  // ✅ NEW OPTIONAL FIELD
-  technicianNote: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-  otherAppEnviroment: {
-    type: String,
-    required: function () {
-      return this.appEnviroment === 7;
-    },
-  },
-
-  ohpUnitType: {
-    type: Number,
-    enum: [1, 2, 3, 4],
-    required: false,
-  },
-
-  ohpHeight: {
-    type: Number,
-    required: false,
-  },
-});
-
-const OHP_YCB = mongoose.model("tblOHP_YCB", OHP_YCBSchema);
-
-module.exports = OHP_YCB;
+module.exports = OH_CCS_CLEANING_BRUSH;

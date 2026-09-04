@@ -1,315 +1,192 @@
-// const express = require("express");
-// const { authenticate } = require("./sessions");
-// const FT_OPCO = require("../models/FT_OPCO");
-// const templateA = require("../models/templateA");
-
-// const router = express.Router();
-
-// router.post("/", authenticate, async (req, res) => {
-//   try {
-//     const { FT_OPCOData, numRequested } = req.body;
-
-//     const order = new FT_OPCO({
-//       conveyorName: FT_OPCOData.conveyorName,
-//       chainSize: FT_OPCOData.chainSize,
-//       ...(FT_OPCOData.otherChainSize && { otherChainSize: FT_OPCOData.otherChainSize }),
-//       industrialChainManufacturer: FT_OPCOData.industrialChainManufacturer,
-//       ...(FT_OPCOData.otherChainManufacturer && { otherChainManufacturer: FT_OPCOData.otherChainManufacturer }),
-//       wheelManufacturer: FT_OPCOData.wheelManufacturer,
-//       ...(FT_OPCOData.otherWheelManufacturer && { otherWheelManufacturer: FT_OPCOData.otherWheelManufacturer }),
-//       conveyorLength: FT_OPCOData.conveyorLength,
-//       conveyorLengthUnit: FT_OPCOData.conveyorLengthUnit,
-//       conveyorSpeed: FT_OPCOData.conveyorSpeed,
-//       conveyorSpeedUnit: FT_OPCOData.conveyorSpeedUnit,
-//       ...(FT_OPCOData.conveyorIndex && { conveyorIndex: FT_OPCOData.conveyorIndex }),
-//       ...(FT_OPCOData.travelDirection && { travelDirection: FT_OPCOData.travelDirection }),
-//       appEnviroment: FT_OPCOData.appEnviroment,
-//       ...(FT_OPCOData.ovenStatus && { ovenStatus: FT_OPCOData.ovenStatus }),
-//       ...(FT_OPCOData.ovenTemp && { ovenTemp: FT_OPCOData.ovenTemp }),
-//       ...(FT_OPCOData.otherAppEnviroment && { otherAppEnviroment: FT_OPCOData.otherAppEnviroment }),
-//       ...(FT_OPCOData.surroundingTemp && { surroundingTemp: FT_OPCOData.surroundingTemp }),
-//       ...(FT_OPCOData.conveyorLoaded && { conveyorLoaded: FT_OPCOData.conveyorLoaded }),
-//       strandStatus: FT_OPCOData.strandStatus,
-//       conveyorSwing: FT_OPCOData.conveyorSwing,
-//       ...(FT_OPCOData.wearStrips && { wearStrips: FT_OPCOData.wearStrips }),
-//       ...(FT_OPCOData.skiBars && { skiBars: FT_OPCOData.skiBars }),
-//       ...(FT_OPCOData.relayStatus && { relayStatus: FT_OPCOData.relayStatus }),
-//       ...(FT_OPCOData.plantLayout && { plantLayout: FT_OPCOData.plantLayout }),
-//       ...(FT_OPCOData.requiredPics && { requiredPics: FT_OPCOData.requiredPics }),
-//       operatingVoltage: FT_OPCOData.operatingVoltage,
-//       controlVoltage: FT_OPCOData.controlVoltage,
-//       compressedAir: FT_OPCOData.compressedAir,
-//       monitorData: {
-//           existingMonitor: FT_OPCOData.templateA.existingMonitor,
-//           newMonitor: FT_OPCOData.templateA.newMonitor,		
-//           ...(FT_OPCOData.templateA.dcuStatus && { dcuStatus: FT_OPCOData.templateA.dcuStatus }),
-//           ...(FT_OPCOData.templateA.dcuNum && { dcuNum: FT_OPCOData.templateA.dcuNum }),
-//           ...(FT_OPCOData.templateA.existingWindows && { existingWindows: FT_OPCOData.templateA.existingWindows }),
-//           ...(FT_OPCOData.templateA.existingHeadUnit && { existingHeadUnit: FT_OPCOData.templateA.existingHeadUnit }),
-//           ...(FT_OPCOData.templateA.existingDCU && { existingDCU: FT_OPCOData.templateA.existingDCU }),
-//           ...(FT_OPCOData.templateA.existingPowerInterface && { existingPowerInterface: FT_OPCOData.templateA.existingPowerInterface }),
-//           ...(FT_OPCOData.templateA.newReservoir && { newReservoir: FT_OPCOData.templateA.newReservoir }),
-//           ...(FT_OPCOData.templateA.reservoirSize && { reservoirSize: FT_OPCOData.templateA.reservoirSize }),
-//           ...(FT_OPCOData.templateA.otherReservoirSize && { otherReservoirSize: FT_OPCOData.templateA.otherReservoirSize }),
-//           ...(FT_OPCOData.templateA.newReservoirNum && { newReservoirNum: FT_OPCOData.templateA.newReservoirNum }),
-//           ...(FT_OPCOData.templateA.typeMonitor && { typeMonitor: FT_OPCOData.templateA.typeMonitor }),
-//           ...(FT_OPCOData.templateA.driveMotorAmp && { driveMotorAmp: FT_OPCOData.templateA.driveMotorAmp }),
-//           ...(FT_OPCOData.templateA.driveMotorAmpNum && { driveMotorAmpNum: FT_OPCOData.templateA.driveMotorAmpNum }),
-//           ...(FT_OPCOData.templateA.driveTakeUpAir && { driveTakeUpAir: FT_OPCOData.templateA.driveTakeUpAir }),
-//           ...(FT_OPCOData.templateA.driveTakeUpAirNum && { driveTakeUpAirNum: FT_OPCOData.templateA.driveTakeUpAirNum }),
-//           ...(FT_OPCOData.templateA.takeUpDistance && { takeUpDistance: FT_OPCOData.templateA.takeUpDistance }),
-//           ...(FT_OPCOData.templateA.takeUpDistanceNum && { takeUpDistanceNum: FT_OPCOData.templateA.takeUpDistanceNum }),
-//           ...(FT_OPCOData.templateA.driveTemp && { driveTemp: FT_OPCOData.templateA.driveTemp }),
-//           ...(FT_OPCOData.templateA.driveTempNum && { driveTempNum: FT_OPCOData.templateA.driveTempNum }),
-//           ...(FT_OPCOData.templateA.driveVibration && { driveVibration: FT_OPCOData.templateA.driveVibration }),
-//           ...(FT_OPCOData.templateA.driveVibrationNum && { driveVibrationNum: FT_OPCOData.templateA.driveVibrationNum }),
-//           ...(FT_OPCOData.templateA.dogPitch && { dogPitch: FT_OPCOData.templateA.dogPitch }),
-//           ...(FT_OPCOData.templateA.dogPitchNum && { dogPitchNum: FT_OPCOData.templateA.dogPitchNum }),
-//           ...(FT_OPCOData.templateA.paintMarker && { paintMarker: FT_OPCOData.templateA.paintMarker }),
-//           ...(FT_OPCOData.templateA.paintMarkerNum && { paintMarkerNum: FT_OPCOData.templateA.paintMarkerNum }),
-//           ...(FT_OPCOData.templateA.chainVision && { chainVision: FT_OPCOData.templateA.chainVision }),
-//           ...(FT_OPCOData.templateA.lubeVision && { lubeVision: FT_OPCOData.templateA.lubeVision }),
-//           ...(FT_OPCOData.templateA.trolleyVision && { trolleyVision: FT_OPCOData.templateA.trolleyVision }),
-//           ...(FT_OPCOData.templateA.trolleyDetect && { trolleyDetect: FT_OPCOData.templateA.trolleyDetect }),
-//           ...(FT_OPCOData.templateA.omniView && { omniView: FT_OPCOData.templateA.omniView }),
-//           ...(FT_OPCOData.templateA.dcuUpgradeNum && { dcuUpgradeNum: FT_OPCOData.templateA.dcuUpgradeNum }),
-//           ...(FT_OPCOData.templateA.piuDistance && { piuDistance: FT_OPCOData.templateA.piuDistance }),
-//           ...(FT_OPCOData.templateA.switchDistance && { switchDistance: FT_OPCOData.templateA.switchDistance }),
-//           ...(FT_OPCOData.templateA.ampPickup && { ampPickup: FT_OPCOData.templateA.ampPickup }),
-//           ...(FT_OPCOData.templateA.fromAirTakeUpDistance && { fromAirTakeUpDistance: FT_OPCOData.templateA.fromAirTakeUpDistance }),
-//           ...(FT_OPCOData.templateA.specialControllerOptions && { specialControllerOptions: FT_OPCOData.templateA.specialControllerOptions }),
-//           ...(FT_OPCOData.templateA.operatingVoltage && { operatingVoltage: FT_OPCOData.templateA.operatingVoltage })
-//       },
-
-//       ...(FT_OPCOData.wheelOpenType && { wheelOpenType: FT_OPCOData.wheelOpenType }),
-//       ...(FT_OPCOData.wheelClosedType && { wheelClosedType: FT_OPCOData.wheelClosedType }),
-//       ...(FT_OPCOData.openStatus && { openStatus: FT_OPCOData.openStatus }),
-//       freeWheelStatus: FT_OPCOData.freeWheelStatus,
-//       actuatorStatus: FT_OPCOData.actuatorStatus,
-//       ...(FT_OPCOData.kingPinStatus && { kingPinStatus: FT_OPCOData.kingPinStatus }),
-//       ...(FT_OPCOData.guideRollerStatus && { guideRollerStatus: FT_OPCOData.guideRollerStatus }),
-//       ...(FT_OPCOData.openRaceStyleType && { openRaceStyleType: FT_OPCOData.openRaceStyleType }),
-//       ...(FT_OPCOData.closedRaceStyleType && { closedRaceStyleType: FT_OPCOData.closedRaceStyleType }),
-//       ...(FT_OPCOData.holeStatus && { holeStatus: FT_OPCOData.holeStatus }),
-//       ...(FT_OPCOData.rollerChainStatus && { rollerChainStatus: FT_OPCOData.rollerChainStatus }),
-//       ...(FT_OPCOData.brushStatus && { brushStatus: FT_OPCOData.brushStatus }),
-//       ...(FT_OPCOData.outboardStatus && { outboardStatus: FT_OPCOData.outboardStatus }),
-//       lubeBrand: FT_OPCOData.lubeBrand,
-//       lubeViscosity: FT_OPCOData.lubeViscosity,
-//       currentGrease: FT_OPCOData.currentGrease,
-//       currentLube: FT_OPCOData.currentLube,
-//       oilOrGrease: FT_OPCOData.oilOrGrease,
-//       ...(FT_OPCOData.oilViscosity && { oilViscosity: FT_OPCOData.oilViscosity }),
-//       ...(FT_OPCOData.greaseNGLIGrade && { greaseNGLIGrade: FT_OPCOData.greaseNGLIGrade }),
-//       zerkDirection: FT_OPCOData.zerkDirection,
-//       zerkLocationType: FT_OPCOData.zerkLocationType,
-//       swingStatusAgain: FT_OPCOData.swingStatusAgain,
-//       wheelDiameter: FT_OPCOData.wheelDiameter,
-//       ...(FT_OPCOData.chainMaster && { chainMaster: FT_OPCOData.chainMaster }),
-//       ...(FT_OPCOData.remoteStatus && { remoteStatus: FT_OPCOData.remoteStatus }),
-//       ...(FT_OPCOData.mountStatus && { mountStatus: FT_OPCOData.mountStatus }),
-//       ...(FT_OPCOData.otherUnitStatus && { otherUnitStatus: FT_OPCOData.otherUnitStatus }),
-//       ...(FT_OPCOData.timerStatus && { timerStatus: FT_OPCOData.timerStatus }),
-//       ...(FT_OPCOData.electricStatus && { electricStatus: FT_OPCOData.electricStatus }),
-//       ...(FT_OPCOData.mightyLubeMonitoring && { mightyLubeMonitoring: FT_OPCOData.mightyLubeMonitoring }),
-//       ...(FT_OPCOData.preMountType && { preMountType: FT_OPCOData.preMountType }),
-//       ...(FT_OPCOData.otherPreMountType && { otherPreMountType: FT_OPCOData.otherPreMountType }),
-//       ...(FT_OPCOData.plcConnection && { plcConnection: FT_OPCOData.plcConnection }),
-//       ...(FT_OPCOData.otherControllerNotes && { otherControllerNotes: FT_OPCOData.otherControllerNotes }),
-//       ...(FT_OPCOData.ftUnitType && { ftUnitType: FT_OPCOData.ftUnitType }),
-//       ...(FT_OPCOData.ftTopG && { ftTopG: FT_OPCOData.ftTopG }),
-//       ...(FT_OPCOData.ftTopH && { ftTopH: FT_OPCOData.ftTopH }),
-//       ...(FT_OPCOData.ftTopA1 && { ftTopA1: FT_OPCOData.ftTopA1 }),
-//       ...(FT_OPCOData.ftTopB1 && { ftTopB1: FT_OPCOData.ftTopB1 }),
-//       ...(FT_OPCOData.ftTopH1 && { ftTopH1: FT_OPCOData.ftTopH1 }),
-//       ...(FT_OPCOData.ftTopJ1 && { ftTopJ1: FT_OPCOData.ftTopJ1 }),
-//       ...(FT_OPCOData.ftTopL1 && { ftTopL1: FT_OPCOData.ftTopL1 }),
-//       ...(FT_OPCOData.ftTopM1 && { ftTopM1: FT_OPCOData.ftTopM1 }),
-//       ...(FT_OPCOData.ftTopN1 && { ftTopN1: FT_OPCOData.ftTopN1 }),
-//       ...(FT_OPCOData.ftTopP1 && { ftTopP1: FT_OPCOData.ftTopP1 }),
-//       ...(FT_OPCOData.ftTopR1 && { ftTopR1: FT_OPCOData.ftTopR1 })
-//     });
-
-//     req.user.cart.push({
-//       numRequested,
-//       productConfigurationInfo: order,
-//       productType: "FT_OPCO"
-//     });
-
-//     await req.user.save();
-//     return res.status(200).json({ message: "FT_OPCO entry added" });
-//   } catch (error) {
-//     console.error(error);
-//     return res.status(500).json({ error: "Internal server error" });
-//   }
-// });
-
-// module.exports = router;
-
-
-
-
-
-
 const express = require("express");
-const { authenticate } = require("./sessions");
-const FT_OPCO = require("../models/FT_OPCO");
-const templateA = require("../models/templateA");
-
 const router = express.Router();
 
-/**
- * FT_OPCO Create API
- *
- * - Receives FT_OPCOData + numRequested from request body
- * - Builds a FT_OPCO mongoose object (optional fields are conditionally added)
- * - Pushes the created configuration into the authenticated user's cart
- *
- * Note:
- * technicianNote is an optional internal field for technician remarks.
- * It does not affect calculations/flow; it is stored only for reference.
- */
+const { authenticate } = require("./sessions");
+const FT_OPCO = require("../models/FT_OPCO");
+
+// ============================================================
+// CREATE FT OPCO CONFIGURATION
+// POST /api/ft_opco
+// ============================================================
+
 router.post("/", authenticate, async (req, res) => {
   try {
-    const { FT_OPCOData, numRequested } = req.body;
+    const { FT_OPCOData, numRequested } = req.body || {};
+
+    if (!FT_OPCOData) {
+      return res.status(400).json({
+        success: false,
+        message: "FT_OPCOData is required",
+      });
+    }
 
     const order = new FT_OPCO({
-      conveyorName: FT_OPCOData.conveyorName,
-      chainSize: FT_OPCOData.chainSize,
-      ...(FT_OPCOData.otherChainSize && { otherChainSize: FT_OPCOData.otherChainSize }),
-      industrialChainManufacturer: FT_OPCOData.industrialChainManufacturer,
-      ...(FT_OPCOData.otherChainManufacturer && { otherChainManufacturer: FT_OPCOData.otherChainManufacturer }),
-      wheelManufacturer: FT_OPCOData.wheelManufacturer,
-      ...(FT_OPCOData.otherWheelManufacturer && { otherWheelManufacturer: FT_OPCOData.otherWheelManufacturer }),
-      conveyorLength: FT_OPCOData.conveyorLength,
-      conveyorLengthUnit: FT_OPCOData.conveyorLengthUnit,
-      conveyorSpeed: FT_OPCOData.conveyorSpeed,
-      conveyorSpeedUnit: FT_OPCOData.conveyorSpeedUnit,
-      ...(FT_OPCOData.conveyorIndex && { conveyorIndex: FT_OPCOData.conveyorIndex }),
-      ...(FT_OPCOData.travelDirection && { travelDirection: FT_OPCOData.travelDirection }),
-      appEnviroment: FT_OPCOData.appEnviroment,
-      ...(FT_OPCOData.ovenStatus && { ovenStatus: FT_OPCOData.ovenStatus }),
-      ...(FT_OPCOData.ovenTemp && { ovenTemp: FT_OPCOData.ovenTemp }),
-      ...(FT_OPCOData.otherAppEnviroment && { otherAppEnviroment: FT_OPCOData.otherAppEnviroment }),
-      ...(FT_OPCOData.surroundingTemp && { surroundingTemp: FT_OPCOData.surroundingTemp }),
-      ...(FT_OPCOData.conveyorLoaded && { conveyorLoaded: FT_OPCOData.conveyorLoaded }),
-      strandStatus: FT_OPCOData.strandStatus,
-      conveyorSwing: FT_OPCOData.conveyorSwing,
-      ...(FT_OPCOData.wearStrips && { wearStrips: FT_OPCOData.wearStrips }),
-      ...(FT_OPCOData.skiBars && { skiBars: FT_OPCOData.skiBars }),
-      ...(FT_OPCOData.relayStatus && { relayStatus: FT_OPCOData.relayStatus }),
-      ...(FT_OPCOData.plantLayout && { plantLayout: FT_OPCOData.plantLayout }),
-      ...(FT_OPCOData.requiredPics && { requiredPics: FT_OPCOData.requiredPics }),
-      operatingVoltage: FT_OPCOData.operatingVoltage,
-      controlVoltage: FT_OPCOData.controlVoltage,
-      compressedAir: FT_OPCOData.compressedAir,
+      // ======================================================
+      // GENERAL INFORMATION
+      // ======================================================
 
-      // technicianNote: Optional note added by technician for internal/reference use
-      ...(FT_OPCOData.technicianNote && { technicianNote: FT_OPCOData.technicianNote }),
+      conveyorName: FT_OPCOData.conveyorName || "",
 
-      monitorData: {
-        existingMonitor: FT_OPCOData.templateA.existingMonitor,
-        newMonitor: FT_OPCOData.templateA.newMonitor,
-        ...(FT_OPCOData.templateA.dcuStatus && { dcuStatus: FT_OPCOData.templateA.dcuStatus }),
-        ...(FT_OPCOData.templateA.dcuNum && { dcuNum: FT_OPCOData.templateA.dcuNum }),
-        ...(FT_OPCOData.templateA.existingWindows && { existingWindows: FT_OPCOData.templateA.existingWindows }),
-        ...(FT_OPCOData.templateA.existingHeadUnit && { existingHeadUnit: FT_OPCOData.templateA.existingHeadUnit }),
-        ...(FT_OPCOData.templateA.existingDCU && { existingDCU: FT_OPCOData.templateA.existingDCU }),
-        ...(FT_OPCOData.templateA.existingPowerInterface && { existingPowerInterface: FT_OPCOData.templateA.existingPowerInterface }),
-        ...(FT_OPCOData.templateA.newReservoir && { newReservoir: FT_OPCOData.templateA.newReservoir }),
-        ...(FT_OPCOData.templateA.reservoirSize && { reservoirSize: FT_OPCOData.templateA.reservoirSize }),
-        ...(FT_OPCOData.templateA.otherReservoirSize && { otherReservoirSize: FT_OPCOData.templateA.otherReservoirSize }),
-        ...(FT_OPCOData.templateA.newReservoirNum && { newReservoirNum: FT_OPCOData.templateA.newReservoirNum }),
-        ...(FT_OPCOData.templateA.typeMonitor && { typeMonitor: FT_OPCOData.templateA.typeMonitor }),
-        ...(FT_OPCOData.templateA.driveMotorAmp && { driveMotorAmp: FT_OPCOData.templateA.driveMotorAmp }),
-        ...(FT_OPCOData.templateA.driveMotorAmpNum && { driveMotorAmpNum: FT_OPCOData.templateA.driveMotorAmpNum }),
-        ...(FT_OPCOData.templateA.driveTakeUpAir && { driveTakeUpAir: FT_OPCOData.templateA.driveTakeUpAir }),
-        ...(FT_OPCOData.templateA.driveTakeUpAirNum && { driveTakeUpAirNum: FT_OPCOData.templateA.driveTakeUpAirNum }),
-        ...(FT_OPCOData.templateA.takeUpDistance && { takeUpDistance: FT_OPCOData.templateA.takeUpDistance }),
-        ...(FT_OPCOData.templateA.takeUpDistanceNum && { takeUpDistanceNum: FT_OPCOData.templateA.takeUpDistanceNum }),
-        ...(FT_OPCOData.templateA.driveTemp && { driveTemp: FT_OPCOData.templateA.driveTemp }),
-        ...(FT_OPCOData.templateA.driveTempNum && { driveTempNum: FT_OPCOData.templateA.driveTempNum }),
-        ...(FT_OPCOData.templateA.driveVibration && { driveVibration: FT_OPCOData.templateA.driveVibration }),
-        ...(FT_OPCOData.templateA.driveVibrationNum && { driveVibrationNum: FT_OPCOData.templateA.driveVibrationNum }),
-        ...(FT_OPCOData.templateA.dogPitch && { dogPitch: FT_OPCOData.templateA.dogPitch }),
-        ...(FT_OPCOData.templateA.dogPitchNum && { dogPitchNum: FT_OPCOData.templateA.dogPitchNum }),
-        ...(FT_OPCOData.templateA.paintMarker && { paintMarker: FT_OPCOData.templateA.paintMarker }),
-        ...(FT_OPCOData.templateA.paintMarkerNum && { paintMarkerNum: FT_OPCOData.templateA.paintMarkerNum }),
-        ...(FT_OPCOData.templateA.chainVision && { chainVision: FT_OPCOData.templateA.chainVision }),
-        ...(FT_OPCOData.templateA.lubeVision && { lubeVision: FT_OPCOData.templateA.lubeVision }),
-        ...(FT_OPCOData.templateA.trolleyVision && { trolleyVision: FT_OPCOData.templateA.trolleyVision }),
-        ...(FT_OPCOData.templateA.trolleyDetect && { trolleyDetect: FT_OPCOData.templateA.trolleyDetect }),
-        ...(FT_OPCOData.templateA.omniView && { omniView: FT_OPCOData.templateA.omniView }),
-        ...(FT_OPCOData.templateA.dcuUpgradeNum && { dcuUpgradeNum: FT_OPCOData.templateA.dcuUpgradeNum }),
-        ...(FT_OPCOData.templateA.piuDistance && { piuDistance: FT_OPCOData.templateA.piuDistance }),
-        ...(FT_OPCOData.templateA.switchDistance && { switchDistance: FT_OPCOData.templateA.switchDistance }),
-        ...(FT_OPCOData.templateA.ampPickup && { ampPickup: FT_OPCOData.templateA.ampPickup }),
-        ...(FT_OPCOData.templateA.fromAirTakeUpDistance && { fromAirTakeUpDistance: FT_OPCOData.templateA.fromAirTakeUpDistance }),
-        ...(FT_OPCOData.templateA.specialControllerOptions && { specialControllerOptions: FT_OPCOData.templateA.specialControllerOptions }),
-        ...(FT_OPCOData.templateA.operatingVoltage && { operatingVoltage: FT_OPCOData.templateA.operatingVoltage })
-      },
+      chainSize: FT_OPCOData.chainSize || "",
+      otherChainSize: FT_OPCOData.otherChainSize || "",
 
-      ...(FT_OPCOData.wheelOpenType && { wheelOpenType: FT_OPCOData.wheelOpenType }),
-      ...(FT_OPCOData.wheelClosedType && { wheelClosedType: FT_OPCOData.wheelClosedType }),
-      ...(FT_OPCOData.openStatus && { openStatus: FT_OPCOData.openStatus }),
-      freeWheelStatus: FT_OPCOData.freeWheelStatus,
-      actuatorStatus: FT_OPCOData.actuatorStatus,
-      ...(FT_OPCOData.kingPinStatus && { kingPinStatus: FT_OPCOData.kingPinStatus }),
-      ...(FT_OPCOData.guideRollerStatus && { guideRollerStatus: FT_OPCOData.guideRollerStatus }),
-      ...(FT_OPCOData.openRaceStyleType && { openRaceStyleType: FT_OPCOData.openRaceStyleType }),
-      ...(FT_OPCOData.closedRaceStyleType && { closedRaceStyleType: FT_OPCOData.closedRaceStyleType }),
-      ...(FT_OPCOData.holeStatus && { holeStatus: FT_OPCOData.holeStatus }),
-      ...(FT_OPCOData.rollerChainStatus && { rollerChainStatus: FT_OPCOData.rollerChainStatus }),
-      ...(FT_OPCOData.brushStatus && { brushStatus: FT_OPCOData.brushStatus }),
-      ...(FT_OPCOData.outboardStatus && { outboardStatus: FT_OPCOData.outboardStatus }),
-      lubeBrand: FT_OPCOData.lubeBrand,
-      lubeViscosity: FT_OPCOData.lubeViscosity,
-      currentGrease: FT_OPCOData.currentGrease,
-      currentLube: FT_OPCOData.currentLube,
-      oilOrGrease: FT_OPCOData.oilOrGrease,
-      ...(FT_OPCOData.oilViscosity && { oilViscosity: FT_OPCOData.oilViscosity }),
-      ...(FT_OPCOData.greaseNGLIGrade && { greaseNGLIGrade: FT_OPCOData.greaseNGLIGrade }),
-      zerkDirection: FT_OPCOData.zerkDirection,
-      zerkLocationType: FT_OPCOData.zerkLocationType,
-      swingStatusAgain: FT_OPCOData.swingStatusAgain,
-      wheelDiameter: FT_OPCOData.wheelDiameter,
-      ...(FT_OPCOData.chainMaster && { chainMaster: FT_OPCOData.chainMaster }),
-      ...(FT_OPCOData.remoteStatus && { remoteStatus: FT_OPCOData.remoteStatus }),
-      ...(FT_OPCOData.mountStatus && { mountStatus: FT_OPCOData.mountStatus }),
-      ...(FT_OPCOData.otherUnitStatus && { otherUnitStatus: FT_OPCOData.otherUnitStatus }),
-      ...(FT_OPCOData.timerStatus && { timerStatus: FT_OPCOData.timerStatus }),
-      ...(FT_OPCOData.electricStatus && { electricStatus: FT_OPCOData.electricStatus }),
-      ...(FT_OPCOData.mightyLubeMonitoring && { mightyLubeMonitoring: FT_OPCOData.mightyLubeMonitoring }),
-      ...(FT_OPCOData.preMountType && { preMountType: FT_OPCOData.preMountType }),
-      ...(FT_OPCOData.otherPreMountType && { otherPreMountType: FT_OPCOData.otherPreMountType }),
-      ...(FT_OPCOData.plcConnection && { plcConnection: FT_OPCOData.plcConnection }),
-      ...(FT_OPCOData.otherControllerNotes && { otherControllerNotes: FT_OPCOData.otherControllerNotes }),
-      ...(FT_OPCOData.ftUnitType && { ftUnitType: FT_OPCOData.ftUnitType }),
-      ...(FT_OPCOData.ftTopG && { ftTopG: FT_OPCOData.ftTopG }),
-      ...(FT_OPCOData.ftTopH && { ftTopH: FT_OPCOData.ftTopH }),
-      ...(FT_OPCOData.ftTopA1 && { ftTopA1: FT_OPCOData.ftTopA1 }),
-      ...(FT_OPCOData.ftTopB1 && { ftTopB1: FT_OPCOData.ftTopB1 }),
-      ...(FT_OPCOData.ftTopH1 && { ftTopH1: FT_OPCOData.ftTopH1 }),
-      ...(FT_OPCOData.ftTopJ1 && { ftTopJ1: FT_OPCOData.ftTopJ1 }),
-      ...(FT_OPCOData.ftTopL1 && { ftTopL1: FT_OPCOData.ftTopL1 }),
-      ...(FT_OPCOData.ftTopM1 && { ftTopM1: FT_OPCOData.ftTopM1 }),
-      ...(FT_OPCOData.ftTopN1 && { ftTopN1: FT_OPCOData.ftTopN1 }),
-      ...(FT_OPCOData.ftTopP1 && { ftTopP1: FT_OPCOData.ftTopP1 }),
-      ...(FT_OPCOData.ftTopR1 && { ftTopR1: FT_OPCOData.ftTopR1 })
+      industrialChainManufacturer:
+        FT_OPCOData.industrialChainManufacturer || "",
+
+      otherIndustrialChainManufacturer:
+        FT_OPCOData.otherIndustrialChainManufacturer || "",
+
+      wheelManufacturer: FT_OPCOData.wheelManufacturer || "",
+      otherWheelManufacturer:
+        FT_OPCOData.otherWheelManufacturer || "",
+
+      conveyorLength: FT_OPCOData.conveyorLength || "",
+      conveyorLengthUnit: FT_OPCOData.conveyorLengthUnit || "",
+
+      conveyorSpeed: FT_OPCOData.conveyorSpeed || "",
+      conveyorSpeedUnit: FT_OPCOData.conveyorSpeedUnit || "",
+
+      conveyorIndex: FT_OPCOData.conveyorIndex || "",
+      travelDirection: FT_OPCOData.travelDirection || "",
+
+      appEnviroment: FT_OPCOData.appEnviroment || "",
+      otherAppEnviroment: FT_OPCOData.otherAppEnviroment || "",
+
+      surroundingTemp: FT_OPCOData.surroundingTemp || "",
+      conveyorLoaded: FT_OPCOData.conveyorLoaded || "",
+      conveyorSwing: FT_OPCOData.conveyorSwing || "",
+
+      // ======================================================
+      // CUSTOMER POWER UTILITIES
+      // ======================================================
+
+      operatingVoltage: FT_OPCOData.operatingVoltage || "",
+      controlVoltage: FT_OPCOData.controlVoltage || "",
+
+      compressedAir: FT_OPCOData.compressedAir || "",
+      compressedAirUnit: FT_OPCOData.compressedAirUnit || "",
+
+      // ======================================================
+      // NEW / EXISTING MONITORING SYSTEM
+      // ======================================================
+
+      existingMonitoring: FT_OPCOData.existingMonitoring || "",
+      newMonitoringSystem: FT_OPCOData.newMonitoringSystem || "",
+
+      // ======================================================
+      // CONVEYOR SPECIFICATIONS
+      // ======================================================
+
+      wheelOpenType: FT_OPCOData.wheelOpenType || "",
+      wheelClosedType: FT_OPCOData.wheelClosedType || "",
+
+      openInsideShieldedOutside:
+        FT_OPCOData.openInsideShieldedOutside || "",
+
+      freeTrolleyWheels: FT_OPCOData.freeTrolleyWheels || "",
+      guideRollers: FT_OPCOData.guideRollers || "",
+
+      rollerChains: FT_OPCOData.rollerChains || "",
+      bushings: FT_OPCOData.bushings || "",
+      outboardWheels: FT_OPCOData.outboardWheels || "",
+
+      lubeBrand: FT_OPCOData.lubeBrand || "",
+      lubeViscosity: FT_OPCOData.lubeViscosity || "",
+
+      currentGrease: FT_OPCOData.currentGrease || "",
+      currentLube: FT_OPCOData.currentLube || "",
+
+      oilOrGrease: FT_OPCOData.oilOrGrease || "",
+      oilViscosity: FT_OPCOData.oilViscosity || "",
+      greaseNGLIGrade: FT_OPCOData.greaseNGLIGrade || "",
+
+      zerkDirection: FT_OPCOData.zerkDirection || "",
+      zerkFtgLocation: FT_OPCOData.zerkFtgLocation || "",
+
+      wheelDiameter: FT_OPCOData.wheelDiameter || "",
+
+      chainCleanStatus: FT_OPCOData.chainCleanStatus || "",
+
+      // ======================================================
+      // CONTROLLER
+      // ======================================================
+
+      chainMaster: FT_OPCOData.chainMaster || "",
+      remoteStatus: FT_OPCOData.remoteStatus || "",
+      mountStatus: FT_OPCOData.mountStatus || "",
+      otherUnitStatus: FT_OPCOData.otherUnitStatus || "",
+
+      timerStatus: FT_OPCOData.timerStatus || "",
+      electricStatus: FT_OPCOData.electricStatus || "",
+
+      mightyLubeMonitoring:
+        FT_OPCOData.mightyLubeMonitoring || "",
+
+      preMountType: FT_OPCOData.preMountType || "",
+      otherPreMountType:
+        FT_OPCOData.otherPreMountType || "",
+
+      plcConnection: FT_OPCOData.plcConnection || "",
+
+      otherControllerNotes:
+        FT_OPCOData.otherControllerNotes || "",
+
+      // ======================================================
+      // FLAT TOP: MEASUREMENTS
+      // ======================================================
+
+      ftUnitType: FT_OPCOData.ftUnitType || "",
+
+      ftTopG: FT_OPCOData.ftTopG || "",
+      ftTopH: FT_OPCOData.ftTopH || "",
+
+      ftTopA1: FT_OPCOData.ftTopA1 || "",
+      ftTopB1: FT_OPCOData.ftTopB1 || "",
+      ftTopH1: FT_OPCOData.ftTopH1 || "",
+      ftTopJ1: FT_OPCOData.ftTopJ1 || "",
+      ftTopL1: FT_OPCOData.ftTopL1 || "",
+      ftTopM1: FT_OPCOData.ftTopM1 || "",
+      ftTopN1: FT_OPCOData.ftTopN1 || "",
+      ftTopP1: FT_OPCOData.ftTopP1 || "",
+      ftTopR1: FT_OPCOData.ftTopR1 || "",
     });
 
+    // ========================================================
+    // SAVE PRODUCT CONFIGURATION
+    // ========================================================
+
+    await order.save();
+
+    // ========================================================
+    // ADD CONFIGURATION TO USER CART
+    // ========================================================
+
     req.user.cart.push({
-      numRequested,
+      numRequested: numRequested || 1,
       productConfigurationInfo: order,
-      productType: "FT_OPCO"
+      productType: "FT_OPCO",
     });
 
     await req.user.save();
-    return res.status(200).json({ message: "FT_OPCO entry added" });
+
+    // ========================================================
+    // SUCCESS
+    // ========================================================
+
+    return res.status(200).json({
+      success: true,
+      message: "FT_OPCO entry added",
+      data: order,
+    });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: "Internal server error" });
+    console.error("FT_OPCO route error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to add FT_OPCO configuration",
+      error: error.message,
+    });
   }
 });
 
-module.exports = router;
+module.exports = router

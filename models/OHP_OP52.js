@@ -1,188 +1,187 @@
 const mongoose = require("mongoose");
-const templateA = require("./templateA.js");
+
 const OHP_OP52Schema = new mongoose.Schema({
+  // ============================================================
+  // GENERAL INFORMATION
+  // ============================================================
+
   conveyorName: {
     type: String,
-    required: true,
+    required: false,
+    trim: true,
   },
 
-  chainSize: {
-    type: Number,
-    enum: [1, 2, 3, 4, 5],
-    required: true,
+  conveyorChainSize: {
+    type: String,
+    required: false,
+    trim: true,
   },
 
-  otherChainSize: {
+  otherConveyorChainSize: {
     type: String,
     required: function () {
-      return this.chainSize === 5;
+      return this.conveyorChainSize === "Other";
     },
+    trim: true,
   },
 
-  industrialChainManufacturer: {
-    type: Number,
-    enum: [1, 2, 3, 4, 5, 6, 7, 8, 9],
+  chainManufacturer: {
+    type: String,
     required: false,
+    trim: true,
   },
 
   otherChainManufacturer: {
     type: String,
     required: function () {
-      return this.industrialChainManufacturer === 9;
+      return this.chainManufacturer === "Other";
     },
+    trim: true,
   },
 
-  wheelManufacturer: {
-    type: Number,
-    enum: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-    required: true,
-  },
-
-  otherWheelManufacturer: {
-    type: String,
-    required: function () {
-      return this.wheelManufacturer === 10;
-    },
-  },
   conveyorLength: {
-    type: Number,
-    required: true,
-  },
-
-  conveyorLengthUnit: {
-    type: Number,
-    enum: [1, 2, 3, 4],
-    required: false,
-  },
-
-  appEnviroment: {
-    type: Number,
-    enum: [1, 2, 3, 4, 5, 6, 7],
-    required: false,
-  },
-
-  ovenStatus: {
-    type: Number,
-    enum: [1, 2],
-    required: function () {
-      return this.appEnviroment === 3;
-    },
-  },
-
-  ovenTemp: {
-    type: Number,
-    required: function () {
-      return this.appEnviroment === 3;
-    },
-  },
-
-  otherAppEnviroment: {
-    type: String,
-    required: function () {
-      return this.appEnviroment === 7;
-    },
-  },
-
-
-  brushApplicators: {
-    type: Number,
-    enum: [1, 2],
-    required: true,
-  },
-
-  m12Plugs: {
-    type: Number,
-    enum: [1, 2],
-    required: true,
-  },
-
-  oilBackupCat: {
-    type: Number,
-    enum: [1, 2],
-    required: true,
-  },
-
-  controlVoltSingle: {
-    type: Number,
-    required: false,
-  },
-
-  // ✅ NEW OPTIONAL FIELD
-  technicianNote: {
     type: String,
     required: false,
     trim: true,
   },
-  
-  lubeBrand: {
+
+  conveyorLengthUnit: {
     type: String,
     required: false,
+    enum: ["Feet"],
   },
 
-  lubeType: {
+  applicationEnvironment: {
+    type: String,
+    required: true,
+    enum: [
+      "Ambient",
+      "Caustic (i.e. Phosphate / E-Coat, etc.)",
+      "Oven",
+      "Wash Down",
+      "Intrinsic",
+      "Food Grade",
+      "Other",
+    ],
+  },
+
+  otherApplicationEnvironment: {
+    type: String,
+    required: function () {
+      return this.applicationEnvironment === "Other";
+    },
+    trim: true,
+  },
+
+  // ============================================================
+  // CUSTOMER POWER UTILITIES
+  // ============================================================
+
+  controlVoltage: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+
+  // ============================================================
+  // CONVEYOR SPECIFICATIONS
+  // ============================================================
+
+  currentLubricationEquipmentBrand: {
     type: String,
     required: false,
+    trim: true,
   },
 
-  lubeViscosity: {
+  currentLubricantType: {
     type: String,
     required: false,
+    trim: true,
   },
 
-  sideLubeStatus: {
-    type: Number,
-    enum: [1, 2],
+  currentLubricantViscosityGrade: {
+    type: String,
     required: false,
+    trim: true,
   },
 
-  topLubeStatus: {
-    type: Number,
-    enum: [1, 2],
+  lubricationFromSideOfChain: {
+    type: String,
     required: false,
+    trim: true,
   },
 
-  chainMaster: {
-    type: Number,
-    enum: [1, 2],
+  lubricationFromTopOfChain: {
+    type: String,
     required: false,
+    enum: ["Yes", "No"],
   },
 
-  timerStatus: {
-    type: Number,
-    enum: [1, 2, 3],
+  // ============================================================
+  // CONTROLLER
+  // ============================================================
+
+  chainMasterController: {
+    type: String,
     required: false,
+    trim: true,
   },
 
-  electricStatus: {
-    type: Number,
-    enum: [1, 2],
+  timer: {
+    type: String,
     required: false,
+    trim: true,
+  },
+
+  electricOnOff: {
+    type: String,
+    required: false,
+    trim: true,
   },
 
   plcConnection: {
-    type: Number,
-    enum: [1, 2],
-    required: false,
-  },
-
-  otherControllerNotes: {
     type: String,
     required: false,
+    trim: true,
   },
 
-  specialControllerOption: {
+  otherControllerDescribe: {
     type: String,
     required: false,
+    trim: true,
   },
 
-  specialControllerInfo: {
+  controllerText: {
     type: String,
     required: false,
+    trim: true,
   },
 
+  controllerSpecialOptions: {
+    type: String,
+    required: false,
+    trim: true,
+  },
 
-});
+  controllerPleaseSpecify: {
+    type: String,
+    required: false,
+    trim: true,
+  },
+
+  // ============================================================
+  // TECHNICIAN NOTE
+  // ============================================================
+
+  technicianNote: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+})
 
 const OHP_OP52 =
-  mongoose.models.OHP_OP52 || mongoose.model("OHP_OP13", OHP_OP52Schema);
-module.exports = OHP_OP52;
+  mongoose.models.OHP_OP52 ||
+  mongoose.model("OHP_OP52", OHP_OP52Schema);
+
+module.exports = OHP_OP52

@@ -1,323 +1,347 @@
 const mongoose = require("mongoose");
-const templateA = require("./templateA.js");
-const getDecodedInfo = require("./getDecodedInfo.js");
 
 const OHP_GPCSchema = new mongoose.Schema({
+  // ============================================================
+  // GENERAL INFORMATION
+  // ============================================================
+
   conveyorName: {
     type: String,
-    required: true,
+    trim: true,
   },
 
-  chainSize: {
-    type: Number,
-    enum: [1, 2, 3, 4, 5],
-    required: true,
-  },
-
-  otherChainSize: {
+  conveyorChainSize: {
     type: String,
+    enum: [
+      'X348 Chain (3")',
+      'X458 Chain (4")',
+      'X678 Chain (6")',
+      '3/8" Log Chain',
+      "Other",
+    ],
+    trim: true,
+  },
+
+  otherConveyorChainSize: {
+    type: String,
+    trim: true,
     required: function () {
-      return this.chainSize === 5;
+      return this.conveyorChainSize === "Other";
     },
   },
 
-  industrialChainManufacturer: {
-    type: Number,
-    enum: [1, 2, 3, 4, 5, 6, 7, 8, 9],
-    required: true,
+  chainManufacturer: {
+    type: String,
+    enum: [
+      "Daifuku",
+      "Frost",
+      "NKC",
+      "Pacline",
+      "Rapid",
+      "WEBB",
+      "Webb-Stiles",
+      "Wilkie Brothers",
+      "Other",
+    ],
+    trim: true,
   },
 
   otherChainManufacturer: {
     type: String,
+    trim: true,
     required: function () {
-      return this.industrialChainManufacturer === 9;
+      return this.chainManufacturer === "Other";
     },
   },
+
   wheelManufacturer: {
-    type: Number,
-    enum: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-    required: true,
+    type: String,
+    enum: [
+      "Green Line",
+      "Frost",
+      "M&M",
+      "Stork",
+      "Meyn",
+      "Linco",
+      "DC",
+      "Merel",
+      "D&F",
+      "Other",
+    ],
+    trim: true,
   },
 
   otherWheelManufacturer: {
     type: String,
+    trim: true,
     required: function () {
-      return this.wheelManufacturer === 10;
+      return this.wheelManufacturer === "Other";
     },
   },
 
   conveyorLength: {
-    type: Number,
-    required: true,
-  },
-
-  conveyorLengthUnit: {
-    type: Number,
-    enum: [1, 2, 3, 4],
-    required: true,
-  },
-
-  conveyorSpeed: {
-    type: Number,
-    required: true,
-  },
-
-  conveyorSpeedUnit: {
-    type: Number,
-    enum: [1, 2],
-    required: true,
-  },
-
-  conveyorIndex: {
-    type: Number,
-    required: true,
-  },
-
-  travelDirection: {
-    type: Number,
-    enum: [1, 2],
-    required: true,
-  },
-
-  appEnviroment: {
-    type: Number,
-    enum: [1, 2, 3, 4, 5, 6, 7],
-    required: true,
-  },
-
-  ovenStatus: {
-    type: Number,
-    enum: [1, 2],
-    required: function () {
-      return this.appEnviroment === 3;
-    },
-  },
-
-  ovenTemp: {
-    type: Number,
-    required: function () {
-      return this.appEnviroment === 3;
-    },
-  },
-
-  otherAppEnviroment: {
     type: String,
-    required: function () {
-      return this.appEnviroment === 7;
-    },
-  },
-
-  surroundingTemp: {
-    type: Number,
-    enum: [1, 2],
-    required: true,
-  },
-
-  orientation: {
-    type: Number,
-    required: true,
-  },
-
-  swingStatus: {
-    type: Number,
-    enum: [1, 2],
-    required: true,
-  },
-
-  conveyorLoaded: {
-    type: Number,
-    enum: [1, 2],
-    required: true,
-  },
-
-  plantLayout: {
-    type: Number,
-    enum: [1, 2],
-    required: false,
-  },
-
-  operatingVoltSingle: {
-    type: Number,
-    required: true,
-  },
-
-  // ✅ NEW OPTIONAL FIELD
-  technicianNote: {
-    type: String,
-    required: false,
     trim: true,
   },
 
-  controlVoltSingle: {
-    type: Number,
-    required: true,
+  conveyorLengthUnit: {
+    type: String,
+    enum: ["Feet"],
+    trim: true,
   },
 
-  compressedAir: {
-    type: Number,
-    enum: [1, 2],
-    required: true,
+  conveyorSpeed: {
+    type: String,
+    trim: true,
   },
 
-  monitorData: templateA,
-  
-  currentGrease: {
+  conveyorSpeedUnit: {
+    type: String,
+    enum: ["Feet / minute"],
+    trim: true,
+  },
+
+  indexingOrVariableSpeedConditions: {
+    type: String,
+    trim: true,
+  },
+
+  directionOfTravel: {
+    type: String,
+    enum: ["Right to Left", "Left to Right"],
+    trim: true,
+  },
+
+  applicationEnvironment: {
+    type: String,
+    enum: [
+      "Ambient",
+      "Caustic (i.e. Phosphate / E-Coat, etc.)",
+      "Oven",
+      "Wash Down",
+      "Intrinsic",
+      "Food Grade",
+      "Other",
+    ],
+    required: true,
+    trim: true,
+  },
+
+  surroundingTemperature: {
+    type: String,
+    trim: true,
+  },
+
+  conveyorLoadedOrUnloaded: {
+    type: String,
+    enum: ["Yes", "No"],
+    required: true,
+    trim: true,
+  },
+
+  conveyorMovement: {
+    type: String,
+    enum: ["Yes", "No"],
+    required: true,
+    trim: true,
+  },
+
+  plantLayout: {
+    type: String,
+    trim: true,
+  },
+
+  // ============================================================
+  // CUSTOMER POWER UTILITIES
+  // ============================================================
+
+  operatingVoltageSinglePhase: {
     type: String,
     required: true,
+    trim: true,
   },
 
-  currentGreaseGrade: {
-    type: Number,
-    required: true,
-  },
-
-  wheelDiameter: {
-    type: Number,
-    required: true,
-  },
-
-  lubeBrand: {
+  controlVoltage: {
     type: String,
     required: true,
+    trim: true,
   },
 
-  chainMaster: {
-    type: Number,
-    enum: [1, 2],
-    required: function () {
-      return this.lubeBrand === "Mighty Lube";
-    },
+  compressedAirSupply: {
+    type: String,
+    required: true,
+    trim: true,
   },
 
-  remoteStatus: {
-    type: Number,
-    enum: [1, 2],
-    required: function () {
-      return this.lubeBrand === "Mighty Lube";
-    },
+  compressedAirSupplyUnit: {
+    type: String,
+    enum: ["PSI", "KPI", "Bar"],
+    trim: true,
   },
 
-  mountStatus: {
-    type: Number,
-    enum: [1, 2],
-    required: function () {
-      return this.lubeBrand === "Mighty Lube";
-    },
+  // ============================================================
+  // MONITORING SYSTEM
+  // ============================================================
+
+  connectingToExistingMonitoring: {
+    type: String,
+    trim: true,
   },
 
-  otherUnitStatus: {
-    type: Number,
-    enum: [1, 2],
-    required: function () {
-      return this.lubeBrand === "Mighty Lube";
-    },
+  addNewMonitoringSystem: {
+    type: String,
+    enum: ["Yes", "No"],
+    trim: true,
   },
 
-  timerStatus: {
-    type: Number,
-    enum: [1, 2, 3],
-    required: function () {
-      return this.lubeBrand === "Mighty Lube";
-    },
+  // ============================================================
+  // CONVEYOR SPECIFICATIONS
+  // ============================================================
+
+  currentGreaseType: {
+    type: String,
+    trim: true,
   },
 
-  electricStatus: {
-    type: Number,
-    enum: [1, 2],
-    required: function () {
-      return this.lubeBrand === "Mighty Lube";
-    },
+  currentGreaseNlgiGrade: {
+    type: String,
+    trim: true,
+  },
+
+  // ============================================================
+  // CONTROLLER
+  // ============================================================
+
+  chainMasterController: {
+    type: String,
+    enum: ["Yes", "No"],
+    trim: true,
+  },
+
+  remote: {
+    type: String,
+    enum: ["Yes", "No"],
+    trim: true,
+  },
+
+  mountedOnGreaser: {
+    type: String,
+    enum: ["Yes", "No"],
+    trim: true,
+  },
+
+  controlsOtherUnits: {
+    type: String,
+    trim: true,
+  },
+
+  timer: {
+    type: String,
+    enum: [
+      "Not Required",
+      "12 Hour",
+      "1000 Hour",
+    ],
+    trim: true,
+  },
+
+  electricOnOff: {
+    type: String,
+    enum: ["On", "Off"],
+    trim: true,
   },
 
   mightyLubeMonitoring: {
-    type: Number,
-    enum: [1, 2],
-    required: function () {
-      return this.lubeBrand === "Mighty Lube";
-    },
-  },
-
-  preMountType: {
-    type: Number,
-    enum: [1, 2, 3],
-    required: function () {
-      return this.lubeBrand === "Mighty Lube";
-    },
-  },
-
-  otherPreMountType: {
     type: String,
-    required: function () {
-      return this.preMountType === 3;
-    },
+    trim: true,
   },
 
-  plcConnection: {
-    type: Number,
-    enum: [1, 2],
-    required: function () {
-      return this.lubeBrand === "Mighty Lube";
-    },
-  },
-
-  otherControllerNotes: {
+  preMountingRequirements: {
     type: String,
-    required: function () {
-      return this.lubeBrand === "Mighty Lube";
-    },
-  },
-  gpcUnitType: {
-    type: Number,
-    enum: [1, 2, 3, 4],
-    required: false,
+    enum: [
+      "OPCO Track",
+      "Customer Provided Track",
+      "Other",
+    ],
+    trim: true,
   },
 
-  chainDrop: {
-    type: Number,
-    required: false,
+  otherDescribe: {
+    type: String,
+    trim: true,
   },
 
-  gpcDiameter: {
-    type: Number,
-    required: false,
+  // ============================================================
+  // GREASER - POWER CHAIN: MEASUREMENTS
+  // ============================================================
+
+  measurementUnit: {
+    type: String,
+    enum: [
+      "Feet",
+      "Inches",
+      "m Meter",
+      "mm Millimeter",
+    ],
+    trim: true,
   },
 
-  gpcWheelC: {
-    type: Number,
-    required: false,
+  chainDropA: {
+    type: String,
+    trim: true,
   },
 
-  gpcWheelD: {
-    type: Number,
-    required: false,
+  powerTrolleyWheelB: {
+    type: String,
+    trim: true,
   },
 
-  gpcWheelE: {
-    type: Number,
-    required: false,
+  trolleyWheelBracketWidthC: {
+    type: String,
+    trim: true,
   },
 
-  gpcWheelF: {
-    type: Number,
-    required: false,
+  trolleyWheelSpacerD: {
+    type: String,
+    trim: true,
   },
 
-  gpcWheelG: {
-    type: Number,
-    required: false,
+  zerkFittingVerticalLocationE: {
+    type: String,
+    trim: true,
   },
 
-  gpcWheelH: {
-    type: Number,
-    required: false,
+  zerkFittingHorizontalLocationF: {
+    type: String,
+    trim: true,
   },
 
-  gpcWheelS: {
-    type: Number,
-    required: false,
+  railG: {
+    type: String,
+    trim: true,
+  },
+
+  railH: {
+    type: String,
+    trim: true,
+  },
+
+  trolleyPitchS: {
+    type: String,
+    trim: true,
+  },
+
+  // ============================================================
+  // TECHNICIAN NOTE
+  // ============================================================
+
+  technicianNote: {
+    type: String,
+    required: true,
+    trim: true,
   },
 });
 
-const OHP_GPC = mongoose.model("tblOHP_GPC", OHP_GPCSchema);
+const OHP_GPC = mongoose.model("OHP_GPC", OHP_GPCSchema);
 
-module.exports = OHP_GPC;
+module.exports = OHP_GPC

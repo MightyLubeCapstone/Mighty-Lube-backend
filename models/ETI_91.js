@@ -1,44 +1,136 @@
-const mongoose = require('mongoose');
-const templateA = require("./templateA.js");
-const getDecodedInfo = require("./getDecodedInfo.js");  
+const mongoose = require("mongoose");
 
-const ETI_91_Schema = new mongoose.Schema({
+// =========================================================
+// ETI_91
+//
+// Product:
+// Overhead Non-Powered Mighty Lube Rail Cleaners
+// UN91 / RW91
+//
+// Latest frontend contract:
+//
+// {
+//   conveyorName,
+//   chainSize,
+//   otherChainSize,
+//   industrialChainManufacturer,
+//   otherIndustrialChainManufacturer,
+//   conveyorLength,
+//   conveyorLengthUnit,
+//   conveyorSpeed,
+//   conveyorSpeedUnit,
+//   appEnviroment,
+//   otherAppEnviroment,
+//   technicianNote
+// }
+// =========================================================
+
+const ETI_91_Schema = new mongoose.Schema(
+  {
+    // =====================================================
+    // GENERAL INFORMATION
+    // =====================================================
+
     conveyorName: {
-        type: String,
-        required: true,
+      type: String,
+      required: true,
+      trim: true,
     },
+
+    chainSize: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    otherChainSize: {
+      type: String,
+      trim: true,
+      default: null,
+      required: function () {
+        return this.chainSize === "Other";
+      },
+    },
+
     industrialChainManufacturer: {
-        type: Number,
-        enum: [1, 2, 3, 4, 5],
-        required: true,
+      type: String,
+      required: true,
+      trim: true,
     },
+
     otherIndustrialChainManufacturer: {
-        type: String,
-        required: function () {
-            return this.industrialChainManufacturer === 5;
-        },
+      type: String,
+      trim: true,
+      default: null,
+      required: function () {
+        return this.industrialChainManufacturer === "Other";
+      },
     },
+
     conveyorLength: {
-
-        type: Number,
-        required: false,
+      type: String,
+      required: true,
+      trim: true,
     },
-    
-    // ✅ NEW OPTIONAL FIELD
-  technicianNote: {
-    type: String,
-    required: false,
-    trim: true,
+
+    conveyorLengthUnit: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    conveyorSpeed: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    conveyorSpeedUnit: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    appEnviroment: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    otherAppEnviroment: {
+      type: String,
+      trim: true,
+      default: null,
+      required: function () {
+        return this.appEnviroment === "Other";
+      },
+    },
+
+    // =====================================================
+    // TECHNICIAN NOTE
+    // =====================================================
+
+    technicianNote: {
+      type: String,
+      required: false,
+      trim: true,
+      default: null,
+    },
   },
-    conveyorLengthUnit: { 
+  {
+    timestamps: true,
+  }
+);
 
-        type: Number,
-        enum: [1, 2, 3, 4],
-        required: false,
+// =========================================================
+// MODEL
+// =========================================================
 
-    }
-    
-});
+const ETI_91 =
+  mongoose.models.ETI_91 ||
+  mongoose.model(
+    "ETI_91",
+    ETI_91_Schema
+  );
 
-const ETI_91 = mongoose.models.ETI_91 || mongoose.model('ETI_91', ETI_91_Schema);
-module.exports = ETI_91;
+module.exports = ETI_91

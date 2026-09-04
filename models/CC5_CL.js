@@ -1,249 +1,377 @@
 const mongoose = require("mongoose");
-const templateA = require("./templateA.js");
-const uuid = require("uuid");
-const getDecodedInfo = require("./getDecodedInfo.js");
 
-const CC5_CLSchema = new mongoose.Schema({
-  conveyorName: {
-    type: String,
-    required: true,
-  },
+const CC5_CLSchema = new mongoose.Schema(
+  {
+    // =======================================================
+    // GENERAL INFORMATION
+    // =======================================================
 
-  cc5ChainSize: {
-    type: Number,
-    enum: [1, 2, 3, 4, 5, 6, 7, 8],
-    required: true,
-  },
+    conveyorName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
 
-  otherChainSize: {
-    type: String,
-    required: function () {
-      return this.cc5ChainSize === 8;
+    cc5ChainSize: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    industrialChainManufacturer: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    conveyorLength: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    conveyorLengthUnit: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    conveyorSpeed: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    conveyorSpeedUnit: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    conveyorIndex: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    travelDirection: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    appEnviroment: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    surroundingTemp: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    loadedUnloadedStatus: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    swingSwaySurgeStatus: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    strandStatus: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    plantLayout: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    chainPicture: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    // =======================================================
+    // CUSTOMER POWER UTILITIES
+    // =======================================================
+
+    operatingVoltage: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    controlVoltage: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    // =======================================================
+    // MONITORING
+    // =======================================================
+
+    existingMonitoring: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    addMonitoring: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    // =======================================================
+    // CONVEYOR SPECIFICATIONS
+    // =======================================================
+
+    wheelOpenRaceStyle: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    wheelSealedStyle: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    openInsideShieldedOutside: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    powerChain: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    chainPins: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    sliderPlates: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    outboardStatus: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    caterpillarDrive: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    caterpillarDriveQuantity: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    railLubrication: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    externalLubrication: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    lubeBrand: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    lubeType: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    lubeViscosity: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    reservoirSize: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    reservoirSizeQuantity: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    cleanChain: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    // =======================================================
+    // CONTROLLER
+    // =======================================================
+
+    specialControllerOptions: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    specialControllerDetails: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    // =======================================================
+    // WIRE
+    // =======================================================
+
+    wireMeasurementUnit: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    conductor2: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    conductor4: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    conductor7: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    conductor12: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    junctionBoxNum: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    // =======================================================
+    // CC5 MEASUREMENTS
+    // =======================================================
+
+    measurementUnit: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    powerRailWidth: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    powerRailHeight: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    rollerWheelA1: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    rollerWheelB1: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    linkD1: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    wheelPitchM1: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    rollerPinY1: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    rollerPinZ1: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    // =======================================================
+    // TECHNICIAN NOTE
+    // Optional multiline note from mobile app.
+    // =======================================================
+
+    technicianNote: {
+      type: String,
+      required: false,
+      trim: true,
     },
   },
-
-  industrialChainManufacturer: {
-    type: Number,
-    enum: [1, 2, 3, 4, 5, 6, 7, 8, 9],
-    required: true,
+  {
+    timestamps: true,
   },
+);
 
-  otherChainManufacturer: {
-    type: String,
-    required: function () {
-      return this.industrialChainManufacturer === 9;
-    },
-  },
+const CC5_CL =
+  mongoose.models.CC5_CL ||
+  mongoose.model("CC5_CL", CC5_CLSchema);
 
-  conveyorLength: {
-    type: Number,
-    required: false,
-  },
-
-  conveyorLengthUnit: {
-    type: Number,
-    enum: [1, 2, 3, 4],
-    required: false,
-  },
-
-  conveyorSpeed: {
-    type: String,
-    required: false,
-  },
-
-  conveyorSpeedUnit: {
-    type: Number,
-    enum: [1, 2],
-    required: false,
-  },
-
-  conveyorIndex: {
-    type: String,
-    required: false,
-  },
-
-  travelDirection: {
-    type: Number,
-    enum: [1, 2],
-    required: false,
-  },
-
-  appEnviroment: {
-    type: Number,
-    enum: [1, 2, 3, 4, 5, 6, 7],
-    required: true,
-  },
-
-  ovenStatus: {
-    type: Number,
-    enum: [1, 2],
-    required: function () {
-      return this.appEnviroment === 3;
-    },
-  },
-
-  ovenTemp: {
-    type: Number,
-    required: function () {
-      return this.appEnviroment === 3;
-    },
-  },
-
-  otherAppEnviroment: {
-    type: String,
-    required: function () {
-      return this.appEnviroment === 7;
-    },
-  },
-
-  surroundingTemp: {
-    type: Number,
-    enum: [1, 2],
-    required: false,
-  },
-
-  strandStatus: {
-    type: Number,
-    enum: [1, 2],
-    required: true,
-  },
-
-  plantLayout: {
-    type: Number,
-    enum: [1, 2],
-    required: false,
-  },
-
-  requiredPics: {
-    type: Number,
-    enum: [1, 2],
-    required: false,
-  },
-
-  operatingVoltage: {
-    type: String,
-    required: true,
-  },
-
-  // ✅ NEW OPTIONAL FIELD
-  technicianNote: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-  
-  monitorData: templateA,
-
-  outboardStatus: {
-    type: Number,
-    enum: [1, 2],
-    required: true,
-  },
-
-  highRollerStatus: {
-    type: Number,
-    enum: [1, 2],
-    required: true,
-  },
-
-  lubeBrand: {
-    type: String,
-    required: false,
-  },
-
-  lubeType: {
-    type: String,
-    required: false,
-  },
-
-  lubeViscosity: {
-    type: String,
-    required: false,
-  },
-
-  cleanChain: {
-    type: Number,
-    enum: [1, 2],
-    required: false,
-  },
-
-  wireMeasurementUnit: {
-    type: Number,
-    enum: [1, 2, 3, 4],
-    required: false,
-  },
-
-  conductor2: {
-    type: Number,
-    required: false,
-  },
-
-  conductor4: {
-    type: Number,
-    required: false,
-  },
-
-  conductor7: {
-    type: Number,
-    required: false,
-  },
-
-  conductor12: {
-    type: Number,
-    required: false,
-  },
-
-  junctionBoxNum: {
-    type: Number,
-    required: false,
-  },
-
-  cc5UnitType: {
-    type: Number,
-    enum: [1, 2, 3, 4],
-    required: false,
-  },
-
-  powerRailWidth: {
-    type: Number,
-    required: false,
-  },
-
-  powerRailHeight: {
-    type: Number,
-    required: false,
-  },
-
-  rollerWheelA1: {
-    type: Number,
-    required: false,
-  },
-
-  rollerWheelB1: {
-    type: Number,
-    required: false,
-  },
-
-  linkD1: {
-    type: Number,
-    required: false,
-  },
-
-  wheelPitchM1: {
-    type: Number,
-    required: false,
-  },
-
-  rollerPinY1: {
-    type: Number,
-    required: false,
-  },
-
-  rollerPinZ1: {
-    type: Number,
-    required: false,
-  },
-});
-
-const CC5_CL = mongoose.models.CC5_CL || mongoose.model("CC5_CL", CC5_CLSchema);
-module.exports = CC5_CL;
+module.exports = CC5_CL

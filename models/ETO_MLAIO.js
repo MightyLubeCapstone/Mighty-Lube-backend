@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const IBR_RFC_Schema = new mongoose.Schema(
+const ETO_MLAIOSchema = new mongoose.Schema(
   {
     // ========================================================
     // GENERAL INFORMATION
@@ -9,103 +9,81 @@ const IBR_RFC_Schema = new mongoose.Schema(
     conveyorName: {
       type: String,
       default: "",
-      trim: true,
     },
 
-    conveyorChainSize: {
+    chainSize: {
       type: String,
       default: "",
-      trim: true,
     },
 
-    otherConveyorChainSize: {
+    otherChainSize: {
       type: String,
       default: "",
-      trim: true,
     },
 
-    chainManufacturer: {
+    industrialChainManufacturer: {
       type: String,
       default: "",
-      trim: true,
     },
 
-    otherChainManufacturer: {
+    otherIndustrialChainManufacturer: {
       type: String,
       default: "",
-      trim: true,
     },
 
     conveyorLength: {
       type: String,
       default: "",
-      trim: true,
     },
 
     conveyorLengthUnit: {
       type: String,
       default: "",
-      trim: true,
     },
 
     conveyorSpeed: {
       type: String,
       default: "",
-      trim: true,
     },
 
     conveyorSpeedUnit: {
       type: String,
       default: "",
-      trim: true,
     },
 
-    indexingVariableSpeedConditions: {
+    conveyorIndex: {
       type: String,
       default: "",
-      trim: true,
     },
 
     travelDirection: {
       type: String,
       default: "",
-      trim: true,
     },
 
-    applicationEnvironment: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-
-    otherApplicationEnvironment: {
+    appEnviroment: {
       type: String,
       default: "",
-      trim: true,
     },
 
-    surroundingTemperature: {
+    otherAppEnviroment: {
       type: String,
       default: "",
-      trim: true,
     },
 
-    conveyorLoadedStatus: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-
-    conveyorSwingStatus: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-
-    conveyorStrand: {
+    surroundingTemp: {
       type: String,
       default: "",
-      trim: true,
+    },
+
+    conveyorLoaded: {
+      type: String,
+      default: "",
+    },
+
+    conveyorSwing: {
+      type: String,
+      default: "",
     },
 
     // ========================================================
@@ -114,14 +92,12 @@ const IBR_RFC_Schema = new mongoose.Schema(
 
     operatingVoltage: {
       type: String,
-      required: true,
-      trim: true,
+      default: "",
     },
 
     controlVoltage: {
       type: String,
-      required: true,
-      trim: true,
+      default: "",
     },
 
     // ========================================================
@@ -131,185 +107,139 @@ const IBR_RFC_Schema = new mongoose.Schema(
     existingMonitoring: {
       type: String,
       default: "",
-      trim: true,
     },
 
     newMonitoringSystem: {
       type: String,
       default: "",
-      trim: true,
     },
 
     // ========================================================
     // CONVEYOR SPECIFICATIONS
     // ========================================================
 
-    wheelOpenRaceStyle: {
+    wheelOpenType: {
       type: String,
       default: "",
-      trim: true,
     },
 
-    wheelSealedStyle: {
+    wheelClosedType: {
       type: String,
       default: "",
-      trim: true,
-    },
-
-    openInsideShieldedOutside: {
-      type: String,
-      default: "",
-      trim: true,
     },
 
     powerChain: {
       type: String,
       default: "",
-      trim: true,
     },
 
     chainPins: {
       type: String,
       default: "",
-      trim: true,
     },
 
-    sliderPlates: {
+    catDriveStatus: {
       type: String,
       default: "",
-      trim: true,
     },
 
-    outboardWheels: {
+    catDriveNum: {
       type: String,
       default: "",
-      trim: true,
     },
 
-    caterpillarDrive: {
+    railLubeStatus: {
       type: String,
       default: "",
-      trim: true,
     },
 
-    caterpillarDriveQuantity: {
+    externalLubeStatus: {
       type: String,
       default: "",
-      trim: true,
     },
 
-    railLubrication: {
+    lubeBrand: {
       type: String,
       default: "",
-      trim: true,
     },
 
-    externalLubrication: {
+    lubeType: {
       type: String,
       default: "",
-      trim: true,
     },
 
-    currentLubricationEquipmentBrand: {
+    lubeViscosity: {
       type: String,
       default: "",
-      trim: true,
-    },
-
-    currentLubricantType: {
-      type: String,
-      default: "",
-      trim: true,
-    },
-
-    currentLubricantViscosityGrade: {
-      type: String,
-      default: "",
-      trim: true,
     },
 
     reservoirSize: {
       type: String,
       default: "",
-      trim: true,
     },
 
     reservoirSizeQuantity: {
       type: String,
       default: "",
-      trim: true,
     },
 
-    conveyorChainClean: {
+    chainCleanStatus: {
       type: String,
       default: "",
-      trim: true,
     },
 
     // ========================================================
-    // CONTROLLER
+    // ENCLOSED TRACK OVERHEAD: MEASUREMENTS
     // ========================================================
 
-    specialControllerOptions: {
+    enclosedUnitType: {
       type: String,
       default: "",
-      trim: true,
     },
 
-    controllerSpecify: {
+    enclosedTrackB: {
       type: String,
       default: "",
-      trim: true,
     },
 
-    // ========================================================
-    // IN BOARD ROLLER CHAIN: MEASUREMENTS
-    // ========================================================
-
-    measurementUnit: {
+    enclosedTrackG: {
       type: String,
       default: "",
-      trim: true,
     },
 
-    inBoardRollerChainRollerWheelA1: {
+    enclosedTrackH: {
       type: String,
       default: "",
-      trim: true,
     },
 
-    inBoardRollerChainRollerWheelB1: {
+    enclosedTrackS: {
       type: String,
       default: "",
-      trim: true,
     },
 
-    inBoardRollerChainLinkC1: {
+    enclosedTrackK2: {
       type: String,
       default: "",
-      trim: true,
     },
 
-    inBoardRollerChainLinkD1: {
+    enclosedTrackL2: {
       type: String,
       default: "",
-      trim: true,
     },
 
-    inBoardRollerChainOuterLinkOffsetF1: {
+    enclosedTrackM2: {
       type: String,
       default: "",
-      trim: true,
     },
 
-    // ========================================================
-    // TECHNICIAN NOTE
-    // ========================================================
-
-    technicianNote: {
+    enclosedTrackN2: {
       type: String,
-      required: true,
-      trim: true,
+      default: "",
+    },
+
+    enclosedTrackS2: {
+      type: String,
+      default: "",
     },
   },
   {
@@ -317,8 +247,4 @@ const IBR_RFC_Schema = new mongoose.Schema(
   }
 );
 
-const IBR_RFC =
-  mongoose.models.IBR_RFC ||
-  mongoose.model("IBR_RFC", IBR_RFC_Schema);
-
-module.exports = IBR_RFC
+module.exports = mongoose.model("ETO_MLAIO", ETO_MLAIOSchema);

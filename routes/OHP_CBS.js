@@ -1,87 +1,91 @@
-// const express = require("express");
-// const { dbConnect } = require("../config/config");
-// const { authenticate } = require("./sessions");
-// const OHP_CBS = require("../models/OHP_CBS");
-
-// const router = express.Router();
- 
-// router.post("/", authenticate, async (req, res) => {
-//     try {
-//         const { OHP_CBSData, numRequested } = req.body;
-//         const order = new OHP_CBS({
-//             conveyorName: OHP_CBSData.conveyorName,
-//             chainSize: OHP_CBSData.chainSize,
-//             ...(OHP_CBSData.otherChainSize && { otherChainSize: OHP_CBSData.otherChainSize }),
-//             railSize: OHP_CBSData.railSize,
-//             industrialChainManufacturer: OHP_CBSData.industrialChainManufacturer,
-//             ...(OHP_CBSData.otherChainManufacturer && { otherChainManufacturer: OHP_CBSData.otherChainManufacturer }),
-//             ...(OHP_CBSData.conveyorLength && { conveyorLength: OHP_CBSData.conveyorLength }),
-//             ...(OHP_CBSData.measurementUnit && { measurementUnit: OHP_CBSData.measurementUnit }),
-//             ...(OHP_CBSData.appEnviroment && { appEnviroment: OHP_CBSData.appEnviroment }),
-//             ...(OHP_CBSData.ovenStatus && { ovenStatus: OHP_CBSData.ovenStatus }),
-//             ...(OHP_CBSData.ovenTemp && { ovenTemp: OHP_CBSData.ovenTemp }),
-//             ...(OHP_CBSData.otherAppEnviroment && { otherAppEnviroment: OHP_CBSData.otherAppEnviroment }),
-
-//         });
-//         req.user.cart.push({
-//             numRequested,
-//             productConfigurationInfo: order,
-//             productType: "OHP_CBS"
-//         });
-//         await req.user.save();
-//         return res.status(200).json({ message: "OHP_CBS entry added" });
-//     } catch (error) {
-//         console.error(error);
-//         res.status(500).json({ error: "Internal server error" });
-//     }
-// });
-
-// module.exports = router;
-
-
-
-
-
 const express = require("express");
-const { dbConnect } = require("../config/config");
 const { authenticate } = require("./sessions");
-const OHP_CBS = require("../models/OHP_CBS");
+const OH_CCS_IBEAM = require("../models/OH_CCS_IBEAM");
 
 const router = express.Router();
 
 router.post("/", authenticate, async (req, res) => {
   try {
-    const { OHP_CBSData, numRequested } = req.body;
+    const { OH_CCS_IBEAMData, numRequested } = req.body;
 
-    const order = new OHP_CBS({
-      conveyorName: OHP_CBSData.conveyorName,
-      chainSize: OHP_CBSData.chainSize,
-      ...(OHP_CBSData.otherChainSize && { otherChainSize: OHP_CBSData.otherChainSize }),
-      railSize: OHP_CBSData.railSize,
-      industrialChainManufacturer: OHP_CBSData.industrialChainManufacturer,
-      ...(OHP_CBSData.otherChainManufacturer && {
-        otherChainManufacturer: OHP_CBSData.otherChainManufacturer,
-      }),
-      ...(OHP_CBSData.conveyorLength && { conveyorLength: OHP_CBSData.conveyorLength }),
-      ...(OHP_CBSData.measurementUnit && { measurementUnit: OHP_CBSData.measurementUnit }),
-      ...(OHP_CBSData.appEnviroment && { appEnviroment: OHP_CBSData.appEnviroment }),
-      ...(OHP_CBSData.ovenStatus && { ovenStatus: OHP_CBSData.ovenStatus }),
-      ...(OHP_CBSData.ovenTemp && { ovenTemp: OHP_CBSData.ovenTemp }),
-      ...(OHP_CBSData.otherAppEnviroment && { otherAppEnviroment: OHP_CBSData.otherAppEnviroment }),
+    if (!OH_CCS_IBEAMData) {
+      return res.status(400).json({
+        error: "OH_CCS_IBEAMData is required",
+      });
+    }
+
+    const order = new OH_CCS_IBEAM({
+      // =====================================================
+      // GENERAL INFORMATION
+      // =====================================================
+
+      conveyorName: OH_CCS_IBEAMData.conveyorName,
+
+      conveyorChainSize: OH_CCS_IBEAMData.conveyorChainSize,
+
+      otherConveyorChainSize:
+        OH_CCS_IBEAMData.otherConveyorChainSize,
+
+      chainManufacturer:
+        OH_CCS_IBEAMData.chainManufacturer,
+
+      otherChainManufacturer:
+        OH_CCS_IBEAMData.otherChainManufacturer,
+
+      conveyorLength:
+        OH_CCS_IBEAMData.conveyorLength,
+
+      conveyorLengthUnit:
+        OH_CCS_IBEAMData.conveyorLengthUnit,
+
+      applicationEnvironment:
+        OH_CCS_IBEAMData.applicationEnvironment,
+
+      otherApplicationEnvironment:
+        OH_CCS_IBEAMData.otherApplicationEnvironment,
+
+      // =====================================================
+      // OVERHEAD POWER RAIL MEASUREMENTS
+      // =====================================================
+
+      measurementUnit:
+        OH_CCS_IBEAMData.measurementUnit,
+
+      overheadPowerRailChannelTrolleyWheelB:
+        OH_CCS_IBEAMData.overheadPowerRailChannelTrolleyWheelB,
+
+      overheadPowerRailG:
+        OH_CCS_IBEAMData.overheadPowerRailG,
+
+      overheadPowerRailH:
+        OH_CCS_IBEAMData.overheadPowerRailH,
+
+      // =====================================================
+      // TECHNICIAN NOTE
+      // =====================================================
+
+      technicianNote:
+        OH_CCS_IBEAMData.technicianNote,
     });
 
     req.user.cart.push({
       numRequested,
       productConfigurationInfo: order,
-      productType: "OHP_CBS",
+      productType: "OH_CCS_IBEAM",
     });
 
     await req.user.save();
-    return res.status(200).json({ message: "OHP_CBS entry added" });
+
+    return res.status(200).json({
+      message: "OH_CCS_IBEAM entry added",
+    });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ error: "Internal server error" });
+
+    return res.status(500).json({
+      error: "Internal server error",
+    });
   }
 });
 
-module.exports = router;
+module.exports = router

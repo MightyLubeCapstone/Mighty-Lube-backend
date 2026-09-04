@@ -1,337 +1,266 @@
-// const express = require("express");
-// const { authenticate } = require("./sessions");
-// const FT_OP4OE = require("../models/FT_OP4OE");
-// const templateA = require("../models/templateA");
-// const templateE = require("../models/templateE");
-
-// const router = express.Router();
-
-// router.post("/", authenticate, async (req, res) => {
-//   try {
-//     const { FT_OP4OEData, numRequested } = req.body;
- 
-//     const order = new FT_OP4OE({
-//       ...(FT_OP4OEData.conveyorName && { conveyorName: FT_OP4OEData.conveyorName }),
-//       chainSize: FT_OP4OEData.chainSize,
-//       ...(FT_OP4OEData.otherChainSize && { otherChainSize: FT_OP4OEData.otherChainSize }),
-//       industrialChainManufacturer: FT_OP4OEData.industrialChainManufacturer,
-//       ...(FT_OP4OEData.otherChainManufacturer && { otherChainManufacturer: FT_OP4OEData.otherChainManufacturer }),
-//       wheelManufacturer: FT_OP4OEData.wheelManufacturer,
-//       ...(FT_OP4OEData.otherWheelManufacturer && { otherWheelManufacturer: FT_OP4OEData.otherWheelManufacturer }),
-//       conveyorLength: FT_OP4OEData.conveyorLength,
-//       conveyorLengthUnit: FT_OP4OEData.conveyorLengthUnit,
-//       conveyorSpeed: FT_OP4OEData.conveyorSpeed,
-//       conveyorSpeedUnit: FT_OP4OEData.conveyorSpeedUnit,
-//       ...(FT_OP4OEData.conveyorIndex && { conveyorIndex: FT_OP4OEData.conveyorIndex }),
-//       ...(FT_OP4OEData.travelDirection && { travelDirection: FT_OP4OEData.travelDirection }),
-//       appEnviroment: FT_OP4OEData.appEnviroment,
-//       ...(FT_OP4OEData.ovenStatus && { ovenStatus: FT_OP4OEData.ovenStatus }),
-//       ...(FT_OP4OEData.ovenTemp && { ovenTemp: FT_OP4OEData.ovenTemp }),
-//       ...(FT_OP4OEData.otherAppEnviroment && { otherAppEnviroment: FT_OP4OEData.otherAppEnviroment }),
-//       ...(FT_OP4OEData.surroundingTemp && { surroundingTemp: FT_OP4OEData.surroundingTemp }),
-//       conveyorLoaded: FT_OP4OEData.conveyorLoaded,
-//       ...(FT_OP4OEData.conveyorSwing && { conveyorSwing: FT_OP4OEData.conveyorSwing }),
-//       strandStatus: FT_OP4OEData.strandStatus,
-//       ...(FT_OP4OEData.plantLayout && { plantLayout: FT_OP4OEData.plantLayout }),
-//       ...(FT_OP4OEData.requiredPics && { requiredPics: FT_OP4OEData.requiredPics }),
-//       operatingVoltage: FT_OP4OEData.operatingVoltage,
-//       controlVoltage: FT_OP4OEData.controlVoltage,
-//         monitorData: 
-//         {
-//                 existingMonitor: FT_OP4OEData.templateA.existingMonitor,
-//                 newMonitor: FT_OP4OEData.templateA.newMonitor,		
-//                 ...(FT_OP4OEData.templateA.dcuStatus && { dcuStatus: FT_OP4OEData.templateA.dcuStatus }),
-//                 ...(FT_OP4OEData.templateA.dcuNum && { dcuNum: FT_OP4OEData.templateA.dcuNum }),
-//                 ...(FT_OP4OEData.templateA.existingWindows && { existingWindows: FT_OP4OEData.templateA.existingWindows }),
-//                 ...(FT_OP4OEData.templateA.existingHeadUnit && { existingHeadUnit: FT_OP4OEData.templateA.existingHeadUnit }),
-//                 ...(FT_OP4OEData.templateA.existingDCU && { existingDCU: FT_OP4OEData.templateA.existingDCU }),
-//                 ...(FT_OP4OEData.templateA.existingPowerInterface && { existingPowerInterface: FT_OP4OEData.templateA.existingPowerInterface }),
-//                 ...(FT_OP4OEData.templateA.newReservoir && { newReservoir: FT_OP4OEData.templateA.newReservoir }),
-//                 ...(FT_OP4OEData.templateA.reservoirSize && { reservoirSize: FT_OP4OEData.templateA.reservoirSize }),
-//                 ...(FT_OP4OEData.templateA.otherReservoirSize && { otherReservoirSize: FT_OP4OEData.templateA.otherReservoirSize }),
-//                 ...(FT_OP4OEData.templateA.newReservoirNum && { newReservoirNum: FT_OP4OEData.templateA.newReservoirNum }),
-//                 ...(FT_OP4OEData.templateA.typeMonitor && { typeMonitor: FT_OP4OEData.templateA.typeMonitor }),
-//                 ...(FT_OP4OEData.templateA.driveMotorAmp && { driveMotorAmp: FT_OP4OEData.templateA.driveMotorAmp }),
-//                 ...(FT_OP4OEData.templateA.driveMotorAmpNum && { driveMotorAmpNum: FT_OP4OEData.templateA.driveMotorAmpNum }),
-//                 ...(FT_OP4OEData.templateA.driveTakeUpAir && { driveTakeUpAir: FT_OP4OEData.templateA.driveTakeUpAir }),
-//                 ...(FT_OP4OEData.templateA.driveTakeUpAirNum && { driveTakeUpAirNum: FT_OP4OEData.templateA.driveTakeUpAirNum }),
-//                 ...(FT_OP4OEData.templateA.takeUpDistance && { takeUpDistance: FT_OP4OEData.templateA.takeUpDistance }),
-//                 ...(FT_OP4OEData.templateA.takeUpDistanceNum && { takeUpDistanceNum: FT_OP4OEData.templateA.takeUpDistanceNum }),
-//                 ...(FT_OP4OEData.templateA.driveTemp && { driveTemp: FT_OP4OEData.templateA.driveTemp }),
-//                 ...(FT_OP4OEData.templateA.driveTempNum && { driveTempNum: FT_OP4OEData.templateA.driveTempNum }),
-//                 ...(FT_OP4OEData.templateA.driveVibration && { driveVibration: FT_OP4OEData.templateA.driveVibration }),
-//                 ...(FT_OP4OEData.templateA.driveVibrationNum && { driveVibrationNum: FT_OP4OEData.templateA.driveVibrationNum }),
-//                 ...(FT_OP4OEData.templateA.dogPitch && { dogPitch: FT_OP4OEData.templateA.dogPitch }),
-//                 ...(FT_OP4OEData.templateA.dogPitchNum && { dogPitchNum: FT_OP4OEData.templateA.dogPitchNum }),
-//                 ...(FT_OP4OEData.templateA.paintMarker && { paintMarker: FT_OP4OEData.templateA.paintMarker }),
-//                 ...(FT_OP4OEData.templateA.paintMarkerNum && { paintMarkerNum: FT_OP4OEData.templateA.paintMarkerNum }),
-//                 ...(FT_OP4OEData.templateA.chainVision && { chainVision: FT_OP4OEData.templateA.chainVision }),
-//                 ...(FT_OP4OEData.templateA.lubeVision && { lubeVision: FT_OP4OEData.templateA.lubeVision }),
-//                 ...(FT_OP4OEData.templateA.trolleyVision && { trolleyVision: FT_OP4OEData.templateA.trolleyVision }),
-//                 ...(FT_OP4OEData.templateA.trolleyDetect && { trolleyDetect: FT_OP4OEData.templateA.trolleyDetect }),
-//                 ...(FT_OP4OEData.templateA.omniView && { omniView: FT_OP4OEData.templateA.omniView }),
-//                 ...(FT_OP4OEData.templateA.dcuUpgradeNum && { dcuUpgradeNum: FT_OP4OEData.templateA.dcuUpgradeNum }),
-//                 ...(FT_OP4OEData.templateA.piuDistance && { piuDistance: FT_OP4OEData.templateA.piuDistance }),
-//                 ...(FT_OP4OEData.templateA.switchDistance && { switchDistance: FT_OP4OEData.templateA.switchDistance }),
-//                 ...(FT_OP4OEData.templateA.ampPickup && { ampPickup: FT_OP4OEData.templateA.ampPickup }),
-//                 ...(FT_OP4OEData.templateA.fromAirTakeUpDistance && { fromAirTakeUpDistance: FT_OP4OEData.templateA.fromAirTakeUpDistance }),
-//                 ...(FT_OP4OEData.templateA.specialControllerOptions && { specialControllerOptions: FT_OP4OEData.templateA.specialControllerOptions }),
-//                 ...(FT_OP4OEData.templateA.operatingVoltage && { operatingVoltage: FT_OP4OEData.templateA.operatingVoltage })
-//             },
-
-
-            
-//       wheelOpenType: FT_OP4OEData.wheelOpenType,
-//       ...(FT_OP4OEData.wheelClosedType && { wheelClosedType: FT_OP4OEData.wheelClosedType }),
-//       openStatus: FT_OP4OEData.openStatus,
-//       ...(FT_OP4OEData.freeWheelStatus && { freeWheelStatus: FT_OP4OEData.freeWheelStatus }),
-//       ...(FT_OP4OEData.guideRollerStatus && { guideRollerStatus: FT_OP4OEData.guideRollerStatus }),
-//       ...(FT_OP4OEData.openRaceStyleType && { openRaceStyleType: FT_OP4OEData.openRaceStyleType }),
-//       ...(FT_OP4OEData.closedRaceStyleType && { closedRaceStyleType: FT_OP4OEData.closedRaceStyleType }),
-//       ...(FT_OP4OEData.holeStatus && { holeStatus: FT_OP4OEData.holeStatus }),
-//       ...(FT_OP4OEData.actuatorStatus && { actuatorStatus: FT_OP4OEData.actuatorStatus }),
-//       ...(FT_OP4OEData.pivotStatus && { pivotStatus: FT_OP4OEData.pivotStatus }),
-//       ...(FT_OP4OEData.kingPinStatus && { kingPinStatus: FT_OP4OEData.kingPinStatus }),
-//       outboardStatus: FT_OP4OEData.outboardStatus,
-//       catDriveStatus: FT_OP4OEData.catDriveStatus,
-
-//       templateEData: 
-//       {
-//           conveyorName: FT_OP4OEData.templateE.conveyorName,
-//           ...(FT_OP4OEData.templateE.chainSize && { chainSize: FT_OP4OEData.templateE.chainSize }),
-//           ...(FT_OP4OEData.templateE.otherChainSize && { otherChainSize: FT_OP4OEData.templateE.otherChainSize }),
-//           ...(FT_OP4OEData.templateE.industrialChainManufacturer && { industrialChainManufacturer: FT_OP4OEData.templateE.industrialChainManufacturer }),
-//           ...(FT_OP4OEData.templateE.otherChainManufacturer && { otherChainManufacturer: FT_OP4OEData.templateE.otherChainManufacturer }),
-//           ...(FT_OP4OEData.templateE.conveyorLength && { conveyorLength: FT_OP4OEData.templateE.conveyorLength }),
-//           ...(FT_OP4OEData.templateE.conveyorLengthUnit && { conveyorLengthUnit: FT_OP4OEData.templateE.conveyorLengthUnit }),
-//           ...(FT_OP4OEData.templateE.appEnviroment && { appEnviroment: FT_OP4OEData.templateE.appEnviroment }),
-//           ...(FT_OP4OEData.templateE.otherAppEnviroment && { otherAppEnviroment: FT_OP4OEData.templateE.otherAppEnviroment }),
-//           ...(FT_OP4OEData.templateE.lubeBrand && { lubeBrand: FT_OP4OEData.templateE.lubeBrand }),
-//           ...(FT_OP4OEData.templateE.lubeType && { lubeType: FT_OP4OEData.templateE.lubeType }),
-//           ...(FT_OP4OEData.templateE.lubeViscosity && { lubeViscosity: FT_OP4OEData.templateE.lubeViscosity }),
-//           ...(FT_OP4OEData.templateE.specialControllerOptions && { specialControllerOptions: FT_OP4OEData.templateE.specialControllerOptions }),
-//           ...(FT_OP4OEData.templateE.wireMeasurementUnit && { wireMeasurementUnit: FT_OP4OEData.templateE.wireMeasurementUnit }),
-//           ...(FT_OP4OEData.templateE.conductor2 && { conductor2: FT_OP4OEData.templateE.conductor2 }),
-//           ...(FT_OP4OEData.templateE.conductor4 && { conductor4: FT_OP4OEData.templateE.conductor4 }),
-//           ...(FT_OP4OEData.templateE.conductor7 && { conductor7: FT_OP4OEData.templateE.conductor7 }),
-//           ...(FT_OP4OEData.templateE.conductor12 && { conductor12: FT_OP4OEData.templateE.conductor12 }),
-//           ...(FT_OP4OEData.templateE.junctionBoxNum && { junctionBoxNum: FT_OP4OEData.templateE.junctionBoxNum }),
-
-//             },
-
-//       ...(FT_OP4OEData.lubeBrand && { lubeBrand: FT_OP4OEData.lubeBrand }),
-//       ...(FT_OP4OEData.lubeType && { lubeType: FT_OP4OEData.lubeType }),
-//       ...(FT_OP4OEData.lubeViscosity && { lubeViscosity: FT_OP4OEData.lubeViscosity }),
-//       ...(FT_OP4OEData.chainMaster && { chainMaster: FT_OP4OEData.chainMaster }),
-//       ...(FT_OP4OEData.timerStatus && { timerStatus: FT_OP4OEData.timerStatus }),
-//       ...(FT_OP4OEData.electricStatus && { electricStatus: FT_OP4OEData.electricStatus }),
-//       ...(FT_OP4OEData.pneumaticStatus && { pneumaticStatus: FT_OP4OEData.pneumaticStatus }),
-//       ...(FT_OP4OEData.mightyLubeMonitoring && { mightyLubeMonitoring: FT_OP4OEData.mightyLubeMonitoring }),
-//       ...(FT_OP4OEData.plcConnection && { plcConnection: FT_OP4OEData.plcConnection }),
-//       ...(FT_OP4OEData.otherControllerInfo && { otherControllerInfo: FT_OP4OEData.otherControllerInfo }),
-//       ...(FT_OP4OEData.ftUnitType && { ftUnitType: FT_OP4OEData.ftUnitType }),
-//       ...(FT_OP4OEData.ftTopG && { ftTopG: FT_OP4OEData.ftTopG }),
-//       ...(FT_OP4OEData.ftTopH && { ftTopH: FT_OP4OEData.ftTopH }),
-//       ...(FT_OP4OEData.ftTopA1 && { ftTopA1: FT_OP4OEData.ftTopA1 }),
-//       ...(FT_OP4OEData.ftTopB1 && { ftTopB1: FT_OP4OEData.ftTopB1 }),
-//       ...(FT_OP4OEData.ftTopH1 && { ftTopH1: FT_OP4OEData.ftTopH1 }),
-//       ...(FT_OP4OEData.ftTopJ1 && { ftTopJ1: FT_OP4OEData.ftTopJ1 }),
-//       ...(FT_OP4OEData.ftTopL1 && { ftTopL1: FT_OP4OEData.ftTopL1 }),
-//       ...(FT_OP4OEData.ftTopM1 && { ftTopM1: FT_OP4OEData.ftTopM1 }),
-//       ...(FT_OP4OEData.ftTopN1 && { ftTopN1: FT_OP4OEData.ftTopN1 }),
-//       ...(FT_OP4OEData.ftTopP1 && { ftTopP1: FT_OP4OEData.ftTopP1 }),
-//       ...(FT_OP4OEData.ftTopR1 && { ftTopR1: FT_OP4OEData.ftTopR1 }),
-//     });
-
-//     req.user.cart.push({
-//       numRequested,
-//       productConfigurationInfo: order,
-//       productType: "FT_OP4OE"
-//     });
-
-//     await req.user.save();
-//     return res.status(200).json({ message: "FT_OP4OE entry added" });
-
-//   } catch (error) {
-//     console.error(error);
-//     return res.status(500).json({ error: "Internal server error" });
-//   }
-// });
-
-// module.exports = router;
-
-
-
-
-
-
 const express = require("express");
 const { authenticate } = require("./sessions");
-const FT_OP4OE = require("../models/FT_OP4OE");
-const templateA = require("../models/templateA");
-const templateE = require("../models/templateE");
+const FT_OP40E = require("../models/FT_OP40E");
 
 const router = express.Router();
 
 /**
- * FT_OP4OE Create API
+ * OP-40E
  *
- * - Receives FT_OP4OEData + numRequested from request body
- * - Builds a FT_OP4OE mongoose object (optional fields are added only if present)
- * - Pushes the configuration into the authenticated user's cart
+ * Product ID:
+ * FT_OP40E
  *
- * Note:
- * technicianNote is an optional field for internal/technician remarks.
- * It is stored with the configuration and does not affect business logic.
+ * Endpoint:
+ * POST /api/ft_op40e
+ *
+ * Body:
+ * {
+ *   FT_OP40EData: {...},
+ *   numRequested: 1
+ * }
  */
 router.post("/", authenticate, async (req, res) => {
   try {
-    const { FT_OP4OEData, numRequested } = req.body;
+    const { FT_OP40EData, numRequested } = req.body || {};
 
-    const order = new FT_OP4OE({
-      ...(FT_OP4OEData.conveyorName && { conveyorName: FT_OP4OEData.conveyorName }),
-      chainSize: FT_OP4OEData.chainSize,
-      ...(FT_OP4OEData.otherChainSize && { otherChainSize: FT_OP4OEData.otherChainSize }),
-      industrialChainManufacturer: FT_OP4OEData.industrialChainManufacturer,
-      ...(FT_OP4OEData.otherChainManufacturer && { otherChainManufacturer: FT_OP4OEData.otherChainManufacturer }),
-      wheelManufacturer: FT_OP4OEData.wheelManufacturer,
-      ...(FT_OP4OEData.otherWheelManufacturer && { otherWheelManufacturer: FT_OP4OEData.otherWheelManufacturer }),
-      conveyorLength: FT_OP4OEData.conveyorLength,
-      conveyorLengthUnit: FT_OP4OEData.conveyorLengthUnit,
-      conveyorSpeed: FT_OP4OEData.conveyorSpeed,
-      conveyorSpeedUnit: FT_OP4OEData.conveyorSpeedUnit,
-      ...(FT_OP4OEData.conveyorIndex && { conveyorIndex: FT_OP4OEData.conveyorIndex }),
-      ...(FT_OP4OEData.travelDirection && { travelDirection: FT_OP4OEData.travelDirection }),
-      appEnviroment: FT_OP4OEData.appEnviroment,
-      ...(FT_OP4OEData.ovenStatus && { ovenStatus: FT_OP4OEData.ovenStatus }),
-      ...(FT_OP4OEData.ovenTemp && { ovenTemp: FT_OP4OEData.ovenTemp }),
-      ...(FT_OP4OEData.otherAppEnviroment && { otherAppEnviroment: FT_OP4OEData.otherAppEnviroment }),
-      ...(FT_OP4OEData.surroundingTemp && { surroundingTemp: FT_OP4OEData.surroundingTemp }),
-      conveyorLoaded: FT_OP4OEData.conveyorLoaded,
-      ...(FT_OP4OEData.conveyorSwing && { conveyorSwing: FT_OP4OEData.conveyorSwing }),
-      strandStatus: FT_OP4OEData.strandStatus,
-      ...(FT_OP4OEData.plantLayout && { plantLayout: FT_OP4OEData.plantLayout }),
-      ...(FT_OP4OEData.requiredPics && { requiredPics: FT_OP4OEData.requiredPics }),
-      operatingVoltage: FT_OP4OEData.operatingVoltage,
-      controlVoltage: FT_OP4OEData.controlVoltage,
+    if (!FT_OP40EData) {
+      return res.status(400).json({
+        error: "FT_OP40EData is required",
+      });
+    }
 
-      // technicianNote: Optional note added by technician for internal/reference use
-      ...(FT_OP4OEData.technicianNote && { technicianNote: FT_OP4OEData.technicianNote }),
+    const order = new FT_OP40E({
+      // =====================================================
+      // GENERAL INFORMATION
+      // =====================================================
 
-      monitorData: {
-        existingMonitor: FT_OP4OEData.templateA.existingMonitor,
-        newMonitor: FT_OP4OEData.templateA.newMonitor,
-        ...(FT_OP4OEData.templateA.dcuStatus && { dcuStatus: FT_OP4OEData.templateA.dcuStatus }),
-        ...(FT_OP4OEData.templateA.dcuNum && { dcuNum: FT_OP4OEData.templateA.dcuNum }),
-        ...(FT_OP4OEData.templateA.existingWindows && { existingWindows: FT_OP4OEData.templateA.existingWindows }),
-        ...(FT_OP4OEData.templateA.existingHeadUnit && { existingHeadUnit: FT_OP4OEData.templateA.existingHeadUnit }),
-        ...(FT_OP4OEData.templateA.existingDCU && { existingDCU: FT_OP4OEData.templateA.existingDCU }),
-        ...(FT_OP4OEData.templateA.existingPowerInterface && { existingPowerInterface: FT_OP4OEData.templateA.existingPowerInterface }),
-        ...(FT_OP4OEData.templateA.newReservoir && { newReservoir: FT_OP4OEData.templateA.newReservoir }),
-        ...(FT_OP4OEData.templateA.reservoirSize && { reservoirSize: FT_OP4OEData.templateA.reservoirSize }),
-        ...(FT_OP4OEData.templateA.otherReservoirSize && { otherReservoirSize: FT_OP4OEData.templateA.otherReservoirSize }),
-        ...(FT_OP4OEData.templateA.newReservoirNum && { newReservoirNum: FT_OP4OEData.templateA.newReservoirNum }),
-        ...(FT_OP4OEData.templateA.typeMonitor && { typeMonitor: FT_OP4OEData.templateA.typeMonitor }),
-        ...(FT_OP4OEData.templateA.driveMotorAmp && { driveMotorAmp: FT_OP4OEData.templateA.driveMotorAmp }),
-        ...(FT_OP4OEData.templateA.driveMotorAmpNum && { driveMotorAmpNum: FT_OP4OEData.templateA.driveMotorAmpNum }),
-        ...(FT_OP4OEData.templateA.driveTakeUpAir && { driveTakeUpAir: FT_OP4OEData.templateA.driveTakeUpAir }),
-        ...(FT_OP4OEData.templateA.driveTakeUpAirNum && { driveTakeUpAirNum: FT_OP4OEData.templateA.driveTakeUpAirNum }),
-        ...(FT_OP4OEData.templateA.takeUpDistance && { takeUpDistance: FT_OP4OEData.templateA.takeUpDistance }),
-        ...(FT_OP4OEData.templateA.takeUpDistanceNum && { takeUpDistanceNum: FT_OP4OEData.templateA.takeUpDistanceNum }),
-        ...(FT_OP4OEData.templateA.driveTemp && { driveTemp: FT_OP4OEData.templateA.driveTemp }),
-        ...(FT_OP4OEData.templateA.driveTempNum && { driveTempNum: FT_OP4OEData.templateA.driveTempNum }),
-        ...(FT_OP4OEData.templateA.driveVibration && { driveVibration: FT_OP4OEData.templateA.driveVibration }),
-        ...(FT_OP4OEData.templateA.driveVibrationNum && { driveVibrationNum: FT_OP4OEData.templateA.driveVibrationNum }),
-        ...(FT_OP4OEData.templateA.dogPitch && { dogPitch: FT_OP4OEData.templateA.dogPitch }),
-        ...(FT_OP4OEData.templateA.dogPitchNum && { dogPitchNum: FT_OP4OEData.templateA.dogPitchNum }),
-        ...(FT_OP4OEData.templateA.paintMarker && { paintMarker: FT_OP4OEData.templateA.paintMarker }),
-        ...(FT_OP4OEData.templateA.paintMarkerNum && { paintMarkerNum: FT_OP4OEData.templateA.paintMarkerNum }),
-        ...(FT_OP4OEData.templateA.chainVision && { chainVision: FT_OP4OEData.templateA.chainVision }),
-        ...(FT_OP4OEData.templateA.lubeVision && { lubeVision: FT_OP4OEData.templateA.lubeVision }),
-        ...(FT_OP4OEData.templateA.trolleyVision && { trolleyVision: FT_OP4OEData.templateA.trolleyVision }),
-        ...(FT_OP4OEData.templateA.trolleyDetect && { trolleyDetect: FT_OP4OEData.templateA.trolleyDetect }),
-        ...(FT_OP4OEData.templateA.omniView && { omniView: FT_OP4OEData.templateA.omniView }),
-        ...(FT_OP4OEData.templateA.dcuUpgradeNum && { dcuUpgradeNum: FT_OP4OEData.templateA.dcuUpgradeNum }),
-        ...(FT_OP4OEData.templateA.piuDistance && { piuDistance: FT_OP4OEData.templateA.piuDistance }),
-        ...(FT_OP4OEData.templateA.switchDistance && { switchDistance: FT_OP4OEData.templateA.switchDistance }),
-        ...(FT_OP4OEData.templateA.ampPickup && { ampPickup: FT_OP4OEData.templateA.ampPickup }),
-        ...(FT_OP4OEData.templateA.fromAirTakeUpDistance && { fromAirTakeUpDistance: FT_OP4OEData.templateA.fromAirTakeUpDistance }),
-        ...(FT_OP4OEData.templateA.specialControllerOptions && { specialControllerOptions: FT_OP4OEData.templateA.specialControllerOptions }),
-        ...(FT_OP4OEData.templateA.operatingVoltage && { operatingVoltage: FT_OP4OEData.templateA.operatingVoltage })
-      },
+      conveyorName: FT_OP40EData.conveyorName || "",
 
-      wheelOpenType: FT_OP4OEData.wheelOpenType,
-      ...(FT_OP4OEData.wheelClosedType && { wheelClosedType: FT_OP4OEData.wheelClosedType }),
-      openStatus: FT_OP4OEData.openStatus,
-      ...(FT_OP4OEData.freeWheelStatus && { freeWheelStatus: FT_OP4OEData.freeWheelStatus }),
-      ...(FT_OP4OEData.guideRollerStatus && { guideRollerStatus: FT_OP4OEData.guideRollerStatus }),
-      ...(FT_OP4OEData.openRaceStyleType && { openRaceStyleType: FT_OP4OEData.openRaceStyleType }),
-      ...(FT_OP4OEData.closedRaceStyleType && { closedRaceStyleType: FT_OP4OEData.closedRaceStyleType }),
-      ...(FT_OP4OEData.holeStatus && { holeStatus: FT_OP4OEData.holeStatus }),
-      ...(FT_OP4OEData.actuatorStatus && { actuatorStatus: FT_OP4OEData.actuatorStatus }),
-      ...(FT_OP4OEData.pivotStatus && { pivotStatus: FT_OP4OEData.pivotStatus }),
-      ...(FT_OP4OEData.kingPinStatus && { kingPinStatus: FT_OP4OEData.kingPinStatus }),
-      outboardStatus: FT_OP4OEData.outboardStatus,
-      catDriveStatus: FT_OP4OEData.catDriveStatus,
+      chainSize: FT_OP40EData.chainSize || "",
 
-      templateEData: {
-        conveyorName: FT_OP4OEData.templateE.conveyorName,
-        ...(FT_OP4OEData.templateE.chainSize && { chainSize: FT_OP4OEData.templateE.chainSize }),
-        ...(FT_OP4OEData.templateE.otherChainSize && { otherChainSize: FT_OP4OEData.templateE.otherChainSize }),
-        ...(FT_OP4OEData.templateE.industrialChainManufacturer && { industrialChainManufacturer: FT_OP4OEData.templateE.industrialChainManufacturer }),
-        ...(FT_OP4OEData.templateE.otherChainManufacturer && { otherChainManufacturer: FT_OP4OEData.templateE.otherChainManufacturer }),
-        ...(FT_OP4OEData.templateE.conveyorLength && { conveyorLength: FT_OP4OEData.templateE.conveyorLength }),
-        ...(FT_OP4OEData.templateE.conveyorLengthUnit && { conveyorLengthUnit: FT_OP4OEData.templateE.conveyorLengthUnit }),
-        ...(FT_OP4OEData.templateE.appEnviroment && { appEnviroment: FT_OP4OEData.templateE.appEnviroment }),
-        ...(FT_OP4OEData.templateE.otherAppEnviroment && { otherAppEnviroment: FT_OP4OEData.templateE.otherAppEnviroment }),
-        ...(FT_OP4OEData.templateE.lubeBrand && { lubeBrand: FT_OP4OEData.templateE.lubeBrand }),
-        ...(FT_OP4OEData.templateE.lubeType && { lubeType: FT_OP4OEData.templateE.lubeType }),
-        ...(FT_OP4OEData.templateE.lubeViscosity && { lubeViscosity: FT_OP4OEData.templateE.lubeViscosity }),
-        ...(FT_OP4OEData.templateE.specialControllerOptions && { specialControllerOptions: FT_OP4OEData.templateE.specialControllerOptions }),
-        ...(FT_OP4OEData.templateE.wireMeasurementUnit && { wireMeasurementUnit: FT_OP4OEData.templateE.wireMeasurementUnit }),
-        ...(FT_OP4OEData.templateE.conductor2 && { conductor2: FT_OP4OEData.templateE.conductor2 }),
-        ...(FT_OP4OEData.templateE.conductor4 && { conductor4: FT_OP4OEData.templateE.conductor4 }),
-        ...(FT_OP4OEData.templateE.conductor7 && { conductor7: FT_OP4OEData.templateE.conductor7 }),
-        ...(FT_OP4OEData.templateE.conductor12 && { conductor12: FT_OP4OEData.templateE.conductor12 }),
-        ...(FT_OP4OEData.templateE.junctionBoxNum && { junctionBoxNum: FT_OP4OEData.templateE.junctionBoxNum })
-      },
+      otherChainSize: FT_OP40EData.otherChainSize || "",
 
-      ...(FT_OP4OEData.lubeBrand && { lubeBrand: FT_OP4OEData.lubeBrand }),
-      ...(FT_OP4OEData.lubeType && { lubeType: FT_OP4OEData.lubeType }),
-      ...(FT_OP4OEData.lubeViscosity && { lubeViscosity: FT_OP4OEData.lubeViscosity }),
-      ...(FT_OP4OEData.chainMaster && { chainMaster: FT_OP4OEData.chainMaster }),
-      ...(FT_OP4OEData.timerStatus && { timerStatus: FT_OP4OEData.timerStatus }),
-      ...(FT_OP4OEData.electricStatus && { electricStatus: FT_OP4OEData.electricStatus }),
-      ...(FT_OP4OEData.pneumaticStatus && { pneumaticStatus: FT_OP4OEData.pneumaticStatus }),
-      ...(FT_OP4OEData.mightyLubeMonitoring && { mightyLubeMonitoring: FT_OP4OEData.mightyLubeMonitoring }),
-      ...(FT_OP4OEData.plcConnection && { plcConnection: FT_OP4OEData.plcConnection }),
-      ...(FT_OP4OEData.otherControllerInfo && { otherControllerInfo: FT_OP4OEData.otherControllerInfo }),
-      ...(FT_OP4OEData.ftUnitType && { ftUnitType: FT_OP4OEData.ftUnitType }),
-      ...(FT_OP4OEData.ftTopG && { ftTopG: FT_OP4OEData.ftTopG }),
-      ...(FT_OP4OEData.ftTopH && { ftTopH: FT_OP4OEData.ftTopH }),
-      ...(FT_OP4OEData.ftTopA1 && { ftTopA1: FT_OP4OEData.ftTopA1 }),
-      ...(FT_OP4OEData.ftTopB1 && { ftTopB1: FT_OP4OEData.ftTopB1 }),
-      ...(FT_OP4OEData.ftTopH1 && { ftTopH1: FT_OP4OEData.ftTopH1 }),
-      ...(FT_OP4OEData.ftTopJ1 && { ftTopJ1: FT_OP4OEData.ftTopJ1 }),
-      ...(FT_OP4OEData.ftTopL1 && { ftTopL1: FT_OP4OEData.ftTopL1 }),
-      ...(FT_OP4OEData.ftTopM1 && { ftTopM1: FT_OP4OEData.ftTopM1 }),
-      ...(FT_OP4OEData.ftTopN1 && { ftTopN1: FT_OP4OEData.ftTopN1 }),
-      ...(FT_OP4OEData.ftTopP1 && { ftTopP1: FT_OP4OEData.ftTopP1 }),
-      ...(FT_OP4OEData.ftTopR1 && { ftTopR1: FT_OP4OEData.ftTopR1 })
+      chainManufacturer:
+        FT_OP40EData.chainManufacturer || "",
+
+      otherChainManufacturer:
+        FT_OP40EData.otherChainManufacturer || "",
+
+      conveyorLength:
+        FT_OP40EData.conveyorLength || "",
+
+      conveyorLengthUnit:
+        FT_OP40EData.conveyorLengthUnit || "",
+
+      conveyorSpeed:
+        FT_OP40EData.conveyorSpeed || "",
+
+      conveyorSpeedUnit:
+        FT_OP40EData.conveyorSpeedUnit || "",
+
+      indexingVariableSpeedConditions:
+        FT_OP40EData.indexingVariableSpeedConditions || "",
+
+      travelDirection:
+        FT_OP40EData.travelDirection || "",
+
+      applicationEnvironment:
+        FT_OP40EData.applicationEnvironment || "",
+
+      otherApplicationEnvironment:
+        FT_OP40EData.otherApplicationEnvironment || "",
+
+      surroundingTemperature:
+        FT_OP40EData.surroundingTemperature || "",
+
+      conveyorLoadedStatus:
+        FT_OP40EData.conveyorLoadedStatus || "",
+
+      conveyorSwingStatus:
+        FT_OP40EData.conveyorSwingStatus || "",
+
+      conveyorStrandType:
+        FT_OP40EData.conveyorStrandType || "",
+
+      // =====================================================
+      // FILE REFERENCES
+      //
+      // Actual upload handling will be implemented separately.
+      // These currently store URL/path/reference values if sent.
+      // =====================================================
+
+      plantLayoutFile:
+        FT_OP40EData.plantLayoutFile || "",
+
+      chainPicturesFile:
+        FT_OP40EData.chainPicturesFile || "",
+
+      // =====================================================
+      // CUSTOMER POWER UTILITIES
+      // =====================================================
+
+      operatingVoltage:
+        FT_OP40EData.operatingVoltage || "",
+
+      controlVoltage:
+        FT_OP40EData.controlVoltage || "",
+
+      // =====================================================
+      // NEW / EXISTING MONITORING SYSTEM
+      // =====================================================
+
+      existingMonitoring:
+        FT_OP40EData.existingMonitoring || "",
+
+      newMonitoringSystem:
+        FT_OP40EData.newMonitoringSystem || "",
+
+      // =====================================================
+      // CONVEYOR SPECIFICATIONS
+      // =====================================================
+
+      wheelOpenRaceStyle:
+        FT_OP40EData.wheelOpenRaceStyle || "",
+
+      wheelSealedStyle:
+        FT_OP40EData.wheelSealedStyle || "",
+
+      openInsideShieldedOutside:
+        FT_OP40EData.openInsideShieldedOutside || "",
+
+      freeTrolleyWheels:
+        FT_OP40EData.freeTrolleyWheels || "",
+
+      guideRollers:
+        FT_OP40EData.guideRollers || "",
+
+      guideRollersOpenRaceStyle:
+        FT_OP40EData.guideRollersOpenRaceStyle || "",
+
+      guideRollersSealedStyle:
+        FT_OP40EData.guideRollersSealedStyle || "",
+
+      openHole:
+        FT_OP40EData.openHole || "",
+
+      dogActuator:
+        FT_OP40EData.dogActuator || "",
+
+      pivotPoints:
+        FT_OP40EData.pivotPoints || "",
+
+      kingPin:
+        FT_OP40EData.kingPin || "",
+
+      outboardWheels:
+        FT_OP40EData.outboardWheels || "",
+
+      railLubrication:
+        FT_OP40EData.railLubrication || "",
+
+      currentLubricationEquipmentBrand:
+        FT_OP40EData.currentLubricationEquipmentBrand || "",
+
+      currentLubricantType:
+        FT_OP40EData.currentLubricantType || "",
+
+      currentLubricantViscosityGrade:
+        FT_OP40EData.currentLubricantViscosityGrade || "",
+
+      // =====================================================
+      // CONTROLLER
+      // =====================================================
+
+      chainMasterController:
+        FT_OP40EData.chainMasterController || "",
+
+      timer:
+        FT_OP40EData.timer || "",
+
+      electricOnOff:
+        FT_OP40EData.electricOnOff || "",
+
+      pneumaticOnOff:
+        FT_OP40EData.pneumaticOnOff || "",
+
+      mightyLubeMonitoring:
+        FT_OP40EData.mightyLubeMonitoring || "",
+
+      plcConnection:
+        FT_OP40EData.plcConnection || "",
+
+      controllerOtherDescribe:
+        FT_OP40EData.controllerOtherDescribe || "",
+
+      specialControllerOptions:
+        FT_OP40EData.specialControllerOptions || "",
+
+      controllerPleaseSpecify:
+        FT_OP40EData.controllerPleaseSpecify || "",
+
+      // =====================================================
+      // FLAT TOP: MEASUREMENTS
+      // =====================================================
+
+      measurementUnit:
+        FT_OP40EData.measurementUnit || "",
+
+      flatTopPowerRailG:
+        FT_OP40EData.flatTopPowerRailG || "",
+
+      flatTopPowerRailH:
+        FT_OP40EData.flatTopPowerRailH || "",
+
+      flatTopRollerWheelA1:
+        FT_OP40EData.flatTopRollerWheelA1 || "",
+
+      flatTopRollerWheelB1:
+        FT_OP40EData.flatTopRollerWheelB1 || "",
+
+      flatTopRollerSleeveH1:
+        FT_OP40EData.flatTopRollerSleeveH1 || "",
+
+      flatTopRailJ1:
+        FT_OP40EData.flatTopRailJ1 || "",
+
+      flatTopDoubleChainPitchL1:
+        FT_OP40EData.flatTopDoubleChainPitchL1 || "",
+
+      flatTopRollerWheelPitchM1:
+        FT_OP40EData.flatTopRollerWheelPitchM1 || "",
+
+      flatTopMountingPlateN1:
+        FT_OP40EData.flatTopMountingPlateN1 || "",
+
+      flatTopRailPitchP1:
+        FT_OP40EData.flatTopRailPitchP1 || "",
+
+      flatTopDoubleStrandPitchR1:
+        FT_OP40EData.flatTopDoubleStrandPitchR1 || "",
     });
+
+    // =======================================================
+    // ADD PRODUCT CONFIGURATION TO USER CART
+    // =======================================================
 
     req.user.cart.push({
       numRequested,
       productConfigurationInfo: order,
-      productType: "FT_OP4OE"
+      productType: "FT_OP40E",
     });
 
     await req.user.save();
-    return res.status(200).json({ message: "FT_OP4OE entry added" });
+
+    return res.status(200).json({
+      message: "FT_OP40E entry added",
+    });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: "Internal server error" });
+    console.error("FT_OP40E error:", error);
+
+    return res.status(500).json({
+      error: "Internal server error",
+    });
   }
 });
 
-module.exports = router;
+module.exports = router
