@@ -1,8 +1,11 @@
 const express = require("express");
+
 const { authenticate } = require("./sessions");
 const COE_OP4OE = require("../models/COE_OP4OE");
+const ProductConfiguration = require("../models/product_configuration");
 
 const router = express.Router();
+
 
 // =========================================================
 // ADD COE OP-40E TO CONFIGURATOR
@@ -23,6 +26,20 @@ const router = express.Router();
 //
 // Product ID:
 // COE_OP4OE
+//
+// FLOW:
+//
+// Frontend
+//   ↓
+// COE_OP4OEData
+//   ↓
+// COE_OP4OE validation model
+//   ↓
+// ProductConfiguration
+//   ↓
+// product_configurations collection
+//
+// status = "cart"
 // =========================================================
 
 router.post("/", authenticate, async (req, res) => {
@@ -35,6 +52,7 @@ router.post("/", authenticate, async (req, res) => {
       COE_OP4OEData,
       numRequested,
     } = req.body || {};
+
 
     // =====================================================
     // VALIDATE CONFIGURATION
@@ -51,6 +69,7 @@ router.post("/", authenticate, async (req, res) => {
       });
     }
 
+
     // =====================================================
     // VALIDATE QUANTITY
     // =====================================================
@@ -59,7 +78,7 @@ router.post("/", authenticate, async (req, res) => {
 
     if (
       !Number.isInteger(quantity) ||
-      quantity <= 0
+      quantity < 1
     ) {
       return res.status(400).json({
         success: false,
@@ -68,85 +87,19 @@ router.post("/", authenticate, async (req, res) => {
       });
     }
 
+
     // =====================================================
-    // PREPARE CONFIGURATION
+    // PRODUCT-SPECIFIC VALIDATION
     //
-    // Flutter reusable form sends field keys that directly
-    // match the COE_OP4OE mongoose schema.
+    // COE_OP4OE model handles:
     //
-    // So manual field-by-field mapping is not required.
-    // =====================================================
-
-    const configurationData = {
-      ...COE_OP4OEData,
-    };
-
-    // =====================================================
-    // NORMALIZE OPTIONAL STRING FIELDS
-    // =====================================================
-
-    const optionalStringFields = [
-      "otherChainSize",
-      "otherIndustrialChainManufacturer",
-      "conveyorIndex",
-      "travelDirection",
-      "otherAppEnviroment",
-      "surroundingTemp",
-      "conveyorLoaded",
-      "conveyorSwing",
-      "plantLayout",
-      "requiredPics",
-      "existingMonitoring",
-      "addMonitoring",
-      "wheelOpenRaceStyle",
-      "wheelSealedStyle",
-      "openInsideShieldedOutside",
-      "freeTrolleyWheels",
-      "guideRollers",
-      "guideRollersOpenRaceStyle",
-      "guideRollersSealedStyle",
-      "openHole",
-      "dogActuator",
-      "pivotPoints",
-      "kingPin",
-      "railLubeStatus",
-      "lubeBrand",
-      "lubeType",
-      "lubeViscosity",
-      "chainMaster",
-      "timerStatus",
-      "electricStatus",
-      "pneumaticStatus",
-      "mightyLubeMonitoring",
-      "plcConnection",
-      "otherControllerInfo",
-      "specialControllerOptions",
-      "technicianNote",
-    ];
-
-    for (const field of optionalStringFields) {
-      if (
-        typeof configurationData[field] === "string"
-      ) {
-        configurationData[field] =
-          configurationData[field].trim();
-
-        if (configurationData[field] === "") {
-          configurationData[field] = null;
-        }
-      }
-    }
-
-    // =====================================================
-    // CREATE PRODUCT CONFIGURATION
-    // =====================================================
-
-    const order =
-      new COE_OP4OE(configurationData);
-
-    // Validate before putting configuration in cart.
+    // - required fields
+    // - optional fields
+    // - conditional required fields
+    // - String trim
+    // - default null values
     //
-    // This also handles conditional rules:
+    // Examples:
     //
     // chainSize === "Other"
     // -> otherChainSize required
@@ -156,21 +109,92 @@ router.post("/", authenticate, async (req, res) => {
     //
     // appEnviroment === "Other"
     // -> otherAppEnviroment required
+    //
+    // COE_OP4OE document is validation-only.
+    // It is NOT saved into its own collection.
     // =====================================================
 
-    await order.validate();
+    const validation =
+      new COE_OP4OE(COE_OP4OEData);
+
+    await validation.validate();
+
 
     // =====================================================
-    // ADD TO USER CART / CONFIGURATOR
+    // CLEAN VALIDATED CONFIGURATION
+    //
+    // Mongoose schema already handles trim/default values,
+    // so manual optionalStringFields loop is not required.
     // =====================================================
 
-    req.user.cart.push({
-      numRequested: quantity,
-      productConfigurationInfo: order,
-      productType: "COE_OP4OE",
-    });
+    const configurationData =
+      validation.toObject({
+        versionKey: false,
+      });
 
-    await req.user.save();
+    delete configurationData._id;
+    delete configurationData.createdAt;
+    delete configurationData.updatedAt;
+
+
+    // =====================================================
+    // AUTHENTICATED ACTOR
+    // =====================================================
+
+    const actor = {
+      userID: req.user.userID,
+      username: req.user.username,
+      firstName: req.user.firstName || "",
+      lastName: req.user.lastName || "",
+      role: req.user.role,
+    };
+
+
+    // =====================================================
+    // CREATE GENERIC PRODUCT CONFIGURATION
+    // =====================================================
+
+    const productConfiguration =
+      new ProductConfiguration({
+        userID: req.user.userID,
+
+        configurationName:
+          configurationData.conveyorName ||
+          "COE OP-40E",
+
+        productType: "COE_OP4OE",
+
+        productName: "COE OP-40E",
+
+        status: "cart",
+
+        isComplete: true,
+
+        numRequested: quantity,
+
+        configurationData,
+
+        createdBy: actor,
+
+        updatedBy: actor,
+      });
+
+
+    // =====================================================
+    // SAVE TO GENERIC COLLECTION
+    //
+    // OLD:
+    //
+    // req.user.cart.push(...)
+    // await req.user.save()
+    //
+    // NEW:
+    //
+    // product_configurations collection
+    // =====================================================
+
+    await productConfiguration.save();
+
 
     // =====================================================
     // SUCCESS RESPONSE
@@ -178,9 +202,43 @@ router.post("/", authenticate, async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: "COE_OP4OE entry added",
+
+      message:
+        "COE OP-40E added to configurator successfully",
+
+      configurationID:
+        productConfiguration.configurationID,
+
+      configuration: {
+        configurationID:
+          productConfiguration.configurationID,
+
+        configurationName:
+          productConfiguration.configurationName,
+
+        productType:
+          productConfiguration.productType,
+
+        productName:
+          productConfiguration.productName,
+
+        status:
+          productConfiguration.status,
+
+        isComplete:
+          productConfiguration.isComplete,
+
+        numRequested:
+          productConfiguration.numRequested,
+      },
     });
   } catch (error) {
+    console.error(
+      "COE_OP4OE route error:",
+      error
+    );
+
+
     // =====================================================
     // MONGOOSE VALIDATION ERROR
     // =====================================================
@@ -193,7 +251,7 @@ router.post("/", authenticate, async (req, res) => {
           error.errors[field].message;
       }
 
-      return res.status(400).json({
+      return res.status(422).json({
         success: false,
         message:
           "Invalid COE_OP4OE configuration",
@@ -201,14 +259,10 @@ router.post("/", authenticate, async (req, res) => {
       });
     }
 
+
     // =====================================================
     // SERVER ERROR
     // =====================================================
-
-    console.error(
-      "COE_OP4OE route error:",
-      error
-    );
 
     return res.status(500).json({
       success: false,
@@ -218,4 +272,5 @@ router.post("/", authenticate, async (req, res) => {
   }
 });
 
-module.exports = router
+
+module.exports = router;

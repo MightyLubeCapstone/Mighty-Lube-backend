@@ -1,329 +1,256 @@
 const express = require("express");
+
 const { authenticate } = require("./sessions");
 const OHP_9000I = require("../models/OHP_9000I");
+const ProductConfiguration = require("../models/product_configuration");
 
 const router = express.Router();
 
-/**
- * ============================================================
- * 9000L SERIES CENTRAL SYSTEM I-BEAM CONVEYOR LUBRICATORS
- * ============================================================
- *
- * Product ID: OHP_9000I
- * Request Body: OHP_9000IData
- *
- * - Receives OHP_9000IData + numRequested
- * - Creates OHP_9000I configuration
- * - Pushes configuration into authenticated user's cart
- * - Uses the current website / Flutter configuration contract
- *
- * Legacy templateA / templateB / templateC mappings are no
- * longer used by the current product configurator.
- */
+
+// =========================================================
+// POST /api/ohp_9000i
+//
+// Product:
+// 9000L Series Central System I-Beam Conveyor Lubricators
+//
+// Product ID:
+// OHP_9000I
+//
+// OHP_9000I model:
+// validation only
+//
+// Actual storage:
+// product_configurations
+//
+// Add to Cart:
+// status = "cart"
+// isComplete = true
+// =========================================================
+
 router.post("/", authenticate, async (req, res) => {
-    try {
-        const { OHP_9000IData, numRequested } = req.body;
-
-        const order = new OHP_9000I({
-
-            // ============================================================
-            // GENERAL INFORMATION
-            // ============================================================
-
-            ...(OHP_9000IData.conveyorName && {
-                conveyorName: OHP_9000IData.conveyorName
-            }),
-
-            ...(OHP_9000IData.conveyorChainSize && {
-                conveyorChainSize: OHP_9000IData.conveyorChainSize
-            }),
-
-            ...(OHP_9000IData.otherConveyorChainSize && {
-                otherConveyorChainSize:
-                    OHP_9000IData.otherConveyorChainSize
-            }),
-
-            ...(OHP_9000IData.chainManufacturer && {
-                chainManufacturer: OHP_9000IData.chainManufacturer
-            }),
-
-            ...(OHP_9000IData.otherChainManufacturer && {
-                otherChainManufacturer:
-                    OHP_9000IData.otherChainManufacturer
-            }),
-
-            ...(OHP_9000IData.conveyorLength && {
-                conveyorLength: OHP_9000IData.conveyorLength
-            }),
-
-            ...(OHP_9000IData.conveyorLengthUnit && {
-                conveyorLengthUnit: OHP_9000IData.conveyorLengthUnit
-            }),
-
-            ...(OHP_9000IData.conveyorSpeed && {
-                conveyorSpeed: OHP_9000IData.conveyorSpeed
-            }),
-
-            ...(OHP_9000IData.conveyorSpeedUnit && {
-                conveyorSpeedUnit: OHP_9000IData.conveyorSpeedUnit
-            }),
-
-            ...(OHP_9000IData.indexingOrVariableSpeedConditions && {
-                indexingOrVariableSpeedConditions:
-                    OHP_9000IData.indexingOrVariableSpeedConditions
-            }),
-
-            ...(OHP_9000IData.directionOfTravel && {
-                directionOfTravel: OHP_9000IData.directionOfTravel
-            }),
-
-            // Website required field
-            applicationEnvironment:
-                OHP_9000IData.applicationEnvironment,
-
-            ...(OHP_9000IData.otherApplicationEnvironment && {
-                otherApplicationEnvironment:
-                    OHP_9000IData.otherApplicationEnvironment
-            }),
-
-            ...(OHP_9000IData.surroundingTemperature && {
-                surroundingTemperature:
-                    OHP_9000IData.surroundingTemperature
-            }),
-
-            // Website required field
-            conveyorLoadedOrUnloaded:
-                OHP_9000IData.conveyorLoadedOrUnloaded,
-
-            // Website required field
-            conveyorMovement:
-                OHP_9000IData.conveyorMovement,
-
-
-            // ============================================================
-            // CUSTOMER POWER UTILITIES
-            // ============================================================
-
-            // Website required field
-            operatingVoltageSinglePhase:
-                OHP_9000IData.operatingVoltageSinglePhase,
-
-            // Website required field
-            controlVoltage:
-                OHP_9000IData.controlVoltage,
-
-
-            // ============================================================
-            // NEW MONITORING SYSTEM OR ADDING TO EXISTING MONITORING SYSTEM
-            // ============================================================
-
-            ...(OHP_9000IData.connectingToExistingMonitoring && {
-                connectingToExistingMonitoring:
-                    OHP_9000IData.connectingToExistingMonitoring
-            }),
-
-            ...(OHP_9000IData.addNewMonitoringSystem && {
-                addNewMonitoringSystem:
-                    OHP_9000IData.addNewMonitoringSystem
-            }),
-
-
-            // ============================================================
-            // CONVEYOR SPECIFICATIONS
-            // ============================================================
-
-            ...(OHP_9000IData.wheelOpenRaceStyle && {
-                wheelOpenRaceStyle:
-                    OHP_9000IData.wheelOpenRaceStyle
-            }),
-
-            ...(OHP_9000IData.wheelSealedStyle && {
-                wheelSealedStyle:
-                    OHP_9000IData.wheelSealedStyle
-            }),
-
-            ...(OHP_9000IData.powerChain && {
-                powerChain: OHP_9000IData.powerChain
-            }),
-
-            ...(OHP_9000IData.chainPins && {
-                chainPins: OHP_9000IData.chainPins
-            }),
-
-            ...(OHP_9000IData.caterpillarDrive && {
-                caterpillarDrive:
-                    OHP_9000IData.caterpillarDrive
-            }),
-
-            ...(OHP_9000IData.caterpillarDriveQuantity && {
-                caterpillarDriveQuantity:
-                    OHP_9000IData.caterpillarDriveQuantity
-            }),
-
-            ...(OHP_9000IData.railLubrication && {
-                railLubrication:
-                    OHP_9000IData.railLubrication
-            }),
-
-            ...(OHP_9000IData.externalLubrication && {
-                externalLubrication:
-                    OHP_9000IData.externalLubrication
-            }),
-
-            ...(OHP_9000IData.currentLubricationEquipmentBrand && {
-                currentLubricationEquipmentBrand:
-                    OHP_9000IData.currentLubricationEquipmentBrand
-            }),
-
-            ...(OHP_9000IData.currentLubricantType && {
-                currentLubricantType:
-                    OHP_9000IData.currentLubricantType
-            }),
-
-            ...(OHP_9000IData.currentLubricantViscosityGrade && {
-                currentLubricantViscosityGrade:
-                    OHP_9000IData.currentLubricantViscosityGrade
-            }),
-
-            ...(OHP_9000IData.lubricationFromSideOfChain && {
-                lubricationFromSideOfChain:
-                    OHP_9000IData.lubricationFromSideOfChain
-            }),
-
-            ...(OHP_9000IData.lubricationFromTopOfChain && {
-                lubricationFromTopOfChain:
-                    OHP_9000IData.lubricationFromTopOfChain
-            }),
-
-            ...(OHP_9000IData.reservoirSize && {
-                reservoirSize:
-                    OHP_9000IData.reservoirSize
-            }),
-
-            ...(OHP_9000IData.reservoirSizeQuantity && {
-                reservoirSizeQuantity:
-                    OHP_9000IData.reservoirSizeQuantity
-            }),
-
-
-            // ============================================================
-            // CONTROLLER
-            // ============================================================
-
-            ...(OHP_9000IData.controllerSpecialOptions && {
-                controllerSpecialOptions:
-                    OHP_9000IData.controllerSpecialOptions
-            }),
-
-            ...(OHP_9000IData.controllerPleaseSpecify && {
-                controllerPleaseSpecify:
-                    OHP_9000IData.controllerPleaseSpecify
-            }),
-
-
-            // ============================================================
-            // WIRE
-            // ============================================================
-
-            ...(OHP_9000IData.wireMeasurementUnit && {
-                wireMeasurementUnit:
-                    OHP_9000IData.wireMeasurementUnit
-            }),
-
-            ...(OHP_9000IData.twoConductor && {
-                twoConductor:
-                    OHP_9000IData.twoConductor
-            }),
-
-            ...(OHP_9000IData.fourConductor && {
-                fourConductor:
-                    OHP_9000IData.fourConductor
-            }),
-
-            ...(OHP_9000IData.sevenConductor && {
-                sevenConductor:
-                    OHP_9000IData.sevenConductor
-            }),
-
-            ...(OHP_9000IData.twelveConductor && {
-                twelveConductor:
-                    OHP_9000IData.twelveConductor
-            }),
-
-            ...(OHP_9000IData.junctionBoxQuantities && {
-                junctionBoxQuantities:
-                    OHP_9000IData.junctionBoxQuantities
-            }),
-
-
-            // ============================================================
-            // OVERHEAD POWER RAIL: MEASUREMENTS
-            // ============================================================
-
-            ...(OHP_9000IData.measurementUnit && {
-                measurementUnit:
-                    OHP_9000IData.measurementUnit
-            }),
-
-            ...(OHP_9000IData.overheadPowerMonoRailPowerTrolleyWheelB && {
-                overheadPowerMonoRailPowerTrolleyWheelB:
-                    OHP_9000IData.overheadPowerMonoRailPowerTrolleyWheelB
-            }),
-
-            ...(OHP_9000IData.overheadPowerMonoRailPowerRailG && {
-                overheadPowerMonoRailPowerRailG:
-                    OHP_9000IData.overheadPowerMonoRailPowerRailG
-            }),
-
-            ...(OHP_9000IData.overheadPowerMonoRailPowerRailH && {
-                overheadPowerMonoRailPowerRailH:
-                    OHP_9000IData.overheadPowerMonoRailPowerRailH
-            }),
-
-
-            // ============================================================
-            // TECHNICIAN NOTE
-            // Required as part of current product workflow.
-            // ============================================================
-
-            technicianNote:
-                OHP_9000IData.technicianNote
-        });
-
-
-        // ============================================================
-        // ADD PRODUCT CONFIGURATION TO USER CART
-        // ============================================================
-
-        req.user.cart.push({
-            numRequested,
-            productConfigurationInfo: order,
-            productType: "OHP_9000I"
-        });
-
-        await req.user.save();
-
-
-        // ============================================================
-        // SUCCESS RESPONSE
-        // ============================================================
-
-        return res.status(200).json({
-            message: "OHP_9000I entry added"
-        });
-
-    } catch (error) {
-
-        // ============================================================
-        // ERROR RESPONSE
-        // ============================================================
-
-        console.error(error);
-
-        return res.status(500).json({
-            error: "Internal server error"
-        });
+  try {
+    const {
+      OHP_9000IData,
+      numRequested,
+    } = req.body || {};
+
+
+    // =====================================================
+    // REQUEST VALIDATION
+    // =====================================================
+
+    if (
+      !OHP_9000IData ||
+      typeof OHP_9000IData !== "object" ||
+      Array.isArray(OHP_9000IData)
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "OHP_9000IData is required",
+      });
     }
+
+
+    // =====================================================
+    // QUANTITY VALIDATION
+    // =====================================================
+
+    const quantity = Number(numRequested);
+
+    if (
+      !Number.isInteger(quantity) ||
+      quantity < 1
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "numRequested must be a positive integer",
+      });
+    }
+
+
+    // =====================================================
+    // PRODUCT-SPECIFIC VALIDATION
+    //
+    // Current OHP_9000I payload and schema use the same
+    // flat field structure.
+    //
+    // Legacy templateA / templateB / templateC mappings
+    // are intentionally not used by the current configurator.
+    //
+    // Conditional "Other" fields are enforced by the
+    // OHP_9000I Mongoose schema.
+    //
+    // IMPORTANT:
+    // OHP_9000I is validation-only.
+    // Do NOT call validation.save().
+    // =====================================================
+
+    const validation =
+      new OHP_9000I(OHP_9000IData);
+
+    await validation.validate();
+
+
+    // =====================================================
+    // CLEAN VALIDATED CONFIGURATION DATA
+    // =====================================================
+
+    const configurationData =
+      validation.toObject({
+        versionKey: false,
+      });
+
+    delete configurationData._id;
+    delete configurationData.createdAt;
+    delete configurationData.updatedAt;
+
+
+    // =====================================================
+    // AUTHENTICATED USER / AUDIT SNAPSHOT
+    // =====================================================
+
+    const actor = {
+      userID: req.user.userID,
+      username: req.user.username,
+      firstName: req.user.firstName || "",
+      lastName: req.user.lastName || "",
+      role: req.user.role || "user",
+    };
+
+
+    // =====================================================
+    // CREATE GENERIC PRODUCT CONFIGURATION
+    // =====================================================
+
+    const productConfiguration =
+      new ProductConfiguration({
+        userID: req.user.userID,
+
+        configurationName:
+          configurationData.conveyorName ||
+          "OHP 9000I",
+
+        productType:
+          "OHP_9000I",
+
+        productName:
+          "9000L Series Central System I-Beam Conveyor Lubricators",
+
+        status:
+          "cart",
+
+        isComplete:
+          true,
+
+        numRequested:
+          quantity,
+
+        configurationData,
+
+        createdBy:
+          actor,
+
+        updatedBy:
+          actor,
+      });
+
+
+    // =====================================================
+    // SAVE INTO GENERIC COLLECTION
+    //
+    // OLD:
+    //
+    // req.user.cart.push(...)
+    // await req.user.save()
+    //
+    // NEW:
+    //
+    // Only ProductConfiguration is persisted.
+    // =====================================================
+
+    const savedConfiguration =
+      await productConfiguration.save();
+
+
+    // =====================================================
+    // SUCCESS RESPONSE
+    // =====================================================
+
+    return res.status(201).json({
+      success: true,
+
+      message:
+        "OHP_9000I configuration added to cart successfully",
+
+      configurationID:
+        savedConfiguration.configurationID,
+
+      configuration: {
+        configurationID:
+          savedConfiguration.configurationID,
+
+        configurationName:
+          savedConfiguration.configurationName,
+
+        productType:
+          savedConfiguration.productType,
+
+        productName:
+          savedConfiguration.productName,
+
+        status:
+          savedConfiguration.status,
+
+        isComplete:
+          savedConfiguration.isComplete,
+
+        numRequested:
+          savedConfiguration.numRequested,
+      },
+    });
+
+  } catch (error) {
+    console.error(
+      "OHP_9000I configuration error:",
+      error
+    );
+
+
+    // =====================================================
+    // MONGOOSE VALIDATION ERROR
+    // =====================================================
+
+    if (error?.name === "ValidationError") {
+      const errors = {};
+
+      for (const field in error.errors) {
+        errors[field] =
+          error.errors[field].message;
+      }
+
+      return res.status(422).json({
+        success: false,
+
+        message:
+          "Invalid OHP_9000I configuration",
+
+        errors,
+      });
+    }
+
+
+    // =====================================================
+    // INTERNAL SERVER ERROR
+    // =====================================================
+
+    return res.status(500).json({
+      success: false,
+
+      message:
+        "Failed to add OHP_9000I configuration",
+    });
+  }
 });
 
-module.exports = router
+
+module.exports = router;

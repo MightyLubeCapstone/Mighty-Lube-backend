@@ -1,133 +1,427 @@
-/**
- * This endpoint will be how the cart actually grabs all the orders that
- * a User has added to it. GET api/orders will return a list of all the orders
- * in the User document with minimal info (but containing the orderID)
- * GET api/orders/order will return EVERYTHING about an order if given an id.
- * DELETE api/orders/order will delete an order object if given an id.
- * */
-
 const express = require("express");
+
 const { authenticate } = require("./sessions");
-const { sendOrderNotification } = require("../utils/emailnotif");
-const User = require("../models/user");
-const getDecodedInfo = require("../models/getDecodedInfo");
+const ProductConfiguration = require("../models/product_configuration");
 
 const router = express.Router();
 
+
+// =========================================================
+// GET /api/cart
+//
+// PURPOSE:
+// Fetch ONLY the logged-in user's cart items.
+//
+// Cart is no longer stored inside User.cart.
+// Cart items are ProductConfiguration records where:
+//
+// userID = logged-in user
+// status = "cart"
+//
+// Frontend can use this response to show cart cards.
+// =========================================================
+
 router.get("/", authenticate, async (req, res) => {
-    //used for FGCO form
-    try {
-        const cart = req.user.cart;
-        if (!cart || !cart[0]) {
-            return res.status(400).json({ error: "No orders found for this user!" });
-        }
-        // dumb order info down for cards
-        const filteredOrders = cart
-            .map(order => ({
-                orderID: order.orderID,
-                orderStatus: order.orderStatus,
-                quantity: order.numRequested,
-                name: order.productType,
-                dateCreated: order.orderCreated,
-            }));
-        return res.status(200).json({ orders: filteredOrders });
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ error: `Internal server error: ${error}` });
+  try {
+    const cartItems = await ProductConfiguration.find({
+      userID: req.user.userID,
+      status: "cart",
+    }).sort({
+      createdAt: -1,
+    });
+
+
+    // Empty cart is NOT an error.
+    // Frontend can simply show "Cart is empty".
+    if (!cartItems.length) {
+      return res.status(200).json({
+        success: true,
+        count: 0,
+        cart: [],
+      });
     }
+
+
+    const cart = cartItems.map((item) => ({
+      configurationID: item.configurationID,
+
+      configurationName: item.configurationName,
+
+      productType: item.productType,
+
+      productName: item.productName,
+
+      quantity: item.numRequested,
+
+      status: item.status,
+
+      isComplete: item.isComplete,
+
+      createdAt: item.createdAt,
+
+      updatedAt: item.updatedAt,
+    }));
+
+
+    return res.status(200).json({
+      success: true,
+      count: cart.length,
+      cart,
+    });
+
+  } catch (error) {
+    console.error("GET /api/cart error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch cart",
+      error: error.message,
+    });
+  }
 });
 
-// this is restoring a saved draft back into the cart
-router.put("/", authenticate, async (req, res) => {
-    try {
-        const { cartID } = req.body;
-        const user = req.user;
-        const draft = user.drafts.find(draft => draft.cartID === cartID);
-        user.cart.push(...draft.cart); // Correctly restore items to cart
-        // Ensure Mongoose knows that the array has changed
-        user.markModified("cart");
-        await user.save();
-        return res.status(200).json({ message: `Successfully moved draft to cart!` });
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ error: `Internal server error: ${error}` });
-    }
-})
 
-router.put("/order", authenticate, async (req, res) => {
-    try {
-        // data will be an entire Map object of String, dynamic pairs (dynamic being either a string or integer)
-        // with the string key being the name of whichever attribute we are trying to update for whichever productType.
-        const { orderID, data, numRequested } = req.body;
-        const user = req.user;
-        const orderInfo = user.cart.find(order => order.orderID === orderID);
-        Object.entries(data).forEach(([key, value]) => {
-            if (orderInfo.productConfigurationInfo[key] === undefined) {
-                if (orderInfo.productConfigurationInfo.monitorData !== undefined)
-                    orderInfo.productConfigurationInfo.monitorData[key] = value;
-                if (orderInfo.productConfigurationInfo.templateBData !== undefined)
-                    orderInfo.productConfigurationInfo.templateBData[key] = value;
-                if (orderInfo.productConfigurationInfo.templateCData !== undefined)
-                    orderInfo.productConfigurationInfo.templateCData[key] = value;
-                if (orderInfo.productConfigurationInfo.templateDData !== undefined)
-                    orderInfo.productConfigurationInfo.templateDData[key] = value;
-                if (orderInfo.productConfigurationInfo.templateEData !== undefined)
-                    orderInfo.productConfigurationInfo.templateEData[key] = value;
-                if (orderInfo.productConfigurationInfo.templateFData !== undefined)
-                    orderInfo.productConfigurationInfo.templateFData[key] = value;
-            }
-            else
-                orderInfo.productConfigurationInfo[key] = value;
-        });
-        if (numRequested != 0) {
-            orderInfo["numRequested"] = numRequested;
-        }
-        // Ensure Mongoose knows that the `orders` array has changed
-        user.markModified("cart");
-        await user.save();
-
-        // Send email notification for cart order edit
-        try {
-            await sendOrderNotification(user, orderInfo, 'edited');
-        } catch (emailError) {
-            console.warn('Failed to send cart order edit notification:', emailError);
-        }
-
-        return res.status(200).json({ message: `Successfully updated the order ${orderID}` });
-    } catch (error) {
-        res.status(500).json({ error: `Internal server error: ${error}` });
-    }
-});
+// =========================================================
+// GET /api/cart/order
+//
+// PURPOSE:
+// Fetch ONE complete configured product from cart.
+//
+// Frontend should send:
+//
+// configurationid: <configurationID>
+//
+// in request headers.
+//
+// Old orderid header is also temporarily supported.
+// =========================================================
 
 router.get("/order", authenticate, async (req, res) => {
-    try {
-        const { orderid: orderID } = req.headers;
-        const order = await req.user.cart.find(order => order.orderID === orderID); // grab whichever model is stored in productType
-        const mappedInfo = getDecodedInfo(order);
-        if (!mappedInfo) {
-            return res.status(400).json({ error: "No order found with that id!" });
-        }
-        return res.status(200).json({ orderInfo: mappedInfo });
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ error: `Internal server error: ${error}` });
+  try {
+    const configurationID =
+      req.headers.configurationid ||
+      req.headers.orderid;
+
+
+    if (!configurationID) {
+      return res.status(400).json({
+        success: false,
+        message: "configurationID is required",
+      });
     }
+
+
+    const configuration =
+      await ProductConfiguration.findOne({
+        configurationID,
+        userID: req.user.userID,
+        status: "cart",
+      });
+
+
+    if (!configuration) {
+      return res.status(404).json({
+        success: false,
+        message: "Cart configuration not found",
+      });
+    }
+
+
+    return res.status(200).json({
+      success: true,
+
+      configuration: {
+        configurationID:
+          configuration.configurationID,
+
+        configurationName:
+          configuration.configurationName,
+
+        productType:
+          configuration.productType,
+
+        productName:
+          configuration.productName,
+
+        numRequested:
+          configuration.numRequested,
+
+        status:
+          configuration.status,
+
+        isComplete:
+          configuration.isComplete,
+
+        configurationData:
+          configuration.configurationData,
+
+        createdBy:
+          configuration.createdBy,
+
+        updatedBy:
+          configuration.updatedBy,
+
+        createdAt:
+          configuration.createdAt,
+
+        updatedAt:
+          configuration.updatedAt,
+      },
+    });
+
+  } catch (error) {
+    console.error(
+      "GET /api/cart/order error:",
+      error
+    );
+
+    return res.status(500).json({
+      success: false,
+      message:
+        "Failed to fetch cart configuration",
+      error: error.message,
+    });
+  }
 });
 
-router.delete("/order", authenticate, async (req, res) => {
-    try {
-        const { orderID } = req.body;
-        // Remove the order with the matching orderID
-        await User.findByIdAndUpdate(
-            req.user._id,
-            { $pull: { cart: { orderID } } }, // Remove the order object that matches orderID
-            { new: true } // Return updated document
-        );
-        return res.status(200).json({ message: "Successfully deleted order!" });
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ error: `Internal server error: ${error}` });
+
+// =========================================================
+// PUT /api/cart/order
+//
+// PURPOSE:
+// Edit ONE configuration currently inside cart.
+//
+// Body:
+//
+// {
+//   "configurationID": "...",
+//   "data": {
+//      "...": "..."
+//   },
+//   "numRequested": 2
+// }
+//
+// Old "orderID" is temporarily supported too.
+// =========================================================
+
+router.put("/order", authenticate, async (req, res) => {
+  try {
+    const {
+      configurationID,
+      orderID,
+      data,
+      numRequested,
+    } = req.body;
+
+
+    const targetConfigurationID =
+      configurationID || orderID;
+
+
+    if (!targetConfigurationID) {
+      return res.status(400).json({
+        success: false,
+        message: "configurationID is required",
+      });
     }
+
+
+    const configuration =
+      await ProductConfiguration.findOne({
+        configurationID:
+          targetConfigurationID,
+
+        userID:
+          req.user.userID,
+
+        status:
+          "cart",
+      });
+
+
+    if (!configuration) {
+      return res.status(404).json({
+        success: false,
+        message: "Cart configuration not found",
+      });
+    }
+
+
+    // =====================================================
+    // UPDATE CONFIGURATION DATA
+    // =====================================================
+
+    if (
+      data &&
+      typeof data === "object" &&
+      !Array.isArray(data)
+    ) {
+      configuration.configurationData = {
+        ...configuration.configurationData,
+        ...data,
+      };
+
+      configuration.markModified(
+        "configurationData"
+      );
+    }
+
+
+    // =====================================================
+    // UPDATE QUANTITY
+    // =====================================================
+
+    if (
+      numRequested !== undefined &&
+      numRequested !== null
+    ) {
+      const quantity = Number(numRequested);
+
+      if (
+        Number.isNaN(quantity) ||
+        quantity < 1
+      ) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "numRequested must be at least 1",
+        });
+      }
+
+      configuration.numRequested = quantity;
+    }
+
+
+    // =====================================================
+    // UPDATE AUDIT INFO
+    // =====================================================
+
+    configuration.updatedBy = {
+      userID:
+        req.user.userID,
+
+      username:
+        req.user.username,
+
+      firstName:
+        req.user.firstName || "",
+
+      lastName:
+        req.user.lastName || "",
+
+      role:
+        req.user.role || "user",
+    };
+
+
+    await configuration.save();
+
+
+    return res.status(200).json({
+      success: true,
+
+      message:
+        "Cart configuration updated successfully",
+
+      configurationID:
+        configuration.configurationID,
+    });
+
+  } catch (error) {
+    console.error(
+      "PUT /api/cart/order error:",
+      error
+    );
+
+    return res.status(500).json({
+      success: false,
+      message:
+        "Failed to update cart configuration",
+      error: error.message,
+    });
+  }
+});
+
+
+// =========================================================
+// DELETE /api/cart/order
+//
+// PURPOSE:
+// Delete ONE configured product from cart.
+//
+// Body:
+//
+// {
+//   "configurationID": "..."
+// }
+//
+// Old orderID is temporarily supported too.
+// =========================================================
+
+router.delete("/order", authenticate, async (req, res) => {
+  try {
+    const {
+      configurationID,
+      orderID,
+    } = req.body;
+
+
+    const targetConfigurationID =
+      configurationID || orderID;
+
+
+    if (!targetConfigurationID) {
+      return res.status(400).json({
+        success: false,
+        message: "configurationID is required",
+      });
+    }
+
+
+    const deletedConfiguration =
+      await ProductConfiguration.findOneAndDelete({
+        configurationID:
+          targetConfigurationID,
+
+        userID:
+          req.user.userID,
+
+        status:
+          "cart",
+      });
+
+
+    if (!deletedConfiguration) {
+      return res.status(404).json({
+        success: false,
+        message: "Cart configuration not found",
+      });
+    }
+
+
+    return res.status(200).json({
+      success: true,
+
+      message:
+        "Cart configuration deleted successfully",
+
+      configurationID:
+        targetConfigurationID,
+    });
+
+  } catch (error) {
+    console.error(
+      "DELETE /api/cart/order error:",
+      error
+    );
+
+    return res.status(500).json({
+      success: false,
+      message:
+        "Failed to delete cart configuration",
+      error: error.message,
+    });
+  }
 });
 
 

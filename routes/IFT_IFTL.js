@@ -1,252 +1,260 @@
 const express = require("express");
+
 const { authenticate } = require("./sessions");
 const IFT_IFTL = require("../models/IFT_IFTL");
+const ProductConfiguration = require("../models/product_configuration");
 
 const router = express.Router();
 
+
+// =========================================================
+// POST /api/ift_iftl
+//
+// Product:
+// In Floor Towline
+//
+// IFT_IFTL model:
+// validation only
+//
+// Actual storage:
+// product_configurations
+//
+// Add to Cart:
+// status = "cart"
+// isComplete = true
+// =========================================================
+
 router.post("/", authenticate, async (req, res) => {
   try {
-    const { IFT_IFTLData, numRequested } = req.body;
+    const {
+      IFT_IFTLData,
+      numRequested,
+    } = req.body || {};
 
-    if (!IFT_IFTLData) {
+
+    // =====================================================
+    // REQUEST VALIDATION
+    // =====================================================
+
+    if (
+      !IFT_IFTLData ||
+      typeof IFT_IFTLData !== "object" ||
+      Array.isArray(IFT_IFTLData)
+    ) {
       return res.status(400).json({
-        error: "IFT_IFTLData is required",
+        success: false,
+        message: "IFT_IFTLData is required",
       });
     }
 
-    const order = new IFT_IFTL({
-      // ======================================================
-      // GENERAL INFORMATION
-      // ======================================================
 
-      conveyorName: IFT_IFTLData.conveyorName,
+    // =====================================================
+    // QUANTITY VALIDATION
+    // =====================================================
 
-      conveyorChainSize: IFT_IFTLData.conveyorChainSize,
+    const quantity = Number(numRequested);
 
-      otherConveyorChainSize:
-        IFT_IFTLData.otherConveyorChainSize,
+    if (
+      !Number.isInteger(quantity) ||
+      quantity < 1
+    ) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "numRequested must be a positive integer",
+      });
+    }
 
-      chainManufacturer:
-        IFT_IFTLData.chainManufacturer,
 
-      otherChainManufacturer:
-        IFT_IFTLData.otherChainManufacturer,
+    // =====================================================
+    // PRODUCT-SPECIFIC VALIDATION
+    //
+    // IFT_IFTLData and IFT_IFTL schema use the same
+    // flat field structure.
+    //
+    // No transformation or legacy mapping is required.
+    //
+    // IMPORTANT:
+    // IFT_IFTL is validation-only.
+    // Do NOT call validation.save().
+    // =====================================================
 
-      conveyorSpeed:
-        IFT_IFTLData.conveyorSpeed,
+    const validation =
+      new IFT_IFTL(IFT_IFTLData);
 
-      conveyorSpeedUnit:
-        IFT_IFTLData.conveyorSpeedUnit,
+    await validation.validate();
 
-      indexingVariableSpeedConditions:
-        IFT_IFTLData.indexingVariableSpeedConditions,
 
-      travelDirection:
-        IFT_IFTLData.travelDirection,
+    // =====================================================
+    // CLEAN VALIDATED CONFIGURATION DATA
+    // =====================================================
 
-      applicationEnvironment:
-        IFT_IFTLData.applicationEnvironment,
+    const configurationData =
+      validation.toObject({
+        versionKey: false,
+      });
 
-      otherApplicationEnvironment:
-        IFT_IFTLData.otherApplicationEnvironment,
+    delete configurationData._id;
+    delete configurationData.createdAt;
+    delete configurationData.updatedAt;
 
-      surroundingTemperature:
-        IFT_IFTLData.surroundingTemperature,
 
-      conveyorLoadedStatus:
-        IFT_IFTLData.conveyorLoadedStatus,
+    // =====================================================
+    // AUTHENTICATED USER / AUDIT SNAPSHOT
+    // =====================================================
 
-      conveyorSwingStatus:
-        IFT_IFTLData.conveyorSwingStatus,
+    const actor = {
+      userID:
+        req.user.userID,
 
-      conveyorStrand:
-        IFT_IFTLData.conveyorStrand,
+      username:
+        req.user.username,
 
-      // ======================================================
-      // CUSTOMER POWER UTILITIES
-      // ======================================================
+      firstName:
+        req.user.firstName || "",
 
-      operatingVoltage:
-        IFT_IFTLData.operatingVoltage,
+      lastName:
+        req.user.lastName || "",
 
-      // ======================================================
-      // NEW / EXISTING MONITORING SYSTEM
-      // ======================================================
+      role:
+        req.user.role || "user",
+    };
 
-      existingMonitoring:
-        IFT_IFTLData.existingMonitoring,
 
-      newMonitoringSystem:
-        IFT_IFTLData.newMonitoringSystem,
+    // =====================================================
+    // CREATE GENERIC PRODUCT CONFIGURATION
+    // =====================================================
 
-      // ======================================================
-      // CONVEYOR SPECIFICATIONS
-      // ======================================================
+    const productConfiguration =
+      new ProductConfiguration({
+        userID:
+          req.user.userID,
 
-      wheelOpenRaceStyle:
-        IFT_IFTLData.wheelOpenRaceStyle,
+        configurationName:
+          configurationData.conveyorName ||
+          "IFT IFTL",
 
-      wheelSealedStyle:
-        IFT_IFTLData.wheelSealedStyle,
+        productType:
+          "IFT_IFTL",
 
-      powerChain:
-        IFT_IFTLData.powerChain,
+        productName:
+          "IFT IFTL",
 
-      chainPins:
-        IFT_IFTLData.chainPins,
+        status:
+          "cart",
 
-      sliderPlates:
-        IFT_IFTLData.sliderPlates,
+        isComplete:
+          true,
 
-      freeTrolleyWheels:
-        IFT_IFTLData.freeTrolleyWheels,
+        numRequested:
+          quantity,
 
-      guideRollers:
-        IFT_IFTLData.guideRollers,
+        configurationData,
 
-      guideRollersOpenRaceStyle:
-        IFT_IFTLData.guideRollersOpenRaceStyle,
+        createdBy:
+          actor,
 
-      guideRollersSealedStyle:
-        IFT_IFTLData.guideRollersSealedStyle,
+        updatedBy:
+          actor,
+      });
 
-      dogActuator:
-        IFT_IFTLData.dogActuator,
 
-      pivotPoints:
-        IFT_IFTLData.pivotPoints,
+    // =====================================================
+    // SAVE INTO GENERIC COLLECTION
+    //
+    // OLD:
+    //
+    // req.user.cart.push(...)
+    // await req.user.save()
+    //
+    // NEW:
+    //
+    // Only ProductConfiguration is persisted.
+    // =====================================================
 
-      kingPin:
-        IFT_IFTLData.kingPin,
+    const savedConfiguration =
+      await productConfiguration.save();
 
-      rollerChains:
-        IFT_IFTLData.rollerChains,
 
-      bushings:
-        IFT_IFTLData.bushings,
+    // =====================================================
+    // SUCCESS RESPONSE
+    // =====================================================
 
-      riderPlates:
-        IFT_IFTLData.riderPlates,
+    return res.status(201).json({
+      success: true,
 
-      outboardWheels:
-        IFT_IFTLData.outboardWheels,
+      message:
+        "IFT_IFTL configuration added to cart successfully",
 
-      caterpillarDrive:
-        IFT_IFTLData.caterpillarDrive,
+      configurationID:
+        savedConfiguration.configurationID,
 
-      caterpillarDriveQuantity:
-        IFT_IFTLData.caterpillarDriveQuantity,
+      configuration: {
+        configurationID:
+          savedConfiguration.configurationID,
 
-      railLubrication:
-        IFT_IFTLData.railLubrication,
+        configurationName:
+          savedConfiguration.configurationName,
 
-      externalLubrication:
-        IFT_IFTLData.externalLubrication,
+        productType:
+          savedConfiguration.productType,
 
-      currentLubricationEquipmentBrand:
-        IFT_IFTLData.currentLubricationEquipmentBrand,
+        productName:
+          savedConfiguration.productName,
 
-      currentLubricantType:
-        IFT_IFTLData.currentLubricantType,
+        status:
+          savedConfiguration.status,
 
-      currentLubricantViscosityGrade:
-        IFT_IFTLData.currentLubricantViscosityGrade,
+        isComplete:
+          savedConfiguration.isComplete,
 
-      lubricationFromSideOfChain:
-        IFT_IFTLData.lubricationFromSideOfChain,
-
-      lubricationFromTopOfChain:
-        IFT_IFTLData.lubricationFromTopOfChain,
-
-      reservoirSize:
-        IFT_IFTLData.reservoirSize,
-
-      reservoirSizeQuantity:
-        IFT_IFTLData.reservoirSizeQuantity,
-
-      conveyorChainClean:
-        IFT_IFTLData.conveyorChainClean,
-
-      // ======================================================
-      // CONTROLLER
-      // ======================================================
-
-      specialControllerOptions:
-        IFT_IFTLData.specialControllerOptions,
-
-      controllerSpecify:
-        IFT_IFTLData.controllerSpecify,
-
-      // ======================================================
-      // ADDITIONAL OPTIONS AVAILABLE
-      // ======================================================
-
-      washDown:
-        IFT_IFTLData.washDown,
-
-      // ======================================================
-      // IN FLOOR TOWLINE MEASUREMENTS
-      // ======================================================
-
-      measurementUnit:
-        IFT_IFTLData.measurementUnit,
-
-      inFloorTowlineChainDropA:
-        IFT_IFTLData.inFloorTowlineChainDropA,
-
-      inFloorTowlinePowerTrolleyWheelB:
-        IFT_IFTLData.inFloorTowlinePowerTrolleyWheelB,
-
-      inFloorTowlinePowerRailG:
-        IFT_IFTLData.inFloorTowlinePowerRailG,
-
-      inFloorTowlinePowerRailH:
-        IFT_IFTLData.inFloorTowlinePowerRailH,
-
-      inFloorTowlineRailOffsetJ:
-        IFT_IFTLData.inFloorTowlineRailOffsetJ,
-
-      inFloorTowlineConveyorHousingS1:
-        IFT_IFTLData.inFloorTowlineConveyorHousingS1,
-
-      inFloorTowlineConveyorHousingT1:
-        IFT_IFTLData.inFloorTowlineConveyorHousingT1,
-
-      inFloorTowlineConveyorHousingWallU1:
-        IFT_IFTLData.inFloorTowlineConveyorHousingWallU1,
-
-      inFloorTowlineConveyorHousingOffsetW1:
-        IFT_IFTLData.inFloorTowlineConveyorHousingOffsetW1,
-
-      inFloorTowlineFloorX1:
-        IFT_IFTLData.inFloorTowlineFloorX1,
-
-      // ======================================================
-      // TECHNICIAN NOTE
-      // ======================================================
-
-      technicianNote:
-        IFT_IFTLData.technicianNote,
+        numRequested:
+          savedConfiguration.numRequested,
+      },
     });
 
-    req.user.cart.push({
-      numRequested,
-      productConfigurationInfo: order,
-      productType: "IFT_IFTL",
-    });
-
-    await req.user.save();
-
-    return res.status(200).json({
-      message: "IFT_IFTL entry added",
-    });
   } catch (error) {
-    console.error("IFT_IFTL create error:", error);
+    console.error(
+      "IFT_IFTL configuration error:",
+      error
+    );
+
+
+    // =====================================================
+    // MONGOOSE VALIDATION ERROR
+    // =====================================================
+
+    if (error?.name === "ValidationError") {
+      const errors = {};
+
+      for (const field in error.errors) {
+        errors[field] =
+          error.errors[field].message;
+      }
+
+      return res.status(422).json({
+        success: false,
+
+        message:
+          "Invalid IFT_IFTL configuration",
+
+        errors,
+      });
+    }
+
+
+    // =====================================================
+    // INTERNAL SERVER ERROR
+    // =====================================================
 
     return res.status(500).json({
-      error: "Internal server error",
+      success: false,
+
+      message:
+        "Failed to add IFT_IFTL configuration",
     });
   }
 });
 
-module.exports = router
+
+module.exports = router;

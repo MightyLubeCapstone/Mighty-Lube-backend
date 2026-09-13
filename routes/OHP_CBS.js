@@ -1,91 +1,227 @@
 const express = require("express");
+
 const { authenticate } = require("./sessions");
 const OH_CCS_IBEAM = require("../models/OH_CCS_IBEAM");
+const ProductConfiguration = require("../models/product_configuration");
 
 const router = express.Router();
 
+
+// =========================================================
+// POST /api/oh_ccs_ibeam
+//
+// Product:
+// OH CCS I-Beam
+//
+// Product ID:
+// OH_CCS_IBEAM
+//
+// OH_CCS_IBEAM model:
+// validation only
+//
+// Actual storage:
+// product_configurations
+//
+// Add to Cart:
+// status = "cart"
+// isComplete = true
+// =========================================================
+
 router.post("/", authenticate, async (req, res) => {
   try {
-    const { OH_CCS_IBEAMData, numRequested } = req.body;
+    const {
+      OH_CCS_IBEAMData,
+      numRequested,
+    } = req.body || {};
 
-    if (!OH_CCS_IBEAMData) {
+    // =====================================================
+    // REQUEST VALIDATION
+    // =====================================================
+
+    if (
+      !OH_CCS_IBEAMData ||
+      typeof OH_CCS_IBEAMData !== "object" ||
+      Array.isArray(OH_CCS_IBEAMData)
+    ) {
       return res.status(400).json({
-        error: "OH_CCS_IBEAMData is required",
+        success: false,
+        message: "OH_CCS_IBEAMData is required",
       });
     }
 
-    const order = new OH_CCS_IBEAM({
-      // =====================================================
-      // GENERAL INFORMATION
-      // =====================================================
+    // =====================================================
+    // QUANTITY VALIDATION
+    // =====================================================
 
-      conveyorName: OH_CCS_IBEAMData.conveyorName,
+    const quantity = Number(numRequested);
 
-      conveyorChainSize: OH_CCS_IBEAMData.conveyorChainSize,
+    if (
+      !Number.isInteger(quantity) ||
+      quantity < 1
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "numRequested must be a positive integer",
+      });
+    }
 
-      otherConveyorChainSize:
-        OH_CCS_IBEAMData.otherConveyorChainSize,
+    // =====================================================
+    // PRODUCT-SPECIFIC VALIDATION
+    //
+    // Direct flat match.
+    // No alias/template/transformation required.
+    //
+    // OH_CCS_IBEAM is validation-only.
+    // Do NOT call validation.save().
+    // =====================================================
 
-      chainManufacturer:
-        OH_CCS_IBEAMData.chainManufacturer,
+    const validation =
+      new OH_CCS_IBEAM(OH_CCS_IBEAMData);
 
-      otherChainManufacturer:
-        OH_CCS_IBEAMData.otherChainManufacturer,
+    await validation.validate();
 
-      conveyorLength:
-        OH_CCS_IBEAMData.conveyorLength,
+    // =====================================================
+    // CLEAN VALIDATED CONFIGURATION DATA
+    // =====================================================
 
-      conveyorLengthUnit:
-        OH_CCS_IBEAMData.conveyorLengthUnit,
+    const configurationData =
+      validation.toObject({
+        versionKey: false,
+      });
 
-      applicationEnvironment:
-        OH_CCS_IBEAMData.applicationEnvironment,
+    delete configurationData._id;
+    delete configurationData.createdAt;
+    delete configurationData.updatedAt;
 
-      otherApplicationEnvironment:
-        OH_CCS_IBEAMData.otherApplicationEnvironment,
+    // =====================================================
+    // AUTHENTICATED USER / AUDIT SNAPSHOT
+    // =====================================================
 
-      // =====================================================
-      // OVERHEAD POWER RAIL MEASUREMENTS
-      // =====================================================
+    const actor = {
+      userID: req.user.userID,
+      username: req.user.username,
+      firstName: req.user.firstName || "",
+      lastName: req.user.lastName || "",
+      role: req.user.role || "user",
+    };
 
-      measurementUnit:
-        OH_CCS_IBEAMData.measurementUnit,
+    // =====================================================
+    // CREATE GENERIC PRODUCT CONFIGURATION
+    // =====================================================
 
-      overheadPowerRailChannelTrolleyWheelB:
-        OH_CCS_IBEAMData.overheadPowerRailChannelTrolleyWheelB,
+    const productConfiguration =
+      new ProductConfiguration({
+        userID: req.user.userID,
 
-      overheadPowerRailG:
-        OH_CCS_IBEAMData.overheadPowerRailG,
+        configurationName:
+          configurationData.conveyorName ||
+          "OH CCS I-Beam",
 
-      overheadPowerRailH:
-        OH_CCS_IBEAMData.overheadPowerRailH,
+        productType:
+          "OH_CCS_IBEAM",
 
-      // =====================================================
-      // TECHNICIAN NOTE
-      // =====================================================
+        productName:
+          "OH CCS I-Beam",
 
-      technicianNote:
-        OH_CCS_IBEAMData.technicianNote,
+        status:
+          "cart",
+
+        isComplete:
+          true,
+
+        numRequested:
+          quantity,
+
+        configurationData,
+
+        createdBy:
+          actor,
+
+        updatedBy:
+          actor,
+      });
+
+    // =====================================================
+    // SAVE ONLY GENERIC PRODUCT CONFIGURATION
+    // =====================================================
+
+    const savedConfiguration =
+      await productConfiguration.save();
+
+    // =====================================================
+    // SUCCESS RESPONSE
+    // =====================================================
+
+    return res.status(201).json({
+      success: true,
+
+      message:
+        "OH_CCS_IBEAM configuration added to cart successfully",
+
+      configurationID:
+        savedConfiguration.configurationID,
+
+      configuration: {
+        configurationID:
+          savedConfiguration.configurationID,
+
+        configurationName:
+          savedConfiguration.configurationName,
+
+        productType:
+          savedConfiguration.productType,
+
+        productName:
+          savedConfiguration.productName,
+
+        status:
+          savedConfiguration.status,
+
+        isComplete:
+          savedConfiguration.isComplete,
+
+        numRequested:
+          savedConfiguration.numRequested,
+      },
     });
 
-    req.user.cart.push({
-      numRequested,
-      productConfigurationInfo: order,
-      productType: "OH_CCS_IBEAM",
-    });
-
-    await req.user.save();
-
-    return res.status(200).json({
-      message: "OH_CCS_IBEAM entry added",
-    });
   } catch (error) {
-    console.error(error);
+    console.error(
+      "OH_CCS_IBEAM configuration error:",
+      error
+    );
+
+    // =====================================================
+    // MONGOOSE VALIDATION ERROR
+    // =====================================================
+
+    if (error?.name === "ValidationError") {
+      const errors = {};
+
+      for (const field in error.errors) {
+        errors[field] =
+          error.errors[field].message;
+      }
+
+      return res.status(422).json({
+        success: false,
+        message:
+          "Invalid OH_CCS_IBEAM configuration",
+        errors,
+      });
+    }
+
+    // =====================================================
+    // INTERNAL SERVER ERROR
+    // =====================================================
 
     return res.status(500).json({
-      error: "Internal server error",
+      success: false,
+      message:
+        "Failed to add OH_CCS_IBEAM configuration",
     });
   }
 });
 
-module.exports = router
+
+module.exports = router;

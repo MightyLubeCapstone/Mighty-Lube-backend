@@ -1,192 +1,269 @@
 const express = require("express");
-const router = express.Router();
 
 const { authenticate } = require("./sessions");
 const FT_OPCO = require("../models/FT_OPCO");
+const ProductConfiguration = require("../models/product_configuration");
 
-// ============================================================
-// CREATE FT OPCO CONFIGURATION
+const router = express.Router();
+
+
+// =========================================================
 // POST /api/ft_opco
-// ============================================================
+//
+// Product:
+// FT OPCO
+//
+// FT_OPCO model:
+// validation only
+//
+// Actual storage:
+// product_configurations
+//
+// Add to Cart:
+// status = "cart"
+// isComplete = true
+// =========================================================
 
 router.post("/", authenticate, async (req, res) => {
   try {
-    const { FT_OPCOData, numRequested } = req.body || {};
+    const {
+      FT_OPCOData,
+      numRequested,
+    } = req.body || {};
 
-    if (!FT_OPCOData) {
+
+    // =====================================================
+    // REQUEST VALIDATION
+    // =====================================================
+
+    if (
+      !FT_OPCOData ||
+      typeof FT_OPCOData !== "object" ||
+      Array.isArray(FT_OPCOData)
+    ) {
       return res.status(400).json({
         success: false,
         message: "FT_OPCOData is required",
       });
     }
 
-    const order = new FT_OPCO({
-      // ======================================================
-      // GENERAL INFORMATION
-      // ======================================================
 
-      conveyorName: FT_OPCOData.conveyorName || "",
+    // =====================================================
+    // QUANTITY
+    //
+    // Legacy behavior preserved:
+    // if numRequested is not provided, default to 1.
+    // =====================================================
 
-      chainSize: FT_OPCOData.chainSize || "",
-      otherChainSize: FT_OPCOData.otherChainSize || "",
+    const quantity =
+      numRequested === undefined ||
+      numRequested === null
+        ? 1
+        : Number(numRequested);
 
-      industrialChainManufacturer:
-        FT_OPCOData.industrialChainManufacturer || "",
+    if (
+      !Number.isInteger(quantity) ||
+      quantity < 1
+    ) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "numRequested must be a positive integer",
+      });
+    }
 
-      otherIndustrialChainManufacturer:
-        FT_OPCOData.otherIndustrialChainManufacturer || "",
 
-      wheelManufacturer: FT_OPCOData.wheelManufacturer || "",
-      otherWheelManufacturer:
-        FT_OPCOData.otherWheelManufacturer || "",
+    // =====================================================
+    // PRODUCT-SPECIFIC VALIDATION
+    //
+    // FT_OPCOData and FT_OPCO schema use the same
+    // flat field structure.
+    //
+    // No transformation or legacy mapping is required.
+    //
+    // IMPORTANT:
+    // FT_OPCO is validation-only.
+    // Do NOT call validation.save().
+    // =====================================================
 
-      conveyorLength: FT_OPCOData.conveyorLength || "",
-      conveyorLengthUnit: FT_OPCOData.conveyorLengthUnit || "",
+    const validation =
+      new FT_OPCO(FT_OPCOData);
 
-      conveyorSpeed: FT_OPCOData.conveyorSpeed || "",
-      conveyorSpeedUnit: FT_OPCOData.conveyorSpeedUnit || "",
+    await validation.validate();
 
-      conveyorIndex: FT_OPCOData.conveyorIndex || "",
-      travelDirection: FT_OPCOData.travelDirection || "",
 
-      appEnviroment: FT_OPCOData.appEnviroment || "",
-      otherAppEnviroment: FT_OPCOData.otherAppEnviroment || "",
+    // =====================================================
+    // CLEAN VALIDATED CONFIGURATION DATA
+    // =====================================================
 
-      surroundingTemp: FT_OPCOData.surroundingTemp || "",
-      conveyorLoaded: FT_OPCOData.conveyorLoaded || "",
-      conveyorSwing: FT_OPCOData.conveyorSwing || "",
+    const configurationData =
+      validation.toObject({
+        versionKey: false,
+      });
 
-      // ======================================================
-      // CUSTOMER POWER UTILITIES
-      // ======================================================
+    delete configurationData._id;
+    delete configurationData.createdAt;
+    delete configurationData.updatedAt;
 
-      operatingVoltage: FT_OPCOData.operatingVoltage || "",
-      controlVoltage: FT_OPCOData.controlVoltage || "",
 
-      compressedAir: FT_OPCOData.compressedAir || "",
-      compressedAirUnit: FT_OPCOData.compressedAirUnit || "",
+    // =====================================================
+    // AUTHENTICATED USER / AUDIT SNAPSHOT
+    // =====================================================
 
-      // ======================================================
-      // NEW / EXISTING MONITORING SYSTEM
-      // ======================================================
+    const actor = {
+      userID:
+        req.user.userID,
 
-      existingMonitoring: FT_OPCOData.existingMonitoring || "",
-      newMonitoringSystem: FT_OPCOData.newMonitoringSystem || "",
+      username:
+        req.user.username,
 
-      // ======================================================
-      // CONVEYOR SPECIFICATIONS
-      // ======================================================
+      firstName:
+        req.user.firstName || "",
 
-      wheelOpenType: FT_OPCOData.wheelOpenType || "",
-      wheelClosedType: FT_OPCOData.wheelClosedType || "",
+      lastName:
+        req.user.lastName || "",
 
-      openInsideShieldedOutside:
-        FT_OPCOData.openInsideShieldedOutside || "",
+      role:
+        req.user.role || "user",
+    };
 
-      freeTrolleyWheels: FT_OPCOData.freeTrolleyWheels || "",
-      guideRollers: FT_OPCOData.guideRollers || "",
 
-      rollerChains: FT_OPCOData.rollerChains || "",
-      bushings: FT_OPCOData.bushings || "",
-      outboardWheels: FT_OPCOData.outboardWheels || "",
+    // =====================================================
+    // CREATE GENERIC PRODUCT CONFIGURATION
+    // =====================================================
 
-      lubeBrand: FT_OPCOData.lubeBrand || "",
-      lubeViscosity: FT_OPCOData.lubeViscosity || "",
+    const productConfiguration =
+      new ProductConfiguration({
+        userID:
+          req.user.userID,
 
-      currentGrease: FT_OPCOData.currentGrease || "",
-      currentLube: FT_OPCOData.currentLube || "",
+        configurationName:
+          configurationData.conveyorName ||
+          "FT OPCO",
 
-      oilOrGrease: FT_OPCOData.oilOrGrease || "",
-      oilViscosity: FT_OPCOData.oilViscosity || "",
-      greaseNGLIGrade: FT_OPCOData.greaseNGLIGrade || "",
+        productType:
+          "FT_OPCO",
 
-      zerkDirection: FT_OPCOData.zerkDirection || "",
-      zerkFtgLocation: FT_OPCOData.zerkFtgLocation || "",
+        productName:
+          "FT OPCO",
 
-      wheelDiameter: FT_OPCOData.wheelDiameter || "",
+        status:
+          "cart",
 
-      chainCleanStatus: FT_OPCOData.chainCleanStatus || "",
+        isComplete:
+          true,
 
-      // ======================================================
-      // CONTROLLER
-      // ======================================================
+        numRequested:
+          quantity,
 
-      chainMaster: FT_OPCOData.chainMaster || "",
-      remoteStatus: FT_OPCOData.remoteStatus || "",
-      mountStatus: FT_OPCOData.mountStatus || "",
-      otherUnitStatus: FT_OPCOData.otherUnitStatus || "",
+        configurationData,
 
-      timerStatus: FT_OPCOData.timerStatus || "",
-      electricStatus: FT_OPCOData.electricStatus || "",
+        createdBy:
+          actor,
 
-      mightyLubeMonitoring:
-        FT_OPCOData.mightyLubeMonitoring || "",
+        updatedBy:
+          actor,
+      });
 
-      preMountType: FT_OPCOData.preMountType || "",
-      otherPreMountType:
-        FT_OPCOData.otherPreMountType || "",
 
-      plcConnection: FT_OPCOData.plcConnection || "",
+    // =====================================================
+    // SAVE INTO GENERIC COLLECTION
+    //
+    // OLD:
+    //
+    // await order.save()
+    //
+    // req.user.cart.push(...)
+    // await req.user.save()
+    //
+    // NEW:
+    //
+    // Only ProductConfiguration is persisted.
+    // =====================================================
 
-      otherControllerNotes:
-        FT_OPCOData.otherControllerNotes || "",
+    const savedConfiguration =
+      await productConfiguration.save();
 
-      // ======================================================
-      // FLAT TOP: MEASUREMENTS
-      // ======================================================
 
-      ftUnitType: FT_OPCOData.ftUnitType || "",
+    // =====================================================
+    // SUCCESS RESPONSE
+    // =====================================================
 
-      ftTopG: FT_OPCOData.ftTopG || "",
-      ftTopH: FT_OPCOData.ftTopH || "",
-
-      ftTopA1: FT_OPCOData.ftTopA1 || "",
-      ftTopB1: FT_OPCOData.ftTopB1 || "",
-      ftTopH1: FT_OPCOData.ftTopH1 || "",
-      ftTopJ1: FT_OPCOData.ftTopJ1 || "",
-      ftTopL1: FT_OPCOData.ftTopL1 || "",
-      ftTopM1: FT_OPCOData.ftTopM1 || "",
-      ftTopN1: FT_OPCOData.ftTopN1 || "",
-      ftTopP1: FT_OPCOData.ftTopP1 || "",
-      ftTopR1: FT_OPCOData.ftTopR1 || "",
-    });
-
-    // ========================================================
-    // SAVE PRODUCT CONFIGURATION
-    // ========================================================
-
-    await order.save();
-
-    // ========================================================
-    // ADD CONFIGURATION TO USER CART
-    // ========================================================
-
-    req.user.cart.push({
-      numRequested: numRequested || 1,
-      productConfigurationInfo: order,
-      productType: "FT_OPCO",
-    });
-
-    await req.user.save();
-
-    // ========================================================
-    // SUCCESS
-    // ========================================================
-
-    return res.status(200).json({
+    return res.status(201).json({
       success: true,
-      message: "FT_OPCO entry added",
-      data: order,
+
+      message:
+        "FT_OPCO configuration added to cart successfully",
+
+      configurationID:
+        savedConfiguration.configurationID,
+
+      configuration: {
+        configurationID:
+          savedConfiguration.configurationID,
+
+        configurationName:
+          savedConfiguration.configurationName,
+
+        productType:
+          savedConfiguration.productType,
+
+        productName:
+          savedConfiguration.productName,
+
+        status:
+          savedConfiguration.status,
+
+        isComplete:
+          savedConfiguration.isComplete,
+
+        numRequested:
+          savedConfiguration.numRequested,
+      },
     });
+
   } catch (error) {
-    console.error("FT_OPCO route error:", error);
+    console.error(
+      "FT_OPCO configuration error:",
+      error
+    );
+
+
+    // =====================================================
+    // MONGOOSE VALIDATION ERROR
+    // =====================================================
+
+    if (error?.name === "ValidationError") {
+      const errors = {};
+
+      for (const field in error.errors) {
+        errors[field] =
+          error.errors[field].message;
+      }
+
+      return res.status(422).json({
+        success: false,
+
+        message:
+          "Invalid FT_OPCO configuration",
+
+        errors,
+      });
+    }
+
+
+    // =====================================================
+    // INTERNAL SERVER ERROR
+    // =====================================================
 
     return res.status(500).json({
       success: false,
-      message: "Failed to add FT_OPCO configuration",
-      error: error.message,
+
+      message:
+        "Failed to add FT_OPCO configuration",
     });
   }
 });
 
-module.exports = router
+
+module.exports = router;

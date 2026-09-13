@@ -1,91 +1,150 @@
-// routes/OH_CCS_BRUSH.js
-
 const express = require("express");
-const { dbConnect } = require("../config/config"); // kept (even if unused)
+
 const { authenticate } = require("./sessions");
 const OH_CCS_BRUSH = require("../models/OH_CCS_BRUSH");
+const ProductConfiguration = require("../models/product_configuration");
 
 const router = express.Router();
 
 router.post("/", authenticate, async (req, res) => {
   try {
-    const { OH_CCS_BRUSHData, numRequested } = req.body;
-
-    const order = new OH_CCS_BRUSH({
-      // =====================================================
-      // GENERAL INFORMATION
-      // =====================================================
-
-      conveyorName: OH_CCS_BRUSHData.conveyorName,
-
-      conveyorChainSize: OH_CCS_BRUSHData.conveyorChainSize,
-
-      ...(OH_CCS_BRUSHData.otherConveyorChainSize && {
-        otherConveyorChainSize:
-          OH_CCS_BRUSHData.otherConveyorChainSize,
-      }),
-
-      chainManufacturer: OH_CCS_BRUSHData.chainManufacturer,
-
-      ...(OH_CCS_BRUSHData.otherChainManufacturer && {
-        otherChainManufacturer:
-          OH_CCS_BRUSHData.otherChainManufacturer,
-      }),
-
-      conveyorLength: OH_CCS_BRUSHData.conveyorLength,
-
-      conveyorLengthUnit: OH_CCS_BRUSHData.conveyorLengthUnit,
-
-      applicationEnvironment:
-        OH_CCS_BRUSHData.applicationEnvironment,
-
-      ...(OH_CCS_BRUSHData.otherApplicationEnvironment && {
-        otherApplicationEnvironment:
-          OH_CCS_BRUSHData.otherApplicationEnvironment,
-      }),
-
-      surroundingTemperatureOutsideRange:
-        OH_CCS_BRUSHData.surroundingTemperatureOutsideRange,
-
-      // =====================================================
-      // OVERHEAD POWER RAIL: MEASUREMENTS
-      // =====================================================
-
-      measurementUnit: OH_CCS_BRUSHData.measurementUnit,
-
-      chainDropA: OH_CCS_BRUSHData.chainDropA,
-
-      overheadPowerMonoRailPowerRailG:
-        OH_CCS_BRUSHData.overheadPowerMonoRailPowerRailG,
-
-      overheadPowerMonoRailPowerRailH:
-        OH_CCS_BRUSHData.overheadPowerMonoRailPowerRailH,
-
-      // =====================================================
-      // TECHNICIAN NOTE
-      // =====================================================
-
-      technicianNote: OH_CCS_BRUSHData.technicianNote,
-    });
-
-    req.user.cart.push({
+    const {
+      OH_CCS_BRUSHData,
       numRequested,
-      productConfigurationInfo: order,
-      productType: "OH_CCS_BRUSH",
-    });
+    } = req.body || {};
 
-    await req.user.save();
+    if (
+      !OH_CCS_BRUSHData ||
+      typeof OH_CCS_BRUSHData !== "object" ||
+      Array.isArray(OH_CCS_BRUSHData)
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "OH_CCS_BRUSHData is required",
+      });
+    }
 
-    return res.status(200).json({
-      message: "OH_CCS_BRUSH entry added",
+    const quantity = Number(numRequested);
+
+    if (!Number.isInteger(quantity) || quantity < 1) {
+      return res.status(400).json({
+        success: false,
+        message: "numRequested must be a positive integer",
+      });
+    }
+
+    // Product-specific model is validation-only.
+    const validation = new OH_CCS_BRUSH(
+      OH_CCS_BRUSHData
+    );
+
+    await validation.validate();
+
+    const configurationData =
+      validation.toObject({
+        versionKey: false,
+      });
+
+    delete configurationData._id;
+    delete configurationData.createdAt;
+    delete configurationData.updatedAt;
+
+    const actor = {
+      userID: req.user.userID,
+      username: req.user.username,
+      firstName: req.user.firstName || "",
+      lastName: req.user.lastName || "",
+      role: req.user.role || "user",
+    };
+
+    const productConfiguration =
+      new ProductConfiguration({
+        userID: req.user.userID,
+
+        configurationName:
+          configurationData.conveyorName ||
+          "OH CCS Brush",
+
+        productType: "OH_CCS_BRUSH",
+
+        productName: "OH CCS Brush",
+
+        status: "cart",
+
+        isComplete: true,
+
+        numRequested: quantity,
+
+        configurationData,
+
+        createdBy: actor,
+
+        updatedBy: actor,
+      });
+
+    const savedConfiguration =
+      await productConfiguration.save();
+
+    return res.status(201).json({
+      success: true,
+
+      message:
+        "OH_CCS_BRUSH configuration added to cart successfully",
+
+      configurationID:
+        savedConfiguration.configurationID,
+
+      configuration: {
+        configurationID:
+          savedConfiguration.configurationID,
+
+        configurationName:
+          savedConfiguration.configurationName,
+
+        productType:
+          savedConfiguration.productType,
+
+        productName:
+          savedConfiguration.productName,
+
+        status:
+          savedConfiguration.status,
+
+        isComplete:
+          savedConfiguration.isComplete,
+
+        numRequested:
+          savedConfiguration.numRequested,
+      },
     });
   } catch (error) {
-    console.error(error);
+    console.error(
+      "OH_CCS_BRUSH configuration error:",
+      error
+    );
+
+    if (error?.name === "ValidationError") {
+      const errors = {};
+
+      for (const field in error.errors) {
+        errors[field] =
+          error.errors[field].message;
+      }
+
+      return res.status(422).json({
+        success: false,
+        message:
+          "Invalid OH_CCS_BRUSH configuration",
+        errors,
+      });
+    }
 
     return res.status(500).json({
-      error: "Internal server error",
+      success: false,
+      message:
+        "Failed to add OH_CCS_BRUSH configuration",
     });
   }
 });
 
-module.exports = router
+module.exports = router;

@@ -1,216 +1,254 @@
 const express = require("express");
+
 const { authenticate } = require("./sessions");
 const FRO_9000F = require("../models/FRO_9000F");
+const ProductConfiguration = require("../models/product_configuration");
 
 const router = express.Router();
 
+
+// =========================================================
+// POST /api/fro_9000f
+//
+// Product:
+// FRO 9000F
+//
+// FRO_9000F model:
+// validation only
+//
+// Actual storage:
+// product_configurations
+//
+// Add to Cart:
+// status = "cart"
+// isComplete = true
+// =========================================================
+
 router.post("/", authenticate, async (req, res) => {
   try {
-    const { FRO_9000FData, numRequested } = req.body || {};
+    const {
+      FRO_9000FData,
+      numRequested,
+    } = req.body || {};
 
-    if (!FRO_9000FData) {
+
+    // =====================================================
+    // REQUEST VALIDATION
+    // =====================================================
+
+    if (
+      !FRO_9000FData ||
+      typeof FRO_9000FData !== "object" ||
+      Array.isArray(FRO_9000FData)
+    ) {
       return res.status(400).json({
-        error: "FRO_9000FData is required",
+        success: false,
+        message: "FRO_9000FData is required",
       });
     }
 
-    const order = new FRO_9000F({
-      // =====================================================
-      // GENERAL INFORMATION
-      // =====================================================
+    const quantity = Number(numRequested);
 
-      conveyorName: FRO_9000FData.conveyorName || "",
+    if (
+      !Number.isInteger(quantity) ||
+      quantity < 1
+    ) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "numRequested must be a positive integer",
+      });
+    }
 
-      conveyorChainSize: FRO_9000FData.conveyorChainSize || "",
 
-      chainManufacturer: FRO_9000FData.chainManufacturer || "",
+    // =====================================================
+    // PRODUCT-SPECIFIC VALIDATION
+    //
+    // FRO_9000FData and FRO_9000F schema use the same
+    // flat field structure.
+    //
+    // No transformation or legacy mapping is required.
+    //
+    // FRO_9000F is used ONLY for validation.
+    // It is NOT saved into a separate collection.
+    // =====================================================
 
-      conveyorLength: FRO_9000FData.conveyorLength || "",
+    const validation =
+      new FRO_9000F(FRO_9000FData);
 
-      conveyorLengthUnit: FRO_9000FData.conveyorLengthUnit || "",
+    await validation.validate();
 
-      conveyorSpeed: FRO_9000FData.conveyorSpeed || "",
 
-      conveyorSpeedUnit: FRO_9000FData.conveyorSpeedUnit || "",
+    // =====================================================
+    // CLEAN VALIDATED CONFIGURATION DATA
+    // =====================================================
 
-      indexingVariableSpeedConditions:
-        FRO_9000FData.indexingVariableSpeedConditions || "",
+    const configurationData =
+      validation.toObject({
+        versionKey: false,
+      });
 
-      travelDirection: FRO_9000FData.travelDirection || "",
+    delete configurationData._id;
+    delete configurationData.createdAt;
+    delete configurationData.updatedAt;
 
-      applicationEnvironment:
-        FRO_9000FData.applicationEnvironment || "",
 
-      surroundingTemperature:
-        FRO_9000FData.surroundingTemperature || "",
+    // =====================================================
+    // AUTHENTICATED USER / AUDIT SNAPSHOT
+    // =====================================================
 
-      conveyorLoadedStatus:
-        FRO_9000FData.conveyorLoadedStatus || "",
+    const actor = {
+      userID:
+        req.user.userID,
 
-      conveyorSwingStatus:
-        FRO_9000FData.conveyorSwingStatus || "",
+      username:
+        req.user.username,
 
-      // =====================================================
-      // CUSTOMER POWER UTILITIES
-      // =====================================================
+      firstName:
+        req.user.firstName || "",
 
-      operatingVoltage:
-        FRO_9000FData.operatingVoltage || "",
+      lastName:
+        req.user.lastName || "",
 
-      controlVoltage:
-        FRO_9000FData.controlVoltage || "",
+      role:
+        req.user.role || "user",
+    };
 
-      // =====================================================
-      // MONITORING
-      // =====================================================
 
-      existingMonitoring:
-        FRO_9000FData.existingMonitoring || "",
+    // =====================================================
+    // CREATE GENERIC PRODUCT CONFIGURATION
+    // =====================================================
 
-      newMonitoringSystem:
-        FRO_9000FData.newMonitoringSystem || "",
+    const productConfiguration =
+      new ProductConfiguration({
+        userID:
+          req.user.userID,
 
-      // =====================================================
-      // CONVEYOR SPECIFICATIONS
-      // =====================================================
+        configurationName:
+          configurationData.conveyorName ||
+          "FRO 9000F",
 
-      wheelOpenRaceStyle:
-        FRO_9000FData.wheelOpenRaceStyle || "",
+        productType:
+          "FRO_9000F",
 
-      wheelSealedStyle:
-        FRO_9000FData.wheelSealedStyle || "",
+        productName:
+          "FRO 9000F",
 
-      openInsideShieldedOutside:
-        FRO_9000FData.openInsideShieldedOutside || "",
+        status:
+          "cart",
 
-      freeTrolleyWheels:
-        FRO_9000FData.freeTrolleyWheels || "",
+        isComplete:
+          true,
 
-      guideRollers:
-        FRO_9000FData.guideRollers || "",
+        numRequested:
+          quantity,
 
-      guideRollersOpenRaceStyle:
-        FRO_9000FData.guideRollersOpenRaceStyle || "",
+        configurationData,
 
-      guideRollersSealedStyle:
-        FRO_9000FData.guideRollersSealedStyle || "",
+        createdBy:
+          actor,
 
-      openHole:
-        FRO_9000FData.openHole || "",
+        updatedBy:
+          actor,
+      });
 
-      dogActuator:
-        FRO_9000FData.dogActuator || "",
 
-      pivotPoints:
-        FRO_9000FData.pivotPoints || "",
+    // =====================================================
+    // SAVE INTO GENERIC COLLECTION
+    //
+    // OLD:
+    //
+    // req.user.cart.push(...)
+    // await req.user.save()
+    //
+    // NEW:
+    //
+    // product_configurations
+    // =====================================================
 
-      kingPin:
-        FRO_9000FData.kingPin || "",
+    const savedConfiguration =
+      await productConfiguration.save();
 
-      railLubrication:
-        FRO_9000FData.railLubrication || "",
 
-      currentLubricationEquipmentBrand:
-        FRO_9000FData.currentLubricationEquipmentBrand || "",
+    // =====================================================
+    // SUCCESS RESPONSE
+    // =====================================================
 
-      currentLubricantType:
-        FRO_9000FData.currentLubricantType || "",
+    return res.status(201).json({
+      success: true,
 
-      currentLubricantViscosityGrade:
-        FRO_9000FData.currentLubricantViscosityGrade || "",
+      message:
+        "FRO_9000F configuration added to cart successfully",
 
-      lubricationFromSideOfChain:
-        FRO_9000FData.lubricationFromSideOfChain || "",
+      configurationID:
+        savedConfiguration.configurationID,
 
-      lubricationFromTopOfChain:
-        FRO_9000FData.lubricationFromTopOfChain || "",
+      configuration: {
+        configurationID:
+          savedConfiguration.configurationID,
 
-      // =====================================================
-      // CONTROLLER
-      // =====================================================
+        configurationName:
+          savedConfiguration.configurationName,
 
-      specialControllerOptions:
-        FRO_9000FData.specialControllerOptions || "",
+        productType:
+          savedConfiguration.productType,
 
-      controllerSpecify:
-        FRO_9000FData.controllerSpecify || "",
+        productName:
+          savedConfiguration.productName,
 
-      // =====================================================
-      // WIRE
-      // =====================================================
+        status:
+          savedConfiguration.status,
 
-      wireMeasurementUnit:
-        FRO_9000FData.wireMeasurementUnit || "",
+        isComplete:
+          savedConfiguration.isComplete,
 
-      twoConductor:
-        FRO_9000FData.twoConductor || "",
-
-      fourConductor:
-        FRO_9000FData.fourConductor || "",
-
-      sevenConductor:
-        FRO_9000FData.sevenConductor || "",
-
-      twelveConductor:
-        FRO_9000FData.twelveConductor || "",
-
-      junctionBoxQuantities:
-        FRO_9000FData.junctionBoxQuantities || "",
-
-      // =====================================================
-      // FREE RAIL MEASUREMENTS
-      // =====================================================
-
-      freeRailMeasurementUnit:
-        FRO_9000FData.freeRailMeasurementUnit || "",
-
-      overheadFreeRailC:
-        FRO_9000FData.overheadFreeRailC || "",
-
-      overheadFreeRailD:
-        FRO_9000FData.overheadFreeRailD || "",
-
-      overheadTrolleyWheelPitchK:
-        FRO_9000FData.overheadTrolleyWheelPitchK || "",
-
-      overheadFreeTrolleyWheelPositionL:
-        FRO_9000FData.overheadFreeTrolleyWheelPositionL || "",
-
-      overheadFreeRailTrolleyWheelC2:
-        FRO_9000FData.overheadFreeRailTrolleyWheelC2 || "",
-
-      invertedPowerFreeRailE:
-        FRO_9000FData.invertedPowerFreeRailE || "",
-
-      invertedPowerFreeTrolleyWheelPitchK:
-        FRO_9000FData.invertedPowerFreeTrolleyWheelPitchK || "",
-
-      // =====================================================
-      // TECHNICIAN NOTE
-      // =====================================================
-
-      technicianNote:
-        FRO_9000FData.technicianNote || "",
+        numRequested:
+          savedConfiguration.numRequested,
+      },
     });
 
-    req.user.cart.push({
-      numRequested,
-      productConfigurationInfo: order,
-      productType: "9000L",
-    });
-
-    await req.user.save();
-
-    return res.status(200).json({
-      message: "FRO_9000F entry added",
-    });
   } catch (error) {
-    console.log("FRO_9000F add error:", error);
+    console.error(
+      "FRO_9000F configuration error:",
+      error
+    );
+
+
+    // =====================================================
+    // MONGOOSE VALIDATION ERROR
+    // =====================================================
+
+    if (error?.name === "ValidationError") {
+      const errors = {};
+
+      for (const field in error.errors) {
+        errors[field] =
+          error.errors[field].message;
+      }
+
+      return res.status(422).json({
+        success: false,
+
+        message:
+          "Invalid FRO_9000F configuration",
+
+        errors,
+      });
+    }
+
+
+    // =====================================================
+    // INTERNAL SERVER ERROR
+    // =====================================================
 
     return res.status(500).json({
-      error: "Internal server error",
+      success: false,
+
+      message:
+        "Failed to add FRO_9000F configuration",
     });
   }
 });
+
 
 module.exports = router;

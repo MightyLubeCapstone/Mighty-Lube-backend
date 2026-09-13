@@ -1,207 +1,256 @@
 const express = require("express");
+
 const { authenticate } = require("./sessions");
 const ETO_9000E = require("../models/ETO_9000E");
+const ProductConfiguration = require("../models/product_configuration");
 
 const router = express.Router();
 
+
+// =========================================================
+// POST /api/eto_9000e
+//
+// Product:
+// ETO 9000E
+//
+// ETO_9000E model:
+// validation only
+//
+// Actual storage:
+// product_configurations
+//
+// Add to Cart:
+// status = "cart"
+// isComplete = true
+// =========================================================
+
 router.post("/", authenticate, async (req, res) => {
   try {
-    const { ETO_9000EData, numRequested } = req.body || {};
+    const {
+      ETO_9000EData,
+      numRequested,
+    } = req.body || {};
 
-    if (!ETO_9000EData) {
+
+    // =====================================================
+    // REQUEST VALIDATION
+    // =====================================================
+
+    if (
+      !ETO_9000EData ||
+      typeof ETO_9000EData !== "object" ||
+      Array.isArray(ETO_9000EData)
+    ) {
       return res.status(400).json({
-        error: "ETO_9000EData is required",
+        success: false,
+        message: "ETO_9000EData is required",
       });
     }
 
-    const order = new ETO_9000E({
-      // =========================================================
-      // GENERAL INFORMATION
-      // =========================================================
+    const quantity = Number(numRequested);
 
-      conveyorName: ETO_9000EData.conveyorName,
+    if (
+      !Number.isInteger(quantity) ||
+      quantity < 1
+    ) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "numRequested must be a positive integer",
+      });
+    }
 
-      chainSize: ETO_9000EData.chainSize,
-      otherChainSize: ETO_9000EData.otherChainSize,
 
-      industrialChainManufacturer:
-        ETO_9000EData.industrialChainManufacturer,
+    // =====================================================
+    // PRODUCT-SPECIFIC VALIDATION
+    //
+    // Route data and ETO_9000E schema use the same
+    // flat field structure.
+    //
+    // No transformation is required.
+    //
+    // ETO_9000E model is NOT saved separately.
+    // =====================================================
 
-      otherIndustrialChainManufacturer:
-        ETO_9000EData.otherIndustrialChainManufacturer,
+    const validation =
+      new ETO_9000E(ETO_9000EData);
 
-      conveyorLength: ETO_9000EData.conveyorLength,
-      conveyorLengthUnit: ETO_9000EData.conveyorLengthUnit,
+    await validation.validate();
 
-      conveyorSpeed: ETO_9000EData.conveyorSpeed,
-      conveyorSpeedUnit: ETO_9000EData.conveyorSpeedUnit,
 
-      conveyorIndex: ETO_9000EData.conveyorIndex,
+    // =====================================================
+    // CLEAN VALIDATED CONFIGURATION DATA
+    //
+    // Mongoose schema also removes fields that do not
+    // belong to ETO_9000E schema.
+    // =====================================================
 
-      travelDirection: ETO_9000EData.travelDirection,
+    const configurationData =
+      validation.toObject({
+        versionKey: false,
+      });
 
-      appEnviroment: ETO_9000EData.appEnviroment,
+    delete configurationData._id;
+    delete configurationData.createdAt;
+    delete configurationData.updatedAt;
 
-      otherAppEnviroment:
-        ETO_9000EData.otherAppEnviroment,
 
-      surroundingTemp: ETO_9000EData.surroundingTemp,
+    // =====================================================
+    // AUTHENTICATED USER / AUDIT SNAPSHOT
+    // =====================================================
 
-      // =========================================================
-      // CUSTOMER POWER UTILITIES
-      // =========================================================
+    const actor = {
+      userID:
+        req.user.userID,
 
-      operatingVoltage: ETO_9000EData.operatingVoltage,
+      username:
+        req.user.username,
 
-      controlVoltage: ETO_9000EData.controlVoltage,
+      firstName:
+        req.user.firstName || "",
 
-      // =========================================================
-      // MONITORING
-      // =========================================================
+      lastName:
+        req.user.lastName || "",
 
-      existingMonitoring:
-        ETO_9000EData.existingMonitoring,
+      role:
+        req.user.role || "user",
+    };
 
-      newMonitoringSystem:
-        ETO_9000EData.newMonitoringSystem,
 
-      // =========================================================
-      // CONVEYOR SPECIFICATIONS
-      // =========================================================
+    // =====================================================
+    // CREATE GENERIC PRODUCT CONFIGURATION
+    // =====================================================
 
-      wheelOpenType:
-        ETO_9000EData.wheelOpenType,
+    const productConfiguration =
+      new ProductConfiguration({
+        userID:
+          req.user.userID,
 
-      wheelClosedType:
-        ETO_9000EData.wheelClosedType,
+        configurationName:
+          configurationData.conveyorName ||
+          "ETO 9000E",
 
-      powerChain:
-        ETO_9000EData.powerChain,
+        productType:
+          "ETO_9000E",
 
-      chainPins:
-        ETO_9000EData.chainPins,
+        productName:
+          "ETO 9000E",
 
-      catDriveStatus:
-        ETO_9000EData.catDriveStatus,
+        status:
+          "cart",
 
-      catDriveNum:
-        ETO_9000EData.catDriveNum,
+        isComplete:
+          true,
 
-      railLubeStatus:
-        ETO_9000EData.railLubeStatus,
+        numRequested:
+          quantity,
 
-      externalLubeStatus:
-        ETO_9000EData.externalLubeStatus,
+        configurationData,
 
-      lubeBrand:
-        ETO_9000EData.lubeBrand,
+        createdBy:
+          actor,
 
-      lubeType:
-        ETO_9000EData.lubeType,
+        updatedBy:
+          actor,
+      });
 
-      lubeViscosity:
-        ETO_9000EData.lubeViscosity,
 
-      sideLubeStatus:
-        ETO_9000EData.sideLubeStatus,
+    // =====================================================
+    // SAVE INTO GENERIC COLLECTION
+    //
+    // OLD:
+    //
+    // req.user.cart.push(...)
+    // await req.user.save()
+    //
+    // NEW:
+    //
+    // product_configurations
+    // =====================================================
 
-      topLubeStatus:
-        ETO_9000EData.topLubeStatus,
+    const savedConfiguration =
+      await productConfiguration.save();
 
-      reservoirSize:
-        ETO_9000EData.reservoirSize,
 
-      reservoirSizeQuantity:
-        ETO_9000EData.reservoirSizeQuantity,
+    // =====================================================
+    // SUCCESS RESPONSE
+    // =====================================================
 
-      chainCleanStatus:
-        ETO_9000EData.chainCleanStatus,
+    return res.status(201).json({
+      success: true,
 
-      // =========================================================
-      // CONTROLLER
-      // =========================================================
+      message:
+        "ETO_9000E configuration added to cart successfully",
 
-      specialControllerOptions:
-        ETO_9000EData.specialControllerOptions,
+      configurationID:
+        savedConfiguration.configurationID,
 
-      controllerPleaseSpecify:
-        ETO_9000EData.controllerPleaseSpecify,
+      configuration: {
+        configurationID:
+          savedConfiguration.configurationID,
 
-      // =========================================================
-      // WIRE
-      // =========================================================
+        configurationName:
+          savedConfiguration.configurationName,
 
-      wireMeasurementUnit:
-        ETO_9000EData.wireMeasurementUnit,
+        productType:
+          savedConfiguration.productType,
 
-      conductor2:
-        ETO_9000EData.conductor2,
+        productName:
+          savedConfiguration.productName,
 
-      conductor4:
-        ETO_9000EData.conductor4,
+        status:
+          savedConfiguration.status,
 
-      conductor7:
-        ETO_9000EData.conductor7,
+        isComplete:
+          savedConfiguration.isComplete,
 
-      conductor12:
-        ETO_9000EData.conductor12,
-
-      junctionBoxNum:
-        ETO_9000EData.junctionBoxNum,
-
-      // =========================================================
-      // ENCLOSED TRACK OVERHEAD MEASUREMENTS
-      // =========================================================
-
-      enclosedUnitType:
-        ETO_9000EData.enclosedUnitType,
-
-      enclosedTrackB:
-        ETO_9000EData.enclosedTrackB,
-
-      enclosedTrackG:
-        ETO_9000EData.enclosedTrackG,
-
-      enclosedTrackH:
-        ETO_9000EData.enclosedTrackH,
-
-      enclosedTrackS:
-        ETO_9000EData.enclosedTrackS,
-
-      enclosedTrackK2:
-        ETO_9000EData.enclosedTrackK2,
-
-      enclosedTrackL2:
-        ETO_9000EData.enclosedTrackL2,
-
-      enclosedTrackM2:
-        ETO_9000EData.enclosedTrackM2,
-
-      enclosedTrackN2:
-        ETO_9000EData.enclosedTrackN2,
-
-      enclosedTrackS2:
-        ETO_9000EData.enclosedTrackS2,
+        numRequested:
+          savedConfiguration.numRequested,
+      },
     });
 
-    req.user.cart.push({
-      numRequested,
-      productConfigurationInfo: order,
-      productType: "ETO_9000E",
-    });
-
-    await req.user.save();
-
-    return res.status(200).json({
-      message: "ETO_9000E entry added",
-    });
   } catch (error) {
-    console.error("ETO_9000E error:", error);
+    console.error(
+      "ETO_9000E configuration error:",
+      error
+    );
+
+
+    // =====================================================
+    // MONGOOSE VALIDATION ERROR
+    // =====================================================
+
+    if (error?.name === "ValidationError") {
+      const errors = {};
+
+      for (const field in error.errors) {
+        errors[field] =
+          error.errors[field].message;
+      }
+
+      return res.status(422).json({
+        success: false,
+
+        message:
+          "Invalid ETO_9000E configuration",
+
+        errors,
+      });
+    }
+
+
+    // =====================================================
+    // INTERNAL SERVER ERROR
+    // =====================================================
 
     return res.status(500).json({
-      error: "Internal server error",
+      success: false,
+
+      message:
+        "Failed to add ETO_9000E configuration",
     });
   }
 });
 
-module.exports = router
+
+module.exports = router;

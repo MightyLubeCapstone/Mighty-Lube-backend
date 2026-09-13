@@ -1,178 +1,253 @@
 const express = require("express");
+
 const { authenticate } = require("./sessions");
 const ETO_OP48E = require("../models/ETO_OP48E");
+const ProductConfiguration = require("../models/product_configuration");
 
 const router = express.Router();
 
+
 // =========================================================
-// ADD ETOPO OP-48E TO CONFIGURATOR
-//
-// Product ID: ETO_OP48E
 // POST /api/eto_op48e
+//
+// Product:
+// ETO OP-48E
+//
+// ETO_OP48E model:
+// validation only
+//
+// Actual storage:
+// product_configurations
+//
+// Add to Cart:
+// status = "cart"
+// isComplete = true
 // =========================================================
 
 router.post("/", authenticate, async (req, res) => {
   try {
-    const { ETO_OP48EData, numRequested } = req.body || {};
+    const {
+      ETO_OP48EData,
+      numRequested,
+    } = req.body || {};
+
 
     // =====================================================
-    // BASIC REQUEST VALIDATION
+    // REQUEST VALIDATION
     // =====================================================
 
-    if (!ETO_OP48EData) {
+    if (
+      !ETO_OP48EData ||
+      typeof ETO_OP48EData !== "object" ||
+      Array.isArray(ETO_OP48EData)
+    ) {
       return res.status(400).json({
-        error: "ETO_OP48EData is required",
+        success: false,
+        message: "ETO_OP48EData is required",
       });
     }
 
+    const quantity = Number(numRequested);
+
+    if (
+      !Number.isInteger(quantity) ||
+      quantity < 1
+    ) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "numRequested must be a positive integer",
+      });
+    }
+
+
     // =====================================================
-    // CREATE PRODUCT CONFIGURATION
+    // PRODUCT-SPECIFIC VALIDATION
+    //
+    // ETO_OP48EData and ETO_OP48E schema use the same
+    // flat field structure.
+    //
+    // No transformation is required.
+    //
+    // ETO_OP48E is NOT saved separately.
     // =====================================================
 
-    const order = new ETO_OP48E({
-      // ---------------------------------------------------
-      // GENERAL INFORMATION
-      // ---------------------------------------------------
+    const validation =
+      new ETO_OP48E(ETO_OP48EData);
 
-      conveyorName: ETO_OP48EData.conveyorName,
+    await validation.validate();
 
-      chainSize: ETO_OP48EData.chainSize,
 
-      otherChainSize: ETO_OP48EData.otherChainSize,
+    // =====================================================
+    // CLEAN VALIDATED CONFIGURATION DATA
+    // =====================================================
 
-      industrialChainManufacturer:
-        ETO_OP48EData.industrialChainManufacturer,
+    const configurationData =
+      validation.toObject({
+        versionKey: false,
+      });
 
-      otherIndustrialChainManufacturer:
-        ETO_OP48EData.otherIndustrialChainManufacturer,
+    delete configurationData._id;
+    delete configurationData.createdAt;
+    delete configurationData.updatedAt;
 
-      conveyorLength: ETO_OP48EData.conveyorLength,
 
-      conveyorLengthUnit: ETO_OP48EData.conveyorLengthUnit,
+    // =====================================================
+    // AUTHENTICATED USER / AUDIT SNAPSHOT
+    // =====================================================
 
-      conveyorSpeed: ETO_OP48EData.conveyorSpeed,
+    const actor = {
+      userID:
+        req.user.userID,
 
-      conveyorSpeedUnit: ETO_OP48EData.conveyorSpeedUnit,
+      username:
+        req.user.username,
 
-      conveyorIndex: ETO_OP48EData.conveyorIndex,
+      firstName:
+        req.user.firstName || "",
 
-      travelDirection: ETO_OP48EData.travelDirection,
+      lastName:
+        req.user.lastName || "",
 
-      appEnviroment: ETO_OP48EData.appEnviroment,
+      role:
+        req.user.role || "user",
+    };
 
-      otherAppEnviroment: ETO_OP48EData.otherAppEnviroment,
 
-      surroundingTemp: ETO_OP48EData.surroundingTemp,
+    // =====================================================
+    // CREATE GENERIC PRODUCT CONFIGURATION
+    // =====================================================
 
-      // ---------------------------------------------------
-      // CUSTOMER POWER UTILITIES
-      // ---------------------------------------------------
+    const productConfiguration =
+      new ProductConfiguration({
+        userID:
+          req.user.userID,
 
-      operatingVoltage: ETO_OP48EData.operatingVoltage,
+        configurationName:
+          configurationData.conveyorName ||
+          "ETO OP-48E",
 
-      controlVoltage: ETO_OP48EData.controlVoltage,
+        productType:
+          "ETO_OP48E",
 
-      // ---------------------------------------------------
-      // MONITORING SYSTEM
-      // ---------------------------------------------------
+        productName:
+          "ETO OP-48E",
 
-      existingMonitoring: ETO_OP48EData.existingMonitoring,
+        status:
+          "cart",
 
-      newMonitoringSystem: ETO_OP48EData.newMonitoringSystem,
+        isComplete:
+          true,
 
-      // ---------------------------------------------------
-      // CONVEYOR SPECIFICATIONS
-      // ---------------------------------------------------
+        numRequested:
+          quantity,
 
-      wheelOpenType: ETO_OP48EData.wheelOpenType,
+        configurationData,
 
-      wheelClosedType: ETO_OP48EData.wheelClosedType,
+        createdBy:
+          actor,
 
-      powerChain: ETO_OP48EData.powerChain,
+        updatedBy:
+          actor,
+      });
 
-      chainPins: ETO_OP48EData.chainPins,
 
-      catDriveStatus: ETO_OP48EData.catDriveStatus,
+    // =====================================================
+    // SAVE INTO GENERIC COLLECTION
+    //
+    // OLD:
+    //
+    // req.user.cart.push(...)
+    // await req.user.save()
+    //
+    // NEW:
+    //
+    // product_configurations
+    // =====================================================
 
-      catDriveNum: ETO_OP48EData.catDriveNum,
+    const savedConfiguration =
+      await productConfiguration.save();
 
-      railLubeStatus: ETO_OP48EData.railLubeStatus,
 
-      externalLubeStatus: ETO_OP48EData.externalLubeStatus,
+    // =====================================================
+    // SUCCESS RESPONSE
+    // =====================================================
 
-      lubeBrand: ETO_OP48EData.lubeBrand,
+    return res.status(201).json({
+      success: true,
 
-      lubeType: ETO_OP48EData.lubeType,
+      message:
+        "ETO_OP48E configuration added to cart successfully",
 
-      lubeViscosity: ETO_OP48EData.lubeViscosity,
+      configurationID:
+        savedConfiguration.configurationID,
 
-      sideLubeStatus: ETO_OP48EData.sideLubeStatus,
+      configuration: {
+        configurationID:
+          savedConfiguration.configurationID,
 
-      topLubeStatus: ETO_OP48EData.topLubeStatus,
+        configurationName:
+          savedConfiguration.configurationName,
 
-      chainCleanStatus: ETO_OP48EData.chainCleanStatus,
+        productType:
+          savedConfiguration.productType,
 
-      // ---------------------------------------------------
-      // CONTROLLER
-      // ---------------------------------------------------
+        productName:
+          savedConfiguration.productName,
 
-      specialControllerOptions:
-        ETO_OP48EData.specialControllerOptions,
+        status:
+          savedConfiguration.status,
 
-      controllerPleaseSpecify:
-        ETO_OP48EData.controllerPleaseSpecify,
+        isComplete:
+          savedConfiguration.isComplete,
 
-      // ---------------------------------------------------
-      // ENCLOSED TRACK OVERHEAD MEASUREMENTS
-      // ---------------------------------------------------
-
-      etUnitType: ETO_OP48EData.etUnitType,
-
-      etOverheadB: ETO_OP48EData.etOverheadB,
-
-      etOverheadG: ETO_OP48EData.etOverheadG,
-
-      etOverheadH: ETO_OP48EData.etOverheadH,
-
-      etOverheadS: ETO_OP48EData.etOverheadS,
-
-      etOverheadK2: ETO_OP48EData.etOverheadK2,
-
-      etOverheadL2: ETO_OP48EData.etOverheadL2,
-
-      etOverheadM2: ETO_OP48EData.etOverheadM2,
-
-      etOverheadN2: ETO_OP48EData.etOverheadN2,
-
-      etOverheadS2: ETO_OP48EData.etOverheadS2,
+        numRequested:
+          savedConfiguration.numRequested,
+      },
     });
 
-    // =====================================================
-    // ADD TO AUTHENTICATED USER CART
-    // =====================================================
-
-    req.user.cart.push({
-      numRequested,
-      productConfigurationInfo: order,
-      productType: "ETO_OP48E",
-    });
-
-    await req.user.save();
-
-    // =====================================================
-    // SUCCESS
-    // =====================================================
-
-    return res.status(200).json({
-      message: "ETO_OP48E entry added",
-    });
   } catch (error) {
-    console.error("ETO_OP48E Error:", error);
+    console.error(
+      "ETO_OP48E configuration error:",
+      error
+    );
+
+
+    // =====================================================
+    // MONGOOSE VALIDATION ERROR
+    // =====================================================
+
+    if (error?.name === "ValidationError") {
+      const errors = {};
+
+      for (const field in error.errors) {
+        errors[field] =
+          error.errors[field].message;
+      }
+
+      return res.status(422).json({
+        success: false,
+
+        message:
+          "Invalid ETO_OP48E configuration",
+
+        errors,
+      });
+    }
+
+
+    // =====================================================
+    // INTERNAL SERVER ERROR
+    // =====================================================
 
     return res.status(500).json({
-      error: "Internal server error",
+      success: false,
+
+      message:
+        "Failed to add ETO_OP48E configuration",
     });
   }
 });
 
-module.exports = router
+
+module.exports = router;

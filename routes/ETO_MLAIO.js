@@ -1,133 +1,274 @@
 const express = require("express");
-const router = express.Router();
 
 const { authenticate } = require("./sessions");
 const ETO_MLAIO = require("../models/ETO_MLAIO");
+const ProductConfiguration = require("../models/product_configuration");
+
+const router = express.Router();
+
+
+// =========================================================
+// POST /api/eto_mlaio
+//
+// Product:
+// ETO MLAIO
+//
+// ETO_MLAIO model:
+// validation only
+//
+// IMPORTANT:
+//
+// Do NOT call:
+//
+// await validation.save()
+//
+// ETO_MLAIO must NOT create its own product collection.
+//
+// Actual storage:
+// product_configurations
+//
+// Add to Cart:
+// status = "cart"
+// isComplete = true
+// =========================================================
 
 router.post("/", authenticate, async (req, res) => {
   try {
-    const { ETO_MLAIOData, numRequested } = req.body || {};
+    const {
+      ETO_MLAIOData,
+      numRequested,
+    } = req.body || {};
 
-    if (!ETO_MLAIOData) {
+
+    // =====================================================
+    // REQUEST VALIDATION
+    // =====================================================
+
+    if (
+      !ETO_MLAIOData ||
+      typeof ETO_MLAIOData !== "object" ||
+      Array.isArray(ETO_MLAIOData)
+    ) {
       return res.status(400).json({
         success: false,
         message: "ETO_MLAIOData is required",
       });
     }
 
-    const order = new ETO_MLAIO({
-      // ======================================================
-      // GENERAL INFORMATION
-      // ======================================================
+    const quantity =
+      numRequested === undefined ||
+      numRequested === null
+        ? 1
+        : Number(numRequested);
 
-      conveyorName: ETO_MLAIOData.conveyorName || "",
-      chainSize: ETO_MLAIOData.chainSize || "",
-      otherChainSize: ETO_MLAIOData.otherChainSize || "",
+    if (
+      !Number.isInteger(quantity) ||
+      quantity < 1
+    ) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "numRequested must be a positive integer",
+      });
+    }
 
-      industrialChainManufacturer:
-        ETO_MLAIOData.industrialChainManufacturer || "",
 
-      otherIndustrialChainManufacturer:
-        ETO_MLAIOData.otherIndustrialChainManufacturer || "",
+    // =====================================================
+    // PRODUCT-SPECIFIC VALIDATION
+    //
+    // Route payload and ETO_MLAIO schema have the same
+    // flat structure.
+    //
+    // No transformation is required.
+    //
+    // Schema defaults missing String fields to "".
+    // =====================================================
 
-      conveyorLength: ETO_MLAIOData.conveyorLength || "",
-      conveyorLengthUnit: ETO_MLAIOData.conveyorLengthUnit || "",
+    const validation =
+      new ETO_MLAIO(ETO_MLAIOData);
 
-      conveyorSpeed: ETO_MLAIOData.conveyorSpeed || "",
-      conveyorSpeedUnit: ETO_MLAIOData.conveyorSpeedUnit || "",
+    await validation.validate();
 
-      conveyorIndex: ETO_MLAIOData.conveyorIndex || "",
-      travelDirection: ETO_MLAIOData.travelDirection || "",
 
-      appEnviroment: ETO_MLAIOData.appEnviroment || "",
-      otherAppEnviroment: ETO_MLAIOData.otherAppEnviroment || "",
+    // =====================================================
+    // CLEAN VALIDATED CONFIGURATION DATA
+    //
+    // IMPORTANT:
+    //
+    // validation.save() is intentionally NOT called.
+    //
+    // ETO_MLAIO is only being used as a validation/schema
+    // normalization layer.
+    // =====================================================
 
-      surroundingTemp: ETO_MLAIOData.surroundingTemp || "",
-      conveyorLoaded: ETO_MLAIOData.conveyorLoaded || "",
-      conveyorSwing: ETO_MLAIOData.conveyorSwing || "",
+    const configurationData =
+      validation.toObject({
+        versionKey: false,
+      });
 
-      // ======================================================
-      // CUSTOMER POWER UTILITIES
-      // ======================================================
+    delete configurationData._id;
+    delete configurationData.createdAt;
+    delete configurationData.updatedAt;
 
-      operatingVoltage: ETO_MLAIOData.operatingVoltage || "",
-      controlVoltage: ETO_MLAIOData.controlVoltage || "",
 
-      // ======================================================
-      // NEW / EXISTING MONITORING SYSTEM
-      // ======================================================
+    // =====================================================
+    // AUTHENTICATED USER / AUDIT SNAPSHOT
+    // =====================================================
 
-      existingMonitoring: ETO_MLAIOData.existingMonitoring || "",
-      newMonitoringSystem: ETO_MLAIOData.newMonitoringSystem || "",
+    const actor = {
+      userID:
+        req.user.userID,
 
-      // ======================================================
-      // CONVEYOR SPECIFICATIONS
-      // ======================================================
+      username:
+        req.user.username,
 
-      wheelOpenType: ETO_MLAIOData.wheelOpenType || "",
-      wheelClosedType: ETO_MLAIOData.wheelClosedType || "",
+      firstName:
+        req.user.firstName || "",
 
-      powerChain: ETO_MLAIOData.powerChain || "",
-      chainPins: ETO_MLAIOData.chainPins || "",
+      lastName:
+        req.user.lastName || "",
 
-      catDriveStatus: ETO_MLAIOData.catDriveStatus || "",
-      catDriveNum: ETO_MLAIOData.catDriveNum || "",
+      role:
+        req.user.role || "user",
+    };
 
-      railLubeStatus: ETO_MLAIOData.railLubeStatus || "",
-      externalLubeStatus: ETO_MLAIOData.externalLubeStatus || "",
 
-      lubeBrand: ETO_MLAIOData.lubeBrand || "",
-      lubeType: ETO_MLAIOData.lubeType || "",
-      lubeViscosity: ETO_MLAIOData.lubeViscosity || "",
+    // =====================================================
+    // CREATE GENERIC PRODUCT CONFIGURATION
+    // =====================================================
 
-      reservoirSize: ETO_MLAIOData.reservoirSize || "",
-      reservoirSizeQuantity:
-        ETO_MLAIOData.reservoirSizeQuantity || "",
+    const productConfiguration =
+      new ProductConfiguration({
+        userID:
+          req.user.userID,
 
-      chainCleanStatus: ETO_MLAIOData.chainCleanStatus || "",
+        configurationName:
+          configurationData.conveyorName ||
+          "ETO MLAIO",
 
-      // ======================================================
-      // ENCLOSED TRACK OVERHEAD: MEASUREMENTS
-      // ======================================================
+        productType:
+          "ETO_MLAIO",
 
-      enclosedUnitType: ETO_MLAIOData.enclosedUnitType || "",
+        productName:
+          "ETO MLAIO",
 
-      enclosedTrackB: ETO_MLAIOData.enclosedTrackB || "",
-      enclosedTrackG: ETO_MLAIOData.enclosedTrackG || "",
-      enclosedTrackH: ETO_MLAIOData.enclosedTrackH || "",
-      enclosedTrackS: ETO_MLAIOData.enclosedTrackS || "",
+        status:
+          "cart",
 
-      enclosedTrackK2: ETO_MLAIOData.enclosedTrackK2 || "",
-      enclosedTrackL2: ETO_MLAIOData.enclosedTrackL2 || "",
-      enclosedTrackM2: ETO_MLAIOData.enclosedTrackM2 || "",
-      enclosedTrackN2: ETO_MLAIOData.enclosedTrackN2 || "",
-      enclosedTrackS2: ETO_MLAIOData.enclosedTrackS2 || "",
-    });
+        isComplete:
+          true,
 
-    await order.save();
+        numRequested:
+          quantity,
 
-    req.user.cart.push({
-      numRequested: numRequested || 1,
-      productConfigurationInfo: order,
-      productType: "ETO_MLAIO",
-    });
+        configurationData,
 
-    await req.user.save();
+        createdBy:
+          actor,
 
-    return res.status(200).json({
+        updatedBy:
+          actor,
+      });
+
+
+    // =====================================================
+    // SAVE INTO COMMON COLLECTION
+    //
+    // OLD:
+    //
+    // await order.save()
+    //
+    // req.user.cart.push(...)
+    // await req.user.save()
+    //
+    // NEW:
+    //
+    // Only product_configurations
+    // =====================================================
+
+    const savedConfiguration =
+      await productConfiguration.save();
+
+
+    // =====================================================
+    // SUCCESS RESPONSE
+    // =====================================================
+
+    return res.status(201).json({
       success: true,
-      message: "ETO_MLAIO entry added",
-      data: order,
+
+      message:
+        "ETO_MLAIO configuration added to cart successfully",
+
+      configurationID:
+        savedConfiguration.configurationID,
+
+      configuration: {
+        configurationID:
+          savedConfiguration.configurationID,
+
+        configurationName:
+          savedConfiguration.configurationName,
+
+        productType:
+          savedConfiguration.productType,
+
+        productName:
+          savedConfiguration.productName,
+
+        status:
+          savedConfiguration.status,
+
+        isComplete:
+          savedConfiguration.isComplete,
+
+        numRequested:
+          savedConfiguration.numRequested,
+      },
     });
+
   } catch (error) {
-    console.error("ETO_MLAIO route error:", error);
+    console.error(
+      "ETO_MLAIO route error:",
+      error
+    );
+
+
+    // =====================================================
+    // MONGOOSE VALIDATION ERROR
+    // =====================================================
+
+    if (error?.name === "ValidationError") {
+      const errors = {};
+
+      for (const field in error.errors) {
+        errors[field] =
+          error.errors[field].message;
+      }
+
+      return res.status(422).json({
+        success: false,
+
+        message:
+          "Invalid ETO_MLAIO configuration",
+
+        errors,
+      });
+    }
+
+
+    // =====================================================
+    // INTERNAL SERVER ERROR
+    // =====================================================
 
     return res.status(500).json({
       success: false,
-      message: "Failed to add ETO_MLAIO configuration",
-      error: error.message,
+
+      message:
+        "Failed to add ETO_MLAIO configuration",
     });
   }
 });
+
 
 module.exports = router;

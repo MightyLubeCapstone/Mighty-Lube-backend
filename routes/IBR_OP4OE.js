@@ -1,236 +1,253 @@
 const express = require("express");
+
 const { authenticate } = require("./sessions");
 const IBR_OP4OE = require("../models/IBR_OP4OE");
+const ProductConfiguration = require("../models/product_configuration");
 
 const router = express.Router();
 
-// ============================================================
-// OP-40E - IN-BOARD ROLLER CHAIN
-//
-// Product ID: IBR_OP4OE
+
+// =========================================================
 // POST /api/ibr_op4oe
-// Request Body:
-// {
-//   IBR_OP4OEData: {...},
-//   numRequested: 1
-// }
-// ============================================================
+//
+// Product:
+// OP-40E - In-Board Roller Chain
+//
+// IBR_OP4OE model:
+// validation only
+//
+// Actual storage:
+// product_configurations
+//
+// Add to Cart:
+// status = "cart"
+// isComplete = true
+// =========================================================
 
 router.post("/", authenticate, async (req, res) => {
   try {
-    const { IBR_OP4OEData, numRequested } = req.body;
+    const {
+      IBR_OP4OEData,
+      numRequested,
+    } = req.body || {};
 
-    if (!IBR_OP4OEData) {
+
+    // =====================================================
+    // REQUEST VALIDATION
+    // =====================================================
+
+    if (
+      !IBR_OP4OEData ||
+      typeof IBR_OP4OEData !== "object" ||
+      Array.isArray(IBR_OP4OEData)
+    ) {
       return res.status(400).json({
-        error: "IBR_OP4OEData is required",
+        success: false,
+        message: "IBR_OP4OEData is required",
       });
     }
 
-    const order = new IBR_OP4OE({
-      // ======================================================
-      // GENERAL INFORMATION
-      // ======================================================
+    const quantity = Number(numRequested);
 
-      conveyorName: IBR_OP4OEData.conveyorName,
+    if (
+      !Number.isInteger(quantity) ||
+      quantity < 1
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "numRequested must be a positive integer",
+      });
+    }
 
-      conveyorChainSize: IBR_OP4OEData.conveyorChainSize,
 
-      otherConveyorChainSize:
-        IBR_OP4OEData.otherConveyorChainSize,
+    // =====================================================
+    // PRODUCT-SPECIFIC VALIDATION
+    //
+    // IBR_OP4OEData and IBR_OP4OE schema use the same
+    // flat field structure.
+    //
+    // No transformation or legacy mapping is required.
+    //
+    // IBR_OP4OE is used ONLY for validation.
+    // It is NOT saved into a separate collection.
+    // =====================================================
 
-      chainManufacturer:
-        IBR_OP4OEData.chainManufacturer,
+    const validation =
+      new IBR_OP4OE(IBR_OP4OEData);
 
-      otherChainManufacturer:
-        IBR_OP4OEData.otherChainManufacturer,
+    await validation.validate();
 
-      conveyorLength:
-        IBR_OP4OEData.conveyorLength,
 
-      conveyorLengthUnit:
-        IBR_OP4OEData.conveyorLengthUnit,
+    // =====================================================
+    // CLEAN VALIDATED CONFIGURATION DATA
+    // =====================================================
 
-      conveyorSpeed:
-        IBR_OP4OEData.conveyorSpeed,
+    const configurationData =
+      validation.toObject({
+        versionKey: false,
+      });
 
-      conveyorSpeedUnit:
-        IBR_OP4OEData.conveyorSpeedUnit,
+    delete configurationData._id;
+    delete configurationData.createdAt;
+    delete configurationData.updatedAt;
 
-      indexingVariableSpeedConditions:
-        IBR_OP4OEData.indexingVariableSpeedConditions,
 
-      travelDirection:
-        IBR_OP4OEData.travelDirection,
+    // =====================================================
+    // AUTHENTICATED USER / AUDIT SNAPSHOT
+    // =====================================================
 
-      applicationEnvironment:
-        IBR_OP4OEData.applicationEnvironment,
+    const actor = {
+      userID:
+        req.user.userID,
 
-      otherApplicationEnvironment:
-        IBR_OP4OEData.otherApplicationEnvironment,
+      username:
+        req.user.username,
 
-      surroundingTemperature:
-        IBR_OP4OEData.surroundingTemperature,
+      firstName:
+        req.user.firstName || "",
 
-      conveyorLoadedStatus:
-        IBR_OP4OEData.conveyorLoadedStatus,
+      lastName:
+        req.user.lastName || "",
 
-      conveyorSwingStatus:
-        IBR_OP4OEData.conveyorSwingStatus,
+      role:
+        req.user.role || "user",
+    };
 
-      conveyorStrand:
-        IBR_OP4OEData.conveyorStrand,
 
-      // ======================================================
-      // CUSTOMER POWER UTILITIES
-      // ======================================================
+    // =====================================================
+    // CREATE GENERIC PRODUCT CONFIGURATION
+    // =====================================================
 
-      operatingVoltage:
-        IBR_OP4OEData.operatingVoltage,
+    const productConfiguration =
+      new ProductConfiguration({
+        userID:
+          req.user.userID,
 
-      controlVoltage:
-        IBR_OP4OEData.controlVoltage,
+        configurationName:
+          configurationData.conveyorName ||
+          "IBR OP-40E",
 
-      // ======================================================
-      // MONITORING SYSTEM
-      // ======================================================
+        productType:
+          "IBR_OP4OE",
 
-      existingMonitoring:
-        IBR_OP4OEData.existingMonitoring,
+        productName:
+          "IBR OP-40E",
 
-      newMonitoringSystem:
-        IBR_OP4OEData.newMonitoringSystem,
+        status:
+          "cart",
 
-      // ======================================================
-      // CONVEYOR SPECIFICATIONS
-      // ======================================================
+        isComplete:
+          true,
 
-      wheelOpenRaceStyle:
-        IBR_OP4OEData.wheelOpenRaceStyle,
+        numRequested:
+          quantity,
 
-      wheelSealedStyle:
-        IBR_OP4OEData.wheelSealedStyle,
+        configurationData,
 
-      openInsideShieldedOutside:
-        IBR_OP4OEData.openInsideShieldedOutside,
+        createdBy:
+          actor,
 
-      freeTrolleyWheels:
-        IBR_OP4OEData.freeTrolleyWheels,
+        updatedBy:
+          actor,
+      });
 
-      guideRollers:
-        IBR_OP4OEData.guideRollers,
 
-      guideRollersOpenRaceStyle:
-        IBR_OP4OEData.guideRollersOpenRaceStyle,
+    // =====================================================
+    // SAVE INTO GENERIC COLLECTION
+    //
+    // OLD:
+    //
+    // req.user.cart.push(...)
+    // await req.user.save()
+    //
+    // NEW:
+    //
+    // Only ProductConfiguration is persisted.
+    // =====================================================
 
-      guideRollersSealedStyle:
-        IBR_OP4OEData.guideRollersSealedStyle,
+    const savedConfiguration =
+      await productConfiguration.save();
 
-      openHole:
-        IBR_OP4OEData.openHole,
 
-      dogActuator:
-        IBR_OP4OEData.dogActuator,
+    // =====================================================
+    // SUCCESS RESPONSE
+    // =====================================================
 
-      pivotPoints:
-        IBR_OP4OEData.pivotPoints,
+    return res.status(201).json({
+      success: true,
 
-      kingPin:
-        IBR_OP4OEData.kingPin,
+      message:
+        "IBR_OP4OE configuration added to cart successfully",
 
-      outboardWheels:
-        IBR_OP4OEData.outboardWheels,
+      configurationID:
+        savedConfiguration.configurationID,
 
-      railLubrication:
-        IBR_OP4OEData.railLubrication,
+      configuration: {
+        configurationID:
+          savedConfiguration.configurationID,
 
-      currentLubricationEquipmentBrand:
-        IBR_OP4OEData.currentLubricationEquipmentBrand,
+        configurationName:
+          savedConfiguration.configurationName,
 
-      currentLubricantType:
-        IBR_OP4OEData.currentLubricantType,
+        productType:
+          savedConfiguration.productType,
 
-      currentLubricantViscosityGrade:
-        IBR_OP4OEData.currentLubricantViscosityGrade,
+        productName:
+          savedConfiguration.productName,
 
-      // ======================================================
-      // CONTROLLER
-      // ======================================================
+        status:
+          savedConfiguration.status,
 
-      chainMasterController:
-        IBR_OP4OEData.chainMasterController,
+        isComplete:
+          savedConfiguration.isComplete,
 
-      timer:
-        IBR_OP4OEData.timer,
-
-      electricOnOff:
-        IBR_OP4OEData.electricOnOff,
-
-      pneumaticOnOff:
-        IBR_OP4OEData.pneumaticOnOff,
-
-      mightyLubeMonitoring:
-        IBR_OP4OEData.mightyLubeMonitoring,
-
-      plcConnection:
-        IBR_OP4OEData.plcConnection,
-
-      otherControllerDescription:
-        IBR_OP4OEData.otherControllerDescription,
-
-      specialControllerOptions:
-        IBR_OP4OEData.specialControllerOptions,
-
-      controllerSpecify:
-        IBR_OP4OEData.controllerSpecify,
-
-      // ======================================================
-      // IN BOARD ROLLER CHAIN: MEASUREMENTS
-      // ======================================================
-
-      measurementUnit:
-        IBR_OP4OEData.measurementUnit,
-
-      inBoardRollerChainRollerWheelA1:
-        IBR_OP4OEData.inBoardRollerChainRollerWheelA1,
-
-      inBoardRollerChainRollerWheelB1:
-        IBR_OP4OEData.inBoardRollerChainRollerWheelB1,
-
-      inBoardRollerChainLinkC1:
-        IBR_OP4OEData.inBoardRollerChainLinkC1,
-
-      inBoardRollerChainLinkD1:
-        IBR_OP4OEData.inBoardRollerChainLinkD1,
-
-      inBoardRollerChainOuterLinkOffsetF1:
-        IBR_OP4OEData.inBoardRollerChainOuterLinkOffsetF1,
-
-      // ======================================================
-      // TECHNICIAN NOTE
-      // ======================================================
-
-      technicianNote:
-        IBR_OP4OEData.technicianNote,
+        numRequested:
+          savedConfiguration.numRequested,
+      },
     });
 
-    req.user.cart.push({
-      numRequested,
-      productConfigurationInfo: order,
-      productType: "IBR_OP4OE",
-    });
-
-    await req.user.save();
-
-    return res.status(200).json({
-      message: "IBR_OP4OE entry added",
-    });
   } catch (error) {
-    console.error("IBR_OP4OE route error:", error);
+    console.error(
+      "IBR_OP4OE configuration error:",
+      error
+    );
+
+
+    // =====================================================
+    // MONGOOSE VALIDATION ERROR
+    // =====================================================
+
+    if (error?.name === "ValidationError") {
+      const errors = {};
+
+      for (const field in error.errors) {
+        errors[field] =
+          error.errors[field].message;
+      }
+
+      return res.status(422).json({
+        success: false,
+
+        message:
+          "Invalid IBR_OP4OE configuration",
+
+        errors,
+      });
+    }
+
+
+    // =====================================================
+    // INTERNAL SERVER ERROR
+    // =====================================================
 
     return res.status(500).json({
-      error: "Internal server error",
+      success: false,
+
+      message:
+        "Failed to add IBR_OP4OE configuration",
     });
   }
 });
 
-module.exports = router
+
+module.exports = router;

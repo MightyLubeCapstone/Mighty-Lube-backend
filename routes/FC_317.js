@@ -1,207 +1,254 @@
 const express = require("express");
+
 const { authenticate } = require("./sessions");
 const FC_317 = require("../models/FC_317");
+const ProductConfiguration = require("../models/product_configuration");
 
 const router = express.Router();
 
+
+// =========================================================
+// POST /api/fc_317
+//
+// Product:
+// FC 317
+//
+// FC_317 model:
+// validation only
+//
+// Actual storage:
+// product_configurations
+//
+// Add to Cart:
+// status = "cart"
+// isComplete = true
+// =========================================================
+
 router.post("/", authenticate, async (req, res) => {
   try {
-    const { FC_317Data, numRequested } = req.body || {};
+    const {
+      FC_317Data,
+      numRequested,
+    } = req.body || {};
 
-    if (!FC_317Data) {
+
+    // =====================================================
+    // REQUEST VALIDATION
+    // =====================================================
+
+    if (
+      !FC_317Data ||
+      typeof FC_317Data !== "object" ||
+      Array.isArray(FC_317Data)
+    ) {
       return res.status(400).json({
-        error: "FC_317Data is required",
+        success: false,
+        message: "FC_317Data is required",
       });
     }
 
-    const order = new FC_317({
-      // =====================================================
-      // GENERAL INFORMATION
-      // =====================================================
+    const quantity = Number(numRequested);
 
-      conveyorName: FC_317Data.conveyorName || "",
+    if (
+      !Number.isInteger(quantity) ||
+      quantity < 1
+    ) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "numRequested must be a positive integer",
+      });
+    }
 
-      wheelManufacturer:
-        FC_317Data.wheelManufacturer || "",
 
-      otherWheelManufacturer:
-        FC_317Data.otherWheelManufacturer || "",
+    // =====================================================
+    // PRODUCT-SPECIFIC VALIDATION
+    //
+    // FC_317Data and FC_317 schema use the same
+    // flat field structure.
+    //
+    // No transformation is required.
+    //
+    // FC_317 is used ONLY for validation.
+    // It is NOT saved into a separate FC_317 collection.
+    // =====================================================
 
-      conveyorLength:
-        FC_317Data.conveyorLength || "",
+    const validation =
+      new FC_317(FC_317Data);
 
-      conveyorLengthUnit:
-        FC_317Data.conveyorLengthUnit || "",
+    await validation.validate();
 
-      conveyorSpeed:
-        FC_317Data.conveyorSpeed || "",
 
-      conveyorSpeedUnit:
-        FC_317Data.conveyorSpeedUnit || "",
+    // =====================================================
+    // CLEAN VALIDATED CONFIGURATION DATA
+    // =====================================================
 
-      indexingVariableSpeedConditions:
-        FC_317Data.indexingVariableSpeedConditions || "",
+    const configurationData =
+      validation.toObject({
+        versionKey: false,
+      });
 
-      travelDirection:
-        FC_317Data.travelDirection || "",
+    delete configurationData._id;
+    delete configurationData.createdAt;
+    delete configurationData.updatedAt;
 
-      applicationEnvironment:
-        FC_317Data.applicationEnvironment || "",
 
-      otherApplicationEnvironment:
-        FC_317Data.otherApplicationEnvironment || "",
+    // =====================================================
+    // AUTHENTICATED USER / AUDIT SNAPSHOT
+    // =====================================================
 
-      surroundingTemperature:
-        FC_317Data.surroundingTemperature || "",
+    const actor = {
+      userID:
+        req.user.userID,
 
-      conveyorSwingStatus:
-        FC_317Data.conveyorSwingStatus || "",
+      username:
+        req.user.username,
 
-      // =====================================================
-      // CUSTOMER POWER UTILITIES
-      // =====================================================
+      firstName:
+        req.user.firstName || "",
 
-      operatingVoltage:
-        FC_317Data.operatingVoltage || "",
+      lastName:
+        req.user.lastName || "",
 
-      controlVoltage:
-        FC_317Data.controlVoltage || "",
+      role:
+        req.user.role || "user",
+    };
 
-      compressedAirSupply:
-        FC_317Data.compressedAirSupply || "",
 
-      compressedAirSupplyUnit:
-        FC_317Data.compressedAirSupplyUnit || "",
+    // =====================================================
+    // CREATE GENERIC PRODUCT CONFIGURATION
+    // =====================================================
 
-      // =====================================================
-      // NEW / EXISTING MONITORING SYSTEM
-      // =====================================================
+    const productConfiguration =
+      new ProductConfiguration({
+        userID:
+          req.user.userID,
 
-      existingMonitoring:
-        FC_317Data.existingMonitoring || "",
+        configurationName:
+          configurationData.conveyorName ||
+          "FC 317",
 
-      newMonitoringSystem:
-        FC_317Data.newMonitoringSystem || "",
+        productType:
+          "FC_317",
 
-      // =====================================================
-      // CONVEYOR SPECIFICATIONS
-      // =====================================================
+        productName:
+          "FC 317",
 
-      freeTrolleyWheels:
-        FC_317Data.freeTrolleyWheels || "",
+        status:
+          "cart",
 
-      guideRollers:
-        FC_317Data.guideRollers || "",
+        isComplete:
+          true,
 
-      guideRollersOpenRaceStyle:
-        FC_317Data.guideRollersOpenRaceStyle || "",
+        numRequested:
+          quantity,
 
-      guideRollersSealedStyle:
-        FC_317Data.guideRollersSealedStyle || "",
+        configurationData,
 
-      openHole:
-        FC_317Data.openHole || "",
+        createdBy:
+          actor,
 
-      currentLubricationEquipmentBrand:
-        FC_317Data.currentLubricationEquipmentBrand || "",
+        updatedBy:
+          actor,
+      });
 
-      currentLubricantType:
-        FC_317Data.currentLubricantType || "",
 
-      currentLubricantViscosityGrade:
-        FC_317Data.currentLubricantViscosityGrade || "",
+    // =====================================================
+    // SAVE INTO GENERIC COLLECTION
+    //
+    // OLD:
+    //
+    // req.user.cart.push(...)
+    // await req.user.save()
+    //
+    // NEW:
+    //
+    // product_configurations
+    // =====================================================
 
-      currentGreaseType:
-        FC_317Data.currentGreaseType || "",
+    const savedConfiguration =
+      await productConfiguration.save();
 
-      currentGreaseNlgiGrade:
-        FC_317Data.currentGreaseNlgiGrade || "",
 
-      zerkFittingLocationSide:
-        FC_317Data.zerkFittingLocationSide || "",
+    // =====================================================
+    // SUCCESS RESPONSE
+    // =====================================================
 
-      zerkFittingLocationOrientation:
-        FC_317Data.zerkFittingLocationOrientation || "",
+    return res.status(201).json({
+      success: true,
 
-      // =====================================================
-      // CONTROLLER
-      // =====================================================
+      message:
+        "FC_317 configuration added to cart successfully",
 
-      chainMasterController:
-        FC_317Data.chainMasterController || "",
+      configurationID:
+        savedConfiguration.configurationID,
 
-      remote:
-        FC_317Data.remote || "",
+      configuration: {
+        configurationID:
+          savedConfiguration.configurationID,
 
-      mountedOnGreaser:
-        FC_317Data.mountedOnGreaser || "",
+        configurationName:
+          savedConfiguration.configurationName,
 
-      controlsOtherUnits:
-        FC_317Data.controlsOtherUnits || "",
+        productType:
+          savedConfiguration.productType,
 
-      timer:
-        FC_317Data.timer || "",
+        productName:
+          savedConfiguration.productName,
 
-      electricOnOff:
-        FC_317Data.electricOnOff || "",
+        status:
+          savedConfiguration.status,
 
-      mightyLubeMonitoring:
-        FC_317Data.mightyLubeMonitoring || "",
+        isComplete:
+          savedConfiguration.isComplete,
 
-      preMountingRequirements:
-        FC_317Data.preMountingRequirements || "",
-
-      plcConnection:
-        FC_317Data.plcConnection || "",
-
-      otherControllerInfo:
-        FC_317Data.otherControllerInfo || "",
-
-      // =====================================================
-      // GREASER - FREE CARRIER
-      // =====================================================
-
-      measurementUnit:
-        FC_317Data.measurementUnit || "",
-
-      freeCarrierZerkFittingE:
-        FC_317Data.freeCarrierZerkFittingE || "",
-
-      freeCarrierZerkFittingF:
-        FC_317Data.freeCarrierZerkFittingF || "",
-
-      freeCarrierRailG:
-        FC_317Data.freeCarrierRailG || "",
-
-      freeCarrierRailH:
-        FC_317Data.freeCarrierRailH || "",
-
-      // =====================================================
-      // TECHNICIAN NOTE
-      // =====================================================
-
-      technicianNote:
-        FC_317Data.technicianNote || "",
+        numRequested:
+          savedConfiguration.numRequested,
+      },
     });
 
-    req.user.cart.push({
-      numRequested,
-      productConfigurationInfo: order,
-      productType: "FC_317",
-    });
-
-    await req.user.save();
-
-    return res.status(200).json({
-      message: "FC_317 entry added",
-    });
   } catch (error) {
-    console.error("FC_317 add error:", error);
+    console.error(
+      "FC_317 configuration error:",
+      error
+    );
+
+
+    // =====================================================
+    // MONGOOSE VALIDATION ERROR
+    // =====================================================
+
+    if (error?.name === "ValidationError") {
+      const errors = {};
+
+      for (const field in error.errors) {
+        errors[field] =
+          error.errors[field].message;
+      }
+
+      return res.status(422).json({
+        success: false,
+
+        message:
+          "Invalid FC_317 configuration",
+
+        errors,
+      });
+    }
+
+
+    // =====================================================
+    // INTERNAL SERVER ERROR
+    // =====================================================
 
     return res.status(500).json({
-      error: "Internal server error",
+      success: false,
+
+      message:
+        "Failed to add FC_317 configuration",
     });
   }
 });
 
-module.exports = router
+
+module.exports = router;

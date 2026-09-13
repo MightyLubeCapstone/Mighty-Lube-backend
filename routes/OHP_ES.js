@@ -1,304 +1,257 @@
 const express = require("express");
+
 const { authenticate } = require("./sessions");
 const OHP_ES = require("../models/OHP_ES");
+const ProductConfiguration = require("../models/product_configuration");
 
 const router = express.Router();
 
+
+// =========================================================
+// POST /api/ohp_es
+//
+// Product:
+// OHP E-Series
+//
+// Product ID:
+// OHP_ES
+//
+// OHP_ES model:
+// validation only
+//
+// Actual storage:
+// product_configurations
+//
+// Add to Cart:
+// status = "cart"
+// isComplete = true
+// =========================================================
+
 router.post("/", authenticate, async (req, res) => {
   try {
-    const { OHP_ESData, numRequested } = req.body;
-
-    const order = new OHP_ES({
-
-      // ============================================================
-      // GENERAL INFORMATION
-      // ============================================================
-
-      ...(OHP_ESData.conveyorName && {
-        conveyorName: OHP_ESData.conveyorName,
-      }),
-
-      ...(OHP_ESData.conveyorChainSize && {
-        conveyorChainSize: OHP_ESData.conveyorChainSize,
-      }),
-
-      ...(OHP_ESData.chainManufacturer && {
-        chainManufacturer: OHP_ESData.chainManufacturer,
-      }),
-
-      ...(OHP_ESData.conveyorLength && {
-        conveyorLength: OHP_ESData.conveyorLength,
-      }),
-
-      ...(OHP_ESData.conveyorLengthUnit && {
-        conveyorLengthUnit: OHP_ESData.conveyorLengthUnit,
-      }),
-
-      ...(OHP_ESData.conveyorSpeed && {
-        conveyorSpeed: OHP_ESData.conveyorSpeed,
-      }),
-
-      ...(OHP_ESData.conveyorSpeedUnit && {
-        conveyorSpeedUnit: OHP_ESData.conveyorSpeedUnit,
-      }),
-
-      ...(OHP_ESData.indexingOrVariableSpeedConditions && {
-        indexingOrVariableSpeedConditions:
-          OHP_ESData.indexingOrVariableSpeedConditions,
-      }),
-
-      ...(OHP_ESData.directionOfTravel && {
-        directionOfTravel: OHP_ESData.directionOfTravel,
-      }),
-
-      applicationEnvironment: OHP_ESData.applicationEnvironment,
-
-      ...(OHP_ESData.otherApplicationEnvironment && {
-        otherApplicationEnvironment:
-          OHP_ESData.otherApplicationEnvironment,
-      }),
-
-      ...(OHP_ESData.requiresMonitoringCapabilities && {
-        requiresMonitoringCapabilities:
-          OHP_ESData.requiresMonitoringCapabilities,
-      }),
-
-      conveyorLoadedOrUnloaded:
-        OHP_ESData.conveyorLoadedOrUnloaded,
-
-      conveyorMovement:
-        OHP_ESData.conveyorMovement,
-
-
-      // ============================================================
-      // CUSTOMER POWER UTILITIES
-      // ============================================================
-
-      operatingVoltageSinglePhase:
-        OHP_ESData.operatingVoltageSinglePhase,
-
-      controlVoltage:
-        OHP_ESData.controlVoltage,
-
-
-      // ============================================================
-      // NEW MONITORING SYSTEM / EXISTING MONITORING SYSTEM
-      // ============================================================
-
-      ...(OHP_ESData.connectingToExistingMonitoring && {
-        connectingToExistingMonitoring:
-          OHP_ESData.connectingToExistingMonitoring,
-      }),
-
-      ...(OHP_ESData.addNewMonitoringSystem && {
-        addNewMonitoringSystem:
-          OHP_ESData.addNewMonitoringSystem,
-      }),
-
-
-      // ============================================================
-      // CONVEYOR SPECIFICATIONS
-      // ============================================================
-
-      ...(OHP_ESData.wheelOpenRaceStyle && {
-        wheelOpenRaceStyle:
-          OHP_ESData.wheelOpenRaceStyle,
-      }),
-
-      ...(OHP_ESData.wheelSealedStyle && {
-        wheelSealedStyle:
-          OHP_ESData.wheelSealedStyle,
-      }),
-
-      ...(OHP_ESData.openInsideShieldedOutside && {
-        openInsideShieldedOutside:
-          OHP_ESData.openInsideShieldedOutside,
-      }),
-
-      ...(OHP_ESData.freeTrolleyWheels && {
-        freeTrolleyWheels:
-          OHP_ESData.freeTrolleyWheels,
-      }),
-
-      ...(OHP_ESData.guideRollers && {
-        guideRollers:
-          OHP_ESData.guideRollers,
-      }),
-
-      ...(OHP_ESData.guideRollersOpenRaceStyle && {
-        guideRollersOpenRaceStyle:
-          OHP_ESData.guideRollersOpenRaceStyle,
-      }),
-
-      ...(OHP_ESData.guideRollersSealedStyle && {
-        guideRollersSealedStyle:
-          OHP_ESData.guideRollersSealedStyle,
-      }),
-
-      ...(OHP_ESData.openHole && {
-        openHole:
-          OHP_ESData.openHole,
-      }),
-
-      ...(OHP_ESData.dogActuator && {
-        dogActuator:
-          OHP_ESData.dogActuator,
-      }),
-
-      ...(OHP_ESData.pivotPoints && {
-        pivotPoints:
-          OHP_ESData.pivotPoints,
-      }),
-
-      ...(OHP_ESData.kingPin && {
-        kingPin:
-          OHP_ESData.kingPin,
-      }),
-
-      ...(OHP_ESData.railLubrication && {
-        railLubrication:
-          OHP_ESData.railLubrication,
-      }),
-
-      ...(OHP_ESData.currentLubricationEquipmentBrand && {
-        currentLubricationEquipmentBrand:
-          OHP_ESData.currentLubricationEquipmentBrand,
-      }),
-
-      ...(OHP_ESData.currentLubricantType && {
-        currentLubricantType:
-          OHP_ESData.currentLubricantType,
-      }),
-
-      ...(OHP_ESData.currentLubricantViscosityGrade && {
-        currentLubricantViscosityGrade:
-          OHP_ESData.currentLubricantViscosityGrade,
-      }),
-
-      ...(OHP_ESData.lubricationFromSideOfChain && {
-        lubricationFromSideOfChain:
-          OHP_ESData.lubricationFromSideOfChain,
-      }),
-
-      ...(OHP_ESData.lubricationFromTopOfChain && {
-        lubricationFromTopOfChain:
-          OHP_ESData.lubricationFromTopOfChain,
-      }),
-
-
-      // ============================================================
-      // CONTROLLER
-      // ============================================================
-
-      ...(OHP_ESData.chainMasterController && {
-        chainMasterController:
-          OHP_ESData.chainMasterController,
-      }),
-
-      ...(OHP_ESData.timer && {
-        timer:
-          OHP_ESData.timer,
-      }),
-
-      ...(OHP_ESData.electricOnOff && {
-        electricOnOff:
-          OHP_ESData.electricOnOff,
-      }),
-
-      ...(OHP_ESData.pneumaticOnOff && {
-        pneumaticOnOff:
-          OHP_ESData.pneumaticOnOff,
-      }),
-
-      ...(OHP_ESData.mightyLubeMonitoring && {
-        mightyLubeMonitoring:
-          OHP_ESData.mightyLubeMonitoring,
-      }),
-
-      ...(OHP_ESData.plcConnection && {
-        plcConnection:
-          OHP_ESData.plcConnection,
-      }),
-
-      ...(OHP_ESData.otherControllerDescribe && {
-        otherControllerDescribe:
-          OHP_ESData.otherControllerDescribe,
-      }),
-
-      ...(OHP_ESData.controllerSpecialOptions && {
-        controllerSpecialOptions:
-          OHP_ESData.controllerSpecialOptions,
-      }),
-
-      ...(OHP_ESData.controllerPleaseSpecify && {
-        controllerPleaseSpecify:
-          OHP_ESData.controllerPleaseSpecify,
-      }),
-
-
-      // ============================================================
-      // OVERHEAD POWER RAIL: MEASUREMENTS
-      // ============================================================
-
-      ...(OHP_ESData.measurementUnit && {
-        measurementUnit:
-          OHP_ESData.measurementUnit,
-      }),
-
-      ...(OHP_ESData.chainDropA && {
-        chainDropA:
-          OHP_ESData.chainDropA,
-      }),
-
-      ...(OHP_ESData.overheadPowerMonoRailPowerTrolleyWheelB && {
-        overheadPowerMonoRailPowerTrolleyWheelB:
-          OHP_ESData.overheadPowerMonoRailPowerTrolleyWheelB,
-      }),
-
-      ...(OHP_ESData.overheadPowerMonoRailPowerRailG && {
-        overheadPowerMonoRailPowerRailG:
-          OHP_ESData.overheadPowerMonoRailPowerRailG,
-      }),
-
-      ...(OHP_ESData.overheadPowerMonoRailPowerRailH && {
-        overheadPowerMonoRailPowerRailH:
-          OHP_ESData.overheadPowerMonoRailPowerRailH,
-      }),
-
-      ...(OHP_ESData.measurementText && {
-        measurementText:
-          OHP_ESData.measurementText,
-      }),
-
-
-      // ============================================================
-      // TECHNICIAN NOTE
-      // ============================================================
-
-      technicianNote:
-        OHP_ESData.technicianNote,
-    });
-
-
-    req.user.cart.push({
+    const {
+      OHP_ESData,
       numRequested,
-      productConfigurationInfo: order,
-      productType: "OHP_ES",
-    });
+    } = req.body || {};
 
-    await req.user.save();
 
-    return res.status(200).json({
-      message: "OHP_ES entry added",
+    // =====================================================
+    // REQUEST VALIDATION
+    // =====================================================
+
+    if (
+      !OHP_ESData ||
+      typeof OHP_ESData !== "object" ||
+      Array.isArray(OHP_ESData)
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "OHP_ESData is required",
+      });
+    }
+
+
+    // =====================================================
+    // QUANTITY VALIDATION
+    // =====================================================
+
+    const quantity = Number(numRequested);
+
+    if (
+      !Number.isInteger(quantity) ||
+      quantity < 1
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "numRequested must be a positive integer",
+      });
+    }
+
+
+    // =====================================================
+    // PRODUCT-SPECIFIC VALIDATION
+    //
+    // OHP_ESData and OHP_ES schema use the same flat
+    // field structure.
+    //
+    // Old conditional spreads only omitted empty optional
+    // fields. No alias/template/transformation is required.
+    //
+    // Conditional otherApplicationEnvironment validation
+    // is handled by the OHP_ES schema.
+    //
+    // IMPORTANT:
+    // OHP_ES is validation-only.
+    // Do NOT call validation.save().
+    // =====================================================
+
+    const validation =
+      new OHP_ES(OHP_ESData);
+
+    await validation.validate();
+
+
+    // =====================================================
+    // CLEAN VALIDATED CONFIGURATION DATA
+    // =====================================================
+
+    const configurationData =
+      validation.toObject({
+        versionKey: false,
+      });
+
+    delete configurationData._id;
+    delete configurationData.createdAt;
+    delete configurationData.updatedAt;
+
+
+    // =====================================================
+    // AUTHENTICATED USER / AUDIT SNAPSHOT
+    // =====================================================
+
+    const actor = {
+      userID: req.user.userID,
+      username: req.user.username,
+      firstName: req.user.firstName || "",
+      lastName: req.user.lastName || "",
+      role: req.user.role || "user",
+    };
+
+
+    // =====================================================
+    // CREATE GENERIC PRODUCT CONFIGURATION
+    // =====================================================
+
+    const productConfiguration =
+      new ProductConfiguration({
+        userID:
+          req.user.userID,
+
+        configurationName:
+          configurationData.conveyorName ||
+          "OHP E-Series",
+
+        productType:
+          "OHP_ES",
+
+        productName:
+          "OHP E-Series",
+
+        status:
+          "cart",
+
+        isComplete:
+          true,
+
+        numRequested:
+          quantity,
+
+        configurationData,
+
+        createdBy:
+          actor,
+
+        updatedBy:
+          actor,
+      });
+
+
+    // =====================================================
+    // SAVE INTO GENERIC COLLECTION
+    //
+    // OLD:
+    //
+    // req.user.cart.push(...)
+    // await req.user.save()
+    //
+    // NEW:
+    //
+    // Only ProductConfiguration is persisted.
+    // =====================================================
+
+    const savedConfiguration =
+      await productConfiguration.save();
+
+
+    // =====================================================
+    // SUCCESS RESPONSE
+    // =====================================================
+
+    return res.status(201).json({
+      success: true,
+
+      message:
+        "OHP_ES configuration added to cart successfully",
+
+      configurationID:
+        savedConfiguration.configurationID,
+
+      configuration: {
+        configurationID:
+          savedConfiguration.configurationID,
+
+        configurationName:
+          savedConfiguration.configurationName,
+
+        productType:
+          savedConfiguration.productType,
+
+        productName:
+          savedConfiguration.productName,
+
+        status:
+          savedConfiguration.status,
+
+        isComplete:
+          savedConfiguration.isComplete,
+
+        numRequested:
+          savedConfiguration.numRequested,
+      },
     });
 
   } catch (error) {
-    console.error(error);
+    console.error(
+      "OHP_ES configuration error:",
+      error
+    );
+
+
+    // =====================================================
+    // MONGOOSE VALIDATION ERROR
+    // =====================================================
+
+    if (error?.name === "ValidationError") {
+      const errors = {};
+
+      for (const field in error.errors) {
+        errors[field] =
+          error.errors[field].message;
+      }
+
+      return res.status(422).json({
+        success: false,
+
+        message:
+          "Invalid OHP_ES configuration",
+
+        errors,
+      });
+    }
+
+
+    // =====================================================
+    // INTERNAL SERVER ERROR
+    // =====================================================
 
     return res.status(500).json({
-      error: "Internal server error",
+      success: false,
+
+      message:
+        "Failed to add OHP_ES configuration",
     });
   }
 });
 
-module.exports = router
+
+module.exports = router;

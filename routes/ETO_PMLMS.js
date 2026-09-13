@@ -1,153 +1,255 @@
 const express = require("express");
+
 const { authenticate } = require("./sessions");
 const ETO_PMLMS = require("../models/ETO_PMLMS");
+const ProductConfiguration = require("../models/product_configuration");
 
 const router = express.Router();
 
+
+// =========================================================
+// POST /api/eto_pmlms
+//
+// Product:
+// ETO PMLMS
+//
+// ETO_PMLMS model:
+// validation only
+//
+// Actual storage:
+// product_configurations
+//
+// Add to Cart:
+// status = "cart"
+// isComplete = true
+// =========================================================
+
 router.post("/", authenticate, async (req, res) => {
-    try {
-        const { ETO_PMLMSData, numRequested } = req.body || {};
-
-        if (!ETO_PMLMSData) {
-            return res.status(400).json({
-                error: "ETO_PMLMSData is required"
-            });
-        }
-
-        const order = new ETO_PMLMS({
-            // ====================================================
-            // GENERAL INFORMATION
-            // ====================================================
-
-            conveyorName: ETO_PMLMSData.conveyorName,
-
-            chainSize: ETO_PMLMSData.chainSize,
-
-            otherChainSize: ETO_PMLMSData.otherChainSize,
-
-            industrialChainManufacturer:
-                ETO_PMLMSData.industrialChainManufacturer,
-
-            otherIndustrialChainManufacturer:
-                ETO_PMLMSData.otherIndustrialChainManufacturer,
-
-            conveyorLength:
-                ETO_PMLMSData.conveyorLength,
-
-            conveyorLengthUnit:
-                ETO_PMLMSData.conveyorLengthUnit,
-
-            conveyorSpeed:
-                ETO_PMLMSData.conveyorSpeed,
-
-            conveyorSpeedUnit:
-                ETO_PMLMSData.conveyorSpeedUnit,
-
-            conveyorIndex:
-                ETO_PMLMSData.conveyorIndex,
-
-            travelDirection:
-                ETO_PMLMSData.travelDirection,
-
-            appEnviroment:
-                ETO_PMLMSData.appEnviroment,
-
-            otherAppEnviroment:
-                ETO_PMLMSData.otherAppEnviroment,
-
-            surroundingTemp:
-                ETO_PMLMSData.surroundingTemp,
-
-            conveyorLoaded:
-                ETO_PMLMSData.conveyorLoaded,
-
-            conveyorSwing:
-                ETO_PMLMSData.conveyorSwing,
+  try {
+    const {
+      ETO_PMLMSData,
+      numRequested,
+    } = req.body || {};
 
 
-            // ====================================================
-            // CUSTOMER POWER UTILITIES
-            // ====================================================
+    // =====================================================
+    // REQUEST VALIDATION
+    // =====================================================
 
-            operatingVoltage:
-                ETO_PMLMSData.operatingVoltage,
-
-
-            // ====================================================
-            // MONITORING FEATURES REQUESTED
-            // ====================================================
-
-            paintMarkerSystem:
-                ETO_PMLMSData.paintMarkerSystem,
-
-
-            // ====================================================
-            // CONVEYOR SPECIFICATIONS
-            // ====================================================
-
-            chainCleanStatus:
-                ETO_PMLMSData.chainCleanStatus,
-
-
-            // ====================================================
-            // MEASUREMENTS
-            // ====================================================
-
-            enclosedUnitType:
-                ETO_PMLMSData.enclosedUnitType,
-
-            enclosedTrackB:
-                ETO_PMLMSData.enclosedTrackB,
-
-            enclosedTrackG:
-                ETO_PMLMSData.enclosedTrackG,
-
-            enclosedTrackH:
-                ETO_PMLMSData.enclosedTrackH,
-
-            enclosedTrackS:
-                ETO_PMLMSData.enclosedTrackS,
-
-            enclosedTrackK2:
-                ETO_PMLMSData.enclosedTrackK2,
-
-            enclosedTrackL2:
-                ETO_PMLMSData.enclosedTrackL2,
-
-            enclosedTrackM2:
-                ETO_PMLMSData.enclosedTrackM2,
-
-            enclosedTrackN2:
-                ETO_PMLMSData.enclosedTrackN2,
-
-            enclosedTrackS2:
-                ETO_PMLMSData.enclosedTrackS2
-        });
-
-
-        // ========================================================
-        // ADD PRODUCT TO USER CART
-        // ========================================================
-
-        req.user.cart.push({
-            numRequested,
-            productConfigurationInfo: order,
-            productType: "ETO_PMLMS"
-        });
-
-        await req.user.save();
-
-        return res.status(200).json({
-            message: "ETO_PMLMS entry added"
-        });
-
-    } catch (error) {
-        console.error("ETO_PMLMS Error:", error);
-
-        return res.status(500).json({
-            error: "Internal server error"
-        });
+    if (
+      !ETO_PMLMSData ||
+      typeof ETO_PMLMSData !== "object" ||
+      Array.isArray(ETO_PMLMSData)
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "ETO_PMLMSData is required",
+      });
     }
+
+    const quantity = Number(numRequested);
+
+    if (
+      !Number.isInteger(quantity) ||
+      quantity < 1
+    ) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "numRequested must be a positive integer",
+      });
+    }
+
+
+    // =====================================================
+    // PRODUCT-SPECIFIC VALIDATION
+    //
+    // ETO_PMLMSData and ETO_PMLMS schema use the same
+    // flat field structure.
+    //
+    // No transformation is required.
+    //
+    // Schema defaults missing String values to "".
+    //
+    // ETO_PMLMS is NOT saved separately.
+    // =====================================================
+
+    const validation =
+      new ETO_PMLMS(ETO_PMLMSData);
+
+    await validation.validate();
+
+
+    // =====================================================
+    // CLEAN VALIDATED CONFIGURATION DATA
+    // =====================================================
+
+    const configurationData =
+      validation.toObject({
+        versionKey: false,
+      });
+
+    delete configurationData._id;
+    delete configurationData.createdAt;
+    delete configurationData.updatedAt;
+
+
+    // =====================================================
+    // AUTHENTICATED USER / AUDIT SNAPSHOT
+    // =====================================================
+
+    const actor = {
+      userID:
+        req.user.userID,
+
+      username:
+        req.user.username,
+
+      firstName:
+        req.user.firstName || "",
+
+      lastName:
+        req.user.lastName || "",
+
+      role:
+        req.user.role || "user",
+    };
+
+
+    // =====================================================
+    // CREATE GENERIC PRODUCT CONFIGURATION
+    // =====================================================
+
+    const productConfiguration =
+      new ProductConfiguration({
+        userID:
+          req.user.userID,
+
+        configurationName:
+          configurationData.conveyorName ||
+          "ETO PMLMS",
+
+        productType:
+          "ETO_PMLMS",
+
+        productName:
+          "ETO PMLMS",
+
+        status:
+          "cart",
+
+        isComplete:
+          true,
+
+        numRequested:
+          quantity,
+
+        configurationData,
+
+        createdBy:
+          actor,
+
+        updatedBy:
+          actor,
+      });
+
+
+    // =====================================================
+    // SAVE INTO GENERIC COLLECTION
+    //
+    // OLD:
+    //
+    // req.user.cart.push(...)
+    // await req.user.save()
+    //
+    // NEW:
+    //
+    // product_configurations
+    // =====================================================
+
+    const savedConfiguration =
+      await productConfiguration.save();
+
+
+    // =====================================================
+    // SUCCESS RESPONSE
+    // =====================================================
+
+    return res.status(201).json({
+      success: true,
+
+      message:
+        "ETO_PMLMS configuration added to cart successfully",
+
+      configurationID:
+        savedConfiguration.configurationID,
+
+      configuration: {
+        configurationID:
+          savedConfiguration.configurationID,
+
+        configurationName:
+          savedConfiguration.configurationName,
+
+        productType:
+          savedConfiguration.productType,
+
+        productName:
+          savedConfiguration.productName,
+
+        status:
+          savedConfiguration.status,
+
+        isComplete:
+          savedConfiguration.isComplete,
+
+        numRequested:
+          savedConfiguration.numRequested,
+      },
+    });
+
+  } catch (error) {
+    console.error(
+      "ETO_PMLMS configuration error:",
+      error
+    );
+
+
+    // =====================================================
+    // MONGOOSE VALIDATION ERROR
+    // =====================================================
+
+    if (error?.name === "ValidationError") {
+      const errors = {};
+
+      for (const field in error.errors) {
+        errors[field] =
+          error.errors[field].message;
+      }
+
+      return res.status(422).json({
+        success: false,
+
+        message:
+          "Invalid ETO_PMLMS configuration",
+
+        errors,
+      });
+    }
+
+
+    // =====================================================
+    // INTERNAL SERVER ERROR
+    // =====================================================
+
+    return res.status(500).json({
+      success: false,
+
+      message:
+        "Failed to add ETO_PMLMS configuration",
+    });
+  }
 });
+
 
 module.exports = router;

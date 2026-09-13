@@ -1,8 +1,11 @@
 const express = require("express");
-const { authenticate } = require("./sessions");
+
 const ETI_807 = require("../models/ETI_807");
+const ProductConfiguration = require("../models/product_configuration");
+const { authenticate } = require("./sessions");
 
 const router = express.Router();
+
 
 // =========================================================
 // POST /api/eti_807
@@ -11,166 +14,236 @@ const router = express.Router();
 // Overhead Non-Powered Mighty Lube
 // Chain Cleaners 8074-B / 8075-B
 //
-// Expected body:
+// ETI_807 model:
+// validation only
 //
-// {
-//   "ETI_807Data": {
-//     "conveyorName": "...",
-//     "chainSize": "...",
-//     "otherChainSize": "...",
-//     "industrialChainManufacturer": "...",
-//     "otherIndustrialChainManufacturer": "...",
-//     "conveyorLength": "...",
-//     "conveyorLengthUnit": "...",
-//     "conveyorSpeed": "...",
-//     "conveyorSpeedUnit": "...",
-//     "appEnviroment": "...",
-//     "otherAppEnviroment": "...",
-//     "technicianNote": "..."
-//   },
-//   "numRequested": 1
-// }
+// Actual storage:
+// product_configurations
+//
+// Add to Cart:
+// status = "cart"
+// isComplete = true
 // =========================================================
 
 router.post("/", authenticate, async (req, res) => {
   try {
-    const { ETI_807Data, numRequested } = req.body || {};
-
-    // =====================================================
-    // BASIC REQUEST VALIDATION
-    // =====================================================
-
-    if (!ETI_807Data) {
-      return res.status(400).json({
-        error: "ETI_807Data is required",
-      });
-    }
-
-    if (!numRequested || numRequested < 1) {
-      return res.status(400).json({
-        error: "numRequested must be at least 1",
-      });
-    }
-
-    // =====================================================
-    // BUILD PRODUCT CONFIGURATION
-    // =====================================================
-
-    const order = new ETI_807({
-      // ---------------------------------------------------
-      // GENERAL INFORMATION
-      // ---------------------------------------------------
-
-      conveyorName: ETI_807Data.conveyorName,
-
-      chainSize: ETI_807Data.chainSize,
-
-      industrialChainManufacturer:
-        ETI_807Data.industrialChainManufacturer,
-
-      conveyorLength: ETI_807Data.conveyorLength,
-
-      conveyorLengthUnit:
-        ETI_807Data.conveyorLengthUnit,
-
-      conveyorSpeed: ETI_807Data.conveyorSpeed,
-
-      conveyorSpeedUnit:
-        ETI_807Data.conveyorSpeedUnit,
-
-      appEnviroment: ETI_807Data.appEnviroment,
-
-      // ---------------------------------------------------
-      // CONDITIONAL: OTHER CHAIN SIZE
-      // ---------------------------------------------------
-
-      ...(ETI_807Data.chainSize === "Other" &&
-        ETI_807Data.otherChainSize && {
-          otherChainSize:
-            ETI_807Data.otherChainSize.trim(),
-        }),
-
-      // ---------------------------------------------------
-      // CONDITIONAL: OTHER CHAIN MANUFACTURER
-      // ---------------------------------------------------
-
-      ...(ETI_807Data.industrialChainManufacturer ===
-        "Other" &&
-        ETI_807Data.otherIndustrialChainManufacturer && {
-          otherIndustrialChainManufacturer:
-            ETI_807Data.otherIndustrialChainManufacturer.trim(),
-        }),
-
-      // ---------------------------------------------------
-      // CONDITIONAL: OTHER APPLICATION ENVIRONMENT
-      // ---------------------------------------------------
-
-      ...(ETI_807Data.appEnviroment === "Other" &&
-        ETI_807Data.otherAppEnviroment && {
-          otherAppEnviroment:
-            ETI_807Data.otherAppEnviroment.trim(),
-        }),
-
-      // ---------------------------------------------------
-      // OPTIONAL TECHNICIAN NOTE
-      // ---------------------------------------------------
-
-      ...(ETI_807Data.technicianNote &&
-        ETI_807Data.technicianNote.trim() && {
-          technicianNote:
-            ETI_807Data.technicianNote.trim(),
-        }),
-    });
-
-    // =====================================================
-    // VALIDATE CONFIGURATION
-    //
-    // Important because this document is embedded into
-    // user's cart and is not saved independently here.
-    // =====================================================
-
-    await order.validate();
-
-    // =====================================================
-    // ADD TO AUTHENTICATED USER CART
-    // =====================================================
-
-    req.user.cart.push({
+    const {
+      ETI_807Data,
       numRequested,
-      productConfigurationInfo: order,
-      productType: "ETI_807",
-    });
+    } = req.body || {};
 
-    await req.user.save();
+
+    // =====================================================
+    // REQUEST VALIDATION
+    // =====================================================
+
+    if (
+      !ETI_807Data ||
+      typeof ETI_807Data !== "object" ||
+      Array.isArray(ETI_807Data)
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "ETI_807Data is required",
+      });
+    }
+
+    const quantity = Number(numRequested);
+
+    if (
+      !Number.isInteger(quantity) ||
+      quantity < 1
+    ) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "numRequested must be a positive integer",
+      });
+    }
+
+
+    // =====================================================
+    // PRODUCT-SPECIFIC VALIDATION
+    //
+    // ETI_807 handles:
+    //
+    // - required fields
+    // - conditional required fields
+    // - trimming
+    // - default null
+    // - allowed schema fields
+    //
+    // Conditional rules:
+    //
+    // chainSize === "Other"
+    // -> otherChainSize required
+    //
+    // industrialChainManufacturer === "Other"
+    // -> otherIndustrialChainManufacturer required
+    //
+    // appEnviroment === "Other"
+    // -> otherAppEnviroment required
+    //
+    // ETI_807 is NOT saved separately.
+    // =====================================================
+
+    const validation =
+      new ETI_807(ETI_807Data);
+
+    await validation.validate();
+
+
+    // =====================================================
+    // CLEAN VALIDATED DATA
+    // =====================================================
+
+    const configurationData =
+      validation.toObject({
+        versionKey: false,
+      });
+
+    delete configurationData._id;
+    delete configurationData.createdAt;
+    delete configurationData.updatedAt;
+
+
+    // =====================================================
+    // USER / AUDIT INFORMATION
+    // =====================================================
+
+    const actor = {
+      userID: req.user.userID,
+      username: req.user.username,
+      firstName:
+        req.user.firstName || "",
+      lastName:
+        req.user.lastName || "",
+      role:
+        req.user.role || "user",
+    };
+
+
+    // =====================================================
+    // SAVE INTO GENERIC COLLECTION
+    // =====================================================
+
+    const productConfiguration =
+      new ProductConfiguration({
+        userID:
+          req.user.userID,
+
+        configurationName:
+          configurationData.conveyorName ||
+          "ETI 807",
+
+        productType:
+          "ETI_807",
+
+        productName:
+          "Chain Cleaners 8074-B / 8075-B",
+
+        status:
+          "cart",
+
+        isComplete:
+          true,
+
+        numRequested:
+          quantity,
+
+        configurationData,
+
+        createdBy:
+          actor,
+
+        updatedBy:
+          actor,
+      });
+
+
+    const savedConfiguration =
+      await productConfiguration.save();
+
 
     // =====================================================
     // SUCCESS RESPONSE
     // =====================================================
 
-    return res.status(200).json({
-      message: "ETI_807 entry added",
+    return res.status(201).json({
+      success: true,
+
+      message:
+        "ETI_807 configuration added to cart successfully",
+
+      configurationID:
+        savedConfiguration.configurationID,
+
+      configuration: {
+        configurationID:
+          savedConfiguration.configurationID,
+
+        configurationName:
+          savedConfiguration.configurationName,
+
+        productType:
+          savedConfiguration.productType,
+
+        productName:
+          savedConfiguration.productName,
+
+        status:
+          savedConfiguration.status,
+
+        isComplete:
+          savedConfiguration.isComplete,
+
+        numRequested:
+          savedConfiguration.numRequested,
+      },
     });
+
   } catch (error) {
-    console.error("ETI_807 configuration error:", error);
+    console.error(
+      "ETI_807 configuration error:",
+      error
+    );
+
 
     // =====================================================
     // MONGOOSE VALIDATION ERROR
     // =====================================================
 
     if (error.name === "ValidationError") {
-      return res.status(400).json({
-        error: error.message,
+      const errors = {};
+
+      for (const field in error.errors) {
+        errors[field] =
+          error.errors[field].message;
+      }
+
+      return res.status(422).json({
+        success: false,
+
+        message:
+          "Invalid ETI_807 configuration",
+
+        errors,
       });
     }
+
 
     // =====================================================
     // INTERNAL SERVER ERROR
     // =====================================================
 
     return res.status(500).json({
-      error: "Internal server error",
+      success: false,
+
+      message:
+        "Failed to add ETI_807 configuration",
     });
   }
 });
 
-module.exports = router
+
+module.exports = router;

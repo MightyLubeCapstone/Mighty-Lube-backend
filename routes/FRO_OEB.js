@@ -1,111 +1,254 @@
 const express = require("express");
+
 const { authenticate } = require("./sessions");
 const FRO_OEB = require("../models/FRO_OEB");
+const ProductConfiguration = require("../models/product_configuration");
 
 const router = express.Router();
 
+
+// =========================================================
+// POST /api/fro_oeb
+//
+// Product:
+// FRO OEB
+//
+// FRO_OEB model:
+// validation only
+//
+// Actual storage:
+// product_configurations
+//
+// Add to Cart:
+// status = "cart"
+// isComplete = true
+// =========================================================
+
 router.post("/", authenticate, async (req, res) => {
   try {
-    const { FRO_OEBData, numRequested } = req.body || {};
+    const {
+      FRO_OEBData,
+      numRequested,
+    } = req.body || {};
 
-    if (!FRO_OEBData) {
+
+    // =====================================================
+    // REQUEST VALIDATION
+    // =====================================================
+
+    if (
+      !FRO_OEBData ||
+      typeof FRO_OEBData !== "object" ||
+      Array.isArray(FRO_OEBData)
+    ) {
       return res.status(400).json({
-        error: "FRO_OEBData is required",
+        success: false,
+        message: "FRO_OEBData is required",
       });
     }
 
-    const order = new FRO_OEB({
-      // =====================================================
-      // GENERAL INFORMATION
-      // =====================================================
+    const quantity = Number(numRequested);
 
-      conveyorName: FRO_OEBData.conveyorName || "",
+    if (
+      !Number.isInteger(quantity) ||
+      quantity < 1
+    ) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "numRequested must be a positive integer",
+      });
+    }
 
-      conveyorChainSize:
-        FRO_OEBData.conveyorChainSize || "",
 
-      chainManufacturer:
-        FRO_OEBData.chainManufacturer || "",
+    // =====================================================
+    // PRODUCT-SPECIFIC VALIDATION
+    //
+    // FRO_OEBData and FRO_OEB schema use the same
+    // flat field structure.
+    //
+    // No transformation or legacy mapping is required.
+    //
+    // FRO_OEB is used ONLY for validation.
+    // It is NOT saved into a separate collection.
+    // =====================================================
 
-      conveyorLength:
-        FRO_OEBData.conveyorLength || "",
+    const validation =
+      new FRO_OEB(FRO_OEBData);
 
-      conveyorLengthUnit:
-        FRO_OEBData.conveyorLengthUnit || "",
+    await validation.validate();
 
-      applicationEnvironment:
-        FRO_OEBData.applicationEnvironment || "",
 
-      otherApplicationEnvironment:
-        FRO_OEBData.otherApplicationEnvironment || "",
+    // =====================================================
+    // CLEAN VALIDATED CONFIGURATION DATA
+    // =====================================================
 
-      surroundingTemperature:
-        FRO_OEBData.surroundingTemperature || "",
+    const configurationData =
+      validation.toObject({
+        versionKey: false,
+      });
 
-      // =====================================================
-      // FREE RAIL: MEASUREMENTS
-      // =====================================================
+    delete configurationData._id;
+    delete configurationData.createdAt;
+    delete configurationData.updatedAt;
 
-      measurementUnit:
-        FRO_OEBData.measurementUnit || "",
 
-      overheadFreeRailChainDropA:
-        FRO_OEBData.overheadFreeRailChainDropA || "",
+    // =====================================================
+    // AUTHENTICATED USER / AUDIT SNAPSHOT
+    // =====================================================
 
-      overheadFreeRailPowerTrolleyWheelB:
-        FRO_OEBData.overheadFreeRailPowerTrolleyWheelB || "",
+    const actor = {
+      userID:
+        req.user.userID,
 
-      overheadFreeRailRailG:
-        FRO_OEBData.overheadFreeRailRailG || "",
+      username:
+        req.user.username,
 
-      overheadFreeRailRailH:
-        FRO_OEBData.overheadFreeRailRailH || "",
+      firstName:
+        req.user.firstName || "",
 
-      overheadFreeRailTrolleyWheelVerticalL:
-        FRO_OEBData.overheadFreeRailTrolleyWheelVerticalL || "",
+      lastName:
+        req.user.lastName || "",
 
-      invertedPowerFreeChainDropA:
-        FRO_OEBData.invertedPowerFreeChainDropA || "",
+      role:
+        req.user.role || "user",
+    };
 
-      invertedPowerFreePowerTrolleyWheelB:
-        FRO_OEBData.invertedPowerFreePowerTrolleyWheelB || "",
 
-      invertedPowerFreeRailG:
-        FRO_OEBData.invertedPowerFreeRailG || "",
+    // =====================================================
+    // CREATE GENERIC PRODUCT CONFIGURATION
+    // =====================================================
 
-      invertedPowerFreeRailH:
-        FRO_OEBData.invertedPowerFreeRailH || "",
+    const productConfiguration =
+      new ProductConfiguration({
+        userID:
+          req.user.userID,
 
-      invertedPowerFreeTrolleyWheelPitchK:
-        FRO_OEBData.invertedPowerFreeTrolleyWheelPitchK || "",
+        configurationName:
+          configurationData.conveyorName ||
+          "FRO OEB",
 
-      // =====================================================
-      // TECHNICIAN NOTE
-      // Legacy-retained optional field
-      // =====================================================
+        productType:
+          "FRO_OEB",
 
-      technicianNote:
-        FRO_OEBData.technicianNote || "",
+        productName:
+          "FRO OEB",
+
+        status:
+          "cart",
+
+        isComplete:
+          true,
+
+        numRequested:
+          quantity,
+
+        configurationData,
+
+        createdBy:
+          actor,
+
+        updatedBy:
+          actor,
+      });
+
+
+    // =====================================================
+    // SAVE INTO GENERIC COLLECTION
+    //
+    // OLD:
+    //
+    // req.user.cart.push(...)
+    // await req.user.save()
+    //
+    // NEW:
+    //
+    // product_configurations
+    // =====================================================
+
+    const savedConfiguration =
+      await productConfiguration.save();
+
+
+    // =====================================================
+    // SUCCESS RESPONSE
+    // =====================================================
+
+    return res.status(201).json({
+      success: true,
+
+      message:
+        "FRO_OEB configuration added to cart successfully",
+
+      configurationID:
+        savedConfiguration.configurationID,
+
+      configuration: {
+        configurationID:
+          savedConfiguration.configurationID,
+
+        configurationName:
+          savedConfiguration.configurationName,
+
+        productType:
+          savedConfiguration.productType,
+
+        productName:
+          savedConfiguration.productName,
+
+        status:
+          savedConfiguration.status,
+
+        isComplete:
+          savedConfiguration.isComplete,
+
+        numRequested:
+          savedConfiguration.numRequested,
+      },
     });
 
-    req.user.cart.push({
-      numRequested,
-      productConfigurationInfo: order,
-      productType: "FRO_OEB",
-    });
-
-    await req.user.save();
-
-    return res.status(200).json({
-      message: "FRO_OEB entry added",
-    });
   } catch (error) {
-    console.log("FRO_OEB add error:", error);
+    console.error(
+      "FRO_OEB configuration error:",
+      error
+    );
+
+
+    // =====================================================
+    // MONGOOSE VALIDATION ERROR
+    // =====================================================
+
+    if (error?.name === "ValidationError") {
+      const errors = {};
+
+      for (const field in error.errors) {
+        errors[field] =
+          error.errors[field].message;
+      }
+
+      return res.status(422).json({
+        success: false,
+
+        message:
+          "Invalid FRO_OEB configuration",
+
+        errors,
+      });
+    }
+
+
+    // =====================================================
+    // INTERNAL SERVER ERROR
+    // =====================================================
 
     return res.status(500).json({
-      error: "Internal server error",
+      success: false,
+
+      message:
+        "Failed to add FRO_OEB configuration",
     });
   }
 });
 
-module.exports = router
+
+module.exports = router;

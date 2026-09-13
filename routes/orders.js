@@ -1,335 +1,489 @@
-/*
-
-*/
-
 const express = require("express");
-const { dbConnect } = require("../config/config");
 const { authenticate, requireAdmin } = require("./sessions");
-const User = require("../models/user");
+const ProductConfiguration = require("../models/product_configuration");
 const { sendOrderNotification } = require("../utils/emailnotif");
-
-// Utility function to calculate processing time
-function calculateProcessingTime(startDate, endDate) {
-    if (!startDate || !endDate) return null;
-    
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-    const diffMs = end - start;
-    
-    if (diffMs < 0) return null;
-    
-    const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-    
-    return {
-        totalMs: diffMs,
-        days,
-        hours,
-        minutes,
-        formatted: days > 0 ? 
-            `${days} day${days > 1 ? 's' : ''}, ${hours} hour${hours > 1 ? 's' : ''}` :
-            hours > 0 ? 
-                `${hours} hour${hours > 1 ? 's' : ''}, ${minutes} minute${minutes > 1 ? 's' : ''}` :
-                `${minutes} minute${minutes > 1 ? 's' : ''}`
-    };
-}
 
 const router = express.Router();
 
-// deep-merge helper: merges src into target, adds new keys, merges nested objects, replaces arrays/primitives.
-// Does not allow replacing orderID.
-function deepMergeAllowNew(target, src) {
-    for (const key of Object.keys(src)) {
-        if (key === 'orderID') continue; // never overwrite orderID
-        const srcVal = src[key];
-        const tgtVal = target[key];
+const ALLOWED_STATUSES = [
+  "draft",
+  "cart",
+  "submitted",
+  "completed",
+  "archived",
+];
 
-        // If both are plain objects, merge recursively
-        if (
-            srcVal &&
-            typeof srcVal === 'object' &&
-            !Array.isArray(srcVal) &&
-            tgtVal &&
-            typeof tgtVal === 'object' &&
-            !Array.isArray(tgtVal)
-        ) {
-            deepMergeAllowNew(tgtVal, srcVal);
-        } else {
-            // Replace primitives and arrays, or add new keys
-            target[key] = srcVal;
-        }
-    }
+/**
+ * Calculates elapsed time between two dates.
+ * Used mainly for submitted/completed configurations.
+ */
+function calculateProcessingTime(startDate, endDate) {
+  if (!startDate || !endDate) return null;
+
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  const diffMs = end - start;
+
+  if (diffMs < 0) return null;
+
+  const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  const hours = Math.floor(
+    (diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+  );
+  const minutes = Math.floor(
+    (diffMs % (1000 * 60 * 60)) / (1000 * 60)
+  );
+
+  return {
+    totalMs: diffMs,
+    days,
+    hours,
+    minutes,
+    formatted:
+      days > 0
+        ? `${days} day${days > 1 ? "s" : ""}, ${hours} hour${hours > 1 ? "s" : ""}`
+        : hours > 0
+          ? `${hours} hour${hours > 1 ? "s" : ""}, ${minutes} minute${minutes > 1 ? "s" : ""}`
+          : `${minutes} minute${minutes > 1 ? "s" : ""}`,
+  };
 }
 
-// PUT /api/orders/editing - Update an order inside a user's configurations carts
-router.put('/editing', authenticate, async (req, res) => {
-    try {
-        await dbConnect();
+/**
+ * Deep-merges incoming configurationData into existing data.
+ * Arrays and primitive values are replaced.
+ */
+function deepMerge(target, source) {
+  for (const key of Object.keys(source)) {
+    const sourceValue = source[key];
+    const targetValue = target[key];
 
-        const { userID, order } = req.body;
-        if (!order || !order.orderID) {
-            return res.status(400).json({ message: 'order with orderID is required' });
-        }
+    if (
+      sourceValue &&
+      typeof sourceValue === "object" &&
+      !Array.isArray(sourceValue) &&
+      targetValue &&
+      typeof targetValue === "object" &&
+      !Array.isArray(targetValue)
+    ) {
+      deepMerge(targetValue, sourceValue);
+    } else {
+      target[key] = sourceValue;
+    }
+  }
 
-        // Determine which user to update: request body userID (admin case) or the authenticated user
-        let targetUser;
-        if (userID) {
-            targetUser = await User.findOne({ userID }).exec();
-            if (!targetUser) return res.status(404).json({ message: 'User not found' });
-        } else {
-            // Try to find the owner of the order across all users' configurations
-            targetUser = await User.findOne({ 'configurations.cart.orderID': order.orderID }).exec();
-            if (!targetUser) {
-                // Fallback: use the authenticated user if present (this is the requester)
-                if (req.user) {
-                    targetUser = await User.findById(req.user._id).exec();
-                } else {
-                    return res.status(400).json({ message: 'userID or valid session is required, or order owner could not be found' });
-                }
-            }
-        }
+  return target;
+}
 
-        // Search for the order inside configurations[*].cart
-        let found = false;
-        for (let cfgIdx = 0; cfgIdx < (targetUser.configurations || []).length; cfgIdx++) {
-            const cfg = targetUser.configurations[cfgIdx];
-            if (!cfg.cart || !cfg.cart.length) continue;
-            const ordIdx = cfg.cart.findIndex(o => o.orderID === order.orderID);
-            if (ordIdx !== -1) {
-                // Deep-merge incoming order into existing order: updates values and adds new fields
-                const existing = cfg.cart[ordIdx];
-                deepMergeAllowNew(existing, order);
+/**
+ * Stores who performed the latest change.
+ */
+function createActor(user) {
+  return {
+    userID: user.userID,
+    username: user.username,
+    firstName: user.firstName || "",
+    lastName: user.lastName || "",
+    role: user.role || "user",
+  };
+}
 
-                // Optionally set an updated timestamp on the order object
-                existing.updatedAt = new Date();
-                cfg.updatedAt = new Date();
-                cfg.updatedBy = {
-                    userID: req.user.userID,
-                    username: req.user.username,
-                    firstName: req.user.firstName,
-                    lastName: req.user.lastName,
-                    role: req.user.role || 'user'
-                };
-                found = true;
-                break;
-            }
-        }
+/**
+ * PUT /api/orders/editing
+ *
+ * Updates one ProductConfiguration.
+ *
+ * Normal user:
+ *   Can edit only own configuration.
+ *
+ * Admin:
+ *   Can edit any configuration.
+ *
+ * Body:
+ * {
+ *   configurationID,
+ *   userID?,              // optional for admin
+ *   configurationName?,
+ *   numRequested?,
+ *   configurationData?
+ * }
+ */
+router.put("/editing", authenticate, async (req, res) => {
+  try {
+    const {
+      configurationID,
+      userID,
+      configurationName,
+      numRequested,
+      configurationData,
+    } = req.body || {};
 
-        if (!found) {
-            return res.status(404).json({ message: 'Order not found in user configurations' });
-        }
+    if (!configurationID) {
+      return res.status(400).json({
+        success: false,
+        message: "configurationID is required",
+      });
+    }
 
-        // Mark modified and save
-        targetUser.markModified('configurations');
-        await targetUser.save();
+    // Ownership is enforced directly in the database query.
+    const query = { configurationID };
 
-        // Send email notification for configuration edit
-        try {
-            await sendOrderNotification(targetUser, order, 'edited');
-        } catch (emailError) {
-            console.warn('Failed to send configuration edit notification:', emailError);
-        }
+    if (req.user.role !== "admin") {
+      query.userID = req.user.userID;
+    } else if (userID) {
+      query.userID = userID;
+    }
 
-        return res.status(200).json({
-            message: 'Order updated successfully',
-            userID: targetUser.userID,
-            orderID: order.orderID,
-            updatedAt: new Date()
+    const configuration = await ProductConfiguration.findOne(query);
+
+    if (!configuration) {
+      return res.status(404).json({
+        success: false,
+        message: "Configuration not found",
+      });
+    }
+
+    if (configurationName !== undefined) {
+      configuration.configurationName = configurationName;
+    }
+
+    if (numRequested !== undefined) {
+      const quantity = Number(numRequested);
+
+      if (!Number.isInteger(quantity) || quantity < 1) {
+        return res.status(400).json({
+          success: false,
+          message: "numRequested must be a positive integer",
         });
+      }
 
-    } catch (error) {
-        console.error('Error updating order in configurations:', error);
-        res.status(500).json({ message: 'Failed to update order' });
+      configuration.numRequested = quantity;
     }
-});
 
-// PUT /api/orders/status - Update the status of an order in a user's configuration
-router.put('/status', authenticate, requireAdmin, async (req, res) => {
-    try {
-        await dbConnect();
-
-        const { userID: providedUserID, configurationName, orderStatus } = req.body;
-
-        if (!providedUserID || !configurationName || !orderStatus) {
-            return res.status(400).json({ message: 'userID, configurationName and orderStatus are required' });
-        }
-
-        // Load the target user by userID
-        const targetUserDoc = await User.findOne({ userID: providedUserID }).exec();
-        if (!targetUserDoc) {
-            return res.status(404).json({ message: 'User not found' });
-        }
-
-        // Find the configuration by name
-        const configIndex = (targetUserDoc.configurations || []).findIndex(cfg => cfg.configurationName === configurationName);
-        if (configIndex === -1) {
-            return res.status(404).json({ message: 'Configuration not found' });
-        }
-
-        // Update only the configuration-level orderStatus
-        targetUserDoc.configurations[configIndex].orderStatus = orderStatus;
-        targetUserDoc.configurations[configIndex].updatedAt = new Date();
-        targetUserDoc.configurations[configIndex].updatedBy = {
-            userID: req.user.userID,
-            username: req.user.username,
-            firstName: req.user.firstName,
-            lastName: req.user.lastName,
-            role: req.user.role || 'user'
-        };
-        
-        // If status is being set to "Completed", set completion timestamp
-        if (orderStatus.toLowerCase() === 'complete') {
-            targetUserDoc.configurations[configIndex].completeDate = new Date();
-            
-            // Also mark all orders in the configuration as complete
-            targetUserDoc.configurations[configIndex].cart.forEach(order => {
-                if (!order.completeDate) {
-                    order.completeDate = new Date();
-                }
-            });
-        }
-
-        targetUserDoc.markModified('configurations');
-        await targetUserDoc.save();
-        
-        // Send email notification if order was complete
-        if (orderStatus.toLowerCase() === 'complete') {
-            try {
-                const { sendOrderNotification } = require('../utils/emailnotif');
-                await sendOrderNotification(
-                    targetUserDoc, 
-                    targetUserDoc.configurations[configIndex].cart, 
-                    'complete', 
-                    configurationName
-                );
-            } catch (emailError) {
-                console.warn('Failed to send completion notification:', emailError);
-            }
-        }
-        
-        const responseData = {
-            message: 'Configuration orderStatus updated',
-            userID: targetUserDoc.userID,
-            configurationName: targetUserDoc.configurations[configIndex].configurationName,
-            orderStatus: targetUserDoc.configurations[configIndex].orderStatus,
-            updatedAt: targetUserDoc.configurations[configIndex].updatedAt
-        };
-        
-        // Add completion data if applicable
-        if (orderStatus.toLowerCase() === 'complete') {
-            responseData.completeDate = targetUserDoc.configurations[configIndex].completeDate;
-            responseData.processingTime = calculateProcessingTime(
-                targetUserDoc.configurations[configIndex].dateOrdered,
-                targetUserDoc.configurations[configIndex].completeDate
-            );
-        }
-
-        return res.status(200).json(responseData);
-    } catch (error) {
-        console.error('Error updating configuration orderStatus:', error);
-        return res.status(500).json({ message: 'Failed to update configuration orderStatus' });
-    }
-});
-
-// PUT /api/orders/complete-cart-order - Mark individual cart order as complete
-router.put('/complete-cart-order', authenticate, async (req, res) => {
-    try {
-        await dbConnect();
-        
-        const { orderID } = req.body;
-        const user = req.user;
-        
-        if (!orderID) {
-            return res.status(400).json({ message: 'orderID is required' });
-        }
-        
-        // Find the order in the user's cart
-        const order = user.cart.find(order => order.orderID === orderID);
-        if (!order) {
-            return res.status(404).json({ message: 'Order not found in cart' });
-        }
-        
-        // Set completion timestamp
-        order.completeDate = new Date();
-        
-        // Mark as modified and save
-        user.markModified("cart");
-        await user.save();
-        
-        // Send completion notification email
-        try {
-            await sendOrderNotification(user, order, 'complete');
-        } catch (emailError) {
-            console.warn('Failed to send completion notification:', emailError);
-        }
-        
-        const processingTime = calculateProcessingTime(order.orderCreated, order.completeDate);
-        
-        res.status(200).json({ 
-            message: `Order ${orderID} marked as complete`,
-            orderID: order.orderID,
-            completeDate: order.completeDate,
-            processingTime
+    if (configurationData !== undefined) {
+      if (
+        !configurationData ||
+        typeof configurationData !== "object" ||
+        Array.isArray(configurationData)
+      ) {
+        return res.status(400).json({
+          success: false,
+          message: "configurationData must be an object",
         });
-        
-    } catch (error) {
-        console.error('Error completing cart order:', error);
-        res.status(500).json({ message: 'Failed to complete cart order' });
-    }
-});
+      }
 
-// GET /api/orders/completion-status/:orderID - Get completion status of an order
-router.get('/completion-status/:orderID', authenticate, async (req, res) => {
+      const currentData =
+        configuration.configurationData &&
+        typeof configuration.configurationData === "object"
+          ? configuration.configurationData
+          : {};
+
+      configuration.configurationData = deepMerge(
+        currentData,
+        configurationData
+      );
+
+      // configurationData is Mixed in ProductConfiguration schema.
+      configuration.markModified("configurationData");
+    }
+
+    configuration.updatedBy = createActor(req.user);
+
+    const savedConfiguration = await configuration.save();
+
+    // Email failure must not fail the actual configuration update.
     try {
-        await dbConnect();
-        
-        const { orderID } = req.params;
-        const user = req.user;
-        
-        // Look for order in cart
-        let order = user.cart.find(order => order.orderID === orderID);
-        let location = 'cart';
-        let configurationName = null;
-        
-        // If not in cart, look in configurations
-        if (!order) {
-            for (const config of user.configurations) {
-                order = config.cart.find(o => o.orderID === orderID);
-                if (order) {
-                    location = 'configuration';
-                    configurationName = config.configurationName;
-                    break;
-                }
-            }
-        }
-        
-        if (!order) {
-            return res.status(404).json({ message: 'Order not found' });
-        }
-        
-        const processingTime = order.completeDate ? 
-            calculateProcessingTime(order.orderCreated, order.completeDate) : null;
-        
-        const responseData = {
-            orderID: order.orderID,
-            location,
-            created: order.orderCreated,
-            complete: order.completeDate,
-            isCompleted: !!order.completeDate,
-            processingTime
-        };
-        
-        if (configurationName) {
-            responseData.configurationName = configurationName;
-        }
-        
-        res.status(200).json(responseData);
-        
-    } catch (error) {
-        console.error('Error getting completion status:', error);
-        res.status(500).json({ message: 'Failed to get completion status' });
+      await sendOrderNotification(
+        req.user,
+        savedConfiguration,
+        "edited"
+      );
+    } catch (emailError) {
+      console.warn(
+        "Failed to send configuration edit notification:",
+        emailError
+      );
     }
+
+    return res.status(200).json({
+      success: true,
+      message: "Configuration updated successfully",
+      configurationID: savedConfiguration.configurationID,
+      userID: savedConfiguration.userID,
+      configurationName: savedConfiguration.configurationName,
+      status: savedConfiguration.status,
+      numRequested: savedConfiguration.numRequested,
+      updatedAt: savedConfiguration.updatedAt,
+    });
+  } catch (error) {
+    console.error("Error updating configuration:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to update configuration",
+    });
+  }
 });
 
-module.exports = router;
+/**
+ * PUT /api/orders/status
+ *
+ * Admin-only route for changing configuration workflow status.
+ *
+ * Body:
+ * {
+ *   configurationID,
+ *   status
+ * }
+ */
+router.put("/status", authenticate, requireAdmin, async (req, res) => {
+  try {
+    const { configurationID, status } = req.body || {};
+
+    if (!configurationID || !status) {
+      return res.status(400).json({
+        success: false,
+        message: "configurationID and status are required",
+      });
+    }
+
+    const normalizedStatus = String(status).trim().toLowerCase();
+
+    if (!ALLOWED_STATUSES.includes(normalizedStatus)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid configuration status",
+        allowedStatuses: ALLOWED_STATUSES,
+      });
+    }
+
+    const configuration = await ProductConfiguration.findOne({
+      configurationID,
+    });
+
+    if (!configuration) {
+      return res.status(404).json({
+        success: false,
+        message: "Configuration not found",
+      });
+    }
+
+    const previousStatus = configuration.status;
+
+    configuration.status = normalizedStatus;
+    configuration.updatedBy = createActor(req.user);
+
+    // First time configuration reaches submitted state.
+    if (
+      normalizedStatus === "submitted" &&
+      !configuration.submittedAt
+    ) {
+      configuration.submittedAt = new Date();
+    }
+
+    // Completion timestamp is stored only once.
+    if (normalizedStatus === "completed") {
+      configuration.isComplete = true;
+
+      if (!configuration.completedAt) {
+        configuration.completedAt = new Date();
+      }
+    }
+
+    const savedConfiguration = await configuration.save();
+
+    if (
+      normalizedStatus === "completed" &&
+      previousStatus !== "completed"
+    ) {
+      try {
+        await sendOrderNotification(
+          req.user,
+          savedConfiguration,
+          "complete",
+          savedConfiguration.configurationName
+        );
+      } catch (emailError) {
+        console.warn(
+          "Failed to send completion notification:",
+          emailError
+        );
+      }
+    }
+
+    const response = {
+      success: true,
+      message: "Configuration status updated successfully",
+      configurationID: savedConfiguration.configurationID,
+      userID: savedConfiguration.userID,
+      configurationName: savedConfiguration.configurationName,
+      previousStatus,
+      status: savedConfiguration.status,
+      updatedAt: savedConfiguration.updatedAt,
+    };
+
+    if (normalizedStatus === "completed") {
+      response.completedAt = savedConfiguration.completedAt;
+      response.processingTime = calculateProcessingTime(
+        savedConfiguration.submittedAt || savedConfiguration.createdAt,
+        savedConfiguration.completedAt
+      );
+    }
+
+    return res.status(200).json(response);
+  } catch (error) {
+    console.error("Error updating configuration status:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to update configuration status",
+    });
+  }
+});
+
+/**
+ * PUT /api/orders/complete-cart-order
+ *
+ * Kept with old route name for API compatibility.
+ * Internally there is no embedded cart anymore.
+ *
+ * Body:
+ * {
+ *   configurationID
+ * }
+ */
+router.put("/complete-cart-order", authenticate, async (req, res) => {
+  try {
+    const { configurationID } = req.body || {};
+
+    if (!configurationID) {
+      return res.status(400).json({
+        success: false,
+        message: "configurationID is required",
+      });
+    }
+
+    // User can complete only their own configuration.
+    const configuration = await ProductConfiguration.findOne({
+      configurationID,
+      userID: req.user.userID,
+    });
+
+    if (!configuration) {
+      return res.status(404).json({
+        success: false,
+        message: "Configuration not found",
+      });
+    }
+
+    configuration.status = "completed";
+    configuration.isComplete = true;
+    configuration.updatedBy = createActor(req.user);
+
+    if (!configuration.completedAt) {
+      configuration.completedAt = new Date();
+    }
+
+    const savedConfiguration = await configuration.save();
+
+    try {
+      await sendOrderNotification(
+        req.user,
+        savedConfiguration,
+        "complete"
+      );
+    } catch (emailError) {
+      console.warn(
+        "Failed to send completion notification:",
+        emailError
+      );
+    }
+
+    const processingTime = calculateProcessingTime(
+      savedConfiguration.submittedAt || savedConfiguration.createdAt,
+      savedConfiguration.completedAt
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: `Configuration ${configurationID} marked as completed`,
+      configurationID: savedConfiguration.configurationID,
+      status: savedConfiguration.status,
+      completedAt: savedConfiguration.completedAt,
+      processingTime,
+    });
+  } catch (error) {
+    console.error("Error completing configuration:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to complete configuration",
+    });
+  }
+});
+
+/**
+ * GET /api/orders/completion-status/:configurationID
+ *
+ * Returns completion information directly from
+ * product_configurations.
+ *
+ * Normal user sees only their own configuration.
+ * Admin can check any configuration.
+ */
+router.get(
+  "/completion-status/:configurationID",
+  authenticate,
+  async (req, res) => {
+    try {
+      const { configurationID } = req.params;
+
+      const query = { configurationID };
+
+      if (req.user.role !== "admin") {
+        query.userID = req.user.userID;
+      }
+
+      const configuration = await ProductConfiguration.findOne(query);
+
+      if (!configuration) {
+        return res.status(404).json({
+          success: false,
+          message: "Configuration not found",
+        });
+      }
+
+      const processingTime = configuration.completedAt
+        ? calculateProcessingTime(
+            configuration.submittedAt || configuration.createdAt,
+            configuration.completedAt
+          )
+        : null;
+
+      return res.status(200).json({
+        success: true,
+        configurationID: configuration.configurationID,
+        configurationName: configuration.configurationName,
+        productType: configuration.productType,
+        productName: configuration.productName,
+        status: configuration.status,
+        isComplete: configuration.isComplete,
+        createdAt: configuration.createdAt,
+        submittedAt: configuration.submittedAt,
+        completedAt: configuration.completedAt,
+        processingTime,
+      });
+    } catch (error) {
+      console.error(
+        "Error getting configuration completion status:",
+        error
+      );
+
+      return res.status(500).json({
+        success: false,
+        message: "Failed to get configuration completion status",
+      });
+    }
+  }
+);
+
+module.exports = router

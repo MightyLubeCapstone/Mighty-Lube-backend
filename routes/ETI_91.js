@@ -1,144 +1,154 @@
-const express = require("express")
-const router = express.Router();
+const express = require("express");
 
 const ETI_91 = require("../models/ETI_91");
-const Cart = require("../models/cart");
+const ProductConfiguration = require("../models/product_configuration");
 const { authenticate } = require("./sessions");
+
+const router = express.Router();
+
 
 // =========================================================
 // POST /api/eti_91
 //
-// Body:
+// ETI_91 model:
+// validation only
 //
-// {
-//   "ETI_91Data": {
-//     "conveyorName": "...",
-//     "chainSize": "...",
-//     "otherChainSize": "...",
-//     "industrialChainManufacturer": "...",
-//     "otherIndustrialChainManufacturer": "...",
-//     "conveyorLength": "...",
-//     "conveyorLengthUnit": "...",
-//     "conveyorSpeed": "...",ss
-//     "conveyorSpeedUnit": "...",
-//     "appEnviroment": "...",
-//     "otherAppEnviroment": "...",
-//     "technicianNote": "..."
-//   },
-//   "numRequested": 1
-// }
+// Actual storage:
+// product_configurations
+//
+// Add to Cart:
+// status = "cart"
+// isComplete = true
 // =========================================================
 
 router.post("/", authenticate, async (req, res) => {
   try {
-    const { ETI_91Data, numRequested } = req.body;
+    const {
+      ETI_91Data,
+      numRequested,
+    } = req.body || {};
+
 
     // =====================================================
-    // BASIC REQUEST VALIDATION
+    // REQUEST VALIDATION
     // =====================================================
 
-    if (!ETI_91Data) {
+    if (
+      !ETI_91Data ||
+      typeof ETI_91Data !== "object" ||
+      Array.isArray(ETI_91Data)
+    ) {
       return res.status(400).json({
         success: false,
         message: "ETI_91Data is required",
       });
     }
 
-    if (!numRequested || numRequested < 1) {
+    const quantity = Number(numRequested);
+
+    if (
+      !Number.isInteger(quantity) ||
+      quantity < 1
+    ) {
       return res.status(400).json({
         success: false,
-        message: "numRequested must be at least 1",
+        message:
+          "numRequested must be a positive integer",
       });
     }
 
+
     // =====================================================
-    // BUILD CONFIGURATION DATA
+    // PRODUCT-SPECIFIC VALIDATION
     //
-    // Hidden conditional fields are not expected from
-    // Flutter when their parent field is not "Other".
+    // ETI_91 handles:
+    //
+    // - required fields
+    // - conditional required fields
+    // - trimming
+    // - default null
+    // - allowed schema fields
+    //
+    // ETI_91 is NOT saved separately.
     // =====================================================
 
-    const configurationData = {
-      conveyorName: ETI_91Data.conveyorName,
+    const validation =
+      new ETI_91(ETI_91Data);
 
-      chainSize: ETI_91Data.chainSize,
+    await validation.validate();
 
-      industrialChainManufacturer:
-        ETI_91Data.industrialChainManufacturer,
 
-      conveyorLength: ETI_91Data.conveyorLength,
+    // =====================================================
+    // CLEAN VALIDATED DATA
+    // =====================================================
 
-      conveyorLengthUnit:
-        ETI_91Data.conveyorLengthUnit,
+    const configurationData =
+      validation.toObject({
+        versionKey: false,
+      });
 
-      conveyorSpeed: ETI_91Data.conveyorSpeed,
+    delete configurationData._id;
+    delete configurationData.createdAt;
+    delete configurationData.updatedAt;
 
-      conveyorSpeedUnit:
-        ETI_91Data.conveyorSpeedUnit,
 
-      appEnviroment: ETI_91Data.appEnviroment,
+    // =====================================================
+    // USER / AUDIT INFORMATION
+    // =====================================================
+
+    const actor = {
+      userID: req.user.userID,
+      username: req.user.username,
+      firstName:
+        req.user.firstName || "",
+      lastName:
+        req.user.lastName || "",
+      role:
+        req.user.role || "user",
     };
 
-    // =====================================================
-    // CONDITIONAL FIELDS
-    // =====================================================
-
-    if (ETI_91Data.chainSize === "Other") {
-      configurationData.otherChainSize =
-        ETI_91Data.otherChainSize;
-    }
-
-    if (
-      ETI_91Data.industrialChainManufacturer === "Other"
-    ) {
-      configurationData.otherIndustrialChainManufacturer =
-        ETI_91Data.otherIndustrialChainManufacturer;
-    }
-
-    if (ETI_91Data.appEnviroment === "Other") {
-      configurationData.otherAppEnviroment =
-        ETI_91Data.otherAppEnviroment;
-    }
 
     // =====================================================
-    // OPTIONAL TECHNICIAN NOTE
+    // SAVE INTO GENERIC COLLECTION
     // =====================================================
 
-    if (
-      ETI_91Data.technicianNote &&
-      ETI_91Data.technicianNote.trim() !== ""
-    ) {
-      configurationData.technicianNote =
-        ETI_91Data.technicianNote.trim();
-    }
+    const productConfiguration =
+      new ProductConfiguration({
+        userID:
+          req.user.userID,
 
-    // =====================================================
-    // SAVE CONFIGURATION
-    //
-    // Mongoose model performs required-field and conditional
-    // validation here.
-    // =====================================================
+        configurationName:
+          configurationData.conveyorName ||
+          "ETI 91",
 
-    const configuration = new ETI_91(
-      configurationData
-    );
+        productType:
+          "ETI_91",
+
+        productName:
+          "ETI 91",
+
+        status:
+          "cart",
+
+        isComplete:
+          true,
+
+        numRequested:
+          quantity,
+
+        configurationData,
+
+        createdBy:
+          actor,
+
+        updatedBy:
+          actor,
+      });
+
 
     const savedConfiguration =
-      await configuration.save();
+      await productConfiguration.save();
 
-    // =====================================================
-    // ADD PRODUCT TO CART
-    // =====================================================
-
-    const cartItem = new Cart({
-      userId: req.user._id,
-      productType: "ETI_91",
-      productConfiguration:
-        savedConfiguration._id,
-      numRequested,
-    });
-
-    await cartItem.save();
 
     // =====================================================
     // RESPONSE
@@ -146,35 +156,79 @@ router.post("/", authenticate, async (req, res) => {
 
     return res.status(201).json({
       success: true,
+
       message:
-        "ETI_91 configuration added successfully",
-      data: {
-        configuration:
-          savedConfiguration,
-        cartItem,
+        "ETI_91 configuration added to cart successfully",
+
+      configurationID:
+        savedConfiguration.configurationID,
+
+      configuration: {
+        configurationID:
+          savedConfiguration.configurationID,
+
+        configurationName:
+          savedConfiguration.configurationName,
+
+        productType:
+          savedConfiguration.productType,
+
+        productName:
+          savedConfiguration.productName,
+
+        status:
+          savedConfiguration.status,
+
+        isComplete:
+          savedConfiguration.isComplete,
+
+        numRequested:
+          savedConfiguration.numRequested,
       },
     });
+
   } catch (error) {
     console.error(
       "ETI_91 configuration error:",
       error
     );
 
-    // Mongoose validation error
+
+    // =====================================================
+    // MONGOOSE VALIDATION ERROR
+    // =====================================================
+
     if (error.name === "ValidationError") {
-      return res.status(400).json({
+      const errors = {};
+
+      for (const field in error.errors) {
+        errors[field] =
+          error.errors[field].message;
+      }
+
+      return res.status(422).json({
         success: false,
-        message: error.message,
+
+        message:
+          "Invalid ETI_91 configuration",
+
+        errors,
       });
     }
 
+
+    // =====================================================
+    // INTERNAL SERVER ERROR
+    // =====================================================
+
     return res.status(500).json({
       success: false,
+
       message:
         "Failed to add ETI_91 configuration",
-      error: error.message,
-    });
+    })
   }
 });
+
 
 module.exports = router

@@ -1,233 +1,244 @@
 const express = require("express");
+
 const { authenticate } = require("./sessions");
 const IBR_RFC = require("../models/IBR_RFC");
+const ProductConfiguration = require("../models/product_configuration");
 
 const router = express.Router();
 
-// ============================================================
-// MIGHTY LUBE ROLLER FLIGHT CONVEYOR
-// Product ID: IBR_RFC
+
+// =========================================================
 // POST /api/ibr_rfc
-// ============================================================
+//
+// Product:
+// Mighty Lube Roller Flight Conveyor
+//
+// IBR_RFC model:
+// validation only
+//
+// Actual storage:
+// product_configurations
+//
+// Add to Cart:
+// status = "cart"
+// isComplete = true
+// =========================================================
 
 router.post("/", authenticate, async (req, res) => {
-    try {
-        const { IBR_RFCData, numRequested } = req.body;
-
-        // ====================================================
-        // BASIC REQUEST VALIDATION
-        // ====================================================
-
-        if (!IBR_RFCData) {
-            return res.status(400).json({
-                error: "IBR_RFCData is required",
-            });
-        }
-
-        // ====================================================
-        // CREATE PRODUCT CONFIGURATION
-        //
-        // Keys below match the new Flutter ProductDetailData
-        // contract directly.
-        // ====================================================
-
-        const order = new IBR_RFC({
-            // ==================================================
-            // GENERAL INFORMATION
-            // ==================================================
-
-            conveyorName: IBR_RFCData.conveyorName,
-
-            conveyorChainSize: IBR_RFCData.conveyorChainSize,
-
-            otherConveyorChainSize:
-                IBR_RFCData.otherConveyorChainSize,
-
-            chainManufacturer:
-                IBR_RFCData.chainManufacturer,
-
-            otherChainManufacturer:
-                IBR_RFCData.otherChainManufacturer,
-
-            conveyorLength:
-                IBR_RFCData.conveyorLength,
-
-            conveyorLengthUnit:
-                IBR_RFCData.conveyorLengthUnit,
-
-            conveyorSpeed:
-                IBR_RFCData.conveyorSpeed,
-
-            conveyorSpeedUnit:
-                IBR_RFCData.conveyorSpeedUnit,
-
-            indexingVariableSpeedConditions:
-                IBR_RFCData.indexingVariableSpeedConditions,
-
-            travelDirection:
-                IBR_RFCData.travelDirection,
-
-            applicationEnvironment:
-                IBR_RFCData.applicationEnvironment,
-
-            otherApplicationEnvironment:
-                IBR_RFCData.otherApplicationEnvironment,
-
-            surroundingTemperature:
-                IBR_RFCData.surroundingTemperature,
-
-            conveyorLoadedStatus:
-                IBR_RFCData.conveyorLoadedStatus,
-
-            conveyorSwingStatus:
-                IBR_RFCData.conveyorSwingStatus,
-
-            conveyorStrand:
-                IBR_RFCData.conveyorStrand,
-
-            // ==================================================
-            // CUSTOMER POWER UTILITIES
-            // ==================================================
-
-            operatingVoltage:
-                IBR_RFCData.operatingVoltage,
-
-            controlVoltage:
-                IBR_RFCData.controlVoltage,
-
-            // ==================================================
-            // NEW / EXISTING MONITORING SYSTEM
-            // ==================================================
-
-            existingMonitoring:
-                IBR_RFCData.existingMonitoring,
-
-            newMonitoringSystem:
-                IBR_RFCData.newMonitoringSystem,
-
-            // ==================================================
-            // CONVEYOR SPECIFICATIONS
-            // ==================================================
-
-            wheelOpenRaceStyle:
-                IBR_RFCData.wheelOpenRaceStyle,
-
-            wheelSealedStyle:
-                IBR_RFCData.wheelSealedStyle,
-
-            openInsideShieldedOutside:
-                IBR_RFCData.openInsideShieldedOutside,
-
-            powerChain:
-                IBR_RFCData.powerChain,
-
-            chainPins:
-                IBR_RFCData.chainPins,
-
-            sliderPlates:
-                IBR_RFCData.sliderPlates,
-
-            outboardWheels:
-                IBR_RFCData.outboardWheels,
-
-            caterpillarDrive:
-                IBR_RFCData.caterpillarDrive,
-
-            caterpillarDriveQuantity:
-                IBR_RFCData.caterpillarDriveQuantity,
-
-            railLubrication:
-                IBR_RFCData.railLubrication,
-
-            externalLubrication:
-                IBR_RFCData.externalLubrication,
-
-            currentLubricationEquipmentBrand:
-                IBR_RFCData.currentLubricationEquipmentBrand,
-
-            currentLubricantType:
-                IBR_RFCData.currentLubricantType,
-
-            currentLubricantViscosityGrade:
-                IBR_RFCData.currentLubricantViscosityGrade,
-
-            reservoirSize:
-                IBR_RFCData.reservoirSize,
-
-            reservoirSizeQuantity:
-                IBR_RFCData.reservoirSizeQuantity,
-
-            conveyorChainClean:
-                IBR_RFCData.conveyorChainClean,
-
-            // ==================================================
-            // CONTROLLER
-            // ==================================================
-
-            specialControllerOptions:
-                IBR_RFCData.specialControllerOptions,
-
-            controllerSpecify:
-                IBR_RFCData.controllerSpecify,
-
-            // ==================================================
-            // IN BOARD ROLLER CHAIN: MEASUREMENTS
-            // ==================================================
-
-            measurementUnit:
-                IBR_RFCData.measurementUnit,
-
-            inBoardRollerChainRollerWheelA1:
-                IBR_RFCData.inBoardRollerChainRollerWheelA1,
-
-            inBoardRollerChainRollerWheelB1:
-                IBR_RFCData.inBoardRollerChainRollerWheelB1,
-
-            inBoardRollerChainLinkC1:
-                IBR_RFCData.inBoardRollerChainLinkC1,
-
-            inBoardRollerChainLinkD1:
-                IBR_RFCData.inBoardRollerChainLinkD1,
-
-            inBoardRollerChainOuterLinkOffsetF1:
-                IBR_RFCData.inBoardRollerChainOuterLinkOffsetF1,
-
-            // ==================================================
-            // TECHNICIAN NOTE
-            // ==================================================
-
-            technicianNote:
-                IBR_RFCData.technicianNote,
-        });
-
-        // ====================================================
-        // ADD CONFIGURATION TO USER CART
-        // ====================================================
-
-        req.user.cart.push({
-            numRequested,
-            productConfigurationInfo: order,
-            productType: "IBR_RFC",
-        });
-
-        await req.user.save();
-
-        // ====================================================
-        // SUCCESS RESPONSE
-        // ====================================================
-
-        return res.status(200).json({
-            message: "IBR_RFC entry added",
-        });
-
-    } catch (error) {
-        console.error("IBR_RFC route error:");
-        console.error(error);
-
-        return res.status(500).json({
-            error: "Internal server error",
-        });
+  try {
+    const {
+      IBR_RFCData,
+      numRequested,
+    } = req.body || {};
+
+
+    // =====================================================
+    // REQUEST VALIDATION
+    // =====================================================
+
+    if (
+      !IBR_RFCData ||
+      typeof IBR_RFCData !== "object" ||
+      Array.isArray(IBR_RFCData)
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "IBR_RFCData is required",
+      });
     }
+
+    const quantity = Number(numRequested);
+
+    if (
+      !Number.isInteger(quantity) ||
+      quantity < 1
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "numRequested must be a positive integer",
+      });
+    }
+
+
+    // =====================================================
+    // PRODUCT-SPECIFIC VALIDATION
+    //
+    // IBR_RFCData and IBR_RFC schema use the same
+    // flat field structure.
+    //
+    // No transformation or legacy mapping is required.
+    //
+    // IBR_RFC is used ONLY for validation.
+    // It is NOT saved into a separate collection.
+    // =====================================================
+
+    const validation =
+      new IBR_RFC(IBR_RFCData);
+
+    await validation.validate();
+
+
+    // =====================================================
+    // CLEAN VALIDATED CONFIGURATION DATA
+    // =====================================================
+
+    const configurationData =
+      validation.toObject({
+        versionKey: false,
+      });
+
+    delete configurationData._id;
+    delete configurationData.createdAt;
+    delete configurationData.updatedAt;
+
+
+    // =====================================================
+    // AUTHENTICATED USER / AUDIT SNAPSHOT
+    // =====================================================
+
+    const actor = {
+      userID:
+        req.user.userID,
+
+      username:
+        req.user.username,
+
+      firstName:
+        req.user.firstName || "",
+
+      lastName:
+        req.user.lastName || "",
+
+      role:
+        req.user.role || "user",
+    };
+
+
+    // =====================================================
+    // CREATE GENERIC PRODUCT CONFIGURATION
+    // =====================================================
+
+    const productConfiguration =
+      new ProductConfiguration({
+        userID:
+          req.user.userID,
+
+        configurationName:
+          configurationData.conveyorName ||
+          "Mighty Lube Roller Flight Conveyor",
+
+        productType:
+          "IBR_RFC",
+
+        productName:
+          "Mighty Lube Roller Flight Conveyor",
+
+        status:
+          "cart",
+
+        isComplete:
+          true,
+
+        numRequested:
+          quantity,
+
+        configurationData,
+
+        createdBy:
+          actor,
+
+        updatedBy:
+          actor,
+      });
+
+
+    // =====================================================
+    // SAVE INTO GENERIC COLLECTION
+    // =====================================================
+
+    const savedConfiguration =
+      await productConfiguration.save();
+
+
+    // =====================================================
+    // SUCCESS RESPONSE
+    // =====================================================
+
+    return res.status(201).json({
+      success: true,
+
+      message:
+        "IBR_RFC configuration added to cart successfully",
+
+      configurationID:
+        savedConfiguration.configurationID,
+
+      configuration: {
+        configurationID:
+          savedConfiguration.configurationID,
+
+        configurationName:
+          savedConfiguration.configurationName,
+
+        productType:
+          savedConfiguration.productType,
+
+        productName:
+          savedConfiguration.productName,
+
+        status:
+          savedConfiguration.status,
+
+        isComplete:
+          savedConfiguration.isComplete,
+
+        numRequested:
+          savedConfiguration.numRequested,
+      },
+    });
+
+  } catch (error) {
+    console.error(
+      "IBR_RFC configuration error:",
+      error
+    );
+
+
+    // =====================================================
+    // MONGOOSE VALIDATION ERROR
+    // =====================================================
+
+    if (error?.name === "ValidationError") {
+      const errors = {};
+
+      for (const field in error.errors) {
+        errors[field] =
+          error.errors[field].message;
+      }
+
+      return res.status(422).json({
+        success: false,
+
+        message:
+          "Invalid IBR_RFC configuration",
+
+        errors,
+      });
+    }
+
+
+    // =====================================================
+    // INTERNAL SERVER ERROR
+    // =====================================================
+
+    return res.status(500).json({
+      success: false,
+
+      message:
+        "Failed to add IBR_RFC configuration",
+    });
+  }
 });
 
-module.exports = router
+
+module.exports = router;

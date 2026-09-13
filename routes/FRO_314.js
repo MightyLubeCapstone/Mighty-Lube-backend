@@ -1,222 +1,254 @@
 const express = require("express");
+
 const { authenticate } = require("./sessions");
 const FRO_314 = require("../models/FRO_314");
+const ProductConfiguration = require("../models/product_configuration");
 
 const router = express.Router();
 
+
+// =========================================================
+// POST /api/fro_314
+//
+// Product:
+// FRO 314
+//
+// FRO_314 model:
+// validation only
+//
+// Actual storage:
+// product_configurations
+//
+// Add to Cart:
+// status = "cart"
+// isComplete = true
+// =========================================================
+
 router.post("/", authenticate, async (req, res) => {
   try {
-    const { FRO_314Data, numRequested } = req.body || {};
+    const {
+      FRO_314Data,
+      numRequested,
+    } = req.body || {};
 
-    if (!FRO_314Data) {
+
+    // =====================================================
+    // REQUEST VALIDATION
+    // =====================================================
+
+    if (
+      !FRO_314Data ||
+      typeof FRO_314Data !== "object" ||
+      Array.isArray(FRO_314Data)
+    ) {
       return res.status(400).json({
-        error: "FRO_314Data is required",
+        success: false,
+        message: "FRO_314Data is required",
       });
     }
 
-    const order = new FRO_314({
-      // =====================================================
-      // GENERAL INFORMATION
-      // =====================================================
+    const quantity = Number(numRequested);
 
-      conveyorName: FRO_314Data.conveyorName || "",
+    if (
+      !Number.isInteger(quantity) ||
+      quantity < 1
+    ) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "numRequested must be a positive integer",
+      });
+    }
 
-      wheelManufacturer:
-        FRO_314Data.wheelManufacturer || "",
 
-      otherWheelManufacturer:
-        FRO_314Data.otherWheelManufacturer || "",
+    // =====================================================
+    // PRODUCT-SPECIFIC VALIDATION
+    //
+    // FRO_314Data and FRO_314 schema use the same
+    // flat field structure.
+    //
+    // No transformation is required.
+    //
+    // FRO_314 model is used ONLY for validation.
+    // It is NOT saved into a separate collection.
+    // =====================================================
 
-      conveyorLength:
-        FRO_314Data.conveyorLength || "",
+    const validation =
+      new FRO_314(FRO_314Data);
 
-      conveyorLengthUnit:
-        FRO_314Data.conveyorLengthUnit || "",
+    await validation.validate();
 
-      conveyorSpeed:
-        FRO_314Data.conveyorSpeed || "",
 
-      conveyorSpeedUnit:
-        FRO_314Data.conveyorSpeedUnit || "",
+    // =====================================================
+    // CLEAN VALIDATED CONFIGURATION DATA
+    // =====================================================
 
-      indexingVariableSpeedConditions:
-        FRO_314Data.indexingVariableSpeedConditions || "",
+    const configurationData =
+      validation.toObject({
+        versionKey: false,
+      });
 
-      travelDirection:
-        FRO_314Data.travelDirection || "",
+    delete configurationData._id;
+    delete configurationData.createdAt;
+    delete configurationData.updatedAt;
 
-      applicationEnvironment:
-        FRO_314Data.applicationEnvironment || "",
 
-      otherApplicationEnvironment:
-        FRO_314Data.otherApplicationEnvironment || "",
+    // =====================================================
+    // AUTHENTICATED USER / AUDIT SNAPSHOT
+    // =====================================================
 
-      surroundingTemperature:
-        FRO_314Data.surroundingTemperature || "",
+    const actor = {
+      userID:
+        req.user.userID,
 
-      conveyorSwingStatus:
-        FRO_314Data.conveyorSwingStatus || "",
+      username:
+        req.user.username,
 
-      conveyorOrientation:
-        FRO_314Data.conveyorOrientation || "",
+      firstName:
+        req.user.firstName || "",
 
-      // =====================================================
-      // CUSTOMER POWER UTILITIES
-      // =====================================================
+      lastName:
+        req.user.lastName || "",
 
-      operatingVoltage:
-        FRO_314Data.operatingVoltage || "",
+      role:
+        req.user.role || "user",
+    };
 
-      controlVoltage:
-        FRO_314Data.controlVoltage || "",
 
-      compressedAirSupply:
-        FRO_314Data.compressedAirSupply || "",
+    // =====================================================
+    // CREATE GENERIC PRODUCT CONFIGURATION
+    // =====================================================
 
-      compressedAirSupplyUnit:
-        FRO_314Data.compressedAirSupplyUnit || "",
+    const productConfiguration =
+      new ProductConfiguration({
+        userID:
+          req.user.userID,
 
-      // =====================================================
-      // NEW MONITORING SYSTEM OR ADDING TO EXISTING
-      // =====================================================
+        configurationName:
+          configurationData.conveyorName ||
+          "FRO 314",
 
-      existingMonitoring:
-        FRO_314Data.existingMonitoring || "",
+        productType:
+          "FRO_314",
 
-      newMonitoringSystem:
-        FRO_314Data.newMonitoringSystem || "",
+        productName:
+          "FRO 314",
 
-      // =====================================================
-      // CONVEYOR SPECIFICATIONS
-      // =====================================================
+        status:
+          "cart",
 
-      freeTrolleyWheels:
-        FRO_314Data.freeTrolleyWheels || "",
+        isComplete:
+          true,
 
-      dogActuator:
-        FRO_314Data.dogActuator || "",
+        numRequested:
+          quantity,
 
-      pivotPoints:
-        FRO_314Data.pivotPoints || "",
+        configurationData,
 
-      kingPin:
-        FRO_314Data.kingPin || "",
+        createdBy:
+          actor,
 
-      currentLubricationEquipmentBrand:
-        FRO_314Data.currentLubricationEquipmentBrand || "",
+        updatedBy:
+          actor,
+      });
 
-      currentLubricantType:
-        FRO_314Data.currentLubricantType || "",
 
-      currentLubricantViscosityGrade:
-        FRO_314Data.currentLubricantViscosityGrade || "",
+    // =====================================================
+    // SAVE INTO GENERIC COLLECTION
+    //
+    // OLD:
+    //
+    // req.user.cart.push(...)
+    // await req.user.save()
+    //
+    // NEW:
+    //
+    // product_configurations
+    // =====================================================
 
-      currentGreaseType:
-        FRO_314Data.currentGreaseType || "",
+    const savedConfiguration =
+      await productConfiguration.save();
 
-      currentGreaseNlgiGrade:
-        FRO_314Data.currentGreaseNlgiGrade || "",
 
-      zerkFittingLocationSide:
-        FRO_314Data.zerkFittingLocationSide || "",
+    // =====================================================
+    // SUCCESS RESPONSE
+    // =====================================================
 
-      zerkFittingLocationOrientation:
-        FRO_314Data.zerkFittingLocationOrientation || "",
+    return res.status(201).json({
+      success: true,
 
-      // =====================================================
-      // CONTROLLER
-      // =====================================================
+      message:
+        "FRO_314 configuration added to cart successfully",
 
-      chainMasterController:
-        FRO_314Data.chainMasterController || "",
+      configurationID:
+        savedConfiguration.configurationID,
 
-      remote:
-        FRO_314Data.remote || "",
+      configuration: {
+        configurationID:
+          savedConfiguration.configurationID,
 
-      mountedOnGreaser:
-        FRO_314Data.mountedOnGreaser || "",
+        configurationName:
+          savedConfiguration.configurationName,
 
-      controlsOtherUnits:
-        FRO_314Data.controlsOtherUnits || "",
+        productType:
+          savedConfiguration.productType,
 
-      timer:
-        FRO_314Data.timer || "",
+        productName:
+          savedConfiguration.productName,
 
-      electricOnOff:
-        FRO_314Data.electricOnOff || "",
+        status:
+          savedConfiguration.status,
 
-      mightyLubeMonitoring:
-        FRO_314Data.mightyLubeMonitoring || "",
+        isComplete:
+          savedConfiguration.isComplete,
 
-      preMountingRequirements:
-        FRO_314Data.preMountingRequirements || "",
-
-      plcConnection:
-        FRO_314Data.plcConnection || "",
-
-      otherControllerInfo:
-        FRO_314Data.otherControllerInfo || "",
-
-      // =====================================================
-      // INVERTED P&F: MEASUREMENTS
-      // =====================================================
-
-      measurementUnit:
-        FRO_314Data.measurementUnit || "",
-
-      invertedPowerTrolleyWheelB:
-        FRO_314Data.invertedPowerTrolleyWheelB || "",
-
-      invertedZerkFittingVerticalE:
-        FRO_314Data.invertedZerkFittingVerticalE || "",
-
-      invertedRailG:
-        FRO_314Data.invertedRailG || "",
-
-      invertedRailH:
-        FRO_314Data.invertedRailH || "",
-
-      invertedTrolleyWheelPitchK:
-        FRO_314Data.invertedTrolleyWheelPitchK || "",
-
-      invertedCarrierTrolleyPitchT:
-        FRO_314Data.invertedCarrierTrolleyPitchT || "",
-
-      invertedCarrierTrolleyPitchU:
-        FRO_314Data.invertedCarrierTrolleyPitchU || "",
-
-      invertedCarrierTrolleyPitchV:
-        FRO_314Data.invertedCarrierTrolleyPitchV || "",
-
-      invertedFreeTrolleyWheelOffsetW:
-        FRO_314Data.invertedFreeTrolleyWheelOffsetW || "",
-
-      // =====================================================
-      // TECHNICIAN NOTE
-      // =====================================================
-
-      technicianNote:
-        FRO_314Data.technicianNote || "",
+        numRequested:
+          savedConfiguration.numRequested,
+      },
     });
 
-    req.user.cart.push({
-      numRequested,
-      productConfigurationInfo: order,
-      productType: "FRO_314",
-    });
-
-    await req.user.save();
-
-    return res.status(200).json({
-      message: "FRO_314 entry added",
-    });
   } catch (error) {
-    console.log("FRO_314 add error:", error);
+    console.error(
+      "FRO_314 configuration error:",
+      error
+    );
+
+
+    // =====================================================
+    // MONGOOSE VALIDATION ERROR
+    // =====================================================
+
+    if (error?.name === "ValidationError") {
+      const errors = {};
+
+      for (const field in error.errors) {
+        errors[field] =
+          error.errors[field].message;
+      }
+
+      return res.status(422).json({
+        success: false,
+
+        message:
+          "Invalid FRO_314 configuration",
+
+        errors,
+      });
+    }
+
+
+    // =====================================================
+    // INTERNAL SERVER ERROR
+    // =====================================================
 
     return res.status(500).json({
-      error: "Internal server error",
+      success: false,
+
+      message:
+        "Failed to add FRO_314 configuration",
     });
   }
 });
 
-module.exports = router
+
+module.exports = router;

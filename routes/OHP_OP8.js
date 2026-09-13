@@ -1,132 +1,249 @@
-// routes/OH_CCS_OP8.js
-
 const express = require("express");
-const { dbConnect } = require("../config/config"); // kept (even if unused)
+
 const { authenticate } = require("./sessions");
 const OH_CCS_OP8 = require("../models/OH_CCS_OP8");
+const ProductConfiguration = require("../models/product_configuration");
 
 const router = express.Router();
 
+
+// =========================================================
+// POST /api/oh_ccs_op8
+//
+// Product:
+// OH CCS OP8
+//
+// Product ID:
+// OH_CCS_OP8
+//
+// OH_CCS_OP8 model:
+// validation only
+//
+// Actual storage:
+// product_configurations
+//
+// Add to Cart:
+// status = "cart"
+// isComplete = true
+// =========================================================
+
 router.post("/", authenticate, async (req, res) => {
   try {
-    const { OH_CCS_OP8Data, numRequested } = req.body;
-
-    const order = new OH_CCS_OP8({
-      // =====================================================
-      // GENERAL INFORMATION
-      // =====================================================
-
-      conveyorName: OH_CCS_OP8Data.conveyorName,
-
-      conveyorChainSize: OH_CCS_OP8Data.conveyorChainSize,
-
-      chainManufacturer: OH_CCS_OP8Data.chainManufacturer,
-
-      conveyorLength: OH_CCS_OP8Data.conveyorLength,
-
-      conveyorLengthUnit: OH_CCS_OP8Data.conveyorLengthUnit,
-
-      directionOfTravel: OH_CCS_OP8Data.directionOfTravel,
-
-      applicationEnvironment:
-        OH_CCS_OP8Data.applicationEnvironment,
-
-      surroundingTemperatureOutsideRange:
-        OH_CCS_OP8Data.surroundingTemperatureOutsideRange,
-
-      conveyorLoadState:
-        OH_CCS_OP8Data.conveyorLoadState,
-
-      // =====================================================
-      // CUSTOMER POWER UTILITIES
-      // =====================================================
-
-      operatingVoltage3Phase:
-        OH_CCS_OP8Data.operatingVoltage3Phase,
-
-      controlVoltage:
-        OH_CCS_OP8Data.controlVoltage,
-
-      // =====================================================
-      // OP-SS
-      // =====================================================
-
-      poweredNonPoweredAvailable:
-        OH_CCS_OP8Data.poweredNonPoweredAvailable,
-
-      brushMaterialsAvailable:
-        OH_CCS_OP8Data.brushMaterialsAvailable,
-
-      installationClearanceConfirmed:
-        OH_CCS_OP8Data.installationClearanceConfirmed,
-
-      // =====================================================
-      // ADDITIONAL OPTIONS AVAILABLE
-      // =====================================================
-
-      washDown:
-        OH_CCS_OP8Data.washDown,
-
-      foodIndustry:
-        OH_CCS_OP8Data.foodIndustry,
-
-      powerPanelWithTimer:
-        OH_CCS_OP8Data.powerPanelWithTimer,
-
-      threeStationPushButtonSwitch:
-        OH_CCS_OP8Data.threeStationPushButtonSwitch,
-
-      shroud:
-        OH_CCS_OP8Data.shroud,
-
-      otherAdditionalOptions:
-        OH_CCS_OP8Data.otherAdditionalOptions,
-
-      // =====================================================
-      // OVERHEAD POWER RAIL: MEASUREMENTS
-      // =====================================================
-
-      measurementUnit:
-        OH_CCS_OP8Data.measurementUnit,
-
-      chainDropA:
-        OH_CCS_OP8Data.chainDropA,
-
-      overheadPowerMonoRailPowerTrolleyWheelB:
-        OH_CCS_OP8Data.overheadPowerMonoRailPowerTrolleyWheelB,
-
-      overheadPowerMonoRailPowerRailG:
-        OH_CCS_OP8Data.overheadPowerMonoRailPowerRailG,
-
-      overheadPowerMonoRailPowerRailH:
-        OH_CCS_OP8Data.overheadPowerMonoRailPowerRailH,
-
-      // =====================================================
-      // TECHNICIAN NOTE
-      // =====================================================
-
-      technicianNote:
-        OH_CCS_OP8Data.technicianNote,
-    });
-
-    req.user.cart.push({
+    const {
+      OH_CCS_OP8Data,
       numRequested,
-      productConfigurationInfo: order,
-      productType: "OH_CCS_OP8",
+    } = req.body || {};
+
+
+    // =====================================================
+    // REQUEST VALIDATION
+    // =====================================================
+
+    if (
+      !OH_CCS_OP8Data ||
+      typeof OH_CCS_OP8Data !== "object" ||
+      Array.isArray(OH_CCS_OP8Data)
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "OH_CCS_OP8Data is required",
+      });
+    }
+
+
+    // =====================================================
+    // QUANTITY VALIDATION
+    // =====================================================
+
+    const quantity = Number(numRequested);
+
+    if (
+      !Number.isInteger(quantity) ||
+      quantity < 1
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "numRequested must be a positive integer",
+      });
+    }
+
+
+    // =====================================================
+    // PRODUCT-SPECIFIC VALIDATION
+    //
+    // OH_CCS_OP8Data and OH_CCS_OP8 schema use the same
+    // flat field structure.
+    //
+    // No aliases, templates, nested mappings, or field
+    // transformations are required.
+    //
+    // IMPORTANT:
+    // OH_CCS_OP8 is validation-only.
+    // Do NOT call validation.save().
+    // =====================================================
+
+    const validation =
+      new OH_CCS_OP8(OH_CCS_OP8Data);
+
+    await validation.validate();
+
+
+    // =====================================================
+    // CLEAN VALIDATED CONFIGURATION DATA
+    // =====================================================
+
+    const configurationData =
+      validation.toObject({
+        versionKey: false,
+      });
+
+    delete configurationData._id;
+    delete configurationData.createdAt;
+    delete configurationData.updatedAt;
+
+
+    // =====================================================
+    // AUTHENTICATED USER / AUDIT SNAPSHOT
+    // =====================================================
+
+    const actor = {
+      userID: req.user.userID,
+      username: req.user.username,
+      firstName: req.user.firstName || "",
+      lastName: req.user.lastName || "",
+      role: req.user.role || "user",
+    };
+
+
+    // =====================================================
+    // CREATE GENERIC PRODUCT CONFIGURATION
+    // =====================================================
+
+    const productConfiguration =
+      new ProductConfiguration({
+        userID:
+          req.user.userID,
+
+        configurationName:
+          configurationData.conveyorName ||
+          "OH CCS OP8",
+
+        productType:
+          "OH_CCS_OP8",
+
+        productName:
+          "OH CCS OP8",
+
+        status:
+          "cart",
+
+        isComplete:
+          true,
+
+        numRequested:
+          quantity,
+
+        configurationData,
+
+        createdBy:
+          actor,
+
+        updatedBy:
+          actor,
+      });
+
+
+    // =====================================================
+    // SAVE ONLY GENERIC PRODUCT CONFIGURATION
+    //
+    // OLD:
+    // req.user.cart.push(...)
+    // await req.user.save()
+    //
+    // NEW:
+    // ProductConfiguration only
+    // =====================================================
+
+    const savedConfiguration =
+      await productConfiguration.save();
+
+
+    // =====================================================
+    // SUCCESS RESPONSE
+    // =====================================================
+
+    return res.status(201).json({
+      success: true,
+
+      message:
+        "OH_CCS_OP8 configuration added to cart successfully",
+
+      configurationID:
+        savedConfiguration.configurationID,
+
+      configuration: {
+        configurationID:
+          savedConfiguration.configurationID,
+
+        configurationName:
+          savedConfiguration.configurationName,
+
+        productType:
+          savedConfiguration.productType,
+
+        productName:
+          savedConfiguration.productName,
+
+        status:
+          savedConfiguration.status,
+
+        isComplete:
+          savedConfiguration.isComplete,
+
+        numRequested:
+          savedConfiguration.numRequested,
+      },
     });
 
-    await req.user.save();
-
-    return res.status(200).json({
-      message: "OH_CCS_OP8 entry added",
-    });
   } catch (error) {
-    console.error(error);
+    console.error(
+      "OH_CCS_OP8 configuration error:",
+      error
+    );
+
+
+    // =====================================================
+    // MONGOOSE VALIDATION ERROR
+    // =====================================================
+
+    if (error?.name === "ValidationError") {
+      const errors = {};
+
+      for (const field in error.errors) {
+        errors[field] =
+          error.errors[field].message;
+      }
+
+      return res.status(422).json({
+        success: false,
+        message:
+          "Invalid OH_CCS_OP8 configuration",
+        errors,
+      });
+    }
+
+
+    // =====================================================
+    // INTERNAL SERVER ERROR
+    // =====================================================
 
     return res.status(500).json({
-      error: "Internal server error",
+      success: false,
+      message:
+        "Failed to add OH_CCS_OP8 configuration",
     });
   }
 });
 
-module.exports = router
+
+module.exports = router;

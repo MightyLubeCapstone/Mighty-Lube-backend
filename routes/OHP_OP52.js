@@ -1,127 +1,251 @@
 const express = require("express");
+
 const { authenticate } = require("./sessions");
 const OHP_OP52 = require("../models/OHP_OP52");
+const ProductConfiguration = require("../models/product_configuration");
 
 const router = express.Router();
 
+
+// =========================================================
+// POST /api/ohp_op52
+//
+// Product:
+// OHP OP52
+//
+// Product ID:
+// OHP_OP52
+//
+// OHP_OP52 model:
+// validation only
+//
+// Actual storage:
+// product_configurations
+//
+// Add to Cart:
+// status = "cart"
+// isComplete = true
+// =========================================================
+
 router.post("/", authenticate, async (req, res) => {
-    try {
-        const { OHP_OP52Data, numRequested } = req.body;
-
-        const order = new OHP_OP52({
-            // ============================================================
-            // GENERAL INFORMATION
-            // ============================================================
-
-            conveyorName: OHP_OP52Data.conveyorName,
-
-            conveyorChainSize: OHP_OP52Data.conveyorChainSize,
-
-            ...(OHP_OP52Data.otherConveyorChainSize && {
-                otherConveyorChainSize: OHP_OP52Data.otherConveyorChainSize
-            }),
-
-            chainManufacturer: OHP_OP52Data.chainManufacturer,
-
-            ...(OHP_OP52Data.otherChainManufacturer && {
-                otherChainManufacturer: OHP_OP52Data.otherChainManufacturer
-            }),
-
-            conveyorLength: OHP_OP52Data.conveyorLength,
-
-            conveyorLengthUnit: OHP_OP52Data.conveyorLengthUnit,
-
-            applicationEnvironment: OHP_OP52Data.applicationEnvironment,
-
-            ...(OHP_OP52Data.otherApplicationEnvironment && {
-                otherApplicationEnvironment:
-                    OHP_OP52Data.otherApplicationEnvironment
-            }),
+  try {
+    const {
+      OHP_OP52Data,
+      numRequested,
+    } = req.body || {};
 
 
-            // ============================================================
-            // CUSTOMER POWER UTILITIES
-            // ============================================================
+    // =====================================================
+    // REQUEST VALIDATION
+    // =====================================================
 
-            controlVoltage: OHP_OP52Data.controlVoltage,
-
-
-            // ============================================================
-            // CONVEYOR SPECIFICATIONS
-            // ============================================================
-
-            currentLubricationEquipmentBrand:
-                OHP_OP52Data.currentLubricationEquipmentBrand,
-
-            currentLubricantType:
-                OHP_OP52Data.currentLubricantType,
-
-            currentLubricantViscosityGrade:
-                OHP_OP52Data.currentLubricantViscosityGrade,
-
-            lubricationFromSideOfChain:
-                OHP_OP52Data.lubricationFromSideOfChain,
-
-            lubricationFromTopOfChain:
-                OHP_OP52Data.lubricationFromTopOfChain,
-
-
-            // ============================================================
-            // CONTROLLER
-            // ============================================================
-
-            chainMasterController:
-                OHP_OP52Data.chainMasterController,
-
-            timer:
-                OHP_OP52Data.timer,
-
-            electricOnOff:
-                OHP_OP52Data.electricOnOff,
-
-            plcConnection:
-                OHP_OP52Data.plcConnection,
-
-            otherControllerDescribe:
-                OHP_OP52Data.otherControllerDescribe,
-
-            controllerText:
-                OHP_OP52Data.controllerText,
-
-            controllerSpecialOptions:
-                OHP_OP52Data.controllerSpecialOptions,
-
-            controllerPleaseSpecify:
-                OHP_OP52Data.controllerPleaseSpecify,
-
-
-            // ============================================================
-            // TECHNICIAN NOTE
-            // ============================================================
-
-            technicianNote:
-                OHP_OP52Data.technicianNote,
-        });
-
-        req.user.cart.push({
-            numRequested,
-            productConfigurationInfo: order,
-            productType: "OHP_OP52",
-        });
-
-        await req.user.save();
-
-        return res.status(200).json({
-            message: "OHP_OP52 entry added",
-        });
-
-    } catch (error) {
-        console.error("OHP_OP52 route error:", error);
-
-        return res.status(500).json({
-            error: "Internal server error",
-        });
+    if (
+      !OHP_OP52Data ||
+      typeof OHP_OP52Data !== "object" ||
+      Array.isArray(OHP_OP52Data)
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "OHP_OP52Data is required",
+      });
     }
+
+
+    // =====================================================
+    // QUANTITY VALIDATION
+    // =====================================================
+
+    const quantity = Number(numRequested);
+
+    if (
+      !Number.isInteger(quantity) ||
+      quantity < 1
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "numRequested must be a positive integer",
+      });
+    }
+
+
+    // =====================================================
+    // PRODUCT-SPECIFIC VALIDATION
+    //
+    // OHP_OP52Data and OHP_OP52 schema use the same
+    // flat field structure.
+    //
+    // Conditional "Other" validation is handled by
+    // the OHP_OP52 Mongoose schema.
+    //
+    // IMPORTANT:
+    // OHP_OP52 is validation-only.
+    // Do NOT call validation.save().
+    // =====================================================
+
+    const validation =
+      new OHP_OP52(OHP_OP52Data);
+
+    await validation.validate();
+
+
+    // =====================================================
+    // CLEAN VALIDATED CONFIGURATION DATA
+    // =====================================================
+
+    const configurationData =
+      validation.toObject({
+        versionKey: false,
+      });
+
+    delete configurationData._id;
+    delete configurationData.createdAt;
+    delete configurationData.updatedAt;
+
+
+    // =====================================================
+    // AUTHENTICATED USER / AUDIT SNAPSHOT
+    // =====================================================
+
+    const actor = {
+      userID: req.user.userID,
+      username: req.user.username,
+      firstName: req.user.firstName || "",
+      lastName: req.user.lastName || "",
+      role: req.user.role || "user",
+    };
+
+
+    // =====================================================
+    // CREATE GENERIC PRODUCT CONFIGURATION
+    // =====================================================
+
+    const productConfiguration =
+      new ProductConfiguration({
+        userID:
+          req.user.userID,
+
+        configurationName:
+          configurationData.conveyorName ||
+          "OHP OP52",
+
+        productType:
+          "OHP_OP52",
+
+        productName:
+          "OHP OP52",
+
+        status:
+          "cart",
+
+        isComplete:
+          true,
+
+        numRequested:
+          quantity,
+
+        configurationData,
+
+        createdBy:
+          actor,
+
+        updatedBy:
+          actor,
+      });
+
+
+    // =====================================================
+    // SAVE ONLY GENERIC PRODUCT CONFIGURATION
+    //
+    // OLD:
+    //
+    // req.user.cart.push(...)
+    // await req.user.save()
+    //
+    // NEW:
+    //
+    // ProductConfiguration only
+    // =====================================================
+
+    const savedConfiguration =
+      await productConfiguration.save();
+
+
+    // =====================================================
+    // SUCCESS RESPONSE
+    // =====================================================
+
+    return res.status(201).json({
+      success: true,
+
+      message:
+        "OHP_OP52 configuration added to cart successfully",
+
+      configurationID:
+        savedConfiguration.configurationID,
+
+      configuration: {
+        configurationID:
+          savedConfiguration.configurationID,
+
+        configurationName:
+          savedConfiguration.configurationName,
+
+        productType:
+          savedConfiguration.productType,
+
+        productName:
+          savedConfiguration.productName,
+
+        status:
+          savedConfiguration.status,
+
+        isComplete:
+          savedConfiguration.isComplete,
+
+        numRequested:
+          savedConfiguration.numRequested,
+      },
+    });
+
+  } catch (error) {
+    console.error(
+      "OHP_OP52 configuration error:",
+      error
+    );
+
+
+    // =====================================================
+    // MONGOOSE VALIDATION ERROR
+    // =====================================================
+
+    if (error?.name === "ValidationError") {
+      const errors = {};
+
+      for (const field in error.errors) {
+        errors[field] =
+          error.errors[field].message;
+      }
+
+      return res.status(422).json({
+        success: false,
+        message:
+          "Invalid OHP_OP52 configuration",
+        errors,
+      });
+    }
+
+
+    // =====================================================
+    // INTERNAL SERVER ERROR
+    // =====================================================
+
+    return res.status(500).json({
+      success: false,
+      message:
+        "Failed to add OHP_OP52 configuration",
+    });
+  }
 });
 
-module.exports = router
+
+module.exports = router;

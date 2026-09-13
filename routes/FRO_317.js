@@ -1,220 +1,254 @@
 const express = require("express");
+
 const { authenticate } = require("./sessions");
 const FRO_317 = require("../models/FRO_317");
+const ProductConfiguration = require("../models/product_configuration");
 
 const router = express.Router();
 
+
+// =========================================================
+// POST /api/fro_317
+//
+// Product:
+// FRO 317
+//
+// FRO_317 model:
+// validation only
+//
+// Actual storage:
+// product_configurations
+//
+// Add to Cart:
+// status = "cart"
+// isComplete = true
+// =========================================================
+
 router.post("/", authenticate, async (req, res) => {
   try {
-    const { FRO_317Data, numRequested } = req.body || {};
+    const {
+      FRO_317Data,
+      numRequested,
+    } = req.body || {};
 
-    if (!FRO_317Data) {
+
+    // =====================================================
+    // REQUEST VALIDATION
+    // =====================================================
+
+    if (
+      !FRO_317Data ||
+      typeof FRO_317Data !== "object" ||
+      Array.isArray(FRO_317Data)
+    ) {
       return res.status(400).json({
-        error: "FRO_317Data is required",
+        success: false,
+        message: "FRO_317Data is required",
       });
     }
 
-    const order = new FRO_317({
-      // =====================================================
-      // GENERAL INFORMATION
-      // =====================================================
+    const quantity = Number(numRequested);
 
-      conveyorName:
-        FRO_317Data.conveyorName || "",
+    if (
+      !Number.isInteger(quantity) ||
+      quantity < 1
+    ) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "numRequested must be a positive integer",
+      });
+    }
 
-      wheelManufacturer:
-        FRO_317Data.wheelManufacturer || "",
 
-      otherWheelManufacturer:
-        FRO_317Data.otherWheelManufacturer || "",
+    // =====================================================
+    // PRODUCT-SPECIFIC VALIDATION
+    //
+    // FRO_317Data and FRO_317 schema use the same
+    // flat field structure.
+    //
+    // No transformation or legacy mapping is required.
+    //
+    // FRO_317 is used ONLY for validation.
+    // It is NOT saved into a separate collection.
+    // =====================================================
 
-      conveyorLength:
-        FRO_317Data.conveyorLength || "",
+    const validation =
+      new FRO_317(FRO_317Data);
 
-      conveyorLengthUnit:
-        FRO_317Data.conveyorLengthUnit || "",
+    await validation.validate();
 
-      conveyorSpeed:
-        FRO_317Data.conveyorSpeed || "",
 
-      conveyorSpeedUnit:
-        FRO_317Data.conveyorSpeedUnit || "",
+    // =====================================================
+    // CLEAN VALIDATED CONFIGURATION DATA
+    // =====================================================
 
-      indexingVariableSpeedConditions:
-        FRO_317Data.indexingVariableSpeedConditions || "",
+    const configurationData =
+      validation.toObject({
+        versionKey: false,
+      });
 
-      travelDirection:
-        FRO_317Data.travelDirection || "",
+    delete configurationData._id;
+    delete configurationData.createdAt;
+    delete configurationData.updatedAt;
 
-      applicationEnvironment:
-        FRO_317Data.applicationEnvironment || "",
 
-      otherApplicationEnvironment:
-        FRO_317Data.otherApplicationEnvironment || "",
+    // =====================================================
+    // AUTHENTICATED USER / AUDIT SNAPSHOT
+    // =====================================================
 
-      surroundingTemperature:
-        FRO_317Data.surroundingTemperature || "",
+    const actor = {
+      userID:
+        req.user.userID,
 
-      conveyorSwingStatus:
-        FRO_317Data.conveyorSwingStatus || "",
+      username:
+        req.user.username,
 
-      conveyorOrientation:
-        FRO_317Data.conveyorOrientation || "",
+      firstName:
+        req.user.firstName || "",
 
-      // =====================================================
-      // CUSTOMER POWER UTILITIES
-      // =====================================================
+      lastName:
+        req.user.lastName || "",
 
-      operatingVoltage:
-        FRO_317Data.operatingVoltage || "",
+      role:
+        req.user.role || "user",
+    };
 
-      controlVoltage:
-        FRO_317Data.controlVoltage || "",
 
-      compressedAirSupply:
-        FRO_317Data.compressedAirSupply || "",
+    // =====================================================
+    // CREATE GENERIC PRODUCT CONFIGURATION
+    // =====================================================
 
-      compressedAirSupplyUnit:
-        FRO_317Data.compressedAirSupplyUnit || "",
+    const productConfiguration =
+      new ProductConfiguration({
+        userID:
+          req.user.userID,
 
-      // =====================================================
-      // NEW MONITORING SYSTEM OR ADDING TO EXISTING
-      // =====================================================
+        configurationName:
+          configurationData.conveyorName ||
+          "FRO 317",
 
-      existingMonitoring:
-        FRO_317Data.existingMonitoring || "",
+        productType:
+          "FRO_317",
 
-      newMonitoringSystem:
-        FRO_317Data.newMonitoringSystem || "",
+        productName:
+          "FRO 317",
 
-      // =====================================================
-      // CONVEYOR SPECIFICATIONS
-      // =====================================================
+        status:
+          "cart",
 
-      freeTrolleyWheels:
-        FRO_317Data.freeTrolleyWheels || "",
+        isComplete:
+          true,
 
-      guideRollers:
-        FRO_317Data.guideRollers || "",
+        numRequested:
+          quantity,
 
-      guideRollersOpenRaceStyle:
-        FRO_317Data.guideRollersOpenRaceStyle || "",
+        configurationData,
 
-      guideRollersSealedStyle:
-        FRO_317Data.guideRollersSealedStyle || "",
+        createdBy:
+          actor,
 
-      openHole:
-        FRO_317Data.openHole || "",
+        updatedBy:
+          actor,
+      });
 
-      currentLubricationEquipmentBrand:
-        FRO_317Data.currentLubricationEquipmentBrand || "",
 
-      currentLubricantType:
-        FRO_317Data.currentLubricantType || "",
+    // =====================================================
+    // SAVE INTO GENERIC COLLECTION
+    //
+    // OLD:
+    //
+    // req.user.cart.push(...)
+    // await req.user.save()
+    //
+    // NEW:
+    //
+    // product_configurations
+    // =====================================================
 
-      currentLubricantViscosityGrade:
-        FRO_317Data.currentLubricantViscosityGrade || "",
+    const savedConfiguration =
+      await productConfiguration.save();
 
-      currentGreaseType:
-        FRO_317Data.currentGreaseType || "",
 
-      currentGreaseNlgiGrade:
-        FRO_317Data.currentGreaseNlgiGrade || "",
+    // =====================================================
+    // SUCCESS RESPONSE
+    // =====================================================
 
-      zerkFittingLocationSide:
-        FRO_317Data.zerkFittingLocationSide || "",
+    return res.status(201).json({
+      success: true,
 
-      zerkFittingLocationOrientation:
-        FRO_317Data.zerkFittingLocationOrientation || "",
+      message:
+        "FRO_317 configuration added to cart successfully",
 
-      // =====================================================
-      // CONTROLLER
-      // =====================================================
+      configurationID:
+        savedConfiguration.configurationID,
 
-      chainMasterController:
-        FRO_317Data.chainMasterController || "",
+      configuration: {
+        configurationID:
+          savedConfiguration.configurationID,
 
-      remote:
-        FRO_317Data.remote || "",
+        configurationName:
+          savedConfiguration.configurationName,
 
-      mountedOnGreaser:
-        FRO_317Data.mountedOnGreaser || "",
+        productType:
+          savedConfiguration.productType,
 
-      controlsOtherUnits:
-        FRO_317Data.controlsOtherUnits || "",
+        productName:
+          savedConfiguration.productName,
 
-      timer:
-        FRO_317Data.timer || "",
+        status:
+          savedConfiguration.status,
 
-      electricOnOff:
-        FRO_317Data.electricOnOff || "",
+        isComplete:
+          savedConfiguration.isComplete,
 
-      mightyLubeMonitoring:
-        FRO_317Data.mightyLubeMonitoring || "",
-
-      preMountingRequirements:
-        FRO_317Data.preMountingRequirements || "",
-
-      otherPreMountingRequirements:
-        FRO_317Data.otherPreMountingRequirements || "",
-
-      plcConnection:
-        FRO_317Data.plcConnection || "",
-
-      otherControllerInfo:
-        FRO_317Data.otherControllerInfo || "",
-
-      // =====================================================
-      // INVERTED P&F: MEASUREMENTS
-      // =====================================================
-
-      measurementUnit:
-        FRO_317Data.measurementUnit || "",
-
-      invertedChainDropA:
-        FRO_317Data.invertedChainDropA || "",
-
-      invertedPowerTrolleyWheelB:
-        FRO_317Data.invertedPowerTrolleyWheelB || "",
-
-      invertedZerkFittingVerticalE:
-        FRO_317Data.invertedZerkFittingVerticalE || "",
-
-      invertedRailG:
-        FRO_317Data.invertedRailG || "",
-
-      invertedRailH:
-        FRO_317Data.invertedRailH || "",
-
-      invertedPowerTrolleyPitchS:
-        FRO_317Data.invertedPowerTrolleyPitchS || "",
-
-      // =====================================================
-      // TECHNICIAN NOTE
-      // =====================================================
-
-      technicianNote:
-        FRO_317Data.technicianNote || "",
+        numRequested:
+          savedConfiguration.numRequested,
+      },
     });
 
-    req.user.cart.push({
-      numRequested,
-      productConfigurationInfo: order,
-      productType: "FRO_317",
-    });
-
-    await req.user.save();
-
-    return res.status(200).json({
-      message: "FRO_317 entry added",
-    });
   } catch (error) {
-    console.log("FRO_317 add error:", error);
+    console.error(
+      "FRO_317 configuration error:",
+      error
+    );
+
+
+    // =====================================================
+    // MONGOOSE VALIDATION ERROR
+    // =====================================================
+
+    if (error?.name === "ValidationError") {
+      const errors = {};
+
+      for (const field in error.errors) {
+        errors[field] =
+          error.errors[field].message;
+      }
+
+      return res.status(422).json({
+        success: false,
+
+        message:
+          "Invalid FRO_317 configuration",
+
+        errors,
+      });
+    }
+
+
+    // =====================================================
+    // INTERNAL SERVER ERROR
+    // =====================================================
 
     return res.status(500).json({
-      error: "Internal server error",
+      success: false,
+
+      message:
+        "Failed to add FRO_317 configuration",
     });
   }
 });
 
-module.exports = router
+
+module.exports = router;

@@ -1,145 +1,254 @@
 const express = require("express");
-const { dbConnect } = require("../config/config"); // kept as existing
+
 const { authenticate } = require("./sessions");
 const OHP_PML = require("../models/OHP_PML");
+const ProductConfiguration = require("../models/product_configuration");
 
 const router = express.Router();
 
+
+// =========================================================
+// POST /api/ohp_pml
+//
+// Product:
+// OHP PML
+//
+// Product ID:
+// OHP_PML
+//
+// OHP_PML model:
+// validation only
+//
+// Actual storage:
+// product_configurations
+//
+// Add to Cart:
+// status = "cart"
+// isComplete = true
+// =========================================================
+
 router.post("/", authenticate, async (req, res) => {
-    try {
-        const { OHP_PMLData, numRequested } = req.body;
-
-        const order = new OHP_PML({
-
-            // ============================================================
-            // GENERAL INFORMATION
-            // ============================================================
-
-            conveyorName: OHP_PMLData.conveyorName,
-
-            conveyorChainSize: OHP_PMLData.conveyorChainSize,
-
-            ...(OHP_PMLData.conveyorChainSize === "Other" &&
-                OHP_PMLData.otherConveyorChainSize && {
-                    otherConveyorChainSize:
-                        OHP_PMLData.otherConveyorChainSize
-                }),
-
-            chainManufacturer: OHP_PMLData.chainManufacturer,
-
-            ...(OHP_PMLData.chainManufacturer === "Other" &&
-                OHP_PMLData.otherChainManufacturer && {
-                    otherChainManufacturer:
-                        OHP_PMLData.otherChainManufacturer
-                }),
-
-            conveyorLength: OHP_PMLData.conveyorLength,
-
-            conveyorLengthUnit:
-                OHP_PMLData.conveyorLengthUnit,
-
-            conveyorSpeed:
-                OHP_PMLData.conveyorSpeed,
-
-            conveyorSpeedUnit:
-                OHP_PMLData.conveyorSpeedUnit,
-
-            indexingOrVariableSpeedConditions:
-                OHP_PMLData.indexingOrVariableSpeedConditions,
-
-            directionOfTravel:
-                OHP_PMLData.directionOfTravel,
-
-            applicationEnvironment:
-                OHP_PMLData.applicationEnvironment,
-
-            ...(OHP_PMLData.applicationEnvironment === "Other" &&
-                OHP_PMLData.otherApplicationEnvironment && {
-                    otherApplicationEnvironment:
-                        OHP_PMLData.otherApplicationEnvironment
-                }),
-
-            surroundingAreaTemperature:
-                OHP_PMLData.surroundingAreaTemperature,
-
-            conveyorLoadedOrUnloaded:
-                OHP_PMLData.conveyorLoadedOrUnloaded,
-
-            conveyorSwingSwaySurge:
-                OHP_PMLData.conveyorSwingSwaySurge,
+  try {
+    const {
+      OHP_PMLData,
+      numRequested,
+    } = req.body || {};
 
 
-            // ============================================================
-            // CUSTOMER POWER UTILITIES
-            // ============================================================
+    // =====================================================
+    // REQUEST VALIDATION
+    // =====================================================
 
-            operatingVoltageSinglePhase:
-                OHP_PMLData.operatingVoltageSinglePhase,
-
-
-            // ============================================================
-            // MONITORING FEATURES REQUESTED
-            // ============================================================
-
-            paintMarkerSystem:
-                OHP_PMLData.paintMarkerSystem,
-
-
-            // ============================================================
-            // CONVEYOR SPECIFICATIONS
-            // ============================================================
-
-            isConveyorClean:
-                OHP_PMLData.isConveyorClean,
-
-
-            // ============================================================
-            // OVERHEAD POWER RAIL MEASUREMENTS
-            // ============================================================
-
-            measurementUnit:
-                OHP_PMLData.measurementUnit,
-
-            chainDrop:
-                OHP_PMLData.chainDrop,
-
-            powerTrolleyWheelDiameter:
-                OHP_PMLData.powerTrolleyWheelDiameter,
-
-            powerRailWidth:
-                OHP_PMLData.powerRailWidth,
-
-            powerRailHeight:
-                OHP_PMLData.powerRailHeight,
-
-
-            // ============================================================
-            // TECHNICIAN NOTE
-            // ============================================================
-
-            technicianNote:
-                OHP_PMLData.technicianNote
-        });
-
-        req.user.cart.push({
-            numRequested,
-            productConfigurationInfo: order,
-            productType: "OHP_PML"
-        });
-
-        await req.user.save();
-
-        return res.status(200).json({
-            message: "OHP_PML entry added"
-        });
-
-    } catch (error) {
-        console.error(error);
-
-        return res.status(500).json({
-            error: "Internal server error"
-        });
+    if (
+      !OHP_PMLData ||
+      typeof OHP_PMLData !== "object" ||
+      Array.isArray(OHP_PMLData)
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "OHP_PMLData is required",
+      });
     }
+
+
+    // =====================================================
+    // QUANTITY VALIDATION
+    // =====================================================
+
+    const quantity = Number(numRequested);
+
+    if (
+      !Number.isInteger(quantity) ||
+      quantity < 1
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "numRequested must be a positive integer",
+      });
+    }
+
+
+    // =====================================================
+    // PRODUCT-SPECIFIC VALIDATION
+    //
+    // OHP_PMLData and OHP_PML schema use the same
+    // flat field structure.
+    //
+    // No aliases, templates, nested mappings, or field
+    // transformations are required.
+    //
+    // Conditional "Other" validation is handled by
+    // the OHP_PML Mongoose schema.
+    //
+    // IMPORTANT:
+    // OHP_PML is validation-only.
+    // Do NOT call validation.save().
+    // =====================================================
+
+    const validation =
+      new OHP_PML(OHP_PMLData);
+
+    await validation.validate();
+
+
+    // =====================================================
+    // CLEAN VALIDATED CONFIGURATION DATA
+    // =====================================================
+
+    const configurationData =
+      validation.toObject({
+        versionKey: false,
+      });
+
+    delete configurationData._id;
+    delete configurationData.createdAt;
+    delete configurationData.updatedAt;
+
+
+    // =====================================================
+    // AUTHENTICATED USER / AUDIT SNAPSHOT
+    // =====================================================
+
+    const actor = {
+      userID: req.user.userID,
+      username: req.user.username,
+      firstName: req.user.firstName || "",
+      lastName: req.user.lastName || "",
+      role: req.user.role || "user",
+    };
+
+
+    // =====================================================
+    // CREATE GENERIC PRODUCT CONFIGURATION
+    // =====================================================
+
+    const productConfiguration =
+      new ProductConfiguration({
+        userID:
+          req.user.userID,
+
+        configurationName:
+          configurationData.conveyorName ||
+          "OHP PML",
+
+        productType:
+          "OHP_PML",
+
+        productName:
+          "OHP PML",
+
+        status:
+          "cart",
+
+        isComplete:
+          true,
+
+        numRequested:
+          quantity,
+
+        configurationData,
+
+        createdBy:
+          actor,
+
+        updatedBy:
+          actor,
+      });
+
+
+    // =====================================================
+    // SAVE ONLY GENERIC PRODUCT CONFIGURATION
+    //
+    // OLD:
+    //
+    // req.user.cart.push(...)
+    // await req.user.save()
+    //
+    // NEW:
+    //
+    // ProductConfiguration only
+    // =====================================================
+
+    const savedConfiguration =
+      await productConfiguration.save();
+
+
+    // =====================================================
+    // SUCCESS RESPONSE
+    // =====================================================
+
+    return res.status(201).json({
+      success: true,
+
+      message:
+        "OHP_PML configuration added to cart successfully",
+
+      configurationID:
+        savedConfiguration.configurationID,
+
+      configuration: {
+        configurationID:
+          savedConfiguration.configurationID,
+
+        configurationName:
+          savedConfiguration.configurationName,
+
+        productType:
+          savedConfiguration.productType,
+
+        productName:
+          savedConfiguration.productName,
+
+        status:
+          savedConfiguration.status,
+
+        isComplete:
+          savedConfiguration.isComplete,
+
+        numRequested:
+          savedConfiguration.numRequested,
+      },
+    });
+
+  } catch (error) {
+    console.error(
+      "OHP_PML configuration error:",
+      error
+    );
+
+
+    // =====================================================
+    // MONGOOSE VALIDATION ERROR
+    // =====================================================
+
+    if (error?.name === "ValidationError") {
+      const errors = {};
+
+      for (const field in error.errors) {
+        errors[field] =
+          error.errors[field].message;
+      }
+
+      return res.status(422).json({
+        success: false,
+        message:
+          "Invalid OHP_PML configuration",
+        errors,
+      });
+    }
+
+
+    // =====================================================
+    // INTERNAL SERVER ERROR
+    // =====================================================
+
+    return res.status(500).json({
+      success: false,
+      message:
+        "Failed to add OHP_PML configuration",
+    });
+  }
 });
 
-module.exports = router
+
+module.exports = router;

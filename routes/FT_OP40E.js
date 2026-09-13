@@ -1,266 +1,245 @@
 const express = require("express");
+
 const { authenticate } = require("./sessions");
 const FT_OP40E = require("../models/FT_OP40E");
+const ProductConfiguration = require("../models/product_configuration");
 
 const router = express.Router();
 
-/**
- * OP-40E
- *
- * Product ID:
- * FT_OP40E
- *
- * Endpoint:
- * POST /api/ft_op40e
- *
- * Body:
- * {
- *   FT_OP40EData: {...},
- *   numRequested: 1
- * }
- */
+
+// =========================================================
+// POST /api/ft_op40e
+//
+// Product:
+// FT OP-40E
+//
+// FT_OP40E model:
+// validation only
+//
+// Actual storage:
+// product_configurations
+//
+// Add to Cart:
+// status = "cart"
+// isComplete = true
+// =========================================================
+
 router.post("/", authenticate, async (req, res) => {
   try {
-    const { FT_OP40EData, numRequested } = req.body || {};
+    const {
+      FT_OP40EData,
+      numRequested,
+    } = req.body || {};
 
-    if (!FT_OP40EData) {
+
+    // =====================================================
+    // REQUEST VALIDATION
+    // =====================================================
+
+    if (
+      !FT_OP40EData ||
+      typeof FT_OP40EData !== "object" ||
+      Array.isArray(FT_OP40EData)
+    ) {
       return res.status(400).json({
-        error: "FT_OP40EData is required",
+        success: false,
+        message: "FT_OP40EData is required",
       });
     }
 
-    const order = new FT_OP40E({
-      // =====================================================
-      // GENERAL INFORMATION
-      // =====================================================
+    const quantity = Number(numRequested);
 
-      conveyorName: FT_OP40EData.conveyorName || "",
+    if (
+      !Number.isInteger(quantity) ||
+      quantity < 1
+    ) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "numRequested must be a positive integer",
+      });
+    }
 
-      chainSize: FT_OP40EData.chainSize || "",
 
-      otherChainSize: FT_OP40EData.otherChainSize || "",
+    // =====================================================
+    // PRODUCT-SPECIFIC VALIDATION
+    //
+    // FT_OP40EData and FT_OP40E schema use the same
+    // flat field structure.
+    //
+    // No transformation or legacy mapping is required.
+    //
+    // FT_OP40E is used ONLY for validation.
+    // It is NOT saved into a separate collection.
+    // =====================================================
 
-      chainManufacturer:
-        FT_OP40EData.chainManufacturer || "",
+    const validation =
+      new FT_OP40E(FT_OP40EData);
 
-      otherChainManufacturer:
-        FT_OP40EData.otherChainManufacturer || "",
+    await validation.validate();
 
-      conveyorLength:
-        FT_OP40EData.conveyorLength || "",
 
-      conveyorLengthUnit:
-        FT_OP40EData.conveyorLengthUnit || "",
+    // =====================================================
+    // CLEAN VALIDATED CONFIGURATION DATA
+    // =====================================================
 
-      conveyorSpeed:
-        FT_OP40EData.conveyorSpeed || "",
+    const configurationData =
+      validation.toObject({
+        versionKey: false,
+      });
 
-      conveyorSpeedUnit:
-        FT_OP40EData.conveyorSpeedUnit || "",
+    delete configurationData._id;
+    delete configurationData.createdAt;
+    delete configurationData.updatedAt;
 
-      indexingVariableSpeedConditions:
-        FT_OP40EData.indexingVariableSpeedConditions || "",
 
-      travelDirection:
-        FT_OP40EData.travelDirection || "",
+    // =====================================================
+    // AUTHENTICATED USER / AUDIT SNAPSHOT
+    // =====================================================
 
-      applicationEnvironment:
-        FT_OP40EData.applicationEnvironment || "",
+    const actor = {
+      userID:
+        req.user.userID,
 
-      otherApplicationEnvironment:
-        FT_OP40EData.otherApplicationEnvironment || "",
+      username:
+        req.user.username,
 
-      surroundingTemperature:
-        FT_OP40EData.surroundingTemperature || "",
+      firstName:
+        req.user.firstName || "",
 
-      conveyorLoadedStatus:
-        FT_OP40EData.conveyorLoadedStatus || "",
+      lastName:
+        req.user.lastName || "",
 
-      conveyorSwingStatus:
-        FT_OP40EData.conveyorSwingStatus || "",
+      role:
+        req.user.role || "user",
+    };
 
-      conveyorStrandType:
-        FT_OP40EData.conveyorStrandType || "",
 
-      // =====================================================
-      // FILE REFERENCES
-      //
-      // Actual upload handling will be implemented separately.
-      // These currently store URL/path/reference values if sent.
-      // =====================================================
+    // =====================================================
+    // CREATE GENERIC PRODUCT CONFIGURATION
+    // =====================================================
 
-      plantLayoutFile:
-        FT_OP40EData.plantLayoutFile || "",
+    const productConfiguration =
+      new ProductConfiguration({
+        userID:
+          req.user.userID,
 
-      chainPicturesFile:
-        FT_OP40EData.chainPicturesFile || "",
+        configurationName:
+          configurationData.conveyorName ||
+          "FT OP-40E",
 
-      // =====================================================
-      // CUSTOMER POWER UTILITIES
-      // =====================================================
+        productType:
+          "FT_OP40E",
 
-      operatingVoltage:
-        FT_OP40EData.operatingVoltage || "",
+        productName:
+          "FT OP-40E",
 
-      controlVoltage:
-        FT_OP40EData.controlVoltage || "",
+        status:
+          "cart",
 
-      // =====================================================
-      // NEW / EXISTING MONITORING SYSTEM
-      // =====================================================
+        isComplete:
+          true,
 
-      existingMonitoring:
-        FT_OP40EData.existingMonitoring || "",
+        numRequested:
+          quantity,
 
-      newMonitoringSystem:
-        FT_OP40EData.newMonitoringSystem || "",
+        configurationData,
 
-      // =====================================================
-      // CONVEYOR SPECIFICATIONS
-      // =====================================================
+        createdBy:
+          actor,
 
-      wheelOpenRaceStyle:
-        FT_OP40EData.wheelOpenRaceStyle || "",
+        updatedBy:
+          actor,
+      });
 
-      wheelSealedStyle:
-        FT_OP40EData.wheelSealedStyle || "",
 
-      openInsideShieldedOutside:
-        FT_OP40EData.openInsideShieldedOutside || "",
+    // =====================================================
+    // SAVE INTO GENERIC COLLECTION
+    // =====================================================
 
-      freeTrolleyWheels:
-        FT_OP40EData.freeTrolleyWheels || "",
+    const savedConfiguration =
+      await productConfiguration.save();
 
-      guideRollers:
-        FT_OP40EData.guideRollers || "",
 
-      guideRollersOpenRaceStyle:
-        FT_OP40EData.guideRollersOpenRaceStyle || "",
+    // =====================================================
+    // SUCCESS RESPONSE
+    // =====================================================
 
-      guideRollersSealedStyle:
-        FT_OP40EData.guideRollersSealedStyle || "",
+    return res.status(201).json({
+      success: true,
 
-      openHole:
-        FT_OP40EData.openHole || "",
+      message:
+        "FT_OP40E configuration added to cart successfully",
 
-      dogActuator:
-        FT_OP40EData.dogActuator || "",
+      configurationID:
+        savedConfiguration.configurationID,
 
-      pivotPoints:
-        FT_OP40EData.pivotPoints || "",
+      configuration: {
+        configurationID:
+          savedConfiguration.configurationID,
 
-      kingPin:
-        FT_OP40EData.kingPin || "",
+        configurationName:
+          savedConfiguration.configurationName,
 
-      outboardWheels:
-        FT_OP40EData.outboardWheels || "",
+        productType:
+          savedConfiguration.productType,
 
-      railLubrication:
-        FT_OP40EData.railLubrication || "",
+        productName:
+          savedConfiguration.productName,
 
-      currentLubricationEquipmentBrand:
-        FT_OP40EData.currentLubricationEquipmentBrand || "",
+        status:
+          savedConfiguration.status,
 
-      currentLubricantType:
-        FT_OP40EData.currentLubricantType || "",
+        isComplete:
+          savedConfiguration.isComplete,
 
-      currentLubricantViscosityGrade:
-        FT_OP40EData.currentLubricantViscosityGrade || "",
-
-      // =====================================================
-      // CONTROLLER
-      // =====================================================
-
-      chainMasterController:
-        FT_OP40EData.chainMasterController || "",
-
-      timer:
-        FT_OP40EData.timer || "",
-
-      electricOnOff:
-        FT_OP40EData.electricOnOff || "",
-
-      pneumaticOnOff:
-        FT_OP40EData.pneumaticOnOff || "",
-
-      mightyLubeMonitoring:
-        FT_OP40EData.mightyLubeMonitoring || "",
-
-      plcConnection:
-        FT_OP40EData.plcConnection || "",
-
-      controllerOtherDescribe:
-        FT_OP40EData.controllerOtherDescribe || "",
-
-      specialControllerOptions:
-        FT_OP40EData.specialControllerOptions || "",
-
-      controllerPleaseSpecify:
-        FT_OP40EData.controllerPleaseSpecify || "",
-
-      // =====================================================
-      // FLAT TOP: MEASUREMENTS
-      // =====================================================
-
-      measurementUnit:
-        FT_OP40EData.measurementUnit || "",
-
-      flatTopPowerRailG:
-        FT_OP40EData.flatTopPowerRailG || "",
-
-      flatTopPowerRailH:
-        FT_OP40EData.flatTopPowerRailH || "",
-
-      flatTopRollerWheelA1:
-        FT_OP40EData.flatTopRollerWheelA1 || "",
-
-      flatTopRollerWheelB1:
-        FT_OP40EData.flatTopRollerWheelB1 || "",
-
-      flatTopRollerSleeveH1:
-        FT_OP40EData.flatTopRollerSleeveH1 || "",
-
-      flatTopRailJ1:
-        FT_OP40EData.flatTopRailJ1 || "",
-
-      flatTopDoubleChainPitchL1:
-        FT_OP40EData.flatTopDoubleChainPitchL1 || "",
-
-      flatTopRollerWheelPitchM1:
-        FT_OP40EData.flatTopRollerWheelPitchM1 || "",
-
-      flatTopMountingPlateN1:
-        FT_OP40EData.flatTopMountingPlateN1 || "",
-
-      flatTopRailPitchP1:
-        FT_OP40EData.flatTopRailPitchP1 || "",
-
-      flatTopDoubleStrandPitchR1:
-        FT_OP40EData.flatTopDoubleStrandPitchR1 || "",
+        numRequested:
+          savedConfiguration.numRequested,
+      },
     });
 
-    // =======================================================
-    // ADD PRODUCT CONFIGURATION TO USER CART
-    // =======================================================
-
-    req.user.cart.push({
-      numRequested,
-      productConfigurationInfo: order,
-      productType: "FT_OP40E",
-    });
-
-    await req.user.save();
-
-    return res.status(200).json({
-      message: "FT_OP40E entry added",
-    });
   } catch (error) {
-    console.error("FT_OP40E error:", error);
+    console.error(
+      "FT_OP40E configuration error:",
+      error
+    );
+
+
+    // =====================================================
+    // MONGOOSE VALIDATION ERROR
+    // =====================================================
+
+    if (error?.name === "ValidationError") {
+      const errors = {};
+
+      for (const field in error.errors) {
+        errors[field] =
+          error.errors[field].message;
+      }
+
+      return res.status(422).json({
+        success: false,
+
+        message:
+          "Invalid FT_OP40E configuration",
+
+        errors,
+      });
+    }
+
+
+    // =====================================================
+    // INTERNAL SERVER ERROR
+    // =====================================================
 
     return res.status(500).json({
-      error: "Internal server error",
+      success: false,
+
+      message:
+        "Failed to add FT_OP40E configuration",
     });
   }
 });
 
-module.exports = router
+
+module.exports = router;

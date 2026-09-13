@@ -1,186 +1,256 @@
 const express = require("express");
+
 const { authenticate } = require("./sessions");
 const OHP_GPC = require("../models/OHP_GPC");
+const ProductConfiguration = require("../models/product_configuration");
 
 const router = express.Router();
 
+
+// =========================================================
+// POST /api/ohp_gpc
+//
+// Product:
+// OHP GPC
+//
+// Product ID:
+// OHP_GPC
+//
+// OHP_GPC model:
+// validation only
+//
+// Actual storage:
+// product_configurations
+//
+// Add to Cart:
+// status = "cart"
+// isComplete = true
+// =========================================================
+
 router.post("/", authenticate, async (req, res) => {
   try {
-    const { OHP_GPCData, numRequested } = req.body;
-
-    const order = new OHP_GPC({
-      // ============================================================
-      // GENERAL INFORMATION
-      // ============================================================
-
-      conveyorName: OHP_GPCData.conveyorName,
-
-      conveyorChainSize: OHP_GPCData.conveyorChainSize,
-
-      ...(OHP_GPCData.otherConveyorChainSize && {
-        otherConveyorChainSize: OHP_GPCData.otherConveyorChainSize,
-      }),
-
-      chainManufacturer: OHP_GPCData.chainManufacturer,
-
-      ...(OHP_GPCData.otherChainManufacturer && {
-        otherChainManufacturer: OHP_GPCData.otherChainManufacturer,
-      }),
-
-      wheelManufacturer: OHP_GPCData.wheelManufacturer,
-
-      ...(OHP_GPCData.otherWheelManufacturer && {
-        otherWheelManufacturer: OHP_GPCData.otherWheelManufacturer,
-      }),
-
-      conveyorLength: OHP_GPCData.conveyorLength,
-
-      conveyorLengthUnit: OHP_GPCData.conveyorLengthUnit,
-
-      conveyorSpeed: OHP_GPCData.conveyorSpeed,
-
-      conveyorSpeedUnit: OHP_GPCData.conveyorSpeedUnit,
-
-      indexingOrVariableSpeedConditions:
-        OHP_GPCData.indexingOrVariableSpeedConditions,
-
-      directionOfTravel: OHP_GPCData.directionOfTravel,
-
-      applicationEnvironment: OHP_GPCData.applicationEnvironment,
-
-      surroundingTemperature: OHP_GPCData.surroundingTemperature,
-
-      conveyorLoadedOrUnloaded: OHP_GPCData.conveyorLoadedOrUnloaded,
-
-      conveyorMovement: OHP_GPCData.conveyorMovement,
-
-      ...(OHP_GPCData.plantLayout && {
-        plantLayout: OHP_GPCData.plantLayout,
-      }),
-
-      // ============================================================
-      // CUSTOMER POWER UTILITIES
-      // ============================================================
-
-      operatingVoltageSinglePhase:
-        OHP_GPCData.operatingVoltageSinglePhase,
-
-      controlVoltage: OHP_GPCData.controlVoltage,
-
-      compressedAirSupply: OHP_GPCData.compressedAirSupply,
-
-      compressedAirSupplyUnit:
-        OHP_GPCData.compressedAirSupplyUnit,
-
-      // ============================================================
-      // MONITORING SYSTEM
-      // ============================================================
-
-      connectingToExistingMonitoring:
-        OHP_GPCData.connectingToExistingMonitoring,
-
-      addNewMonitoringSystem:
-        OHP_GPCData.addNewMonitoringSystem,
-
-      // ============================================================
-      // CONVEYOR SPECIFICATIONS
-      // ============================================================
-
-      currentGreaseType: OHP_GPCData.currentGreaseType,
-
-      currentGreaseNlgiGrade:
-        OHP_GPCData.currentGreaseNlgiGrade,
-
-      // ============================================================
-      // CONTROLLER
-      // ============================================================
-
-      chainMasterController:
-        OHP_GPCData.chainMasterController,
-
-      remote: OHP_GPCData.remote,
-
-      mountedOnGreaser:
-        OHP_GPCData.mountedOnGreaser,
-
-      controlsOtherUnits:
-        OHP_GPCData.controlsOtherUnits,
-
-      timer: OHP_GPCData.timer,
-
-      electricOnOff:
-        OHP_GPCData.electricOnOff,
-
-      mightyLubeMonitoring:
-        OHP_GPCData.mightyLubeMonitoring,
-
-      preMountingRequirements:
-        OHP_GPCData.preMountingRequirements,
-
-      ...(OHP_GPCData.otherDescribe && {
-        otherDescribe: OHP_GPCData.otherDescribe,
-      }),
-
-      // ============================================================
-      // GREASER - POWER CHAIN: MEASUREMENTS
-      // ============================================================
-
-      measurementUnit:
-        OHP_GPCData.measurementUnit,
-
-      chainDropA:
-        OHP_GPCData.chainDropA,
-
-      powerTrolleyWheelB:
-        OHP_GPCData.powerTrolleyWheelB,
-
-      trolleyWheelBracketWidthC:
-        OHP_GPCData.trolleyWheelBracketWidthC,
-
-      trolleyWheelSpacerD:
-        OHP_GPCData.trolleyWheelSpacerD,
-
-      zerkFittingVerticalLocationE:
-        OHP_GPCData.zerkFittingVerticalLocationE,
-
-      zerkFittingHorizontalLocationF:
-        OHP_GPCData.zerkFittingHorizontalLocationF,
-
-      railG:
-        OHP_GPCData.railG,
-
-      railH:
-        OHP_GPCData.railH,
-
-      trolleyPitchS:
-        OHP_GPCData.trolleyPitchS,
-
-      // ============================================================
-      // TECHNICIAN NOTE
-      // ============================================================
-
-      technicianNote:
-        OHP_GPCData.technicianNote,
-    });
-
-    req.user.cart.push({
+    const {
+      OHP_GPCData,
       numRequested,
-      productConfigurationInfo: order,
-      productType: "OHP_GPC",
+    } = req.body || {};
+
+
+    // =====================================================
+    // REQUEST VALIDATION
+    // =====================================================
+
+    if (
+      !OHP_GPCData ||
+      typeof OHP_GPCData !== "object" ||
+      Array.isArray(OHP_GPCData)
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "OHP_GPCData is required",
+      });
+    }
+
+
+    // =====================================================
+    // QUANTITY VALIDATION
+    // =====================================================
+
+    const quantity = Number(numRequested);
+
+    if (
+      !Number.isInteger(quantity) ||
+      quantity < 1
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "numRequested must be a positive integer",
+      });
+    }
+
+
+    // =====================================================
+    // PRODUCT-SPECIFIC VALIDATION
+    //
+    // OHP_GPCData and OHP_GPC schema use the same
+    // flat field structure.
+    //
+    // No aliases, templates, nested mappings, or other
+    // transformations are required.
+    //
+    // Conditional "Other" fields are handled by the
+    // OHP_GPC Mongoose schema.
+    //
+    // IMPORTANT:
+    // OHP_GPC is validation-only.
+    // Do NOT call validation.save().
+    // =====================================================
+
+    const validation =
+      new OHP_GPC(OHP_GPCData);
+
+    await validation.validate();
+
+
+    // =====================================================
+    // CLEAN VALIDATED CONFIGURATION DATA
+    // =====================================================
+
+    const configurationData =
+      validation.toObject({
+        versionKey: false,
+      });
+
+    delete configurationData._id;
+    delete configurationData.createdAt;
+    delete configurationData.updatedAt;
+
+
+    // =====================================================
+    // AUTHENTICATED USER / AUDIT SNAPSHOT
+    // =====================================================
+
+    const actor = {
+      userID: req.user.userID,
+      username: req.user.username,
+      firstName: req.user.firstName || "",
+      lastName: req.user.lastName || "",
+      role: req.user.role || "user",
+    };
+
+
+    // =====================================================
+    // CREATE GENERIC PRODUCT CONFIGURATION
+    // =====================================================
+
+    const productConfiguration =
+      new ProductConfiguration({
+        userID: req.user.userID,
+
+        configurationName:
+          configurationData.conveyorName ||
+          "OHP GPC",
+
+        productType:
+          "OHP_GPC",
+
+        productName:
+          "OHP GPC",
+
+        status:
+          "cart",
+
+        isComplete:
+          true,
+
+        numRequested:
+          quantity,
+
+        configurationData,
+
+        createdBy:
+          actor,
+
+        updatedBy:
+          actor,
+      });
+
+
+    // =====================================================
+    // SAVE INTO GENERIC COLLECTION
+    //
+    // OLD:
+    //
+    // req.user.cart.push(...)
+    // await req.user.save()
+    //
+    // NEW:
+    //
+    // Only ProductConfiguration is persisted.
+    // =====================================================
+
+    const savedConfiguration =
+      await productConfiguration.save();
+
+
+    // =====================================================
+    // SUCCESS RESPONSE
+    // =====================================================
+
+    return res.status(201).json({
+      success: true,
+
+      message:
+        "OHP_GPC configuration added to cart successfully",
+
+      configurationID:
+        savedConfiguration.configurationID,
+
+      configuration: {
+        configurationID:
+          savedConfiguration.configurationID,
+
+        configurationName:
+          savedConfiguration.configurationName,
+
+        productType:
+          savedConfiguration.productType,
+
+        productName:
+          savedConfiguration.productName,
+
+        status:
+          savedConfiguration.status,
+
+        isComplete:
+          savedConfiguration.isComplete,
+
+        numRequested:
+          savedConfiguration.numRequested,
+      },
     });
 
-    await req.user.save();
-
-    return res.status(200).json({
-      message: "OHP_GPC entry added",
-    });
   } catch (error) {
-    console.error(error);
+    console.error(
+      "OHP_GPC configuration error:",
+      error
+    );
+
+
+    // =====================================================
+    // MONGOOSE VALIDATION ERROR
+    // =====================================================
+
+    if (error?.name === "ValidationError") {
+      const errors = {};
+
+      for (const field in error.errors) {
+        errors[field] =
+          error.errors[field].message;
+      }
+
+      return res.status(422).json({
+        success: false,
+
+        message:
+          "Invalid OHP_GPC configuration",
+
+        errors,
+      });
+    }
+
+
+    // =====================================================
+    // INTERNAL SERVER ERROR
+    // =====================================================
 
     return res.status(500).json({
-      error: "Internal server error",
+      success: false,
+
+      message:
+        "Failed to add OHP_GPC configuration",
     });
   }
 });
 
-module.exports = router
+
+module.exports = router;

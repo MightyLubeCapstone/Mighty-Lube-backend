@@ -1,142 +1,251 @@
 const express = require("express");
+
 const { authenticate } = require("./sessions");
 const OH_CCS_OP13 = require("../models/OH_CCS_OP13");
+const ProductConfiguration = require("../models/product_configuration");
 
 const router = express.Router();
 
+
+// =========================================================
+// POST /api/oh_ccs_op13
+//
+// Product:
+// OH CCS OP13
+//
+// Product ID:
+// OH_CCS_OP13
+//
+// OH_CCS_OP13 model:
+// validation only
+//
+// Actual storage:
+// product_configurations
+//
+// Add to Cart:
+// status = "cart"
+// isComplete = true
+// =========================================================
+
 router.post("/", authenticate, async (req, res) => {
-    try {
-        const { OH_CCS_OP13Data, numRequested } = req.body;
+  try {
+    const {
+      OH_CCS_OP13Data,
+      numRequested,
+    } = req.body || {};
 
-        if (!OH_CCS_OP13Data) {
-            return res.status(400).json({
-                error: "OH_CCS_OP13Data is required",
-            });
-        }
 
-        const order = new OH_CCS_OP13({
-            // =====================================================
-            // GENERAL INFORMATION
-            // =====================================================
+    // =====================================================
+    // REQUEST VALIDATION
+    // =====================================================
 
-            conveyorName:
-                OH_CCS_OP13Data.conveyorName,
-
-            conveyorChainSize:
-                OH_CCS_OP13Data.conveyorChainSize,
-
-            otherConveyorChainSize:
-                OH_CCS_OP13Data.otherConveyorChainSize,
-
-            chainManufacturer:
-                OH_CCS_OP13Data.chainManufacturer,
-
-            otherChainManufacturer:
-                OH_CCS_OP13Data.otherChainManufacturer,
-
-            applicationEnvironment:
-                OH_CCS_OP13Data.applicationEnvironment,
-
-            otherApplicationEnvironment:
-                OH_CCS_OP13Data.otherApplicationEnvironment,
-
-            conveyorLoadStatus:
-                OH_CCS_OP13Data.conveyorLoadStatus,
-
-            hasPlantLayout:
-                OH_CCS_OP13Data.hasPlantLayout,
-
-            plantLayoutAttachment:
-                OH_CCS_OP13Data.plantLayoutAttachment,
-
-            hasRequiredPictures:
-                OH_CCS_OP13Data.hasRequiredPictures,
-
-            requiredPicturesAttachment:
-                OH_CCS_OP13Data.requiredPicturesAttachment,
-
-            // =====================================================
-            // CUSTOMER POWER UTILITIES
-            // =====================================================
-
-            operatingVoltage:
-                OH_CCS_OP13Data.operatingVoltage,
-
-            controlVoltage:
-                OH_CCS_OP13Data.controlVoltage,
-
-            // =====================================================
-            // SANITARY MEASUREMENTS
-            // =====================================================
-
-            measurementUnit:
-                OH_CCS_OP13Data.measurementUnit,
-
-            sanitaryChainDropA:
-                OH_CCS_OP13Data.sanitaryChainDropA,
-
-            sanitaryTrolleyWheelDiameterB:
-                OH_CCS_OP13Data.sanitaryTrolleyWheelDiameterB,
-
-            sanitaryWheelDropD:
-                OH_CCS_OP13Data.sanitaryWheelDropD,
-
-            sanitaryTrolleyWheelBottomWidthE:
-                OH_CCS_OP13Data.sanitaryTrolleyWheelBottomWidthE,
-
-            sanitaryTrolleyWheelTopWidthF:
-                OH_CCS_OP13Data.sanitaryTrolleyWheelTopWidthF,
-
-            sanitaryCenterSupportWidthG:
-                OH_CCS_OP13Data.sanitaryCenterSupportWidthG,
-
-            sanitaryCenterSupportHeightH:
-                OH_CCS_OP13Data.sanitaryCenterSupportHeightH,
-
-            sanitaryHookRadiusL1:
-                OH_CCS_OP13Data.sanitaryHookRadiusL1,
-
-            sanitaryHookRadiusL2:
-                OH_CCS_OP13Data.sanitaryHookRadiusL2,
-
-            sanitaryCHookSupportDiameterL3:
-                OH_CCS_OP13Data.sanitaryCHookSupportDiameterL3,
-
-            sanitaryCHookSupportHeightL4:
-                OH_CCS_OP13Data.sanitaryCHookSupportHeightL4,
-
-            sanitaryHookRadiusL5:
-                OH_CCS_OP13Data.sanitaryHookRadiusL5,
-
-            sanitaryHookRadiusL6:
-                OH_CCS_OP13Data.sanitaryHookRadiusL6,
-
-            // =====================================================
-            // TECHNICIAN NOTE
-            // =====================================================
-
-            technicianNote:
-                OH_CCS_OP13Data.technicianNote,
-        });
-
-        req.user.cart.push({
-            numRequested,
-            productConfigurationInfo: order,
-            productType: "OH_CCS_OP13",
-        });
-
-        await req.user.save();
-
-        return res.status(200).json({
-            message: "OH_CCS_OP13 entry added",
-        });
-    } catch (error) {
-        console.error(error);
-
-        return res.status(500).json({
-            error: "Internal server error",
-        });
+    if (
+      !OH_CCS_OP13Data ||
+      typeof OH_CCS_OP13Data !== "object" ||
+      Array.isArray(OH_CCS_OP13Data)
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "OH_CCS_OP13Data is required",
+      });
     }
+
+
+    // =====================================================
+    // QUANTITY VALIDATION
+    // =====================================================
+
+    const quantity = Number(numRequested);
+
+    if (
+      !Number.isInteger(quantity) ||
+      quantity < 1
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "numRequested must be a positive integer",
+      });
+    }
+
+
+    // =====================================================
+    // PRODUCT-SPECIFIC VALIDATION
+    //
+    // OH_CCS_OP13Data and OH_CCS_OP13 schema use the same
+    // flat field structure.
+    //
+    // No aliases, templates, nested mappings, or field
+    // transformations are required.
+    //
+    // IMPORTANT:
+    // OH_CCS_OP13 is validation-only.
+    // Do NOT call validation.save().
+    // =====================================================
+
+    const validation =
+      new OH_CCS_OP13(OH_CCS_OP13Data);
+
+    await validation.validate();
+
+
+    // =====================================================
+    // CLEAN VALIDATED CONFIGURATION DATA
+    // =====================================================
+
+    const configurationData =
+      validation.toObject({
+        versionKey: false,
+      });
+
+    delete configurationData._id;
+    delete configurationData.createdAt;
+    delete configurationData.updatedAt;
+
+
+    // =====================================================
+    // AUTHENTICATED USER / AUDIT SNAPSHOT
+    // =====================================================
+
+    const actor = {
+      userID: req.user.userID,
+      username: req.user.username,
+      firstName: req.user.firstName || "",
+      lastName: req.user.lastName || "",
+      role: req.user.role || "user",
+    };
+
+
+    // =====================================================
+    // CREATE GENERIC PRODUCT CONFIGURATION
+    // =====================================================
+
+    const productConfiguration =
+      new ProductConfiguration({
+        userID:
+          req.user.userID,
+
+        configurationName:
+          configurationData.conveyorName ||
+          "OH CCS OP13",
+
+        productType:
+          "OH_CCS_OP13",
+
+        productName:
+          "OH CCS OP13",
+
+        status:
+          "cart",
+
+        isComplete:
+          true,
+
+        numRequested:
+          quantity,
+
+        configurationData,
+
+        createdBy:
+          actor,
+
+        updatedBy:
+          actor,
+      });
+
+
+    // =====================================================
+    // SAVE ONLY GENERIC PRODUCT CONFIGURATION
+    //
+    // OLD:
+    //
+    // req.user.cart.push(...)
+    // await req.user.save()
+    //
+    // NEW:
+    //
+    // Only ProductConfiguration is persisted.
+    // =====================================================
+
+    const savedConfiguration =
+      await productConfiguration.save();
+
+
+    // =====================================================
+    // SUCCESS RESPONSE
+    // =====================================================
+
+    return res.status(201).json({
+      success: true,
+
+      message:
+        "OH_CCS_OP13 configuration added to cart successfully",
+
+      configurationID:
+        savedConfiguration.configurationID,
+
+      configuration: {
+        configurationID:
+          savedConfiguration.configurationID,
+
+        configurationName:
+          savedConfiguration.configurationName,
+
+        productType:
+          savedConfiguration.productType,
+
+        productName:
+          savedConfiguration.productName,
+
+        status:
+          savedConfiguration.status,
+
+        isComplete:
+          savedConfiguration.isComplete,
+
+        numRequested:
+          savedConfiguration.numRequested,
+      },
+    });
+
+  } catch (error) {
+    console.error(
+      "OH_CCS_OP13 configuration error:",
+      error
+    );
+
+
+    // =====================================================
+    // MONGOOSE VALIDATION ERROR
+    // =====================================================
+
+    if (error?.name === "ValidationError") {
+      const errors = {};
+
+      for (const field in error.errors) {
+        errors[field] =
+          error.errors[field].message;
+      }
+
+      return res.status(422).json({
+        success: false,
+        message:
+          "Invalid OH_CCS_OP13 configuration",
+        errors,
+      });
+    }
+
+
+    // =====================================================
+    // INTERNAL SERVER ERROR
+    // =====================================================
+
+    return res.status(500).json({
+      success: false,
+      message:
+        "Failed to add OH_CCS_OP13 configuration",
+    });
+  }
 });
 
-module.exports = router
+
+module.exports = router;

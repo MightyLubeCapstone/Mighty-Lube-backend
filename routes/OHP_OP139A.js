@@ -1,200 +1,245 @@
 const express = require("express");
+
 const { authenticate } = require("./sessions");
 const OHP_OP139A = require("../models/OHP_OP139A");
+const ProductConfiguration = require("../models/product_configuration");
 
 const router = express.Router();
 
+
+// =========================================================
+// POST /api/ohp_op139a
+//
+// Product:
+// OHP OP-139A
+//
+// Product ID:
+// OHP_OP139A
+//
+// OHP_OP139A model:
+// validation only
+//
+// Actual storage:
+// product_configurations
+//
+// Add to Cart:
+// status = "cart"
+// isComplete = true
+// =========================================================
+
 router.post("/", authenticate, async (req, res) => {
-    try {
-        const { OHP_OP139AData, numRequested } = req.body;
-
-        const order = new OHP_OP139A({
-
-            // ============================================================
-            // GENERAL INFORMATION
-            // ============================================================
-
-            conveyorName: OHP_OP139AData.conveyorName,
-
-            conveyorChainSize: OHP_OP139AData.conveyorChainSize,
-
-            ...(OHP_OP139AData.conveyorChainSize === "Other" &&
-                OHP_OP139AData.otherConveyorChainSize && {
-                    otherConveyorChainSize:
-                        OHP_OP139AData.otherConveyorChainSize
-                }),
-
-            chainManufacturer: OHP_OP139AData.chainManufacturer,
-
-            ...(OHP_OP139AData.chainManufacturer === "Other" &&
-                OHP_OP139AData.otherChainManufacturer && {
-                    otherChainManufacturer:
-                        OHP_OP139AData.otherChainManufacturer
-                }),
-
-            conveyorLength: OHP_OP139AData.conveyorLength,
-
-            conveyorLengthUnit:
-                OHP_OP139AData.conveyorLengthUnit,
-
-            conveyorSpeed:
-                OHP_OP139AData.conveyorSpeed,
-
-            conveyorSpeedUnit:
-                OHP_OP139AData.conveyorSpeedUnit,
-
-            indexingOrVariableSpeedConditions:
-                OHP_OP139AData.indexingOrVariableSpeedConditions,
-
-            directionOfTravel:
-                OHP_OP139AData.directionOfTravel,
-
-            applicationEnvironment:
-                OHP_OP139AData.applicationEnvironment,
-
-            surroundingAreaTemperature:
-                OHP_OP139AData.surroundingAreaTemperature,
-
-            conveyorLoadedOrUnloaded:
-                OHP_OP139AData.conveyorLoadedOrUnloaded,
-
-            conveyorSwingSwaySurge:
-                OHP_OP139AData.conveyorSwingSwaySurge,
+  try {
+    const {
+      OHP_OP139AData,
+      numRequested,
+    } = req.body || {};
 
 
-            // ============================================================
-            // CUSTOMER POWER UTILITIES
-            // ============================================================
+    // =====================================================
+    // REQUEST VALIDATION
+    // =====================================================
 
-            operatingVoltageSinglePhase:
-                OHP_OP139AData.operatingVoltageSinglePhase,
-
-            controlVoltage:
-                OHP_OP139AData.controlVoltage,
-
-            compressedAirSupply:
-                OHP_OP139AData.compressedAirSupply,
-
-            compressedAirSupplyUnit:
-                OHP_OP139AData.compressedAirSupplyUnit,
-
-
-            // ============================================================
-            // MONITORING SYSTEM
-            // ============================================================
-
-            connectingToExistingMonitoring:
-                OHP_OP139AData.connectingToExistingMonitoring,
-
-            addNewMonitoringSystem:
-                OHP_OP139AData.addNewMonitoringSystem,
-
-
-            // ============================================================
-            // CONVEYOR SPECIFICATIONS
-            // ============================================================
-
-            railLubrication:
-                OHP_OP139AData.railLubrication,
-
-            currentLubricationEquipmentBrand:
-                OHP_OP139AData.currentLubricationEquipmentBrand,
-
-            currentLubricantType:
-                OHP_OP139AData.currentLubricantType,
-
-            currentLubricantViscosityGrade:
-                OHP_OP139AData.currentLubricantViscosityGrade,
-
-            lubricationFromSideOfChain:
-                OHP_OP139AData.lubricationFromSideOfChain,
-
-            lubricationFromTopOfChain:
-                OHP_OP139AData.lubricationFromTopOfChain,
-
-            isConveyorChainClean:
-                OHP_OP139AData.isConveyorChainClean,
-
-
-            // ============================================================
-            // CONTROLLER
-            // ============================================================
-
-            chainMasterController:
-                OHP_OP139AData.chainMasterController,
-
-            controlsOtherUnits:
-                OHP_OP139AData.controlsOtherUnits,
-
-            timer:
-                OHP_OP139AData.timer,
-
-            electricOnOff:
-                OHP_OP139AData.electricOnOff,
-
-            pneumaticOnOff:
-                OHP_OP139AData.pneumaticOnOff,
-
-            mightyLubeMonitoring:
-                OHP_OP139AData.mightyLubeMonitoring,
-
-            preMountingRequirements:
-                OHP_OP139AData.preMountingRequirements,
-
-            plcConnection:
-                OHP_OP139AData.plcConnection,
-
-            otherControllerDescribe:
-                OHP_OP139AData.otherControllerDescribe,
-
-
-            // ============================================================
-            // OVERHEAD POWER RAIL MEASUREMENTS
-            // ============================================================
-
-            measurementUnit:
-                OHP_OP139AData.measurementUnit,
-
-            chainDrop:
-                OHP_OP139AData.chainDrop,
-
-            powerTrolleyWheelDiameter:
-                OHP_OP139AData.powerTrolleyWheelDiameter,
-
-            powerRailWidth:
-                OHP_OP139AData.powerRailWidth,
-
-            powerRailHeight:
-                OHP_OP139AData.powerRailHeight,
-
-
-            // ============================================================
-            // TECHNICIAN NOTE
-            // ============================================================
-
-            technicianNote:
-                OHP_OP139AData.technicianNote
-        });
-
-        req.user.cart.push({
-            numRequested,
-            productConfigurationInfo: order,
-            productType: "OHP_OP139A"
-        });
-
-        await req.user.save();
-
-        return res.status(200).json({
-            message: "OHP_OP139A entry added"
-        });
-
-    } catch (error) {
-        console.error(error);
-
-        return res.status(500).json({
-            error: "Internal server error"
-        });
+    if (
+      !OHP_OP139AData ||
+      typeof OHP_OP139AData !== "object" ||
+      Array.isArray(OHP_OP139AData)
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "OHP_OP139AData is required",
+      });
     }
+
+
+    // =====================================================
+    // QUANTITY VALIDATION
+    // =====================================================
+
+    const quantity = Number(numRequested);
+
+    if (
+      !Number.isInteger(quantity) ||
+      quantity < 1
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "numRequested must be a positive integer",
+      });
+    }
+
+
+    // =====================================================
+    // PRODUCT-SPECIFIC VALIDATION
+    //
+    // OHP_OP139AData and OHP_OP139A schema use the same
+    // flat field structure.
+    //
+    // No aliases, templates, nested mappings, or field
+    // transformations are required.
+    //
+    // Conditional "Other" validation is handled by
+    // the OHP_OP139A Mongoose schema.
+    //
+    // IMPORTANT:
+    // OHP_OP139A is validation-only.
+    // Do NOT call validation.save().
+    // =====================================================
+
+    const validation =
+      new OHP_OP139A(OHP_OP139AData);
+
+    await validation.validate();
+
+
+    // =====================================================
+    // CLEAN VALIDATED CONFIGURATION DATA
+    // =====================================================
+
+    const configurationData =
+      validation.toObject({
+        versionKey: false,
+      });
+
+    delete configurationData._id;
+    delete configurationData.createdAt;
+    delete configurationData.updatedAt;
+
+
+    // =====================================================
+    // AUTHENTICATED USER / AUDIT SNAPSHOT
+    // =====================================================
+
+    const actor = {
+      userID: req.user.userID,
+      username: req.user.username,
+      firstName: req.user.firstName || "",
+      lastName: req.user.lastName || "",
+      role: req.user.role || "user",
+    };
+
+
+    // =====================================================
+    // CREATE GENERIC PRODUCT CONFIGURATION
+    // =====================================================
+
+    const productConfiguration =
+      new ProductConfiguration({
+        userID:
+          req.user.userID,
+
+        configurationName:
+          configurationData.conveyorName ||
+          "OHP OP-139A",
+
+        productType:
+          "OHP_OP139A",
+
+        productName:
+          "OHP OP-139A",
+
+        status:
+          "cart",
+
+        isComplete:
+          true,
+
+        numRequested:
+          quantity,
+
+        configurationData,
+
+        createdBy:
+          actor,
+
+        updatedBy:
+          actor,
+      });
+
+
+    // =====================================================
+    // SAVE ONLY GENERIC PRODUCT CONFIGURATION
+    // =====================================================
+
+    const savedConfiguration =
+      await productConfiguration.save();
+
+
+    // =====================================================
+    // SUCCESS RESPONSE
+    // =====================================================
+
+    return res.status(201).json({
+      success: true,
+
+      message:
+        "OHP_OP139A configuration added to cart successfully",
+
+      configurationID:
+        savedConfiguration.configurationID,
+
+      configuration: {
+        configurationID:
+          savedConfiguration.configurationID,
+
+        configurationName:
+          savedConfiguration.configurationName,
+
+        productType:
+          savedConfiguration.productType,
+
+        productName:
+          savedConfiguration.productName,
+
+        status:
+          savedConfiguration.status,
+
+        isComplete:
+          savedConfiguration.isComplete,
+
+        numRequested:
+          savedConfiguration.numRequested,
+      },
+    });
+
+  } catch (error) {
+    console.error(
+      "OHP_OP139A configuration error:",
+      error
+    );
+
+
+    // =====================================================
+    // MONGOOSE VALIDATION ERROR
+    // =====================================================
+
+    if (error?.name === "ValidationError") {
+      const errors = {};
+
+      for (const field in error.errors) {
+        errors[field] =
+          error.errors[field].message;
+      }
+
+      return res.status(422).json({
+        success: false,
+        message:
+          "Invalid OHP_OP139A configuration",
+        errors,
+      });
+    }
+
+
+    // =====================================================
+    // INTERNAL SERVER ERROR
+    // =====================================================
+
+    return res.status(500).json({
+      success: false,
+      message:
+        "Failed to add OHP_OP139A configuration",
+    });
+  }
 });
 
-module.exports = router
+
+module.exports = router;

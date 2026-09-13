@@ -1,215 +1,254 @@
 const express = require("express");
+
 const { authenticate } = require("./sessions");
 const FRO_ES = require("../models/FRO_ES");
+const ProductConfiguration = require("../models/product_configuration");
 
 const router = express.Router();
 
+
 // =========================================================
-// E-SERIES
-// Product ID: FRO_ES
 // POST /api/fro_es
+//
+// Product:
+// FRO E-Series
+//
+// FRO_ES model:
+// validation only
+//
+// Actual storage:
+// product_configurations
+//
+// Add to Cart:
+// status = "cart"
+// isComplete = true
 // =========================================================
 
 router.post("/", authenticate, async (req, res) => {
   try {
-    const { FRO_ESData, numRequested } = req.body;
+    const {
+      FRO_ESData,
+      numRequested,
+    } = req.body || {};
+
 
     // =====================================================
-    // BASIC REQUEST VALIDATION
+    // REQUEST VALIDATION
     // =====================================================
 
-    if (!FRO_ESData) {
+    if (
+      !FRO_ESData ||
+      typeof FRO_ESData !== "object" ||
+      Array.isArray(FRO_ESData)
+    ) {
       return res.status(400).json({
-        error: "FRO_ESData is required",
+        success: false,
+        message: "FRO_ESData is required",
       });
     }
 
+    const quantity = Number(numRequested);
+
+    if (
+      !Number.isInteger(quantity) ||
+      quantity < 1
+    ) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "numRequested must be a positive integer",
+      });
+    }
+
+
     // =====================================================
-    // CREATE PRODUCT CONFIGURATION
+    // PRODUCT-SPECIFIC VALIDATION
+    //
+    // FRO_ESData and FRO_ES schema use the same
+    // flat field structure.
+    //
+    // No transformation or legacy mapping is required.
+    //
+    // FRO_ES is used ONLY for validation.
+    // It is NOT saved into a separate collection.
     // =====================================================
 
-    const order = new FRO_ES({
-      // ===================================================
-      // GENERAL INFORMATION
-      // ===================================================
+    const validation =
+      new FRO_ES(FRO_ESData);
 
-      conveyorName: FRO_ESData.conveyorName,
+    await validation.validate();
 
-      conveyorChainSize: FRO_ESData.conveyorChainSize,
 
-      chainManufacturer: FRO_ESData.chainManufacturer,
+    // =====================================================
+    // CLEAN VALIDATED CONFIGURATION DATA
+    // =====================================================
 
-      conveyorLength: FRO_ESData.conveyorLength,
+    const configurationData =
+      validation.toObject({
+        versionKey: false,
+      });
 
-      conveyorLengthUnit: FRO_ESData.conveyorLengthUnit,
+    delete configurationData._id;
+    delete configurationData.createdAt;
+    delete configurationData.updatedAt;
 
-      conveyorSpeed: FRO_ESData.conveyorSpeed,
 
-      conveyorSpeedUnit: FRO_ESData.conveyorSpeedUnit,
+    // =====================================================
+    // AUTHENTICATED USER / AUDIT SNAPSHOT
+    // =====================================================
 
-      indexingVariableSpeedConditions:
-        FRO_ESData.indexingVariableSpeedConditions,
+    const actor = {
+      userID:
+        req.user.userID,
 
-      travelDirection: FRO_ESData.travelDirection,
+      username:
+        req.user.username,
 
-      applicationEnvironment: FRO_ESData.applicationEnvironment,
+      firstName:
+        req.user.firstName || "",
 
-      surroundingTemperature: FRO_ESData.surroundingTemperature,
+      lastName:
+        req.user.lastName || "",
 
-      conveyorLoadedStatus: FRO_ESData.conveyorLoadedStatus,
+      role:
+        req.user.role || "user",
+    };
 
-      conveyorSwingStatus: FRO_ESData.conveyorSwingStatus,
 
-      // ===================================================
-      // CUSTOMER POWER UTILITIES
-      // ===================================================
+    // =====================================================
+    // CREATE GENERIC PRODUCT CONFIGURATION
+    // =====================================================
 
-      operatingVoltage: FRO_ESData.operatingVoltage,
+    const productConfiguration =
+      new ProductConfiguration({
+        userID:
+          req.user.userID,
 
-      controlVoltage: FRO_ESData.controlVoltage,
+        configurationName:
+          configurationData.conveyorName ||
+          "FRO E-Series",
 
-      // ===================================================
-      // MONITORING
-      // ===================================================
+        productType:
+          "FRO_ES",
 
-      existingMonitoring: FRO_ESData.existingMonitoring,
+        productName:
+          "FRO E-Series",
 
-      newMonitoringSystem: FRO_ESData.newMonitoringSystem,
+        status:
+          "cart",
 
-      // ===================================================
-      // CONVEYOR SPECIFICATIONS
-      // ===================================================
+        isComplete:
+          true,
 
-      wheelOpenRaceStyle: FRO_ESData.wheelOpenRaceStyle,
+        numRequested:
+          quantity,
 
-      wheelSealedStyle: FRO_ESData.wheelSealedStyle,
+        configurationData,
 
-      openInsideShieldedOutside:
-        FRO_ESData.openInsideShieldedOutside,
+        createdBy:
+          actor,
 
-      freeTrolleyWheels: FRO_ESData.freeTrolleyWheels,
+        updatedBy:
+          actor,
+      });
 
-      guideRollers: FRO_ESData.guideRollers,
 
-      guideRollersOpenRaceStyle:
-        FRO_ESData.guideRollersOpenRaceStyle,
+    // =====================================================
+    // SAVE INTO GENERIC COLLECTION
+    //
+    // OLD:
+    //
+    // req.user.cart.push(...)
+    // await req.user.save()
+    //
+    // NEW:
+    //
+    // product_configurations
+    // =====================================================
 
-      guideRollersSealedStyle:
-        FRO_ESData.guideRollersSealedStyle,
+    const savedConfiguration =
+      await productConfiguration.save();
 
-      openHole: FRO_ESData.openHole,
 
-      dogActuator: FRO_ESData.dogActuator,
+    // =====================================================
+    // SUCCESS RESPONSE
+    // =====================================================
 
-      pivotPoints: FRO_ESData.pivotPoints,
+    return res.status(201).json({
+      success: true,
 
-      kingPin: FRO_ESData.kingPin,
+      message:
+        "FRO_ES configuration added to cart successfully",
 
-      railLubrication: FRO_ESData.railLubrication,
+      configurationID:
+        savedConfiguration.configurationID,
 
-      currentLubricationEquipmentBrand:
-        FRO_ESData.currentLubricationEquipmentBrand,
+      configuration: {
+        configurationID:
+          savedConfiguration.configurationID,
 
-      currentLubricantType:
-        FRO_ESData.currentLubricantType,
+        configurationName:
+          savedConfiguration.configurationName,
 
-      currentLubricantViscosityGrade:
-        FRO_ESData.currentLubricantViscosityGrade,
+        productType:
+          savedConfiguration.productType,
 
-      lubricationFromSideOfChain:
-        FRO_ESData.lubricationFromSideOfChain,
+        productName:
+          savedConfiguration.productName,
 
-      lubricationFromTopOfChain:
-        FRO_ESData.lubricationFromTopOfChain,
+        status:
+          savedConfiguration.status,
 
-      // ===================================================
-      // CONTROLLER
-      // ===================================================
+        isComplete:
+          savedConfiguration.isComplete,
 
-      chainMasterController:
-        FRO_ESData.chainMasterController,
-
-      timer: FRO_ESData.timer,
-
-      electricOnOff: FRO_ESData.electricOnOff,
-
-      pneumaticOnOff: FRO_ESData.pneumaticOnOff,
-
-      mightyLubeMonitoring:
-        FRO_ESData.mightyLubeMonitoring,
-
-      plcConnection: FRO_ESData.plcConnection,
-
-      otherControllerInfo:
-        FRO_ESData.otherControllerInfo,
-
-      specialControllerOptions:
-        FRO_ESData.specialControllerOptions,
-
-      controllerSpecify:
-        FRO_ESData.controllerSpecify,
-
-      // ===================================================
-      // FREE RAIL MEASUREMENTS
-      // ===================================================
-
-      freeRailMeasurementUnit:
-        FRO_ESData.freeRailMeasurementUnit,
-
-      overheadFreeRailC:
-        FRO_ESData.overheadFreeRailC,
-
-      overheadFreeRailD:
-        FRO_ESData.overheadFreeRailD,
-
-      overheadTrolleyWheelPitchK:
-        FRO_ESData.overheadTrolleyWheelPitchK,
-
-      overheadFreeTrolleyWheelPositionL:
-        FRO_ESData.overheadFreeTrolleyWheelPositionL,
-
-      overheadFreeRailTrolleyWheelC2:
-        FRO_ESData.overheadFreeRailTrolleyWheelC2,
-
-      invertedPowerFreeRailE:
-        FRO_ESData.invertedPowerFreeRailE,
-
-      invertedPowerFreeTrolleyWheelPitchK:
-        FRO_ESData.invertedPowerFreeTrolleyWheelPitchK,
-
-      // ===================================================
-      // TECHNICIAN NOTE
-      // ===================================================
-
-      technicianNote: FRO_ESData.technicianNote,
+        numRequested:
+          savedConfiguration.numRequested,
+      },
     });
 
-    // =====================================================
-    // ADD TO USER CART
-    // =====================================================
-
-    req.user.cart.push({
-      numRequested,
-      productConfigurationInfo: order,
-      productType: "FRO_ES",
-    });
-
-    await req.user.save();
-
-    // =====================================================
-    // SUCCESS
-    // =====================================================
-
-    return res.status(200).json({
-      message: "FRO_ES entry added",
-    });
   } catch (error) {
-    console.error("FRO_ES route error:", error);
+    console.error(
+      "FRO_ES configuration error:",
+      error
+    );
+
+
+    // =====================================================
+    // MONGOOSE VALIDATION ERROR
+    // =====================================================
+
+    if (error?.name === "ValidationError") {
+      const errors = {};
+
+      for (const field in error.errors) {
+        errors[field] =
+          error.errors[field].message;
+      }
+
+      return res.status(422).json({
+        success: false,
+
+        message:
+          "Invalid FRO_ES configuration",
+
+        errors,
+      });
+    }
+
+
+    // =====================================================
+    // INTERNAL SERVER ERROR
+    // =====================================================
 
     return res.status(500).json({
-      error: "Internal server error",
+      success: false,
+
+      message:
+        "Failed to add FRO_ES configuration",
     });
   }
 });
+
 
 module.exports = router

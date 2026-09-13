@@ -1,256 +1,254 @@
 const express = require("express");
+
 const { authenticate } = require("./sessions");
 const FRO_OP139A = require("../models/FRO_OP139A");
+const ProductConfiguration = require("../models/product_configuration");
 
 const router = express.Router();
 
+
 // =========================================================
-// OP-139A
-// Product ID: FRO_OP139A
+// POST /api/fro_op139a
+//
+// Product:
+// FRO OP-139A
+//
+// FRO_OP139A model:
+// validation only
+//
+// Actual storage:
+// product_configurations
+//
+// Add to Cart:
+// status = "cart"
+// isComplete = true
 // =========================================================
 
 router.post("/", authenticate, async (req, res) => {
   try {
-    const { FRO_OP139AData, numRequested } = req.body;
+    const {
+      FRO_OP139AData,
+      numRequested,
+    } = req.body || {};
+
 
     // =====================================================
-    // BASIC VALIDATION
+    // REQUEST VALIDATION
     // =====================================================
 
-    if (!FRO_OP139AData) {
+    if (
+      !FRO_OP139AData ||
+      typeof FRO_OP139AData !== "object" ||
+      Array.isArray(FRO_OP139AData)
+    ) {
       return res.status(400).json({
-        error: "FRO_OP139AData is required",
+        success: false,
+        message: "FRO_OP139AData is required",
       });
     }
 
+    const quantity = Number(numRequested);
+
+    if (
+      !Number.isInteger(quantity) ||
+      quantity < 1
+    ) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "numRequested must be a positive integer",
+      });
+    }
+
+
     // =====================================================
-    // CREATE PRODUCT CONFIGURATION
+    // PRODUCT-SPECIFIC VALIDATION
+    //
+    // FRO_OP139AData and FRO_OP139A schema use the same
+    // flat field structure.
+    //
+    // No transformation or legacy mapping is required.
+    //
+    // FRO_OP139A is used ONLY for validation.
+    // It is NOT saved into a separate collection.
     // =====================================================
 
-    const order = new FRO_OP139A({
-      // ===================================================
-      // GENERAL INFORMATION
-      // ===================================================
+    const validation =
+      new FRO_OP139A(FRO_OP139AData);
 
-      conveyorName: FRO_OP139AData.conveyorName,
+    await validation.validate();
 
-      conveyorChainSize: FRO_OP139AData.conveyorChainSize,
 
-      otherConveyorChainSize:
-        FRO_OP139AData.otherConveyorChainSize,
+    // =====================================================
+    // CLEAN VALIDATED CONFIGURATION DATA
+    // =====================================================
 
-      chainManufacturer:
-        FRO_OP139AData.chainManufacturer,
+    const configurationData =
+      validation.toObject({
+        versionKey: false,
+      });
 
-      otherChainManufacturer:
-        FRO_OP139AData.otherChainManufacturer,
+    delete configurationData._id;
+    delete configurationData.createdAt;
+    delete configurationData.updatedAt;
 
-      conveyorLength:
-        FRO_OP139AData.conveyorLength,
 
-      conveyorLengthUnit:
-        FRO_OP139AData.conveyorLengthUnit,
+    // =====================================================
+    // AUTHENTICATED USER / AUDIT SNAPSHOT
+    // =====================================================
 
-      conveyorSpeed:
-        FRO_OP139AData.conveyorSpeed,
+    const actor = {
+      userID:
+        req.user.userID,
 
-      conveyorSpeedUnit:
-        FRO_OP139AData.conveyorSpeedUnit,
+      username:
+        req.user.username,
 
-      indexingVariableSpeedConditions:
-        FRO_OP139AData.indexingVariableSpeedConditions,
+      firstName:
+        req.user.firstName || "",
 
-      travelDirection:
-        FRO_OP139AData.travelDirection,
+      lastName:
+        req.user.lastName || "",
 
-      applicationEnvironment:
-        FRO_OP139AData.applicationEnvironment,
+      role:
+        req.user.role || "user",
+    };
 
-      surroundingTemperature:
-        FRO_OP139AData.surroundingTemperature,
 
-      conveyorLoadedStatus:
-        FRO_OP139AData.conveyorLoadedStatus,
+    // =====================================================
+    // CREATE GENERIC PRODUCT CONFIGURATION
+    // =====================================================
 
-      conveyorSwingStatus:
-        FRO_OP139AData.conveyorSwingStatus,
+    const productConfiguration =
+      new ProductConfiguration({
+        userID:
+          req.user.userID,
 
-      // ===================================================
-      // CUSTOMER POWER UTILITIES
-      // ===================================================
+        configurationName:
+          configurationData.conveyorName ||
+          "FRO OP-139A",
 
-      controlVoltage:
-        FRO_OP139AData.controlVoltage,
+        productType:
+          "FRO_OP139A",
 
-      compressedAirSupply:
-        FRO_OP139AData.compressedAirSupply,
+        productName:
+          "FRO OP-139A",
 
-      compressedAirSupplyUnit:
-        FRO_OP139AData.compressedAirSupplyUnit,
+        status:
+          "cart",
 
-      // ===================================================
-      // MONITORING
-      // ===================================================
+        isComplete:
+          true,
 
-      existingMonitoring:
-        FRO_OP139AData.existingMonitoring,
+        numRequested:
+          quantity,
 
-      newMonitoringSystem:
-        FRO_OP139AData.newMonitoringSystem,
+        configurationData,
 
-      // ===================================================
-      // CONVEYOR SPECIFICATIONS
-      // ===================================================
+        createdBy:
+          actor,
 
-      wheelOpenRaceStyle:
-        FRO_OP139AData.wheelOpenRaceStyle,
+        updatedBy:
+          actor,
+      });
 
-      wheelSealedStyle:
-        FRO_OP139AData.wheelSealedStyle,
 
-      openInsideShieldedOutside:
-        FRO_OP139AData.openInsideShieldedOutside,
+    // =====================================================
+    // SAVE INTO GENERIC COLLECTION
+    //
+    // OLD:
+    //
+    // req.user.cart.push(...)
+    // await req.user.save()
+    //
+    // NEW:
+    //
+    // product_configurations
+    // =====================================================
 
-      freeTrolleyWheels:
-        FRO_OP139AData.freeTrolleyWheels,
+    const savedConfiguration =
+      await productConfiguration.save();
 
-      guideRollers:
-        FRO_OP139AData.guideRollers,
 
-      guideRollersOpenRaceStyle:
-        FRO_OP139AData.guideRollersOpenRaceStyle,
+    // =====================================================
+    // SUCCESS RESPONSE
+    // =====================================================
 
-      guideRollersSealedStyle:
-        FRO_OP139AData.guideRollersSealedStyle,
+    return res.status(201).json({
+      success: true,
 
-      openHole:
-        FRO_OP139AData.openHole,
+      message:
+        "FRO_OP139A configuration added to cart successfully",
 
-      dogActuator:
-        FRO_OP139AData.dogActuator,
+      configurationID:
+        savedConfiguration.configurationID,
 
-      pivotPoints:
-        FRO_OP139AData.pivotPoints,
+      configuration: {
+        configurationID:
+          savedConfiguration.configurationID,
 
-      kingPin:
-        FRO_OP139AData.kingPin,
+        configurationName:
+          savedConfiguration.configurationName,
 
-      railLubrication:
-        FRO_OP139AData.railLubrication,
+        productType:
+          savedConfiguration.productType,
 
-      currentLubricationEquipmentBrand:
-        FRO_OP139AData.currentLubricationEquipmentBrand,
+        productName:
+          savedConfiguration.productName,
 
-      currentLubricantType:
-        FRO_OP139AData.currentLubricantType,
+        status:
+          savedConfiguration.status,
 
-      currentLubricantViscosityGrade:
-        FRO_OP139AData.currentLubricantViscosityGrade,
+        isComplete:
+          savedConfiguration.isComplete,
 
-      lubricationFromSideOfChain:
-        FRO_OP139AData.lubricationFromSideOfChain,
-
-      lubricationFromTopOfChain:
-        FRO_OP139AData.lubricationFromTopOfChain,
-
-      // ===================================================
-      // CONTROLLER
-      // ===================================================
-
-      chainMasterController:
-        FRO_OP139AData.chainMasterController,
-
-      timer:
-        FRO_OP139AData.timer,
-
-      electricOnOff:
-        FRO_OP139AData.electricOnOff,
-
-      pneumaticOnOff:
-        FRO_OP139AData.pneumaticOnOff,
-
-      mightyLubeMonitoring:
-        FRO_OP139AData.mightyLubeMonitoring,
-
-      plcConnection:
-        FRO_OP139AData.plcConnection,
-
-      otherControllerInfo:
-        FRO_OP139AData.otherControllerInfo,
-
-      specialControllerOptions:
-        FRO_OP139AData.specialControllerOptions,
-
-      controllerSpecify:
-        FRO_OP139AData.controllerSpecify,
-
-      // ===================================================
-      // FREE RAIL MEASUREMENTS
-      // ===================================================
-
-      freeRailMeasurementUnit:
-        FRO_OP139AData.freeRailMeasurementUnit,
-
-      overheadFreeRailG:
-        FRO_OP139AData.overheadFreeRailG,
-
-      overheadFreeRailH:
-        FRO_OP139AData.overheadFreeRailH,
-
-      overheadTrolleyWheelPitchK:
-        FRO_OP139AData.overheadTrolleyWheelPitchK,
-
-      overheadFreeRailTrolleyWheelK2:
-        FRO_OP139AData.overheadFreeRailTrolleyWheelK2,
-
-      invertedPowerFreeChainDropA:
-        FRO_OP139AData.invertedPowerFreeChainDropA,
-
-      invertedPowerFreePowerTrolleyWheelB:
-        FRO_OP139AData.invertedPowerFreePowerTrolleyWheelB,
-
-      invertedPowerFreeRailG:
-        FRO_OP139AData.invertedPowerFreeRailG,
-
-      invertedPowerFreeRailH:
-        FRO_OP139AData.invertedPowerFreeRailH,
-
-      invertedPowerFreeTrolleyWheelPitchK:
-        FRO_OP139AData.invertedPowerFreeTrolleyWheelPitchK,
-
-      overheadFreeTrolleyWheelPositionL:
-        FRO_OP139AData.overheadFreeTrolleyWheelPositionL,
-
-      // ===================================================
-      // TECHNICIAN NOTE
-      // ===================================================
-
-      technicianNote:
-        FRO_OP139AData.technicianNote,
+        numRequested:
+          savedConfiguration.numRequested,
+      },
     });
 
-    // =====================================================
-    // ADD TO USER CART
-    // =====================================================
-
-    req.user.cart.push({
-      numRequested,
-      productConfigurationInfo: order,
-      productType: "FRO_OP139A",
-    });
-
-    await req.user.save();
-
-    return res.status(200).json({
-      message: "FRO_OP139A entry added",
-    });
   } catch (error) {
-    console.error("FRO_OP139A route error:", error);
+    console.error(
+      "FRO_OP139A configuration error:",
+      error
+    );
+
+
+    // =====================================================
+    // MONGOOSE VALIDATION ERROR
+    // =====================================================
+
+    if (error?.name === "ValidationError") {
+      const errors = {};
+
+      for (const field in error.errors) {
+        errors[field] =
+          error.errors[field].message;
+      }
+
+      return res.status(422).json({
+        success: false,
+
+        message:
+          "Invalid FRO_OP139A configuration",
+
+        errors,
+      });
+    }
+
+
+    // =====================================================
+    // INTERNAL SERVER ERROR
+    // =====================================================
 
     return res.status(500).json({
-      error: "Internal server error",
+      success: false,
+
+      message:
+        "Failed to add FRO_OP139A configuration",
     });
   }
 });
+
 
 module.exports = router

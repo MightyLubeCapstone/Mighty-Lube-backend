@@ -1,218 +1,254 @@
 const express = require("express");
+
 const { authenticate } = require("./sessions");
 const FC_314 = require("../models/FC_314");
+const ProductConfiguration = require("../models/product_configuration");
 
 const router = express.Router();
 
+
+// =========================================================
+// POST /api/fc_314
+//
+// Product:
+// FC 314
+//
+// FC_314 model:
+// validation only
+//
+// Actual storage:
+// product_configurations
+//
+// Add to Cart:
+// status = "cart"
+// isComplete = true
+// =========================================================
+
 router.post("/", authenticate, async (req, res) => {
   try {
-    const { FC_314Data, numRequested } = req.body || {};
+    const {
+      FC_314Data,
+      numRequested,
+    } = req.body || {};
 
-    if (!FC_314Data) {
+
+    // =====================================================
+    // REQUEST VALIDATION
+    // =====================================================
+
+    if (
+      !FC_314Data ||
+      typeof FC_314Data !== "object" ||
+      Array.isArray(FC_314Data)
+    ) {
       return res.status(400).json({
-        error: "FC_314Data is required",
+        success: false,
+        message: "FC_314Data is required",
       });
     }
 
-    const order = new FC_314({
-      // =====================================================
-      // 1. GENERAL INFORMATION
-      // =====================================================
+    const quantity = Number(numRequested);
 
-      conveyorName: FC_314Data.conveyorName || "",
+    if (
+      !Number.isInteger(quantity) ||
+      quantity < 1
+    ) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "numRequested must be a positive integer",
+      });
+    }
 
-      wheelManufacturer:
-        FC_314Data.wheelManufacturer || "",
-
-      otherWheelManufacturer:
-        FC_314Data.otherWheelManufacturer || "",
-
-      conveyorLength:
-        FC_314Data.conveyorLength || "",
-
-      conveyorLengthUnit:
-        FC_314Data.conveyorLengthUnit || "",
-
-      conveyorSpeed:
-        FC_314Data.conveyorSpeed || "",
-
-      conveyorSpeedUnit:
-        FC_314Data.conveyorSpeedUnit || "",
-
-      indexingVariableSpeedConditions:
-        FC_314Data.indexingVariableSpeedConditions || "",
-
-      travelDirection:
-        FC_314Data.travelDirection || "",
-
-      applicationEnvironment:
-        FC_314Data.applicationEnvironment || "",
-
-      otherApplicationEnvironment:
-        FC_314Data.otherApplicationEnvironment || "",
-
-      surroundingTemperature:
-        FC_314Data.surroundingTemperature || "",
-
-      conveyorSwingStatus:
-        FC_314Data.conveyorSwingStatus || "",
-
-      // =====================================================
-      // 2. CUSTOMER POWER UTILITIES
-      // =====================================================
-
-      operatingVoltage:
-        FC_314Data.operatingVoltage || "",
-
-      controlVoltage:
-        FC_314Data.controlVoltage || "",
-
-      compressedAirSupply:
-        FC_314Data.compressedAirSupply || "",
-
-      compressedAirSupplyUnit:
-        FC_314Data.compressedAirSupplyUnit || "",
-
-      // =====================================================
-      // 3. NEW / EXISTING MONITORING SYSTEM
-      // =====================================================
-
-      existingMonitoring:
-        FC_314Data.existingMonitoring || "",
-
-      newMonitoringSystem:
-        FC_314Data.newMonitoringSystem || "",
-
-      // =====================================================
-      // 4. CONVEYOR SPECIFICATIONS
-      // =====================================================
-
-      freeTrolleyWheels:
-        FC_314Data.freeTrolleyWheels || "",
-
-      dogActuator:
-        FC_314Data.dogActuator || "",
-
-      pivotPoints:
-        FC_314Data.pivotPoints || "",
-
-      kingPin:
-        FC_314Data.kingPin || "",
-
-      currentLubricationEquipmentBrand:
-        FC_314Data.currentLubricationEquipmentBrand || "",
-
-      currentLubricantType:
-        FC_314Data.currentLubricantType || "",
-
-      currentLubricantViscosityGrade:
-        FC_314Data.currentLubricantViscosityGrade || "",
-
-      currentGreaseType:
-        FC_314Data.currentGreaseType || "",
-
-      currentGreaseNlgiGrade:
-        FC_314Data.currentGreaseNlgiGrade || "",
-
-      zerkFittingLocationSide:
-        FC_314Data.zerkFittingLocationSide || "",
-
-      zerkFittingLocationOrientation:
-        FC_314Data.zerkFittingLocationOrientation || "",
-
-      // =====================================================
-      // 5. CONTROLLER
-      // =====================================================
-
-      chainMasterController:
-        FC_314Data.chainMasterController || "",
-
-      remote:
-        FC_314Data.remote || "",
-
-      mountedOnGreaser:
-        FC_314Data.mountedOnGreaser || "",
-
-      controlsOtherUnits:
-        FC_314Data.controlsOtherUnits || "",
-
-      timer:
-        FC_314Data.timer || "",
-
-      electricOnOff:
-        FC_314Data.electricOnOff || "",
-
-      mightyLubeMonitoring:
-        FC_314Data.mightyLubeMonitoring || "",
-
-      preMountingRequirements:
-        FC_314Data.preMountingRequirements || "",
-
-      plcConnection:
-        FC_314Data.plcConnection || "",
-
-      otherControllerInfo:
-        FC_314Data.otherControllerInfo || "",
-
-      // =====================================================
-      // 6. GREASER - FREE CARRIER
-      // =====================================================
-
-      measurementUnit:
-        FC_314Data.measurementUnit || "",
-
-      freeCarrierZerkFittingE:
-        FC_314Data.freeCarrierZerkFittingE || "",
-
-      freeCarrierRailG:
-        FC_314Data.freeCarrierRailG || "",
-
-      freeCarrierRailH:
-        FC_314Data.freeCarrierRailH || "",
-
-      freeCarrierTrolleyWheelPitchK:
-        FC_314Data.freeCarrierTrolleyWheelPitchK || "",
-
-      freeCarrierTrolleyPitchT:
-        FC_314Data.freeCarrierTrolleyPitchT || "",
-
-      freeCarrierTrolleyPitchU:
-        FC_314Data.freeCarrierTrolleyPitchU || "",
-
-      freeCarrierTrolleyPitchV:
-        FC_314Data.freeCarrierTrolleyPitchV || "",
-
-      // =====================================================
-      // 7. TECHNICIAN NOTE
-      // Intentionally retained from legacy Flutter.
-      // =====================================================
-
-      technicianNote:
-        FC_314Data.technicianNote || "",
-    });
 
     // =====================================================
-    // ADD PRODUCT TO USER CART
+    // PRODUCT-SPECIFIC VALIDATION
+    //
+    // FC_314Data and FC_314 schema use the same
+    // flat field structure.
+    //
+    // No transformation is required.
+    //
+    // FC_314 is used ONLY for validation.
+    // It is NOT saved into a separate FC_314 collection.
     // =====================================================
 
-    req.user.cart.push({
-      numRequested,
-      productConfigurationInfo: order,
-      productType: "FC_314",
+    const validation =
+      new FC_314(FC_314Data);
+
+    await validation.validate();
+
+
+    // =====================================================
+    // CLEAN VALIDATED CONFIGURATION DATA
+    // =====================================================
+
+    const configurationData =
+      validation.toObject({
+        versionKey: false,
+      });
+
+    delete configurationData._id;
+    delete configurationData.createdAt;
+    delete configurationData.updatedAt;
+
+
+    // =====================================================
+    // AUTHENTICATED USER / AUDIT SNAPSHOT
+    // =====================================================
+
+    const actor = {
+      userID:
+        req.user.userID,
+
+      username:
+        req.user.username,
+
+      firstName:
+        req.user.firstName || "",
+
+      lastName:
+        req.user.lastName || "",
+
+      role:
+        req.user.role || "user",
+    };
+
+
+    // =====================================================
+    // CREATE GENERIC PRODUCT CONFIGURATION
+    // =====================================================
+
+    const productConfiguration =
+      new ProductConfiguration({
+        userID:
+          req.user.userID,
+
+        configurationName:
+          configurationData.conveyorName ||
+          "FC 314",
+
+        productType:
+          "FC_314",
+
+        productName:
+          "FC 314",
+
+        status:
+          "cart",
+
+        isComplete:
+          true,
+
+        numRequested:
+          quantity,
+
+        configurationData,
+
+        createdBy:
+          actor,
+
+        updatedBy:
+          actor,
+      });
+
+
+    // =====================================================
+    // SAVE INTO GENERIC COLLECTION
+    //
+    // OLD:
+    //
+    // req.user.cart.push(...)
+    // await req.user.save()
+    //
+    // NEW:
+    //
+    // product_configurations
+    // =====================================================
+
+    const savedConfiguration =
+      await productConfiguration.save();
+
+
+    // =====================================================
+    // SUCCESS RESPONSE
+    // =====================================================
+
+    return res.status(201).json({
+      success: true,
+
+      message:
+        "FC_314 configuration added to cart successfully",
+
+      configurationID:
+        savedConfiguration.configurationID,
+
+      configuration: {
+        configurationID:
+          savedConfiguration.configurationID,
+
+        configurationName:
+          savedConfiguration.configurationName,
+
+        productType:
+          savedConfiguration.productType,
+
+        productName:
+          savedConfiguration.productName,
+
+        status:
+          savedConfiguration.status,
+
+        isComplete:
+          savedConfiguration.isComplete,
+
+        numRequested:
+          savedConfiguration.numRequested,
+      },
     });
 
-    await req.user.save();
-
-    return res.status(200).json({
-      message: "FC_314 entry added",
-    });
   } catch (error) {
-    console.log(error);
+    console.error(
+      "FC_314 configuration error:",
+      error
+    );
+
+
+    // =====================================================
+    // MONGOOSE VALIDATION ERROR
+    // =====================================================
+
+    if (error?.name === "ValidationError") {
+      const errors = {};
+
+      for (const field in error.errors) {
+        errors[field] =
+          error.errors[field].message;
+      }
+
+      return res.status(422).json({
+        success: false,
+
+        message:
+          "Invalid FC_314 configuration",
+
+        errors,
+      });
+    }
+
+
+    // =====================================================
+    // INTERNAL SERVER ERROR
+    // =====================================================
 
     return res.status(500).json({
-      error: "Internal server error",
+      success: false,
+
+      message:
+        "Failed to add FC_314 configuration",
     });
   }
 });
 
-module.exports = router
+
+module.exports = router;

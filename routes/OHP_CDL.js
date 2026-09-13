@@ -1,158 +1,257 @@
 const express = require("express");
+
 const { authenticate } = require("./sessions");
 const OHP_CDL = require("../models/OHP_CDL");
+const ProductConfiguration = require("../models/product_configuration");
 
 const router = express.Router();
 
+
+// =========================================================
+// POST /api/ohp_cdl
+//
+// Product:
+// OHP CDL
+//
+// Product ID:
+// OHP_CDL
+//
+// OHP_CDL model:
+// validation only
+//
+// Actual storage:
+// product_configurations
+//
+// Add to Cart:
+// status = "cart"
+// isComplete = true
+// =========================================================
+
 router.post("/", authenticate, async (req, res) => {
   try {
-    const { OHP_CDLData, numRequested } = req.body;
-
-    const order = new OHP_CDL({
-
-      // ============================================================
-      // GENERAL INFORMATION
-      // ============================================================
-
-      ...(OHP_CDLData.conveyorName && {
-        conveyorName: OHP_CDLData.conveyorName,
-      }),
-
-      ...(OHP_CDLData.conveyorChainSize && {
-        conveyorChainSize: OHP_CDLData.conveyorChainSize,
-      }),
-
-      ...(OHP_CDLData.otherConveyorChainSize && {
-        otherConveyorChainSize: OHP_CDLData.otherConveyorChainSize,
-      }),
-
-      ...(OHP_CDLData.chainManufacturer && {
-        chainManufacturer: OHP_CDLData.chainManufacturer,
-      }),
-
-      ...(OHP_CDLData.otherChainManufacturer && {
-        otherChainManufacturer: OHP_CDLData.otherChainManufacturer,
-      }),
-
-      ...(OHP_CDLData.conveyorLength && {
-        conveyorLength: OHP_CDLData.conveyorLength,
-      }),
-
-      ...(OHP_CDLData.conveyorLengthUnit && {
-        conveyorLengthUnit: OHP_CDLData.conveyorLengthUnit,
-      }),
-
-      applicationEnvironment: OHP_CDLData.applicationEnvironment,
-
-
-      // ============================================================
-      // CUSTOMER POWER UTILITIES
-      // ============================================================
-
-      controlVoltage: OHP_CDLData.controlVoltage,
-
-
-      // ============================================================
-      // CONVEYOR SPECIFICATIONS
-      // ============================================================
-
-      ...(OHP_CDLData.currentLubricationEquipmentBrand && {
-        currentLubricationEquipmentBrand:
-          OHP_CDLData.currentLubricationEquipmentBrand,
-      }),
-
-      ...(OHP_CDLData.currentLubricantType && {
-        currentLubricantType: OHP_CDLData.currentLubricantType,
-      }),
-
-      ...(OHP_CDLData.currentLubricantViscosityGrade && {
-        currentLubricantViscosityGrade:
-          OHP_CDLData.currentLubricantViscosityGrade,
-      }),
-
-      ...(OHP_CDLData.lubricationFromSideOfChain && {
-        lubricationFromSideOfChain:
-          OHP_CDLData.lubricationFromSideOfChain,
-      }),
-
-      ...(OHP_CDLData.lubricationFromTopOfChain && {
-        lubricationFromTopOfChain:
-          OHP_CDLData.lubricationFromTopOfChain,
-      }),
-
-
-      // ============================================================
-      // CONTROLLER
-      // ============================================================
-
-      ...(OHP_CDLData.controllerSpecialOptions && {
-        controllerSpecialOptions:
-          OHP_CDLData.controllerSpecialOptions,
-      }),
-
-      ...(OHP_CDLData.controllerPleaseSpecify && {
-        controllerPleaseSpecify:
-          OHP_CDLData.controllerPleaseSpecify,
-      }),
-
-
-      // ============================================================
-      // WIRE
-      // ============================================================
-
-      ...(OHP_CDLData.wireMeasurementUnit && {
-        wireMeasurementUnit: OHP_CDLData.wireMeasurementUnit,
-      }),
-
-      ...(OHP_CDLData.twoConductor && {
-        twoConductor: OHP_CDLData.twoConductor,
-      }),
-
-      ...(OHP_CDLData.fourConductor && {
-        fourConductor: OHP_CDLData.fourConductor,
-      }),
-
-      ...(OHP_CDLData.sevenConductor && {
-        sevenConductor: OHP_CDLData.sevenConductor,
-      }),
-
-      ...(OHP_CDLData.twelveConductor && {
-        twelveConductor: OHP_CDLData.twelveConductor,
-      }),
-
-      ...(OHP_CDLData.junctionBoxQuantities && {
-        junctionBoxQuantities:
-          OHP_CDLData.junctionBoxQuantities,
-      }),
-
-
-      // ============================================================
-      // TECHNICIAN NOTE
-      // ============================================================
-
-      technicianNote: OHP_CDLData.technicianNote,
-    });
-
-
-    req.user.cart.push({
+    const {
+      OHP_CDLData,
       numRequested,
-      productConfigurationInfo: order,
-      productType: "OHP_CDL",
-    });
+    } = req.body || {};
 
-    await req.user.save();
 
-    return res.status(200).json({
-      message: "OHP_CDL entry added",
+    // =====================================================
+    // REQUEST VALIDATION
+    // =====================================================
+
+    if (
+      !OHP_CDLData ||
+      typeof OHP_CDLData !== "object" ||
+      Array.isArray(OHP_CDLData)
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "OHP_CDLData is required",
+      });
+    }
+
+
+    // =====================================================
+    // QUANTITY VALIDATION
+    // =====================================================
+
+    const quantity = Number(numRequested);
+
+    if (
+      !Number.isInteger(quantity) ||
+      quantity < 1
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "numRequested must be a positive integer",
+      });
+    }
+
+
+    // =====================================================
+    // PRODUCT-SPECIFIC VALIDATION
+    //
+    // OHP_CDLData and OHP_CDL schema use the same
+    // flat field structure.
+    //
+    // Old conditional spreads only omitted empty optional
+    // fields. No transformation is required.
+    //
+    // Conditional "Other" fields are handled by the
+    // OHP_CDL schema.
+    //
+    // IMPORTANT:
+    // OHP_CDL is validation-only.
+    // Do NOT call validation.save().
+    // =====================================================
+
+    const validation =
+      new OHP_CDL(OHP_CDLData);
+
+    await validation.validate();
+
+
+    // =====================================================
+    // CLEAN VALIDATED CONFIGURATION DATA
+    // =====================================================
+
+    const configurationData =
+      validation.toObject({
+        versionKey: false,
+      });
+
+    delete configurationData._id;
+    delete configurationData.createdAt;
+    delete configurationData.updatedAt;
+
+
+    // =====================================================
+    // AUTHENTICATED USER / AUDIT SNAPSHOT
+    // =====================================================
+
+    const actor = {
+      userID: req.user.userID,
+      username: req.user.username,
+      firstName: req.user.firstName || "",
+      lastName: req.user.lastName || "",
+      role: req.user.role || "user",
+    };
+
+
+    // =====================================================
+    // CREATE GENERIC PRODUCT CONFIGURATION
+    // =====================================================
+
+    const productConfiguration =
+      new ProductConfiguration({
+        userID:
+          req.user.userID,
+
+        configurationName:
+          configurationData.conveyorName ||
+          "OHP CDL",
+
+        productType:
+          "OHP_CDL",
+
+        productName:
+          "OHP CDL",
+
+        status:
+          "cart",
+
+        isComplete:
+          true,
+
+        numRequested:
+          quantity,
+
+        configurationData,
+
+        createdBy:
+          actor,
+
+        updatedBy:
+          actor,
+      });
+
+
+    // =====================================================
+    // SAVE INTO GENERIC COLLECTION
+    //
+    // OLD:
+    //
+    // req.user.cart.push(...)
+    // await req.user.save()
+    //
+    // NEW:
+    //
+    // Only ProductConfiguration is persisted.
+    // =====================================================
+
+    const savedConfiguration =
+      await productConfiguration.save();
+
+
+    // =====================================================
+    // SUCCESS RESPONSE
+    // =====================================================
+
+    return res.status(201).json({
+      success: true,
+
+      message:
+        "OHP_CDL configuration added to cart successfully",
+
+      configurationID:
+        savedConfiguration.configurationID,
+
+      configuration: {
+        configurationID:
+          savedConfiguration.configurationID,
+
+        configurationName:
+          savedConfiguration.configurationName,
+
+        productType:
+          savedConfiguration.productType,
+
+        productName:
+          savedConfiguration.productName,
+
+        status:
+          savedConfiguration.status,
+
+        isComplete:
+          savedConfiguration.isComplete,
+
+        numRequested:
+          savedConfiguration.numRequested,
+      },
     });
 
   } catch (error) {
-    console.error(error);
+    console.error(
+      "OHP_CDL configuration error:",
+      error
+    );
+
+
+    // =====================================================
+    // MONGOOSE VALIDATION ERROR
+    // =====================================================
+
+    if (error?.name === "ValidationError") {
+      const errors = {};
+
+      for (const field in error.errors) {
+        errors[field] =
+          error.errors[field].message;
+      }
+
+      return res.status(422).json({
+        success: false,
+
+        message:
+          "Invalid OHP_CDL configuration",
+
+        errors,
+      });
+    }
+
+
+    // =====================================================
+    // INTERNAL SERVER ERROR
+    // =====================================================
 
     return res.status(500).json({
-      error: "Internal server error",
+      success: false,
+
+      message:
+        "Failed to add OHP_CDL configuration",
     });
   }
 });
 
-module.exports = router
+
+module.exports = router;
