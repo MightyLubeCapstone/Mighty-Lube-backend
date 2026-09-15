@@ -47,8 +47,8 @@ const fgcoRoute = require("./routes/fgco");
 // CC5
 // ============================================================
 
-const cc5clRoute = require("./routes/CC5_CL");
-const cc5op4OeRoute = require("./routes/CC5_OP4OE");
+const cc5clRoute = require("./routes/CC5/CL/mlccl");
+const cc5op4OeRoute = require("./routes/CC5/CL/OP4OE");
 
 
 // ============================================================
@@ -64,7 +64,7 @@ const coeOp4oeRoute = require("./routes/COE_OP4OE");
 // ETIPO
 // ============================================================
 
-const eti807Route = require("./routes/ETI_807");
+const eti807Route = require("./routes/ETI/CCS/8075");
 const eti9000invlRoute = require("./routes/ETI_9000INVL");
 const eti91Route = require("./routes/ETI_91");
 const etiOp48eRoute = require("./routes/ETI_OP48E");
@@ -74,19 +74,19 @@ const etiOp48eRoute = require("./routes/ETI_OP48E");
 // ETOPO
 // ============================================================
 
-const eto2100Route = require("./routes/ETO_2100");
-const eto9000eRoute = require("./routes/ETO_9000E");
-const etoOp48eRoute = require("./routes/ETO_OP48E");
-const etoPmlmsRoute = require("./routes/ETO_PMLMS");
-const etoMlaioRoute = require("./routes/ETO_MLAIO");
+const eto2100Route = require("./routes/ETO/CLS/2100L");
+const eto9000eRoute = require("./routes/ETO/CLS/9000L");
+const etoOp48eRoute = require("./routes/ETO/CLS/OP48E");
+const etoPmlmsRoute = require("./routes/ETO/CMS/ETO_PMLMS");
+const etoMlaioRoute = require("./routes/ETO/CMS/MLAIO");
 
 
 // ============================================================
 // FREE CARRIER
 // ============================================================
 
-const fc314Route = require("./routes/FC_314");
-const fc317Route = require("./routes/FC_317");
+const fc314Route = require("./routes/FC/FR314");
+const fc317Route = require("./routes/FC/FR317");
 
 
 // ============================================================
@@ -105,9 +105,9 @@ const froOp139aRoute = require("./routes/FRO_OP139A");
 // FLAT TOP
 // ============================================================
 
-const ftFtlRoute = require("./routes/FT_FTL");
-const ftOp40eRoute = require("./routes/FT_OP40E");
-const ftOpcoRoute = require("./routes/FT_OPCO");
+const ftFtlRoute = require("./routes/FT/CLS/MLFTL");
+const ftOp40eRoute = require("./routes/FT/CLS/OP40E");
+const ftOpcoRoute = require("./routes/FT/CGS/OPCO_300");
 const ftMlcelRoute = require("./routes/FT_MLCEL");
 
 
@@ -123,52 +123,52 @@ const iftOp4oeRoute = require("./routes/IFT_OP4OE");
 // IN-BOARD ROLLER CHAIN
 // ============================================================
 
-const ibrRfcRoute = require("./routes/IBR_RFC");
-const ibrOp4oeRoute = require("./routes/IBR_OP4OE");
+const ibrRfcRoute = require("./routes/IBR/CLS/MLRFC");
+const ibrOp4oeRoute = require("./routes/IBR/CLS/OP4OE");
 
 
 // ============================================================
 // OVERHEAD POWER RAIL - CLEANING SYSTEMS
 // ============================================================
 
-const ohCcsIbeamRoute = require("./routes/OH_CCS_IBEAM");
-const ohCcsOp13Route = require("./routes/OH_CCS_OP13");
-const ohCcsBrushRoute = require("./routes/OH_CCS_BRUSH");
-const ohCcs3000Route = require("./routes/OH_CCS_3000");
-const ohCcsOp8Route = require("./routes/OH_CCS_OP8");
-const ohCcsOp8npRoute = require("./routes/OH_CCS_OP8NP");
-const ohCcsO55Route = require("./routes/OH_CCS_O55");
-const ohCcsCleaningBrushRoute = require("./routes/OH_CCS_CLEANING_BRUSH");
+// const ohCcsIbeamRoute = require("./routes/OH_CCS_IBEAM");
+// const ohCcsOp13Route = require("./routes/OH_CCS_OP13");
+// const ohCcsBrushRoute = require("./routes/OH_CCS_BRUSH");
+// const ohCcs3000Route = require("./routes/OH_CCS_3000");
+// const ohCcsOp8Route = require("./routes/OH_CCS_OP8");
+// const ohCcsOp8npRoute = require("./routes/OH_CCS_OP8NP");
+// const ohCcsO55Route = require("./routes/OH_CCS_O55");
+// const ohCcsCleaningBrushRoute = require("./routes/OH_CCS_CLEANING_BRUSH");
 
 
 // ============================================================
 // OVERHEAD POWER RAIL - LUBRICATION / MONITORING
 // ============================================================
 
-const ohpGpcRoute = require("./routes/OHP_GPC");
-const ohp2100iRoute = require("./routes/OHP_2100I");
-const ohp9000iRoute = require("./routes/OHP_9000I");
-const ohpCdlRoute = require("./routes/OHP_CDL");
-const ohpEsRoute = require("./routes/OHP_ES");
-const ohpOp4aRoute = require("./routes/OHP_OP4A");
-const ohpOp52Route = require("./routes/OHP_OP52");
-const ohpOp139aRoute = require("./routes/OHP_OP139A");
+const ohpGpcRoute = require("./routes/OHP/CGS/GPC");
+const ohp2100iRoute = require("./routes/OHP/CLS/2100I");
+const ohp9000iRoute = require("./routes/OHP/CLS/9000I");
+const ohpCdlRoute = require("./routes/OHP/CLS/CDL");
+const ohpEsRoute = require("./routes/OHP/CLS/ES");
+const ohpOp4aRoute = require("./routes/OHP/CLS/OP4A");
+const ohpOp52Route = require("./routes/OHP/CLS/OP52");
+const ohpOp139aRoute = require("./routes/OHP/CLS/OP139A");
 
 // Multi Line (Permanent) ALL IN ONE Monitoring + Lubrication
 // Product ID: OHP_MLP
-const ohpMlpRoute = require("./routes/OHP_MLP");
+const ohpMlpRoute = require("./routes/OHP/CMS/MLP");
 
 // Portable (Multi-Line) Mighty Lube Monitoring System
 // Product ID: OHP_PML
-const ohpPmlRoute = require("./routes/OHP_PML");
+const ohpPmlRoute = require("./routes/OHP/CMS/PML");
 
 // Single Line (Stationary) Mighty Lube Monitoring System
 // Product ID: OHP_001
-const ohp001Route = require("./routes/OHP_001");
+const ohp001Route = require("./routes/OHP/CCS/3001");
 
 // Paint Marker for Monitoring System (Optional)
 // Product ID: OHP_PMM
-const ohpPmmRoute = require("./routes/OHP_PMM");
+const ohpPmmRoute = require("./routes/OHP/CMS/PMM");
 
 
 // ============================================================
@@ -283,14 +283,14 @@ app.use("/api/ibr_op4oe", ibrOp4oeRoute);
 // OVERHEAD POWER RAIL - CLEANING SYSTEM ROUTES
 // ============================================================
 
-app.use("/api/oh_ccs_ibeam", ohCcsIbeamRoute);
-app.use("/api/oh_ccs_op13", ohCcsOp13Route);
-app.use("/api/oh_ccs_brush", ohCcsBrushRoute);
-app.use("/api/oh_ccs_3000", ohCcs3000Route);
-app.use("/api/oh_ccs_op8", ohCcsOp8Route);
-app.use("/api/oh_ccs_op8np", ohCcsOp8npRoute);
-app.use("/api/oh_ccs_o55", ohCcsO55Route);
-app.use("/api/oh_ccs_cleaning_brush", ohCcsCleaningBrushRoute);
+// app.use("/api/oh_ccs_ibeam", ohCcsIbeamRoute);
+// app.use("/api/oh_ccs_op13", ohCcsOp13Route);
+// app.use("/api/oh_ccs_brush", ohCcsBrushRoute);
+// app.use("/api/oh_ccs_3000", ohCcs3000Route);
+// app.use("/api/oh_ccs_op8", ohCcsOp8Route);
+// app.use("/api/oh_ccs_op8np", ohCcsOp8npRoute);
+// app.use("/api/oh_ccs_o55", ohCcsO55Route);
+// app.use("/api/oh_ccs_cleaning_brush", ohCcsCleaningBrushRoute);
 
 
 // ============================================================
