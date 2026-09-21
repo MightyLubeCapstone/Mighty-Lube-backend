@@ -296,6 +296,19 @@ const ETO_9000E_Schema = new mongoose.Schema({
     type: mongoose.Schema.Types.Mixed,
     required: false,
   },
+
+  // =========================================================
+    // LEGACY TECHNICIAN NOTE
+    //
+    // Not part of current website configurator,
+    // but preserved for compatibility.
+    // =========================================================
+
+    technicianNote: {
+      type: String,
+      required: false,
+      trim: true,
+    },
 });
 
 const ETO_9000E =

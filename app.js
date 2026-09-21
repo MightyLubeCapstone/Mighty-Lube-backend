@@ -65,9 +65,12 @@ const coeOp4oeRoute = require("./routes/COE_OP4OE");
 // ============================================================
 
 const eti807Route = require("./routes/ETI/CCS/8075");
-const eti9000invlRoute = require("./routes/ETI_9000INVL");
-const eti91Route = require("./routes/ETI_91");
-const etiOp48eRoute = require("./routes/ETI_OP48E");
+const eti9000invlRoute = require("./routes/ETI/CLS/9000");
+const eti91Route = require("./routes/ETI/CCS/RW91");
+const etiOp48eRoute = require("./routes/ETI/CLS/OP48E");
+const etiOp41aRoute = require("./routes/ETI/CLS/OP41A");
+const etiMlaioRoute = require("./routes/ETI/CMS/MLAIO");
+
 
 
 // ============================================================
@@ -79,6 +82,8 @@ const eto9000eRoute = require("./routes/ETO/CLS/9000L");
 const etoOp48eRoute = require("./routes/ETO/CLS/OP48E");
 const etoPmlmsRoute = require("./routes/ETO/CMS/ETO_PMLMS");
 const etoMlaioRoute = require("./routes/ETO/CMS/MLAIO");
+const etoOp41aRoute = require("./routes/ETO/CLS/OP41A");
+
 
 
 // ============================================================
@@ -109,6 +114,7 @@ const ftFtlRoute = require("./routes/FT/CLS/MLFTL");
 const ftOp40eRoute = require("./routes/FT/CLS/OP40E");
 const ftOpcoRoute = require("./routes/FT/CGS/OPCO_300");
 const ftMlcelRoute = require("./routes/FT_MLCEL");
+const flatTopCdlRoute = require("./routes/FT/CLS/CDL");
 
 
 // ============================================================
@@ -125,6 +131,7 @@ const iftOp4oeRoute = require("./routes/IFT_OP4OE");
 
 const ibrRfcRoute = require("./routes/IBR/CLS/MLRFC");
 const ibrOp4oeRoute = require("./routes/IBR/CLS/OP4OE");
+const ibrc300Route = require("./routes/IBRC/CGS/IBRC_300");
 
 
 // ============================================================
@@ -220,6 +227,8 @@ app.use("/api/eti_807", eti807Route);
 app.use("/api/eti_9000invl", eti9000invlRoute);
 app.use("/api/eti_91", eti91Route);
 app.use("/api/eti_op48e", etiOp48eRoute);
+app.use("/api/eti_op41a", etiOp41aRoute);
+app.use("/api/eti_mlaio", etiMlaioRoute);
 
 
 // ============================================================
@@ -231,6 +240,9 @@ app.use("/api/eto_9000e", eto9000eRoute);
 app.use("/api/eto_op48e", etoOp48eRoute);
 app.use("/api/eto_pmlms", etoPmlmsRoute);
 app.use("/api/eto_mlaio", etoMlaioRoute);
+app.use("/api/eto_op41a", etoOp41aRoute);
+
+
 
 
 // ============================================================
@@ -261,7 +273,7 @@ app.use("/api/ft_ftl", ftFtlRoute);
 app.use("/api/ft_op40e", ftOp40eRoute);
 app.use("/api/ft_opco", ftOpcoRoute);
 app.use("/api/ft_mlcel", ftMlcelRoute);
-
+app.use("/api/ft_cdl", flatTopCdlRoute);
 
 // ============================================================
 // IN FLOOR TOW LINE ROUTES
@@ -277,6 +289,7 @@ app.use("/api/ift_op4oe", iftOp4oeRoute);
 
 app.use("/api/ibr_rfc", ibrRfcRoute);
 app.use("/api/ibr_op4oe", ibrOp4oeRoute);
+app.use("/api/ibrc_300", ibrc300Route);
 
 
 // ============================================================
