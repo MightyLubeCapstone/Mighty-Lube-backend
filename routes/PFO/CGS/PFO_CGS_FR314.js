@@ -1,51 +1,57 @@
 const express = require("express");
 
 const { authenticate } = require("../../sessions");
-const IBR_RFC = require("../../../models/IBR/CLS/MLRFC");
-const ProductConfiguration = require("../../../models/product_configuration");
+const PFO_CGS_FR314 =
+  require("../../../models/PFO/CGS/PFO_CGS_FR314");
+const ProductConfiguration =
+  require("../../../models/product_configuration");
 
 const router = express.Router();
 
 
-// =========================================================
-// POST /api/ibr_rfc
+// ============================================================
+// POST /api/pfo_cgs_fr314
 //
 // Product:
-// Mighty Lube Roller Flight Conveyor
+// Free Rail 314 "Load" Wheel Greaser
 //
-// IBR_RFC model:
-// validation only
+// Product ID:
+// PFO_CGS_FR314
+//
+// Product-specific model:
+// Validation only
 //
 // Actual storage:
-// product_configurations
-//
-// Add to Cart:
-// status = "cart"
-// isComplete = true
-// =========================================================
+// ProductConfiguration
+// ============================================================
 
 router.post("/", authenticate, async (req, res) => {
   try {
     const {
-      IBR_RFCData,
+      PFO_CGS_FR314Data,
       numRequested,
     } = req.body || {};
 
 
-    // =====================================================
+    // ========================================================
     // REQUEST VALIDATION
-    // =====================================================
+    // ========================================================
 
     if (
-      !IBR_RFCData ||
-      typeof IBR_RFCData !== "object" ||
-      Array.isArray(IBR_RFCData)
+      !PFO_CGS_FR314Data ||
+      typeof PFO_CGS_FR314Data !== "object" ||
+      Array.isArray(PFO_CGS_FR314Data)
     ) {
       return res.status(400).json({
         success: false,
-        message: "IBR_RFCData is required",
+        message: "PFO_CGS_FR314Data is required",
       });
     }
+
+
+    // ========================================================
+    // QUANTITY VALIDATION
+    // ========================================================
 
     const quantity = Number(numRequested);
 
@@ -60,27 +66,19 @@ router.post("/", authenticate, async (req, res) => {
     }
 
 
-    // =====================================================
+    // ========================================================
     // PRODUCT-SPECIFIC VALIDATION
-    //
-    // IBR_RFCData and IBR_RFC schema use the same
-    // flat field structure.
-    //
-    // No transformation or legacy mapping is required.
-    //
-    // IBR_RFC is used ONLY for validation.
-    // It is NOT saved into a separate collection.
-    // =====================================================
+    // ========================================================
 
     const validation =
-      new IBR_RFC(IBR_RFCData);
+      new PFO_CGS_FR314(PFO_CGS_FR314Data);
 
     await validation.validate();
 
 
-    // =====================================================
-    // CLEAN VALIDATED CONFIGURATION DATA
-    // =====================================================
+    // ========================================================
+    // CLEAN VALIDATED CONFIGURATION
+    // ========================================================
 
     const configurationData =
       validation.toObject({
@@ -92,46 +90,36 @@ router.post("/", authenticate, async (req, res) => {
     delete configurationData.updatedAt;
 
 
-    // =====================================================
-    // AUTHENTICATED USER / AUDIT SNAPSHOT
-    // =====================================================
+    // ========================================================
+    // USER / AUDIT SNAPSHOT
+    // ========================================================
 
     const actor = {
-      userID:
-        req.user.userID,
-
-      username:
-        req.user.username,
-
-      firstName:
-        req.user.firstName || "",
-
-      lastName:
-        req.user.lastName || "",
-
-      role:
-        req.user.role || "user",
+      userID: req.user.userID,
+      username: req.user.username,
+      firstName: req.user.firstName || "",
+      lastName: req.user.lastName || "",
+      role: req.user.role || "user",
     };
 
 
-    // =====================================================
+    // ========================================================
     // CREATE GENERIC PRODUCT CONFIGURATION
-    // =====================================================
+    // ========================================================
 
     const productConfiguration =
       new ProductConfiguration({
-        userID:
-          req.user.userID,
+        userID: req.user.userID,
 
         configurationName:
           configurationData.conveyorName ||
-          "Mighty Lube Roller Flight Conveyor",
+          'Free Rail 314 "Load" Wheel Greaser',
 
         productType:
-          "IBR_RFC",
+          "PFO_CGS_FR314",
 
         productName:
-          "Mighty Lube Roller Flight Conveyor",
+          'Free Rail 314 "Load" Wheel Greaser',
 
         status:
           "cart",
@@ -152,23 +140,23 @@ router.post("/", authenticate, async (req, res) => {
       });
 
 
-    // =====================================================
-    // SAVE INTO GENERIC COLLECTION
-    // =====================================================
+    // ========================================================
+    // SAVE
+    // ========================================================
 
     const savedConfiguration =
       await productConfiguration.save();
 
 
-    // =====================================================
+    // ========================================================
     // SUCCESS RESPONSE
-    // =====================================================
+    // ========================================================
 
     return res.status(201).json({
       success: true,
 
       message:
-        "IBR_RFC configuration added to cart successfully",
+        "PFO_CGS_FR314 configuration added to cart successfully",
 
       configurationID:
         savedConfiguration.configurationID,
@@ -199,14 +187,14 @@ router.post("/", authenticate, async (req, res) => {
 
   } catch (error) {
     console.error(
-      "IBR_RFC configuration error:",
+      "PFO_CGS_FR314 configuration error:",
       error
     );
 
 
-    // =====================================================
+    // ========================================================
     // MONGOOSE VALIDATION ERROR
-    // =====================================================
+    // ========================================================
 
     if (error?.name === "ValidationError") {
       const errors = {};
@@ -218,24 +206,21 @@ router.post("/", authenticate, async (req, res) => {
 
       return res.status(422).json({
         success: false,
-
         message:
-          "Invalid IBR_RFC configuration",
-
+          "Invalid PFO_CGS_FR314 configuration",
         errors,
       });
     }
 
 
-    // =====================================================
+    // ========================================================
     // INTERNAL SERVER ERROR
-    // =====================================================
+    // ========================================================
 
     return res.status(500).json({
       success: false,
-
       message:
-        "Failed to add IBR_RFC configuration",
+        "Failed to add PFO_CGS_FR314 configuration",
     });
   }
 });

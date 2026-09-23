@@ -129,8 +129,8 @@ const iftOp4oeRoute = require("./routes/IFT_OP4OE");
 // IN-BOARD ROLLER CHAIN
 // ============================================================
 
-const ibrRfcRoute = require("./routes/IBR/CLS/MLRFC");
-const ibrOp4oeRoute = require("./routes/IBR/CLS/OP4OE");
+const ibrRfcRoute = require("./routes/IBRC/CLS/MLRFC");
+const ibrOp4oeRoute = require("./routes/IBRC/CLS/OP4OE");
 const ibrc300Route = require("./routes/IBRC/CGS/IBRC_300");
 
 
@@ -176,6 +176,20 @@ const ohp001Route = require("./routes/OHP/CCS/3001");
 // Paint Marker for Monitoring System (Optional)
 // Product ID: OHP_PMM
 const ohpPmmRoute = require("./routes/OHP/CMS/PMM");
+
+
+
+// ============================================================
+// POWER AND FREE OVERHEAD OR INVERTED
+// ============================================================
+
+// Overhead Non-Powered Mighty Lube Brush Cleaners
+// 300I / 400I / 600I
+// Product ID: PFO_CCS_300I
+const pfoCcs300iRoute = require("./routes/PFO/CCS/PFO_CCS_300I");
+const pfoCcsOp8Route = require("./routes/PFO/CCS/PFO_CCS_OP8");
+const pfoCcsOp8npRoute = require("./routes/PFO/CCS/PFO_CCS_OP8NP");
+const pfoCgsFr314Route = require("./routes/PFO/CGS/PFO_CGS_FR314");
 
 
 // ============================================================
@@ -305,6 +319,19 @@ app.use("/api/ibrc_300", ibrc300Route);
 // app.use("/api/oh_ccs_o55", ohCcsO55Route);
 // app.use("/api/oh_ccs_cleaning_brush", ohCcsCleaningBrushRoute);
 
+
+// ============================================================
+// POWER AND FREE OVERHEAD OR INVERTED ROUTES
+// ============================================================
+
+// Overhead Non-Powered Mighty Lube Brush Cleaners
+// 300I / 400I / 600I
+// Product ID: PFO_CCS_300I
+// POST /api/pfo_ccs_300i
+app.use("/api/pfo_ccs_300i", pfoCcs300iRoute);
+app.use("/api/pfo_ccs_op8", pfoCcsOp8Route);
+app.use("/api/pfo_ccs_op8np", pfoCcsOp8npRoute);
+app.use("/api/pfo_cgs_fr314",pfoCgsFr314Route);
 
 // ============================================================
 // OVERHEAD POWER RAIL - LUBRICATION / MONITORING ROUTES

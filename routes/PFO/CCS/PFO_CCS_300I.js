@@ -1,19 +1,20 @@
 const express = require("express");
 
 const { authenticate } = require("../../sessions");
-const IBR_OP4OE = require("../../../models/IBR/CLS/OP4OE");
+const PFO_CCS_300I = require("../../../models/PFO/CCS/PFO_CCS_300I");
 const ProductConfiguration = require("../../../models/product_configuration");
 
 const router = express.Router();
 
 
 // =========================================================
-// POST /api/ibr_op4oe
+// POST /api/pfo_ccs_300i
 //
 // Product:
-// OP-40E - In-Board Roller Chain
+// Overhead Non-Powered Mighty Lube Brush Cleaners
+// 300I / 400I / 600I
 //
-// IBR_OP4OE model:
+// PFO_CCS_300I model:
 // validation only
 //
 // Actual storage:
@@ -27,7 +28,7 @@ const router = express.Router();
 router.post("/", authenticate, async (req, res) => {
   try {
     const {
-      IBR_OP4OEData,
+      PFO_CCS_300IData,
       numRequested,
     } = req.body || {};
 
@@ -37,15 +38,20 @@ router.post("/", authenticate, async (req, res) => {
     // =====================================================
 
     if (
-      !IBR_OP4OEData ||
-      typeof IBR_OP4OEData !== "object" ||
-      Array.isArray(IBR_OP4OEData)
+      !PFO_CCS_300IData ||
+      typeof PFO_CCS_300IData !== "object" ||
+      Array.isArray(PFO_CCS_300IData)
     ) {
       return res.status(400).json({
         success: false,
-        message: "IBR_OP4OEData is required",
+        message: "PFO_CCS_300IData is required",
       });
     }
+
+
+    // =====================================================
+    // QUANTITY VALIDATION
+    // =====================================================
 
     const quantity = Number(numRequested);
 
@@ -63,17 +69,18 @@ router.post("/", authenticate, async (req, res) => {
     // =====================================================
     // PRODUCT-SPECIFIC VALIDATION
     //
-    // IBR_OP4OEData and IBR_OP4OE schema use the same
+    // PFO_CCS_300IData and PFO_CCS_300I schema use the same
     // flat field structure.
     //
-    // No transformation or legacy mapping is required.
+    // Conditional "Other" fields are handled by the
+    // model's required functions.
     //
-    // IBR_OP4OE is used ONLY for validation.
-    // It is NOT saved into a separate collection.
+    // PFO_CCS_300I is validation-only.
+    // Do NOT call validation.save().
     // =====================================================
 
     const validation =
-      new IBR_OP4OE(IBR_OP4OEData);
+      new PFO_CCS_300I(PFO_CCS_300IData);
 
     await validation.validate();
 
@@ -97,20 +104,11 @@ router.post("/", authenticate, async (req, res) => {
     // =====================================================
 
     const actor = {
-      userID:
-        req.user.userID,
-
-      username:
-        req.user.username,
-
-      firstName:
-        req.user.firstName || "",
-
-      lastName:
-        req.user.lastName || "",
-
-      role:
-        req.user.role || "user",
+      userID: req.user.userID,
+      username: req.user.username,
+      firstName: req.user.firstName || "",
+      lastName: req.user.lastName || "",
+      role: req.user.role || "user",
     };
 
 
@@ -120,18 +118,17 @@ router.post("/", authenticate, async (req, res) => {
 
     const productConfiguration =
       new ProductConfiguration({
-        userID:
-          req.user.userID,
+        userID: req.user.userID,
 
         configurationName:
           configurationData.conveyorName ||
-          "IBR OP-40E",
+          "PFO CCS 300I / 400I / 600I",
 
         productType:
-          "IBR_OP4OE",
+          "PFO_CCS_300I",
 
         productName:
-          "IBR OP-40E",
+          "Overhead Non-Powered Mighty Lube Brush Cleaners 300I 400I 600I",
 
         status:
           "cart",
@@ -154,15 +151,6 @@ router.post("/", authenticate, async (req, res) => {
 
     // =====================================================
     // SAVE INTO GENERIC COLLECTION
-    //
-    // OLD:
-    //
-    // req.user.cart.push(...)
-    // await req.user.save()
-    //
-    // NEW:
-    //
-    // Only ProductConfiguration is persisted.
     // =====================================================
 
     const savedConfiguration =
@@ -177,7 +165,7 @@ router.post("/", authenticate, async (req, res) => {
       success: true,
 
       message:
-        "IBR_OP4OE configuration added to cart successfully",
+        "PFO_CCS_300I configuration added to cart successfully",
 
       configurationID:
         savedConfiguration.configurationID,
@@ -208,7 +196,7 @@ router.post("/", authenticate, async (req, res) => {
 
   } catch (error) {
     console.error(
-      "IBR_OP4OE configuration error:",
+      "PFO_CCS_300I configuration error:",
       error
     );
 
@@ -229,7 +217,7 @@ router.post("/", authenticate, async (req, res) => {
         success: false,
 
         message:
-          "Invalid IBR_OP4OE configuration",
+          "Invalid PFO_CCS_300I configuration",
 
         errors,
       });
@@ -244,7 +232,7 @@ router.post("/", authenticate, async (req, res) => {
       success: false,
 
       message:
-        "Failed to add IBR_OP4OE configuration",
+        "Failed to add PFO_CCS_300I configuration",
     });
   }
 });
