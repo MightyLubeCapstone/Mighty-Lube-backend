@@ -190,7 +190,14 @@ const pfoCcs300iRoute = require("./routes/PFO/CCS/PFO_CCS_300I");
 const pfoCcsOp8Route = require("./routes/PFO/CCS/PFO_CCS_OP8");
 const pfoCcsOp8npRoute = require("./routes/PFO/CCS/PFO_CCS_OP8NP");
 const pfoCgsFr314Route = require("./routes/PFO/CGS/PFO_CGS_FR314");
-
+const pfoCgsFr317Route = require("./routes/PFO/CGS/PFO_CGS_FR317");
+const pfoCgsGpcRoute = require("./routes/PFO/CGS/PFO_CGS_GPC");
+const pfoCls9000lRoute = require("./routes/PFO/CLS/PFO_CLS_9000L");
+const pfoCls9000leccclRoute = require("./routes/PFO/CLS/PFO_CLS_9000LECCCL");
+const pfoCls9000ltclRoute = require("./routes/PFO/CLS/PFO_CLS_9000LTCL");
+const pfoClsCdlRoute = require("./routes/PFO/CLS/PFO_CLS_CDL");
+const pfoClsEsRoute = require("./routes/PFO/CLS/PFO_CLS_ES");
+const pfoClsOp139aRoute = require("./routes/PFO/CLS/PFO_CLS_OP139A");
 
 // ============================================================
 // DASHBOARD ROUTE USAGE
@@ -332,6 +339,14 @@ app.use("/api/pfo_ccs_300i", pfoCcs300iRoute);
 app.use("/api/pfo_ccs_op8", pfoCcsOp8Route);
 app.use("/api/pfo_ccs_op8np", pfoCcsOp8npRoute);
 app.use("/api/pfo_cgs_fr314",pfoCgsFr314Route);
+app.use("/api/pfo_cgs_fr317", pfoCgsFr317Route);
+app.use("/api/pfo_cgs_gpc", pfoCgsGpcRoute);
+app.use( "/api/pfo_cls_9000l", pfoCls9000lRoute );
+app.use( "/api/pfo_cls_9000lecccl", pfoCls9000leccclRoute );
+app.use( "/api/pfo_cls_9000ltcl", pfoCls9000ltclRoute);
+app.use( "/api/pfo_cls_cdl", pfoClsCdlRoute);
+app.use("/api/pfo_cls_es",pfoClsEsRoute);
+app.use( "/api/pfo_cls_op139a", pfoClsOp139aRoute )
 
 // ============================================================
 // OVERHEAD POWER RAIL - LUBRICATION / MONITORING ROUTES
