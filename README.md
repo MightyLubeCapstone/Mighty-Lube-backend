@@ -1,98 +1,126 @@
 # Mighty Lube Backend
 
-Express and MongoDB backend for the Mighty Lube product configurator, customer accounts, carts, submitted configurations, email notifications, and administrator dashboard.
+Express and MongoDB backend for the Mighty Lube Product Configurator.
 
-## Versions
+The backend supports:
 
-| Version | Git branch | Description |
-| --- | --- | --- |
-| `1.0.0` | `AddTechNote` | Original customer configurator backend and security-PIN password recovery |
-| `2.0.0` | `adminDashboard` | Role-based administration, configuration/user management, audit information, sorting, and filtering |
+- Customer accounts and authentication
+- Product configuration
+- Cart and Draft workflows
+- Submitted configurations
+- Administrator dashboard
+- User management
+- Product-specific validation
+- Customer image uploads
+- Private object storage
+- Secure image preview
+- Email/RFQ workflows
 
-Version 2.0.0 extends version 1.0.0 with:
+The backend has been migrated to support the new reusable Product Configurator architecture.
 
-- One shared login/session system for users and administrators.
-- Automatic `user` role assignment for new accounts.
-- Admin-only middleware and dashboard APIs.
-- Configuration totals for requested, pending, and completed work.
-- Configuration editing and status updates.
-- User listing, role changes, and administrator password resets.
-- Configuration `createdAt`, `updatedAt`, `createdBy`, and `updatedBy` audit information.
-- User and configuration sorting and date filtering.
-- Configuration status filtering.
-- Local/production server and database configuration.
+---
 
-<details>
-<summary><strong>Backend version and health APIs</strong></summary>
+## Current Architecture
 
-The version is read directly from `package.json`, which is the single source of truth.
+The current product configuration flow is:
 
-### Get backend version
-
-```http
-GET /api/version
+```text
+Flutter Frontend
+      ↓
+Product API Route
+      ↓
+Authentication
+      ↓
+Product-Specific Validation Model
+      ↓
+Common ProductConfiguration
+      ↓
+MongoDB
 ```
 
-No authentication is required.
+Product-specific models validate product data.
 
-```json
-{
-  "name": "mighty-lube",
-  "version": "2.0.0",
-  "environment": "production"
-}
+The validated product data is then stored through the common
+`ProductConfiguration` structure.
+
+This separates:
+
+```text
+Product-Specific Validation
+            ↓
+Common Configuration Persistence
 ```
 
-### Health check
+and avoids maintaining a completely separate persistence workflow for every
+product.
 
-```http
-GET /
-```
+---
 
-```json
-{
-  "success": true,
-  "message": "Backend server is running",
-  "version": "2.0.0",
-  "port": 8080,
-  "timestamp": "2026-07-27T10:00:00.000Z"
-}
-```
+## Technology Stack
 
-</details>
+- Node.js
+- Express.js
+- MongoDB
+- Mongoose
+- REST APIs
+- Session-based authentication
+- Multer for multipart image uploads
+- S3-compatible private object storage
+- Email notification integration
 
-## Getting started
+---
+
+## Getting Started
+
+Install dependencies:
 
 ```bash
 npm install
+```
+
+Start the backend:
+
+```bash
 node app.js
+```
+
+or use the configured npm start command:
+
+```bash
+npm start
 ```
 
 Local defaults:
 
 ```text
 Server:   http://localhost:8080
-API base: http://localhost:8080/api
+API Base: http://localhost:8080/api
 MongoDB:  mongodb://127.0.0.1:27017/mighty_lube
 ```
 
-The application reads the root `.env` file. Never commit real credentials.
+The application reads configuration from environment variables.
 
-<details>
-<summary><strong>Environment variables</strong></summary>
+Never commit real credentials to Git.
+
+---
+
+## Environment Configuration
+
+Example environment configuration:
 
 ```env
-# development selects the local server/database.
-# production selects the deployed server/database.
 NODE_ENV=development
 
 DB_MODE=local
+
 MONGODB_URI_LOCAL=mongodb://127.0.0.1:27017/mighty_lube
-MONGODB_URI_PRODUCTION=<mongodb-atlas-uri>
+MONGODB_URI_PRODUCTION=<mongodb-uri>
 
 SERVER_MODE=local
+
 SERVER_HOST_LOCAL=127.0.0.1
 SERVER_PORT_LOCAL=8080
+
 SERVER_HOST_PRODUCTION=0.0.0.0
 SERVER_PORT_PRODUCTION=8080
 
@@ -104,11 +132,60 @@ EMAIL_FROM=<verified-sender>
 ORDER_EMAIL_TO=<notification-recipient>
 ```
 
-Hosting providers may supply `PORT`; it overrides the configured server port.
+Object-storage credentials are also provided through the deployment
+environment.
 
-</details>
+Do not place real storage credentials in this README.
 
-## Authentication and authorization
+Hosting providers may provide `PORT`; the deployment environment can
+override the local server port.
+
+---
+
+## Backend Version
+
+The backend exposes a version API.
+
+```http
+GET /api/version
+```
+
+The version is read from `package.json`.
+
+Example response:
+
+```json
+{
+  "name": "mighty-lube",
+  "version": "<current-package-version>",
+  "environment": "production"
+}
+```
+
+`package.json` should remain the source of truth for the backend version.
+
+---
+
+## Health Check
+
+```http
+GET /
+```
+
+The health endpoint confirms that the backend server is running.
+
+Example:
+
+```json
+{
+  "success": true,
+  "message": "Backend server is running"
+}
+```
+
+---
+
+# Authentication and Authorization
 
 Protected APIs require:
 
@@ -116,90 +193,106 @@ Protected APIs require:
 Authorization: Bearer <sessionID>
 ```
 
-Sessions expire after 12 hours. Users and administrators use the same login endpoint. Authorization is determined from the current `role` stored on the user document.
+Users and administrators use the same session/authentication system.
 
-Allowed roles:
+Authorization is determined using the authenticated user's role.
+
+Current roles:
 
 ```text
 user
 admin
 ```
 
-New accounts always receive `role: "user"`. The signup body cannot assign a role.
+New customer accounts should receive:
 
-<details>
-<summary><strong>Sessions: login, validate, and logout</strong></summary>
+```text
+role: user
+```
 
-### Login
+The signup request must not be allowed to assign an administrator role.
+
+---
+
+## Login
 
 ```http
 POST /api/sessions
 Content-Type: application/json
 ```
 
+Example:
+
 ```json
 {
   "username": "customer@example.com",
-  "password": "password123"
+  "password": "password"
 }
 ```
 
-```json
-{
-  "status": "success",
-  "sessionID": "session-uuid",
-  "role": "user"
-}
-```
+Successful authentication returns the session information used for
+protected APIs.
 
-### Validate session
+---
+
+## Validate Session
 
 ```http
 GET /api/sessions
 Authorization: Bearer <sessionID>
 ```
 
-```json
-{
-  "message": "Valid Session",
-  "user": {
-    "userID": "user-uuid",
-    "username": "customer@example.com",
-    "role": "user"
-  }
-}
-```
+The endpoint validates the session and returns authenticated user
+information.
 
-### Logout
+---
+
+## Logout
 
 ```http
 DELETE /api/sessions
 Authorization: Bearer <sessionID>
 ```
 
-</details>
+---
 
-<details>
-<summary><strong>Users: registration, profile, update, and deletion</strong></summary>
+# User APIs
 
-### Check username availability
+The backend supports:
+
+- Username availability
+- Account registration
+- Current-user information
+- Profile updates
+- Account deletion
+- Password recovery
+- Security PIN validation
+- Password reset
+- Role-based authorization
+
+---
+
+## Check Username
 
 ```http
 GET /api/users/username
-username: customer@example.com
 ```
 
-### Register
+---
+
+## Register User
 
 ```http
 POST /api/users
 Content-Type: application/json
 ```
 
+Example:
+
 ```json
 {
   "username": "customer@example.com",
-  "password": "password123",
+  "password": "password",
   "securityPin": "1234",
   "firstName": "Example",
   "lastName": "Customer",
@@ -210,16 +303,20 @@ Content-Type: application/json
 }
 ```
 
-`emailAddress` is accepted as an alias for `email`.
+New users receive the normal customer/user role.
 
-### Get current user
+---
+
+## Current User
 
 ```http
 GET /api/users/userinfo
 Authorization: Bearer <sessionID>
 ```
 
-### Update current user
+---
+
+## Update User
 
 ```http
 PUT /api/users
@@ -227,431 +324,1212 @@ Authorization: Bearer <sessionID>
 Content-Type: application/json
 ```
 
-```json
-{
-  "firstName": "Example",
-  "lastName": "Customer",
-  "username": "customer@example.com",
-  "email": "customer@example.com",
-  "phoneNumber": "9876543210",
-  "companyName": "Example Company"
-}
-```
+---
 
-### Delete current user
+## Delete User
 
 ```http
 DELETE /api/users
 Authorization: Bearer <sessionID>
-Content-Type: application/json
 ```
 
-```json
-{
-  "password": "current-password"
-}
-```
+---
 
-</details>
+# Forgot Password
 
-<details>
-<summary><strong>Forgot password: normal-user security PIN flow</strong></summary>
+Normal-user password recovery uses the security PIN flow.
 
-### Find account
+### Find Account
 
 ```http
 POST /api/email/forgot
-Content-Type: application/json
 ```
 
-```json
-{
-  "email": "customer@example.com"
-}
-```
-
-### Verify security PIN
+### Verify Security PIN
 
 ```http
 POST /api/email/forgot/verify-pin
-Content-Type: application/json
 ```
 
-```json
-{
-  "email": "customer@example.com",
-  "securityPin": "1234"
-}
-```
-
-The backward-compatible `GET /api/email/forgot?email=...&securityPin=...` route is also available.
-
-### Set new password
+### Set New Password
 
 ```http
 PUT /api/email/forgot
-Content-Type: application/json
 ```
+
+A normal user must successfully complete the required recovery validation
+before changing the password.
+
+---
+
+# Product Configurator Architecture
+
+The product backend was migrated to support the new frontend Product
+Configurator architecture.
+
+Each migrated product generally has:
+
+```text
+Product-Specific Mongoose Model
+              +
+Product-Specific Express Route
+              ↓
+Common ProductConfiguration
+```
+
+The responsibilities are intentionally separated.
+
+### Product Model
+
+Responsible for:
+
+```text
+Product field validation
+Required-field validation
+Data type validation
+Product-specific rules
+```
+
+### Product Route
+
+Responsible for:
+
+```text
+Authentication
+Request validation
+Quantity validation
+Product model validation
+Preparing configurationData
+Creating ProductConfiguration
+Returning API response
+```
+
+### ProductConfiguration
+
+Responsible for the shared configuration lifecycle and persistence.
+
+---
+
+# Product API Flow
+
+Typical product request:
+
+```text
+POST /api/<product>
+       ↓
+Authenticate
+       ↓
+Read Product Data
+       ↓
+Validate Quantity
+       ↓
+Validate Product Model
+       ↓
+Prepare configurationData
+       ↓
+Create ProductConfiguration
+       ↓
+Save to MongoDB
+       ↓
+Return configurationID
+```
+
+A typical product request contains:
 
 ```json
 {
-  "email": "customer@example.com",
-  "password": "newPassword123"
+  "PRODUCTData": {
+    "conveyorName": "Example Conveyor"
+  },
+  "numRequested": 1
 }
 ```
 
-A normal user must verify the security PIN before changing the password.
+The exact product-data property depends on the product API.
 
-</details>
+---
 
-<details>
-<summary><strong>Admin configurations: list, sort, filter, edit, and change status</strong></summary>
+# Product Validation Models
 
-All routes in this section require an administrator session.
+Product-specific Mongoose models are primarily used to validate the
+configuration received from the frontend.
 
-### List configurations
+Conceptually:
+
+```javascript
+const validation = new ProductModel(PRODUCTData);
+
+await validation.validate();
+
+const configurationData = validation.toObject({
+  versionKey: false,
+});
+```
+
+Validated data is then used when creating the common configuration.
+
+---
+
+# Common ProductConfiguration
+
+Migrated products use the common `ProductConfiguration` persistence
+structure.
+
+The common configuration contains information such as:
+
+```text
+configurationID
+userID
+configurationName
+productType
+productName
+status
+isComplete
+numRequested
+configurationData
+createdBy
+updatedBy
+```
+
+Product-specific fields are stored inside:
+
+```text
+configurationData
+```
+
+Example:
+
+```json
+{
+  "configurationID": "configuration-uuid",
+  "userID": "user-uuid",
+  "configurationName": "Main Conveyor",
+  "productType": "CC5_CL",
+  "productName": "CC5 Chain Lubricator",
+  "status": "cart",
+  "isComplete": true,
+  "numRequested": 1,
+  "configurationData": {
+    "conveyorName": "Main Conveyor"
+  }
+}
+```
+
+---
+
+# Why Common ProductConfiguration Is Used
+
+Previously, product workflows relied more heavily on product-specific
+handling.
+
+The migrated architecture uses:
+
+```text
+Product Model
+    ↓
+Validate Product Data
+    ↓
+ProductConfiguration
+    ↓
+Persist Common Configuration
+```
+
+Benefits:
+
+- Consistent configuration lifecycle
+- Consistent Cart integration
+- Common quantity handling
+- Common ownership information
+- Common audit information
+- Easier product migration
+- Less duplicated persistence logic
+
+---
+
+# Frontend / Backend Field Contract
+
+Frontend field keys and backend model fields must remain aligned.
+
+Example:
+
+Frontend:
+
+```dart
+key: 'wheelOpenType'
+```
+
+Backend:
+
+```javascript
+wheelOpenType: {
+  type: String,
+  required: true,
+  trim: true,
+}
+```
+
+A mismatch such as:
+
+```text
+Frontend:
+wheelOpenType
+
+Backend:
+wheelOpenRaceStyle
+```
+
+causes backend validation to fail even when the customer completed the
+frontend form correctly.
+
+When migrating or modifying a product, always compare the actual frontend
+field keys with the backend model.
+
+---
+
+# Required and Optional Fields
+
+If the frontend defines:
+
+```dart
+required: true
+```
+
+the backend model should normally require the same field.
+
+Optional frontend fields should remain optional unless there is a
+documented backend requirement.
+
+Frontend and backend validation should describe the same product contract.
+
+---
+
+# Handling "Other"
+
+Some frontend dropdowns support:
+
+```text
+Other
+```
+
+When the customer selects `Other`, the frontend can replace the literal
+`Other` value with custom text.
+
+Example:
+
+```text
+Dropdown:
+Daifuku
+Frost
+Rapid
+Other
+
+Custom Value:
+Custom Manufacturer
+```
+
+Backend receives:
+
+```text
+Custom Manufacturer
+```
+
+For this type of field, do not use an enum that only accepts the original
+dropdown values.
+
+Also do not introduce separate fields such as:
+
+```text
+otherManufacturer
+otherChainSize
+otherApplicationEnvironment
+```
+
+unless the frontend actually sends those fields.
+
+---
+
+# Quantity Validation
+
+Product APIs validate:
+
+```text
+numRequested
+```
+
+Quantity must be a positive integer.
+
+Conceptually:
+
+```javascript
+const quantity = Number(numRequested);
+
+if (!Number.isInteger(quantity) || quantity < 1) {
+  return res.status(400).json({
+    success: false,
+    message: "numRequested must be a positive integer",
+  });
+}
+```
+
+---
+
+# Product Route Registration
+
+Product routes are registered centrally in:
+
+```text
+app.js
+```
+
+Example:
+
+```javascript
+const productRoute = require("./routes/...");
+
+app.use("/api/product", productRoute);
+```
+
+When adding a product backend:
+
+```text
+Create Model
+    ↓
+Create Route
+    ↓
+Register Route in app.js
+    ↓
+Add Frontend Endpoint
+    ↓
+Test
+```
+
+---
+
+# Cart APIs
+
+Cart routes require a valid authenticated session.
+
+| Method | Endpoint | Purpose |
+| --- | --- | --- |
+| `GET` | `/api/cart` | List cart orders |
+| `PUT` | `/api/cart` | Restore saved work into cart |
+| `PUT` | `/api/cart/order` | Update a cart order |
+| `GET` | `/api/cart/order` | Get order details |
+| `DELETE` | `/api/cart/order` | Delete an order |
+
+Migrated product APIs create configurations that participate in the common
+cart/configuration workflow.
+
+---
+
+# Draft APIs
+
+Drafts allow customers to save unfinished configuration work.
+
+| Method | Endpoint | Purpose |
+| --- | --- | --- |
+| `GET` | `/api/drafts` | List drafts |
+| `PUT` | `/api/drafts` | Save current work as draft |
+| `DELETE` | `/api/drafts` | Delete draft |
+
+The newer frontend works with draft concepts including:
+
+```text
+draftID
+items
+quantity
+createdAt
+```
+
+---
+
+# Submitted Configurations
+
+Authenticated users can access submitted configurations.
+
+| Method | Endpoint | Purpose |
+| --- | --- | --- |
+| `GET` | `/api/configurations` | List submitted configurations |
+| `PUT` | `/api/configurations` | Submit/finalize configuration |
+| `DELETE` | `/api/configurations/:configId` | Delete configuration |
+
+The overall lifecycle is:
+
+```text
+Product Configuration
+        ↓
+Cart
+        ↓
+Draft (optional)
+        ↓
+Finalize
+        ↓
+Submitted Configuration
+```
+
+---
+
+# Customer Image Upload
+
+The backend now supports customer-uploaded configuration images.
+
+Upload endpoint:
+
+```http
+POST /api/uploads/image
+Authorization: Bearer <sessionID>
+Content-Type: multipart/form-data
+```
+
+Multipart fields:
+
+```text
+image
+projectKey
+```
+
+The user must be authenticated before an image can be uploaded.
+
+---
+
+# Supported Image Types
+
+Currently supported MIME types:
+
+```text
+image/jpeg
+image/png
+image/webp
+```
+
+Unsupported image formats are rejected.
+
+The upload API also applies a file-size limit.
+
+---
+
+# Image Upload Flow
+
+```text
+Flutter
+   ↓
+POST /api/uploads/image
+   ↓
+Authentication
+   ↓
+Multer
+   ↓
+Validate Image
+   ↓
+Generate Object Key
+   ↓
+Private Object Storage
+   ↓
+Return Image Metadata
+```
+
+The backend does not return a permanent public image URL for storage in the
+configuration.
+
+---
+
+# Private Object Storage
+
+Customer-uploaded images are stored in private S3-compatible object
+storage.
+
+Current object organization follows:
+
+```text
+product-configurations/
+└── <userID>-<productType>/
+    └── <generated-file-id>.<extension>
+```
+
+The user ID comes from the authenticated user.
+
+The product/project key is validated before it is used as part of the
+object-storage path.
+
+Clients must not be allowed to supply arbitrary storage paths.
+
+---
+
+# Image Metadata
+
+MongoDB stores image metadata instead of the binary image.
+
+Example:
+
+```json
+{
+  "objectKey": "product-configurations/user-id-CC5_CL/image-id.jpg",
+  "originalName": "factory.jpg",
+  "contentType": "image/jpeg",
+  "size": 123456
+}
+```
+
+Supported product models can use an image metadata schema conceptually
+similar to:
+
+```javascript
+const ImageMetadataSchema = new mongoose.Schema(
+  {
+    objectKey: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    originalName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    contentType: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    size: {
+      type: Number,
+      required: true,
+    },
+  },
+  {
+    _id: false,
+  },
+);
+```
+
+---
+
+# Image Storage Rules
+
+The backend follows these rules:
+
+```text
+Do not store local Flutter/device paths.
+
+Do not store temporary signed URLs.
+
+Store permanent objectKey + metadata.
+
+Generate signed URLs only when an image needs to be viewed.
+
+Keep customer images private.
+```
+
+---
+
+# Admin Dashboard APIs
+
+Admin APIs require an administrator session.
+
+Main Admin functionality includes:
+
+- Configuration listing
+- Sorting
+- Date filtering
+- Workflow-status filtering
+- Configuration details
+- Configuration editing
+- Configuration deletion
+- Admin workflow updates
+- Customer image access
+- User listing
+- User editing
+- Role management
+- Password reset
+- User deletion
+
+---
+
+# Admin Configurations
 
 ```http
 GET /api/admin/configurations
 Authorization: Bearer <admin-sessionID>
 ```
 
-Supported query parameters:
+Configuration listing supports server-side sorting and filtering.
 
-| Parameter | Values | Default |
-| --- | --- | --- |
-| `sortBy` | `createdAt`, `updatedAt` | `createdAt` |
-| `sortOrder` | `asc`, `desc` | `asc` |
-| `dateField` | `createdAt`, `updatedAt` | `createdAt` |
-| `dateFilter` | `all`, `today`, `lastDay`, `thisWeek`, `custom` | `all` |
-| `startDate` | `YYYY-MM-DD` | Required for `custom` |
-| `endDate` | `YYYY-MM-DD` | Required for `custom` |
-| `status` | `all`, `requested`, `pending`, `done`, or comma-separated values | `all` |
-
-Examples:
-
-```http
-GET /api/admin/configurations?status=pending&sortBy=updatedAt&sortOrder=desc
-GET /api/admin/configurations?dateFilter=today&dateField=createdAt
-GET /api/admin/configurations?dateFilter=thisWeek&status=requested,pending
-GET /api/admin/configurations?dateFilter=custom&startDate=2026-07-01&endDate=2026-07-31
-```
-
-Response:
-
-```json
-{
-  "summary": {
-    "total": 1,
-    "requested": 0,
-    "pending": 1,
-    "done": 0
-  },
-  "query": {
-    "sortBy": "updatedAt",
-    "sortOrder": "desc",
-    "dateField": "createdAt",
-    "dateFilter": "all",
-    "startDate": null,
-    "endDate": null,
-    "status": ["pending"]
-  },
-  "data": [
-    {
-      "_id": "configuration-id",
-      "configurationName": "Factory conveyor",
-      "orderStatus": "Pending",
-      "status": "pending",
-      "dateOrdered": "2026-07-20T10:00:00.000Z",
-      "completeDate": null,
-      "createdAt": "2026-07-20T10:00:00.000Z",
-      "updatedAt": "2026-07-22T12:00:00.000Z",
-      "createdBy": {
-        "userID": "user-id",
-        "username": "customer@example.com",
-        "firstName": "Example",
-        "lastName": "Customer",
-        "role": "user"
-      },
-      "updatedBy": {
-        "userID": "admin-id",
-        "username": "admin@example.com",
-        "firstName": "Admin",
-        "lastName": "User",
-        "role": "admin"
-      },
-      "cart": []
-    }
-  ]
-}
-```
-
-Summary counts describe the filtered result set.
-
-### Edit configuration content
-
-```http
-PATCH /api/admin/configurations/:configurationId
-Authorization: Bearer <admin-sessionID>
-Content-Type: application/json
-```
-
-```json
-{
-  "configurationName": "Updated configuration name",
-  "cart": []
-}
-```
-
-Only `configurationName` and `cart` are editable through this route. Status and server-owned dates are preserved.
-
-### Change configuration status
-
-```http
-PATCH /api/admin/configurations/:configurationId/status
-Authorization: Bearer <admin-sessionID>
-Content-Type: application/json
-```
-
-```json
-{
-  "status": "pending"
-}
-```
-
-Allowed values are `requested`, `pending`, and `done`. Setting `done` records completion timestamps.
-
-</details>
-
-<details>
-<summary><strong>Admin users: list, sort, filter, role, and password</strong></summary>
-
-All routes in this section require an administrator session.
-
-### List users
-
-```http
-GET /api/admin/users
-Authorization: Bearer <admin-sessionID>
-```
-
-The user API supports the same `sortBy`, `sortOrder`, `dateField`, `dateFilter`, `startDate`, and `endDate` parameters as the configuration API. It does not use the configuration `status` parameter.
-
-```http
-GET /api/admin/users?sortBy=createdAt&sortOrder=desc
-GET /api/admin/users?dateField=updatedAt&dateFilter=thisWeek
-GET /api/admin/users?dateFilter=custom&startDate=2026-07-01&endDate=2026-07-31
-```
-
-```json
-{
-  "count": 1,
-  "query": {
-    "sortBy": "createdAt",
-    "sortOrder": "desc",
-    "dateField": "createdAt",
-    "dateFilter": "all",
-    "startDate": null,
-    "endDate": null
-  },
-  "data": [
-    {
-      "_id": "mongodb-user-id",
-      "userID": "user-uuid",
-      "username": "customer@example.com",
-      "role": "user",
-      "firstName": "Example",
-      "lastName": "Customer",
-      "email": "customer@example.com",
-      "phoneNumber": "9876543210",
-      "companyName": "Example Company",
-      "country": "USA",
-      "createdAt": "2026-07-20T10:00:00.000Z",
-      "updatedAt": "2026-07-22T12:00:00.000Z"
-    }
-  ]
-}
-```
-
-Passwords, security PINs, reset codes, and sessions are never returned.
-
-### Change role
-
-```http
-PATCH /api/admin/users/:userId/role
-Authorization: Bearer <admin-sessionID>
-Content-Type: application/json
-```
-
-```json
-{
-  "role": "admin"
-}
-```
-
-An administrator cannot remove their own admin role.
-
-### Reset password
-
-```http
-PATCH /api/admin/users/:userId/password
-Authorization: Bearer <admin-sessionID>
-Content-Type: application/json
-```
-
-```json
-{
-  "password": "newPassword123"
-}
-```
-
-`newPassword` is accepted as an alias. The password must contain 8–50 characters. All sessions for the affected account are revoked after reset.
-
-</details>
-
-<details>
-<summary><strong>Cart APIs</strong></summary>
-
-All cart routes require a valid session.
-
-| Method | Endpoint | Purpose |
-| --- | --- | --- |
-| `GET` | `/api/cart` | List summarized cart orders |
-| `PUT` | `/api/cart` | Restore a saved draft into the cart |
-| `PUT` | `/api/cart/order` | Update a cart order |
-| `GET` | `/api/cart/order` | Get decoded order details; send `orderid` header |
-| `DELETE` | `/api/cart/order` | Delete an order; send `orderID` in the body |
-
-</details>
-
-<details>
-<summary><strong>Draft and submitted-configuration APIs</strong></summary>
-
-All routes require a valid session.
-
-| Method | Endpoint | Purpose |
-| --- | --- | --- |
-| `GET` | `/api/drafts` | List the current user's drafts |
-| `PUT` | `/api/drafts` | Save the current cart as a draft |
-| `DELETE` | `/api/drafts` | Delete a draft |
-| `GET` | `/api/configurations` | List the current user's submitted configurations |
-| `PUT` | `/api/configurations` | Submit the current cart as a named configuration |
-| `DELETE` | `/api/configurations/:configId` | Delete a configuration |
-
-New submitted configurations record audit timestamps and actor information.
-
-</details>
-
-<details>
-<summary><strong>Order, RFQ, and email APIs</strong></summary>
-
-| Method | Endpoint | Access | Purpose |
-| --- | --- | --- | --- |
-| `PUT` | `/api/orders/editing` | Authenticated | Edit an order inside a submitted configuration |
-| `PUT` | `/api/orders/status` | Admin | Legacy configuration-status update |
-| `PUT` | `/api/orders/complete-cart-order` | Authenticated | Mark a cart order complete |
-| `GET` | `/api/orders/completion-status/:orderID` | Authenticated | Read completion status |
-| `PUT` | `/api/rfq/add-to-cart` | Authenticated | Assign the next RFQ order ID in cart |
-| `PUT` | `/api/rfq/add-to-configurations` | Authenticated | Assign the next RFQ order ID in configurations |
-| `POST` | `/api/email/send-email` | Authenticated | Email the latest configuration |
-
-</details>
-
-<details>
-<summary><strong>Product configurator APIs</strong></summary>
-
-Each active product route accepts `POST /api/<product>` with a valid session, validates/builds the product configuration, and adds it to the current user's cart.
+Supported concepts include:
 
 ```text
-/api/fglm
-/api/fgco
-/api/cc5_cl
-/api/cc5_op40e
-/api/coe_cdl
-/api/coe_cel
-/api/coe_op4oe
-/api/eti_807
-/api/eti_9000invl
-/api/eti_91
-/api/eti_op48e
-/api/eto_2100
-/api/eto_9000e
-/api/eto_op48e
-/api/fc_314
-/api/fc_317
-/api/fro_314
-/api/fro_317
-/api/fro_es
-/api/fro_oeb
-/api/fro_op139a
-/api/ft_ftl
-/api/ft_op40e
-/api/ft_opco
+sortBy
+sortOrder
+dateField
+dateFilter
+startDate
+endDate
+status
 ```
 
-Payload fields depend on the selected product model.
+Workflow status filtering supports:
 
-</details>
+```text
+requested
+pending
+done
+```
 
-<details>
-<summary><strong>Legacy dashboard APIs</strong></summary>
+---
 
-These routes remain available for compatibility but new admin frontend code should use `/api/admin/configurations` and `/api/admin/users`.
+# Admin Workflow
 
-| Method | Endpoint | Access |
-| --- | --- | --- |
-| `GET` | `/api/user_orders` | Public health text |
-| `GET` | `/api/user_orders/allCarts` | Admin |
-| `GET` | `/api/user_orders/admin/userRaw` | Admin |
+Configurations have a separate Admin workflow:
 
-Sensitive authentication fields are excluded from legacy user responses.
+```text
+Requested
+Pending
+Done
+```
 
-</details>
+Admin can move between the supported workflow states.
 
-## Common errors
+This workflow is separate from the normal configuration lifecycle status.
+
+---
+
+# Admin Workflow Timestamps
+
+Admin workflow transitions are tracked using fields such as:
+
+```text
+adminRequestedAt
+adminStartedAt
+adminCompletedAt
+```
+
+Conceptually:
+
+```text
+Requested
+    ↓
+adminRequestedAt
+
+Pending
+    ↓
+adminStartedAt
+
+Done
+    ↓
+adminCompletedAt
+```
+
+---
+
+## Pending
+
+When status changes to:
+
+```text
+pending
+```
+
+the backend starts the Pending period from the actual transition time.
+
+```text
+adminStartedAt = current time
+```
+
+The completion timestamp is cleared when a new Pending period starts.
+
+If a configuration goes from Done back to Pending, a new Pending period
+starts.
+
+---
+
+## Done
+
+When status changes to:
+
+```text
+done
+```
+
+the backend records:
+
+```text
+adminCompletedAt
+```
+
+This timestamp is used as the Admin completion date.
+
+---
+
+## Requested
+
+When the workflow returns to:
+
+```text
+requested
+```
+
+active processing/completion timestamps are reset according to the current
+workflow.
+
+This keeps workflow timestamps synchronized with Admin status.
+
+---
+
+# Admin Customer Image Access
+
+Admin can view customer-uploaded images attached to configurations.
+
+The database stores only the image metadata/object key.
+
+When Admin requests an image:
+
+```text
+Admin Frontend
+      ↓
+Image URL API
+      ↓
+Find Configuration
+      ↓
+Find Image Metadata
+      ↓
+Validate Ownership
+      ↓
+Generate Signed URL
+      ↓
+Return Temporary URL
+```
+
+---
+
+# Signed Image URL API
+
+Admin image access uses a configuration-based endpoint.
+
+```http
+POST /api/admin/configurations/:configurationID/image-url
+Authorization: Bearer <admin-sessionID>
+Content-Type: application/json
+```
+
+Request:
 
 ```json
 {
-  "error": "Unauthorized: Missing token",
-  "message": "Session is missing, invalid, or expired"
+  "imageKey": "plantLayoutImage"
 }
 ```
 
-| HTTP status | Meaning |
+The frontend sends the configuration field name containing the image
+metadata.
+
+It does not need to send an arbitrary object-storage path.
+
+---
+
+# Image Ownership Validation
+
+Before generating a signed URL, the backend verifies that the image belongs
+to the configuration.
+
+Current expected prefix:
+
+```text
+product-configurations/<configuration.userID>-<configuration.productType>/
+```
+
+Conceptually:
+
+```javascript
+const expectedPrefix =
+  `product-configurations/${configuration.userID}-${configuration.productType}/`;
+```
+
+If the stored object key does not belong to the expected configuration
+location, access is rejected.
+
+This protects private images from cross-configuration access.
+
+---
+
+# Admin User Management
+
+Admin user APIs support:
+
+- List users
+- Sort users
+- Filter users by date
+- View user information
+- Edit user information
+- Change user role
+- Reset user password
+- Delete user
+
+Sensitive authentication data must never be returned through user-list or
+user-detail APIs.
+
+This includes:
+
+```text
+Password Hashes
+Security PINs
+Reset Codes
+Sessions
+```
+
+---
+
+# Admin Role Management
+
+Normal users and Admin users share the authentication system.
+
+Role authorization is handled by the backend.
+
+Allowed roles:
+
+```text
+user
+admin
+```
+
+Admin-only routes must always verify administrator access on the server.
+
+Frontend role checks are not a replacement for backend authorization.
+
+---
+
+# Order / RFQ / Email APIs
+
+Existing order, RFQ and email functionality remains part of the backend.
+
+Examples include:
+
+```text
+/api/orders/...
+/api/rfq/...
+/api/email/...
+```
+
+These workflows support configuration/order processing and notifications.
+
+---
+
+# Database Architecture
+
+MongoDB stores:
+
+```text
+Users
+Sessions / authentication-related data
+Product Configurations
+Cart / Draft information
+Submitted configurations
+Admin workflow information
+Audit information
+Customer image metadata
+```
+
+The major Product Configurator migration is the use of the common:
+
+```text
+ProductConfiguration
+```
+
+for migrated product persistence.
+
+---
+
+# Database Changes
+
+The new backend architecture introduced/updated the following database
+concepts.
+
+### Common Product Configuration
+
+Product-specific configuration data is stored inside:
+
+```text
+configurationData
+```
+
+while shared information remains at the common configuration level.
+
+---
+
+### Quantity
+
+Configuration quantity is maintained using:
+
+```text
+numRequested
+```
+
+---
+
+### Audit Information
+
+Configuration records can maintain actor and timestamp information such as:
+
+```text
+createdAt
+updatedAt
+createdBy
+updatedBy
+```
+
+---
+
+### Admin Workflow
+
+Admin workflow information includes:
+
+```text
+Admin Status
+
+adminRequestedAt
+adminStartedAt
+adminCompletedAt
+```
+
+This separates operational Admin processing from normal configuration
+creation/submission timestamps.
+
+---
+
+### Customer Images
+
+Customer image binary data is not stored in MongoDB.
+
+MongoDB stores only metadata:
+
+```text
+objectKey
+originalName
+contentType
+size
+```
+
+The actual file remains in private object storage.
+
+---
+
+# Error Handling
+
+Common HTTP status codes:
+
+| Status | Meaning |
 | --- | --- |
 | `400` | Invalid or missing request data |
-| `401` | Session is missing, invalid, or expired |
-| `403` | Administrator access is required |
+| `401` | Missing, invalid, or expired session |
+| `403` | Access not allowed |
 | `404` | Resource or route not found |
+| `422` | Product/model validation error |
 | `500` | Internal server error |
 
-## Upgrading from 1.0.0
+Product validation errors can return field-level details.
 
-1. Configure production database/server environment variables.
-2. Backfill existing users with the default role:
+Example:
 
-```javascript
-db.users.updateMany(
-  { role: { $exists: false } },
-  { $set: { role: "user" } }
-)
+```json
+{
+  "success": false,
+  "message": "Invalid product configuration",
+  "errors": {
+    "fieldName": "Validation message"
+  }
+}
 ```
 
-3. Promote the first administrator:
+---
 
-```javascript
-db.users.updateOne(
-  { username: "admin@example.com" },
-  { $set: { role: "admin" } }
-)
+# Adding a New Product
+
+For a normal new product:
+
+```text
+1. Confirm frontend Product ID.
+
+2. Confirm frontend field keys.
+
+3. Create the Mongoose validation model.
+
+4. Match required/optional fields with frontend.
+
+5. Create the Express product route.
+
+6. Validate product data.
+
+7. Validate numRequested.
+
+8. Store validated data in configurationData.
+
+9. Create ProductConfiguration.
+
+10. Register the route in app.js.
+
+11. Add/verify the frontend API endpoint.
+
+12. Test the complete request.
 ```
 
-4. Use `POST /api/sessions` for both user and administrator login.
-5. Send the returned bearer token to all protected APIs.
+---
 
-## Security notes
+# Product Migration Checklist
 
-- Do not commit `.env` or `config/.env`.
-- Do not return password hashes, security PINs, reset codes, or session IDs in user-list APIs.
-- Administrator password resets revoke the affected user's sessions.
-- Production dashboard APIs must always use HTTPS.
+When migrating an old product:
+
+```text
+Check Product ID
+
+Check Request Body Key
+
+Check API Endpoint
+
+Check Frontend Field Keys
+
+Check Backend Model Keys
+
+Check Required Fields
+
+Check Optional Fields
+
+Check Dropdown Values
+
+Check "Other" Handling
+
+Check Image Metadata Fields
+
+Check Quantity
+
+Check Product Name
+
+Check Product Type
+
+Check app.js Route Registration
+
+Test Configuration Creation
+```
+
+Do not assume an old backend model matches the current frontend form.
+
+---
+
+# Security Notes
+
+Never commit:
+
+```text
+.env
+
+MongoDB credentials
+
+Session secrets
+
+Email API keys
+
+Object-storage access keys
+
+Object-storage secret keys
+
+Private certificates
+
+Passwords
+
+Production credentials
+```
+
+Use deployment/environment configuration for all secrets.
+
+Additional rules:
+
+- Do not return password hashes.
+- Do not return security PINs.
+- Do not return reset codes.
+- Do not expose session IDs unnecessarily.
+- Admin APIs must verify Admin authorization.
+- Private image URLs must be temporary.
+- Validate image ownership before signing.
+- Derive user ownership from authenticated sessions.
+- Production APIs should use HTTPS.
+
+A private Git repository does **not** replace proper secret management.
+
+---
+
+# Production
+
+Current production backend:
+
+```text
+https://configurator-67eol.sevalla.app
+```
+
+API root:
+
+```text
+https://configurator-67eol.sevalla.app/api
+```
+
+The hosting platform manages the production application process.
+
+Environment-specific credentials and database/storage configuration must
+remain outside the repository.
+
+---
+
+# Notes for Future Development
+
+Keep these rules in mind:
+
+- Product-specific models should validate product-specific data.
+- Use the common `ProductConfiguration` for the shared configuration lifecycle.
+- Keep frontend and backend field keys exactly aligned.
+- Keep required/optional validation synchronized.
+- Allow custom text when frontend `Other` replaces the dropdown value.
+- Do not invent separate `other...` fields unless frontend sends them.
+- Register every new product route in `app.js`.
+- Keep user ownership tied to the authenticated session.
+- Store customer image metadata, not image binaries, in MongoDB.
+- Never store local device image paths.
+- Never persist signed URLs.
+- Validate object ownership before generating signed URLs.
+- Keep Admin workflow timestamps separate from normal configuration dates.
+- Never commit production secrets.
+
+---
+
+# Migration Summary
+
+The backend was upgraded from the previous product-specific configuration
+approach to support the new reusable Mighty Lube Product Configurator.
+
+The main backend work includes:
+
+- Migrated product validation models
+- Migrated product API routes
+- Common `ProductConfiguration` persistence
+- Frontend/backend field alignment
+- Required and optional field validation
+- Custom `Other` value handling
+- Quantity validation
+- Cart integration
+- Draft integration
+- Submitted configuration support
+- Customer image upload API
+- Private object-storage integration
+- Permanent image metadata
+- Temporary signed image URLs
+- Image ownership validation
+- Updated Admin configuration APIs
+- Requested / Pending / Done Admin workflow
+- Admin workflow timestamps
+- Pending-duration tracking
+- Admin customer-image access
+- Existing authentication and user-management integration
+
+The main backend design principle is:
+
+> **Product-specific models validate the product data, while the common
+> ProductConfiguration structure manages the shared configuration
+> lifecycle and persistence.**
