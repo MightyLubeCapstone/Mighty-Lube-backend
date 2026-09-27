@@ -12,29 +12,11 @@ const PFO_CGS_FR314Schema = new mongoose.Schema(
       required: true,
     },
 
+    // Supports custom value when "Other" is selected.
     wheelManufacturer: {
       type: String,
-      enum: [
-        "Green Line",
-        "Frost",
-        "M&M",
-        "Stork",
-        "Meyn",
-        "Linco",
-        "DC",
-        "Merel",
-        "D&F",
-        "Other",
-      ],
-      required: true,
-    },
-
-    otherWheelManufacturer: {
-      type: String,
       trim: true,
-      required: function () {
-        return this.wheelManufacturer === "Other";
-      },
+      required: true,
     },
 
     conveyorLength: {
@@ -84,26 +66,11 @@ const PFO_CGS_FR314Schema = new mongoose.Schema(
       required: true,
     },
 
+    // Supports custom value when "Other" is selected.
     applicationEnvironment: {
       type: String,
-      enum: [
-        "Ambient",
-        "Caustic (i.e. Phosphate / E-Coat, etc.)",
-        "Oven",
-        "Wash Down",
-        "Intrinsic",
-        "Food Grade",
-        "Other",
-      ],
-      required: true,
-    },
-
-    otherApplicationEnvironment: {
-      type: String,
       trim: true,
-      required: function () {
-        return this.applicationEnvironment === "Other";
-      },
+      required: true,
     },
 
     surroundingTemperature: {
@@ -299,15 +266,13 @@ const PFO_CGS_FR314Schema = new mongoose.Schema(
     mightyLubeMonitoring: {
       type: String,
       enum: ["Yes", "No"],
+      required: true,
     },
 
+    // Supports custom value when "Other" is selected.
     preMountingRequirements: {
       type: String,
-      enum: [
-        "OPCO Truck",
-        "Customer Provided Track",
-        "Other",
-      ],
+      trim: true,
       required: true,
     },
 
@@ -320,6 +285,7 @@ const PFO_CGS_FR314Schema = new mongoose.Schema(
     otherControllerInfo: {
       type: String,
       trim: true,
+      default: "",
     },
 
     // ========================================================
@@ -398,7 +364,7 @@ const PFO_CGS_FR314Schema = new mongoose.Schema(
     technicianNote: {
       type: String,
       trim: true,
-      required: true,
+      default: "",
     },
   },
   {

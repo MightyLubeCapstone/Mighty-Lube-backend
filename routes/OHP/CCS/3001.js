@@ -19,15 +19,14 @@ const router = express.Router();
 // Actual storage:
 // product_configurations
 //
-// Add to Cart:
-// status = "cart"
-// isComplete = true
+// Frontend request key:
+// OH_CCS_3000Data
 // =========================================================
 
 router.post("/", authenticate, async (req, res) => {
   try {
     const {
-      OHP_001Data,
+      OH_CCS_3000Data,
       numRequested,
     } = req.body || {};
 
@@ -37,13 +36,13 @@ router.post("/", authenticate, async (req, res) => {
     // =====================================================
 
     if (
-      !OHP_001Data ||
-      typeof OHP_001Data !== "object" ||
-      Array.isArray(OHP_001Data)
+      !OH_CCS_3000Data ||
+      typeof OH_CCS_3000Data !== "object" ||
+      Array.isArray(OH_CCS_3000Data)
     ) {
       return res.status(400).json({
         success: false,
-        message: "OHP_001Data is required",
+        message: "OH_CCS_3000Data is required",
       });
     }
 
@@ -67,19 +66,10 @@ router.post("/", authenticate, async (req, res) => {
 
     // =====================================================
     // PRODUCT-SPECIFIC VALIDATION
-    //
-    // OHP_001Data and OHP_001 schema use the same
-    // flat field structure.
-    //
-    // Conditional "Other" fields are handled by the
-    // model's required functions.
-    //
-    // OHP_001 is validation-only.
-    // Do NOT call validation.save().
     // =====================================================
 
     const validation =
-      new OHP_001(OHP_001Data);
+      new OHP_001(OH_CCS_3000Data);
 
     await validation.validate();
 
@@ -150,13 +140,6 @@ router.post("/", authenticate, async (req, res) => {
 
     // =====================================================
     // SAVE INTO GENERIC COLLECTION
-    //
-    // OLD:
-    // req.user.cart.push(...)
-    // await req.user.save()
-    //
-    // NEW:
-    // only ProductConfiguration is persisted
     // =====================================================
 
     const savedConfiguration =

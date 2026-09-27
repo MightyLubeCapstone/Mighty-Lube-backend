@@ -1,322 +1,405 @@
 const mongoose = require("mongoose");
 
-const OHP_2100ISchema = new mongoose.Schema({
+// =========================================================
+// PRODUCT
+//
+// Product Name: 2100L Series Self-Contained I-Beam
+//               Conveyor Lubricators
+// Product ID: OHP_2100I
+// =========================================================
 
-  conveyorName: {
-    type: String,
-    required: false,
-    trim: true,
-  },
+const OHP_2100ISchema = new mongoose.Schema(
+  {
+    // =====================================================
+    // GENERAL INFORMATION
+    // =====================================================
 
-  conveyorChainSize: {
-    type: String,
-    enum: [
-      'X348 Chain (3")',
-      'X458 Chain (4")',
-      'X678 Chain (6")',
-      '3/8" Log Chain',
-      'Other',
-    ],
-    required: false,
-  },
-
-  otherConveyorChainSize: {
-    type: String,
-    required: function () {
-      return this.conveyorChainSize === "Other";
+    conveyorName: {
+      type: String,
+      required: true,
+      trim: true,
     },
-    trim: true,
-  },
 
-  chainManufacturer: {
-    type: String,
-    enum: [
-      "Other",
-    ],
-    required: false,
-  },
-
-  otherChainManufacturer: {
-    type: String,
-    required: function () {
-      return this.chainManufacturer === "Other";
+    // "Other" option exists.
+    // Custom string value is allowed.
+    conveyorChainSize: {
+      type: String,
+      required: true,
+      trim: true,
     },
-    trim: true,
+
+    // "Other" option exists.
+    // Custom string value is allowed.
+    chainManufacturer: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    conveyorLength: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    // Fixed dropdown - no "Other".
+    conveyorLengthUnit: {
+      type: String,
+      required: true,
+      enum: [
+        "Feet",
+        "Inches",
+        "m Meter",
+        "mm Millimeter",
+      ],
+    },
+
+    conveyorSpeed: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    // Fixed dropdown - no "Other".
+    conveyorSpeedUnit: {
+      type: String,
+      required: true,
+      enum: [
+        "Feet / minute",
+        "Meters / Minute",
+      ],
+    },
+
+    indexingOrVariableSpeedConditions: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    // Fixed dropdown - no "Other".
+    directionOfTravel: {
+      type: String,
+      required: true,
+      enum: [
+        "Right to Left",
+        "Left to Right",
+      ],
+    },
+
+    // "Other" option exists.
+    // Custom string value is allowed.
+    applicationEnvironment: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    surroundingTemperature: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    // Fixed dropdown - no "Other".
+    conveyorLoadedOrUnloaded: {
+      type: String,
+      required: true,
+      enum: [
+        "Loaded",
+        "Unloaded",
+      ],
+    },
+
+    // Fixed Yes / No dropdown.
+    conveyorMovement: {
+      type: String,
+      required: true,
+      enum: [
+        "Yes",
+        "No",
+      ],
+    },
+
+    // =====================================================
+    // CUSTOMER POWER UTILITIES
+    // =====================================================
+
+    operatingVoltageSinglePhase: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    controlVoltage: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    // =====================================================
+    // EXISTING MONITOR SYSTEMS
+    // =====================================================
+
+    // Fixed Yes / No dropdown.
+    connectingToExistingMonitoring: {
+      type: String,
+      required: true,
+      enum: [
+        "Yes",
+        "No",
+      ],
+    },
+
+    // Fixed Yes / No dropdown.
+    addNewMonitoringSystem: {
+      type: String,
+      required: true,
+      enum: [
+        "Yes",
+        "No",
+      ],
+    },
+
+    // =====================================================
+    // CONVEYOR SPECIFICATIONS
+    // =====================================================
+
+    // Fixed dropdown - no "Other".
+    wheelOpenType: {
+      type: String,
+      required: true,
+      enum: [
+        "Not Applicable",
+        "Open Inside",
+        "Open Outside",
+      ],
+    },
+
+    // Fixed dropdown - no "Other".
+    wheelClosedType: {
+      type: String,
+      required: true,
+      enum: [
+        "Extended",
+        "Flush",
+        "Recessed",
+      ],
+    },
+
+    // Fixed Yes / No dropdown.
+    powerChain: {
+      type: String,
+      required: true,
+      enum: [
+        "Yes",
+        "No",
+      ],
+    },
+
+    // Fixed Yes / No dropdown.
+    chainPins: {
+      type: String,
+      required: true,
+      enum: [
+        "Yes",
+        "No",
+      ],
+    },
+
+    // Fixed Yes / No dropdown.
+    catDriveStatus: {
+      type: String,
+      required: true,
+      enum: [
+        "Yes",
+        "No",
+      ],
+    },
+
+    caterpillarDriveQuantity: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    // Fixed Yes / No dropdown.
+    railLubeStatus: {
+      type: String,
+      required: true,
+      enum: [
+        "Yes",
+        "No",
+      ],
+    },
+
+    // Fixed Yes / No dropdown.
+    externalLubeStatus: {
+      type: String,
+      required: true,
+      enum: [
+        "Yes",
+        "No",
+      ],
+    },
+
+    lubeBrand: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    lubeType: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    lubeViscosity: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    // Fixed Yes / No dropdown.
+    lubricationSideChainViscosity: {
+      type: String,
+      required: true,
+      enum: [
+        "Yes",
+        "No",
+      ],
+    },
+
+    // IMPORTANT:
+    // Frontend key contains a space:
+    // key: 'lubricationSideTo Chain'
+    //
+    // Keeping exact frontend key so request data is not lost.
+    "lubricationSideTo Chain": {
+      type: String,
+      required: true,
+      enum: [
+        "Yes",
+        "No",
+      ],
+    },
+
+    // Fixed Yes / No dropdown.
+    cleanChain: {
+      type: String,
+      required: true,
+      enum: [
+        "Yes",
+        "No",
+      ],
+    },
+
+    // =====================================================
+    // WIRE
+    // =====================================================
+
+    // Fixed dropdown - no "Other".
+    wireMeasurementUnit: {
+      type: String,
+      required: true,
+      enum: [
+        "Feet",
+        "Inches",
+        "m Meter",
+        "mm Millimeter",
+      ],
+    },
+
+    twoConductor: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    fourConductor: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    sevenConductor: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    twelveConductor: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    junctionBoxQuantity: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    // =====================================================
+    // OVERHEAD POWER RAIL: MEASUREMENTS
+    // =====================================================
+
+    // Fixed dropdown - no "Other".
+    measurementUnit: {
+      type: String,
+      required: true,
+      enum: [
+        "Feet",
+        "Inches",
+        "m Meter",
+        "mm Millimeter",
+      ],
+    },
+
+    overheadPowerMonoRailPowerTrolleyWheelB: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    overheadPowerMonoRailPowerRailG: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    overheadPowerMonoRailPowerRailH: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    // =====================================================
+    // TECHNICIAN NOTE
+    //
+    // Frontend required: false
+    // =====================================================
+
+    technicianNote: {
+      type: String,
+      default: "",
+      trim: true,
+    },
   },
+  {
+    timestamps: true,
+  }
+);
 
-  conveyorLength: {
-    type: String,
-    required: false,
-    trim: true,
-  },
+// =========================================================
+// MODEL
+// =========================================================
 
-  conveyorLengthUnit: {
-    type: String,
-    enum: [
-      "Feet",
-    ],
-    required: false,
-  },
+const OHP_2100I =
+  mongoose.models.OHP_2100I ||
+  mongoose.model(
+    "OHP_2100I",
+    OHP_2100ISchema
+  );
 
-  conveyorSpeed: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-  conveyorSpeedUnit: {
-    type: String,
-    enum: [
-      "Feet / minute",
-    ],
-    required: false,
-  },
-
-  indexingOrVariableSpeedConditions: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-  directionOfTravel: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-  applicationEnvironment: {
-    type: String,
-    enum: [
-      "Ambient",
-      "Caustic (i.e. Phosphate / E-Coat, etc.)",
-      "Oven",
-      "Wash Down",
-      "Intrinsic",
-      "Food Grade",
-      "Other",
-    ],
-    required: true,
-  },
-
-  surroundingTemperature: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-  conveyorLoadedOrUnloaded: {
-    type: String,
-    enum: [
-      "Yes",
-      "No",
-    ],
-    required: true,
-  },
-
-  conveyorMovement: {
-    type: String,
-    enum: [
-      "Yes",
-      "No",
-    ],
-    required: true,
-  },
-
-  operatingVoltageSinglePhase: {
-    type: String,
-    required: true,
-    trim: true,
-  },
-
-  controlVoltage: {
-    type: String,
-    required: true,
-    trim: true,
-  },
-
-  connectingToExistingMonitoring: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-  addNewMonitoringSystem: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-  wheelOpenRaceStyle: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-  wheelSealedStyle: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-  powerChain: {
-    type: String,
-    enum: [
-      "Yes",
-      "No",
-    ],
-    required: false,
-  },
-
-  chainPins: {
-    type: String,
-    enum: [
-      "Yes",
-      "No",
-    ],
-    required: false,
-  },
-
-  caterpillarDrive: {
-    type: String,
-    enum: [
-      "Yes",
-      "No",
-    ],
-    required: false,
-  },
-
-  caterpillarDriveQuantity: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-  railLubrication: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-  externalLubrication: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-  currentLubricationEquipmentBrand: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-  currentLubricantType: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-  currentLubricantViscosityGrade: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-  lubricationFromSideOfChain: {
-    type: String,
-    enum: [
-      "Yes",
-      "No",
-    ],
-    required: false,
-  },
-
-  lubricationFromTopOfChain: {
-    type: String,
-    enum: [
-      "Yes",
-      "No",
-    ],
-    required: false,
-  },
-
-  conveyorChainClean: {
-    type: String,
-    enum: [
-      "Yes",
-      "No",
-    ],
-    required: false,
-  },
-
-  wireMeasurementUnit: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-  twoConductor: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-  fourConductor: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-  sevenConductor: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-  twelveConductor: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-  junctionBoxQuantity: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-  measurementUnit: {
-    type: String,
-    enum: [
-      "Feet",
-    ],
-    required: false,
-  },
-
-  overheadPowerMonoRailPowerTrolleyWheelB: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-  overheadPowerMonoRailPowerRailG: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-  overheadPowerMonoRailPowerRailH: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-  technicianNote: {
-    type: String,
-    required: true,
-    trim: true,
-  },
-
-});
-
-const OHP_2100I = mongoose.model("OHP_2100I", OHP_2100ISchema);
-module.exports = OHP_2100I
+module.exports = OHP_2100I;

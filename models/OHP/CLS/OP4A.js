@@ -1,325 +1,387 @@
 const mongoose = require("mongoose");
 
-const OHP_OP4ASchema = new mongoose.Schema({
-  // ============================================================
-  // GENERAL INFORMATION
-  // ============================================================
+const OHP_OP4ASchema = new mongoose.Schema(
+  {
+    // ============================================================
+    // GENERAL INFORMATION
+    // ============================================================
 
-  conveyorName: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-  conveyorChainSize: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-  otherConveyorChainSize: {
-    type: String,
-    required: function () {
-      return this.conveyorChainSize === "Other";
+    conveyorName: {
+      type: String,
+      required: true,
+      trim: true,
     },
-    trim: true,
-  },
 
-  chainManufacturer: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-  otherChainManufacturer: {
-    type: String,
-    required: function () {
-      return this.chainManufacturer === "Other";
+    // "Other" exists -> custom value allowed.
+    conveyorChainSize: {
+      type: String,
+      required: true,
+      trim: true,
     },
-    trim: true,
-  },
 
-  conveyorLength: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-  conveyorLengthUnit: {
-    type: String,
-    required: false,
-    enum: ["Feet"],
-  },
-
-  conveyorSpeed: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-  conveyorSpeedUnit: {
-    type: String,
-    required: false,
-    enum: ["Feet"],
-  },
-
-  indexingOrVariableSpeedConditions: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-  directionOfTravel: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-  applicationEnvironment: {
-    type: String,
-    enum: [
-      "Ambient",
-      "Caustic (i.e. Phosphate / E-Coat, etc.)",
-      "Oven",
-      "Wash Down",
-      "Intrinsic",
-      "Food Grade",
-      "Other",
-    ],
-    required: true,
-  },
-
-  otherApplicationEnvironment: {
-    type: String,
-    required: function () {
-      return this.applicationEnvironment === "Other";
+    // "Other" exists -> custom value allowed.
+    chainManufacturer: {
+      type: String,
+      required: true,
+      trim: true,
     },
-    trim: true,
+
+    conveyorLength: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    conveyorLengthUnit: {
+      type: String,
+      required: true,
+      enum: [
+        "Feet",
+        "Inches",
+        "Meter",
+        "Millimeter",
+      ],
+    },
+
+    conveyorSpeed: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    conveyorSpeedUnit: {
+      type: String,
+      required: true,
+      enum: [
+        "Feet",
+        "Inches",
+        "m Meter",
+        "mm Millimeter",
+      ],
+    },
+
+    indexingOrVariableSpeedConditions: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    // Exact frontend key.
+    travelDirection: {
+      type: String,
+      required: true,
+      enum: [
+        "Right to Left",
+        "Left to Right",
+      ],
+    },
+
+    // Exact frontend key.
+    // "Other" exists -> custom value allowed.
+    appEnviroment: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    // Exact frontend key.
+    surroundingTemp: {
+      type: String,
+      required: true,
+      enum: [
+        "Yes",
+        "No",
+      ],
+    },
+
+    conveyorLoadedOrUnloaded: {
+      type: String,
+      required: true,
+      enum: [
+        "Yes",
+        "No",
+      ],
+    },
+
+    conveyorMovement: {
+      type: String,
+      required: true,
+      enum: [
+        "Yes",
+        "No",
+      ],
+    },
+
+    // ============================================================
+    // CUSTOMER POWER UTILITIES
+    // ============================================================
+
+    controlVoltage: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    compressedAirSupply: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    compressedAirSupplyUnit: {
+      type: String,
+      required: true,
+      enum: [
+        "PSI",
+        "KPI",
+        "Bar",
+      ],
+    },
+
+    // ============================================================
+    // MONITORING SYSTEM
+    // ============================================================
+
+    connectingToExistingMonitoring: {
+      type: String,
+      required: true,
+      enum: [
+        "Yes",
+        "No",
+      ],
+    },
+
+    addNewMonitoringSystem: {
+      type: String,
+      required: true,
+      enum: [
+        "Yes",
+        "No",
+      ],
+    },
+
+    // ============================================================
+    // CONVEYOR SPECIFICATIONS
+    // ============================================================
+
+    railLubrication: {
+      type: String,
+      required: true,
+      enum: [
+        "Yes",
+        "No",
+      ],
+    },
+
+    currentLubricationEquipmentBrand: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    currentLubricantType: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    currentLubricantViscosityGrade: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    lubricationFromSideOfChain: {
+      type: String,
+      required: true,
+      enum: [
+        "Yes",
+        "No",
+      ],
+    },
+
+    lubricationFromTopOfChain: {
+      type: String,
+      required: true,
+      enum: [
+        "Yes",
+        "No",
+      ],
+    },
+
+    optionalFiveGallonReservoir: {
+      type: String,
+      required: true,
+      enum: [
+        "Yes",
+        "No",
+      ],
+    },
+
+    conveyorChainClean: {
+      type: String,
+      required: true,
+      enum: [
+        "Yes",
+        "No",
+      ],
+    },
+
+    // ============================================================
+    // CONTROLLER
+    // ============================================================
+
+    chainMasterController: {
+      type: String,
+      required: true,
+      enum: [
+        "Yes",
+        "No",
+      ],
+    },
+
+    controlsOtherUnits: {
+      type: String,
+      required: true,
+      enum: [
+        "Yes",
+        "No",
+      ],
+    },
+
+    timer: {
+      type: String,
+      required: true,
+      enum: [
+        "Not Required",
+        "12 Hour",
+        "1000 Hour",
+      ],
+    },
+
+    electricOnOff: {
+      type: String,
+      required: true,
+      enum: [
+        "On",
+        "Off",
+      ],
+    },
+
+    pneumaticOnOff: {
+      type: String,
+      required: true,
+      enum: [
+        "On",
+        "Off",
+      ],
+    },
+
+    mightyLubeMonitoring: {
+      type: String,
+      required: true,
+      enum: [
+        "Yes",
+        "No",
+      ],
+    },
+
+    preMountingRequirements: {
+      type: String,
+      required: true,
+      enum: [
+        "Yes",
+        "No",
+      ],
+    },
+
+    plcConnection: {
+      type: String,
+      required: true,
+      enum: [
+        "Yes",
+        "No",
+      ],
+    },
+
+    // Frontend does NOT mark these as required.
+    otherControllerDescribe: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    controllerSpecialOptions: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    controllerPleaseSpecify: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    // ============================================================
+    // OVERHEAD POWER RAIL: MEASUREMENTS
+    // ============================================================
+
+    measurementUnit: {
+      type: String,
+      required: true,
+      enum: [
+        "Feet",
+        "Inches",
+        "Meter",
+        "Millimeter",
+      ],
+    },
+
+    // Frontend does not mark these measurement fields required.
+    chainDropA: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    overheadPowerMonoRailPowerRailG: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    overheadPowerMonoRailPowerRailH: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    // Frontend has options: [] and does not mark it required.
+    measurementDropdown: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    // ============================================================
+    // TECHNICIAN NOTE
+    // ============================================================
+
+    technicianNote: {
+      type: String,
+      required: true,
+      trim: true,
+    },
   },
+  {
+    timestamps: true,
+  }
+);
 
-  surroundingTemperatureOutsideRange: {
-    type: String,
-    required: false,
-    enum: ["No"],
-  },
+// Existing Mongo model mapping preserved.
+const OHP_OP4A =
+  mongoose.models.tblOHP_OP4A ||
+  mongoose.model("tblOHP_OP4A", OHP_OP4ASchema);
 
-  conveyorLoadedOrUnloaded: {
-    type: String,
-    required: true,
-    enum: ["Loaded"],
-  },
-
-  conveyorMovement: {
-    type: String,
-    required: true,
-    enum: ["No"],
-  },
-
-  // ============================================================
-  // CUSTOMER POWER UTILITIES
-  // ============================================================
-
-  controlVoltage: {
-    type: String,
-    required: true,
-    trim: true,
-  },
-
-  compressedAirSupply: {
-    type: String,
-    required: true,
-    trim: true,
-  },
-
-  compressedAirSupplyUnit: {
-    type: String,
-    required: false,
-    enum: ["PSI"],
-  },
-
-  // ============================================================
-  // MONITORING SYSTEM
-  // ============================================================
-
-  connectingToExistingMonitoring: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-  addNewMonitoringSystem: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-  // ============================================================
-  // CONVEYOR SPECIFICATIONS
-  // ============================================================
-
-  railLubrication: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-  currentLubricationEquipmentBrand: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-  currentLubricantType: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-  currentLubricantViscosityGrade: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-  lubricationFromSideOfChain: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-  lubricationFromTopOfChain: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-  optionalFiveGallonReservoir: {
-    type: String,
-    required: false,
-    enum: ["No"],
-  },
-
-  conveyorChainClean: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-  // ============================================================
-  // CONTROLLER
-  // ============================================================
-
-  chainMasterController: {
-    type: String,
-    required: false,
-    enum: ["Yes", "No"],
-  },
-
-  controlsOtherUnits: {
-    type: String,
-    required: false,
-    enum: ["Yes", "No"],
-  },
-
-  timer: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-  electricOnOff: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-  pneumaticOnOff: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-  mightyLubeMonitoring: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-  preMountingRequirements: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-  plcConnection: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-  otherControllerDescribe: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-  controllerSpecialOptions: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-  controllerPleaseSpecify: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-  // ============================================================
-  // OVERHEAD POWER RAIL: MEASUREMENTS
-  // ============================================================
-
-  measurementUnit: {
-    type: String,
-    required: false,
-    enum: ["Feet"],
-  },
-
-  chainDropA: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-  overheadPowerMonoRailPowerRailG: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-  overheadPowerMonoRailPowerRailH: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-  measurementDropdown: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-  // ============================================================
-  // TECHNICIAN NOTE
-  // ============================================================
-
-  technicianNote: {
-    type: String,
-    required: true,
-    trim: true,
-  },
-});
-
-const OHP_OP4A = mongoose.model("tblOHP_OP4A", OHP_OP4ASchema);
-
-module.exports = OHP_OP4A
+module.exports = OHP_OP4A;

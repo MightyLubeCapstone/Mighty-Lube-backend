@@ -1,7 +1,7 @@
 const express = require("express");
 
 const { authenticate } = require("../../sessions");
-const OH_CCS_OP8 = require("../models/OH_CCS_OP8");
+const OH_CCS_OP8 = require("../../../models/OHP/CCS/OP8");
 const ProductConfiguration = require("../../../models/product_configuration");
 
 const router = express.Router();

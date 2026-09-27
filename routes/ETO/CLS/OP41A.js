@@ -1,13 +1,13 @@
 const express = require("express");
 
 const { authenticate } = require("../../sessions");
-const ETI_OP41A = require("../../../models/ETO/CLS/OP41A");
+const ETO_OP41A = require("../../../models/ETO/CLS/OP41A");
 const ProductConfiguration = require("../../../models/product_configuration");
 
 const router = express.Router();
 
 // =========================================================
-// POST /api/eti_op41a
+// POST /api/eto_op41a
 //
 // Product:
 // OP-41A Conveyor Lubricators
@@ -15,7 +15,7 @@ const router = express.Router();
 // Supports:
 // Current reusable Flutter flat payload
 //
-// ETI_OP41A model is used ONLY for validation.
+// ETO_OP41A model is used ONLY for validation.
 //
 // Actual storage:
 // product_configurations
@@ -28,7 +28,7 @@ const router = express.Router();
 router.post("/", authenticate, async (req, res) => {
   try {
     const {
-      ETI_OP41AData,
+      ETO_OP41AData,
       numRequested,
     } = req.body || {};
 
@@ -37,13 +37,13 @@ router.post("/", authenticate, async (req, res) => {
     // =====================================================
 
     if (
-      !ETI_OP41AData ||
-      typeof ETI_OP41AData !== "object" ||
-      Array.isArray(ETI_OP41AData)
+      !ETO_OP41AData ||
+      typeof ETO_OP41AData !== "object" ||
+      Array.isArray(ETO_OP41AData)
     ) {
       return res.status(400).json({
         success: false,
-        message: "ETI_OP41AData is required",
+        message: "ETO_OP41AData is required",
       });
     }
 
@@ -59,12 +59,12 @@ router.post("/", authenticate, async (req, res) => {
     // =====================================================
     // PRODUCT-SPECIFIC VALIDATION
     //
-    // technicianNote is preserved through the ETI_OP41A
+    // technicianNote is preserved through the ETO_OP41A
     // schema and saved inside configurationData.
     // =====================================================
 
-    const validation = new ETI_OP41A({
-      ...ETI_OP41AData,
+    const validation = new ETO_OP41A({
+      ...ETO_OP41AData,
     });
 
     await validation.validate();
@@ -101,7 +101,7 @@ router.post("/", authenticate, async (req, res) => {
         "OP-41A",
 
       productType:
-        "ETI_OP41A",
+        "ETO_OP41A",
 
       productName:
         "OP-41A Conveyor Lubricators",
@@ -135,7 +135,7 @@ router.post("/", authenticate, async (req, res) => {
       success: true,
 
       message:
-        "ETI_OP41A configuration added to cart successfully",
+        "ETO_OP41A configuration added to cart successfully",
 
       configurationID:
         savedConfiguration.configurationID,
@@ -165,7 +165,7 @@ router.post("/", authenticate, async (req, res) => {
     });
   } catch (error) {
     console.error(
-      "ETI_OP41A add configuration error:",
+      "ETO_OP41A add configuration error:",
       error
     );
 
@@ -185,7 +185,7 @@ router.post("/", authenticate, async (req, res) => {
         success: false,
 
         message:
-          "Invalid ETI_OP41A configuration",
+          "Invalid ETO_OP41A configuration",
 
         errors,
       });
@@ -199,7 +199,7 @@ router.post("/", authenticate, async (req, res) => {
       success: false,
 
       message:
-        "Failed to add ETI_OP41A configuration",
+        "Failed to add ETO_OP41A configuration",
     });
   }
 });

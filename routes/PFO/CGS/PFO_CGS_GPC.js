@@ -1,10 +1,8 @@
 const express = require("express");
 
 const { authenticate } = require("../../sessions");
-const PFO_CGS_GPC =
-  require("../../../models/PFO/CGS/PFO_CGS_GPC");
-const ProductConfiguration =
-  require("../../../models/product_configuration");
+const PFO_CGS_GPC = require("../../../models/PFO/CGS/PFO_CGS_GPC");
+const ProductConfiguration = require("../../../models/product_configuration");
 
 const router = express.Router();
 

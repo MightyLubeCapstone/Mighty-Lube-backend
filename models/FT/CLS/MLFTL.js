@@ -1,328 +1,453 @@
 const mongoose = require("mongoose");
-const templateA = require("../../templateA.js");
-const templateE = require("../../templateE.js");
 
-const FT_FTL_Schema = new mongoose.Schema({
-  conveyorName: {
-    type: String,
-    required: true,
-  },
-  chainSize: {
-    type: Number,
-    enum: [1, 2, 3, 4, 5],
-    required: true,
-  },
+const FT_MLCEL_Schema = new mongoose.Schema(
+  {
+    // ========================================================
+    // GENERAL INFORMATION
+    // ========================================================
 
-  otherChainSize: {
-    type: String,
-    required: function () {
-      return this.chainSize === 5;
+    conveyorName: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    chainSize: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    otherChainSize: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    chainManufacturer: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    otherChainManufacturer: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    conveyorLength: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    conveyorLengthUnit: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    conveyorSpeed: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    conveyorSpeedUnit: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    indexingVariableSpeedConditions: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    travelDirection: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    applicationEnvironment: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    otherApplicationEnvironment: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    surroundingTemperature: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    conveyorLoadedStatus: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    conveyorSwingStatus: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    conveyorStrandType: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    plantLayoutAvailable: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    plantLayoutFile: {
+      type: mongoose.Schema.Types.Mixed,
+      default: null,
+    },
+
+    chainPhotosAvailable: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    chainPhotosFile: {
+      type: mongoose.Schema.Types.Mixed,
+      default: null,
+    },
+
+    // ========================================================
+    // CUSTOMER POWER UTILITIES
+    // ========================================================
+
+    operatingVoltage: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    controlVoltage: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    // ========================================================
+    // MONITORING SYSTEM
+    // ========================================================
+
+    existingMonitoring: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    newMonitoringSystem: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    // ========================================================
+    // CONVEYOR SPECIFICATIONS
+    // ========================================================
+
+    wheelOpenRaceStyle: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    wheelSealedStyle: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    openInsideShieldedOutside: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    powerChain: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    chainPins: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    sliderPlates: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    outboardWheels: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    caterpillarDrive: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    caterpillarDriveQuantity: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    railLubrication: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    externalLubrication: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    currentLubricationEquipmentBrand: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    currentLubricantType: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    currentLubricantViscosityGrade: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    reservoirSize: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    reservoirSizeQuantity: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    conveyorChainClean: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    // ========================================================
+    // CONTROLLER
+    // ========================================================
+
+    mightyLubeMonitoring: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    ctrController: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    plcConnection: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    monitoringController: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    controllerOtherDescribe: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    specialControllerOptions: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    controllerPleaseSpecify: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    // ========================================================
+    // FLAT TOP MEASUREMENTS
+    // ========================================================
+
+    ftUnitType: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    ftTopG: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    ftTopH: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    ftTopA1: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    ftTopB1: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    ftTopH1: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    ftTopJ1: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    ftTopL1: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    ftTopM1: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    ftTopN1: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    ftTopP1: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    ftTopR1: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    // ========================================================
+    // WIRE
+    // ========================================================
+
+    wireMeasurementUnit: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    wire2Conductor: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    wire4Conductor: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    wire7Conductor: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    wire12Conductor: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    junctionBoxQuantities: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    // ========================================================
+    // TECHNICIAN NOTE
+    // ========================================================
+
+    technicianNote: {
+      type: String,
+      default: "",
+      trim: true,
     },
   },
-  industrialChainManufacturer: {
-    type: Number,
-    enum: [1, 2, 3, 4, 5, 6, 7, 8, 9],
-    required: true,
-  },
-  otherChainManufacturer: {
-    type: String,
-    required: function () {
-      return this.industrialChainManufacturer === 9;
-    },
-  },
+  {
+    timestamps: true,
+  }
+);
 
-  wheelManufacturer: {
-    type: Number,
-    enum: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-    required: true,
-  },
-  otherWheelManufacturer: {
-    type: String,
-    required: function () {
-      return this.wheelManufacturer === 10;
-    },
-  },
-  conveyorLength: {
-    type: Number,
-    required: true,
-  },
-  conveyorLengthUnit: {
-    type: Number,
-    enum: [1, 2, 3, 4],
-    required: true,
-  },
-  conveyorSpeed: {
-    type: Number,
-    required: true,
-  },
-  speedUnit: {
-    type: Number,
-    enum: [1, 2],
-    required: true,
-  },
-  conveyorIndex: {
-    type: Number,
-    required: false,
-  },
-  travelDirection: {
-    type: Number,
-    enum: [1, 2],
-    required: false,
-  },
-  appEnviroment: {
-    type: Number,
-    enum: [1, 2, 3, 4, 5, 6, 7],
-    required: true,
-  },
+const FT_MLCEL = mongoose.model(
+  "FT_MLCEL",
+  FT_MLCEL_Schema
+);
 
-  ovenStatus: {
-    type: Number,
-    enum: [1, 2],
-    required: function () {
-      return this.appEnviroment === 3;
-    },
-  },
-
-  ovenTemp: {
-    type: Number,
-    required: function () {
-      return this.appEnviroment === 3;
-    },
-  },
-
-  otherAppEnviroment: {
-    type: String,
-    required: function () {
-      return this.appEnviroment === 7;
-    },
-  },
-
-    strandStatus: {
-    type: Number,
-    enum: [1, 2],
-    required: true,
-  },
-
-  surroundingTemp: {
-    type: Number,
-    enum: [1, 2],
-    required: false,
-  },
-  conveyorLoaded: {
-    type: Number,
-    enum: [1, 2],
-    required: true,
-  },
-  conveyorSwing: {
-    type: Number,
-    enum: [1, 2],
-    required: false,
-  },
-  plantLayout: {
-    type: Number,
-    enum: [1, 2],
-    required: false,
-  },
-  requiredPics: {
-    type: Number,
-    enum: [1, 2],
-    required: false,
-  },
-  operatingVoltage: {
-    type: Number,
-    required: true,
-  },
-
-  // ✅ NEW OPTIONAL FIELD
-  technicianNote: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-  monitorData: templateA,
-  wheelOpenType: {
-    type: Number,
-    enum: [1, 2, 3],
-    required: true,
-  },
-  wheelClosedType: {
-    type: Number,
-    enum: [1, 2, 3],
-    required: false,
-  },
-  openStatus: {
-    type: Number,
-    enum: [1, 2],
-    required: true,
-  },
-
-  outBoardStatus: {
-    type: Number,
-    enum: [1, 2],
-    required: true,
-  },
-
-  catDriveStatus: {
-    type: Number,
-    enum: [1, 2],
-    required: true,
-  },
-
-  templateEData: templateE,
-
-  externalLubeStatus: {
-    type: Number,
-    enum: [1, 2],
-    required: false,
-  },
-  lubeBrand: {
-    type: String,
-    required: false,
-  },
-  lubeType: {
-    type: String,
-    required: false,
-  },
-  lubeViscosity: {
-    type: String,
-    required: false,
-  },
-
-  reservoirSize: {
-    type: String,
-    required: false,
-  },
-
-  reservoirSizeNum: {
-    type: Number,
-    required: false,
-  },
-
-  chainCleanStatus: {
-    type: Number,
-    enum: [1, 2],
-    required: false,
-  },
-
-  mightyLubeMonitoring: {
-    type: Number,
-    enum: [1, 2],
-    required: false,
-  },
-
-  ctrController: {
-    type: Number,
-    enum: [1, 2],
-    required: false,
-  },
-
-  plcConnection: {
-    type: Number,
-    enum: [1, 2],
-    required: false,
-  },
-
-  monitoringController: {
-    type: Number,
-    enum: [1, 2],
-    required: false,
-  },
-
-  otherControllerInfo: {
-    type: String,
-    required: false,
-  },
-
-  specialControllerOptions: {
-    type: Number,
-    enum: [1, 2, 3],
-    required: false,
-  },
-
-  measurementUnitType: {
-    type: Number,
-    enum: [1, 2, 3, 4],
-    required: false,
-  },
-  powerRailG: {
-    type: Number,
-    required: false,
-  },
-  powerRailH: {
-    type: Number,
-    required: false,
-  },
-  powerRailA1: {
-    type: Number,
-    required: false,
-  },
-  powerRailB1: {
-    type: Number,
-    required: false,
-  },
-  powerRailH1: {
-    type: Number,
-    required: false,
-  },
-
-  powerRailJ1: {
-    type: Number,
-    required: false,
-  },
-  powerRailL1: {
-    type: Number,
-    required: false,
-  },
-  powerRailM1: {
-    type: Number,
-    required: false,
-  },
-  powerRailN1: {
-    type: Number,
-    required: false,
-  },
-  powerRailP1: {
-    type: Number,
-    required: false,
-  },
-  powerRailR1: {
-    type: Number,
-    required: false,
-  },
-
-  wireMeasurementUnit: {
-    type: Number,
-    enum: [1, 2, 3, 4],
-    required: false,
-  },
-
-  conductor2: {
-    type: Number,
-    required: false,
-  },
-
-  conductor4: {
-    type: Number,
-    required: false,
-  },
-
-  conductor7: {
-    type: Number,
-    required: false,
-  },
-
-  conductor12: {
-    type: Number,
-    required: false,
-  },
-
-  junctionBoxNum: {
-    type: Number,
-    required: false,
-  },
-});
-
-const FT_FTL =
-  mongoose.models.FT_FTL || mongoose.model("FT_FTL", FT_FTL_Schema);
-module.exports = FT_FTL;
+module.exports = FT_MLCEL;

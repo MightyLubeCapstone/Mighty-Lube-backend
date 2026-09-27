@@ -1,8 +1,8 @@
 const express = require("express");
 
 const { authenticate } = require("../../sessions");
-const PFO_CLS_9000LECCCL =
-  require("../../../models/PFO/CLS/PFO_CLS_9000LECCCL");
+const PFO_CLS_9000LIBEAM =
+  require("../../../models/PFO/CLS/9000LIBEAM");
 const ProductConfiguration =
   require("../../../models/product_configuration");
 
@@ -10,13 +10,16 @@ const router = express.Router();
 
 
 // ============================================================
-// POST /api/pfo_cls_9000lecccl
+// POST /api/pfo_cls_9000lIbeam
 //
 // Product:
-// 9000L Series Central System Enclosed Track Conveyor Lubricators
+// 9000L Series Central Overhead I-Beam Conveyor Lubricators
 //
 // Product ID:
-// PFO_CLS_9000LECCCL
+// PFO_CLS_9000LIBEAM
+//
+// Request Body:
+// PFO_CLS_9000LIBEAMData
 //
 // Product-specific model:
 // Validation only
@@ -28,7 +31,7 @@ const router = express.Router();
 router.post("/", authenticate, async (req, res) => {
   try {
     const {
-      PFO_CLS_9000LECCCLData,
+      PFO_CLS_9000LIBEAMData,
       numRequested,
     } = req.body || {};
 
@@ -38,13 +41,13 @@ router.post("/", authenticate, async (req, res) => {
     // ========================================================
 
     if (
-      !PFO_CLS_9000LECCCLData ||
-      typeof PFO_CLS_9000LECCCLData !== "object" ||
-      Array.isArray(PFO_CLS_9000LECCCLData)
+      !PFO_CLS_9000LIBEAMData ||
+      typeof PFO_CLS_9000LIBEAMData !== "object" ||
+      Array.isArray(PFO_CLS_9000LIBEAMData)
     ) {
       return res.status(400).json({
         success: false,
-        message: "PFO_CLS_9000LECCCLData is required",
+        message: "PFO_CLS_9000LIBEAMData is required",
       });
     }
 
@@ -71,9 +74,7 @@ router.post("/", authenticate, async (req, res) => {
     // ========================================================
 
     const validation =
-      new PFO_CLS_9000LECCCL(
-        PFO_CLS_9000LECCCLData
-      );
+      new PFO_CLS_9000LIBEAM(PFO_CLS_9000LIBEAMData);
 
     await validation.validate();
 
@@ -106,7 +107,7 @@ router.post("/", authenticate, async (req, res) => {
 
 
     // ========================================================
-    // CREATE GENERIC PRODUCT CONFIGURATION
+    // GENERIC PRODUCT CONFIGURATION
     // ========================================================
 
     const productConfiguration =
@@ -115,13 +116,13 @@ router.post("/", authenticate, async (req, res) => {
 
         configurationName:
           configurationData.conveyorName ||
-          "9000L Series Central System Enclosed Track Conveyor Lubricators",
+          "9000L Series Central Overhead I-Beam Conveyor Lubricators",
 
         productType:
-          "PFO_CLS_9000LECCCL",
+          "PFO_CLS_9000LIBEAM",
 
         productName:
-          "9000L Series Central System Enclosed Track Conveyor Lubricators",
+          "9000L Series Central Overhead I-Beam Conveyor Lubricators",
 
         status:
           "cart",
@@ -158,7 +159,7 @@ router.post("/", authenticate, async (req, res) => {
       success: true,
 
       message:
-        "PFO_CLS_9000LECCCL configuration added to cart successfully",
+        "PFO_CLS_9000LIBEAM configuration added to cart successfully",
 
       configurationID:
         savedConfiguration.configurationID,
@@ -184,12 +185,15 @@ router.post("/", authenticate, async (req, res) => {
 
         numRequested:
           savedConfiguration.numRequested,
+
+        configurationData:
+          savedConfiguration.configurationData,
       },
     });
 
   } catch (error) {
     console.error(
-      "PFO_CLS_9000LECCCL configuration error:",
+      "PFO_CLS_9000LIBEAM configuration error:",
       error
     );
 
@@ -209,7 +213,7 @@ router.post("/", authenticate, async (req, res) => {
       return res.status(422).json({
         success: false,
         message:
-          "Invalid PFO_CLS_9000LECCCL configuration",
+          "Invalid PFO_CLS_9000LIBEAM configuration",
         errors,
       });
     }
@@ -222,7 +226,7 @@ router.post("/", authenticate, async (req, res) => {
     return res.status(500).json({
       success: false,
       message:
-        "Failed to add PFO_CLS_9000LECCCL configuration",
+        "Failed to add PFO_CLS_9000LIBEAM configuration",
     });
   }
 });

@@ -1,7 +1,7 @@
 const express = require("express");
 
 const { authenticate } = require("../../sessions");
-const OH_CCS_CLEANING_BRUSH = require("../models/OH_CCS_CLEANING_BRUSH");
+const OH_CCS_CLEANING_BRUSH = require("../../../models/OHP/CCS/YCB");
 const ProductConfiguration = require("../../../models/product_configuration");
 
 const router = express.Router();

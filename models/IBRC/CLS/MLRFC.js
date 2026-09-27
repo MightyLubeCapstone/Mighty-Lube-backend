@@ -24,7 +24,7 @@ const IBR_RFC_Schema = new mongoose.Schema(
       trim: true,
     },
 
-    chainManufacturer: {
+    industrialChainManufacturer: {
       type: String,
       default: "",
       trim: true,
@@ -60,7 +60,7 @@ const IBR_RFC_Schema = new mongoose.Schema(
       trim: true,
     },
 
-    indexingVariableSpeedConditions: {
+    conveyorIndex: {
       type: String,
       default: "",
       trim: true,
@@ -72,37 +72,49 @@ const IBR_RFC_Schema = new mongoose.Schema(
       trim: true,
     },
 
-    applicationEnvironment: {
+    appEnviroment: {
       type: String,
       required: true,
       trim: true,
     },
 
-    otherApplicationEnvironment: {
+    otherAppEnviroment: {
       type: String,
       default: "",
       trim: true,
     },
 
-    surroundingTemperature: {
+    surroundingTemp: {
       type: String,
       default: "",
       trim: true,
     },
 
-    conveyorLoadedStatus: {
+    conveyorLoaded: {
       type: String,
       required: true,
       trim: true,
     },
 
-    conveyorSwingStatus: {
+    conveyorSwing: {
       type: String,
       required: true,
       trim: true,
     },
 
     conveyorStrand: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    plantLayout: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    requiredPics: {
       type: String,
       default: "",
       trim: true,
@@ -296,7 +308,7 @@ const IBR_RFC_Schema = new mongoose.Schema(
       trim: true,
     },
 
-    inBoardRollerChainOuterLinkOffsetF1: {
+    inBoardRollerChainLinkF1: {
       type: String,
       default: "",
       trim: true,
@@ -319,6 +331,9 @@ const IBR_RFC_Schema = new mongoose.Schema(
 
 const IBR_RFC =
   mongoose.models.IBR_RFC ||
-  mongoose.model("IBR_RFC", IBR_RFC_Schema);
+  mongoose.model(
+    "IBR_RFC",
+    IBR_RFC_Schema
+  );
 
-module.exports = IBR_RFC
+module.exports = IBR_RFC;

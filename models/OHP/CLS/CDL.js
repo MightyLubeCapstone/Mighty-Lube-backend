@@ -1,203 +1,184 @@
 const mongoose = require("mongoose");
 
-const OHP_CDLSchema = new mongoose.Schema({
+const OHP_CDLSchema = new mongoose.Schema(
+  {
+    // ============================================================
+    // GENERAL INFORMATION
+    // ============================================================
 
-  // ============================================================
-  // GENERAL INFORMATION
-  // ============================================================
-
-  conveyorName: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-  conveyorChainSize: {
-    type: String,
-    enum: [
-      'X348 Chain (3")',
-      'X458 Chain (4")',
-      'X678 Chain (6")',
-      '3/8" Log Chain',
-      'Other',
-    ],
-    required: false,
-  },
-
-  otherConveyorChainSize: {
-    type: String,
-    required: function () {
-      return this.conveyorChainSize === "Other";
+    conveyorName: {
+      type: String,
+      required: true,
+      trim: true,
     },
-    trim: true,
-  },
 
-  chainManufacturer: {
-    type: String,
-    enum: [
-      "Daifuku",
-      "Frost",
-      "NKC",
-      "Pacline",
-      "Rapid",
-      "WEBB",
-      "Webb-Stiles",
-      "Wilkie Brothers",
-      "Other",
-    ],
-    required: false,
-  },
-
-  otherChainManufacturer: {
-    type: String,
-    required: function () {
-      return this.chainManufacturer === "Other";
+    // "Other" option exists.
+    // Custom string value is allowed.
+    conveyorChainSize: {
+      type: String,
+      required: true,
+      trim: true,
     },
-    trim: true,
+
+    // "Other" option exists.
+    // Custom string value is allowed.
+    chainManufacturer: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    conveyorLength: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    // Fixed dropdown - no "Other".
+    conveyorLengthUnit: {
+      type: String,
+      required: true,
+      enum: [
+        "Feet",
+        "Inches",
+        "Meter",
+        "Millimeter",
+      ],
+    },
+
+    // "Other" option exists.
+    // Custom string value is allowed.
+    applicationEnvironment: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    // ============================================================
+    // CUSTOMER POWER UTILITIES
+    // ============================================================
+
+    controlVoltage: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    // ============================================================
+    // CONVEYOR SPECIFICATIONS
+    // ============================================================
+
+    currentLubricationEquipmentBrand: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    currentLubricantType: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    currentLubricantViscosityGrade: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    lubricationFromSideOfChain: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    lubricationFromTopOfChain: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    // ============================================================
+    // CONTROLLER
+    // ============================================================
+
+    controllerSpecialOptions: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    // Frontend does not mark this as required.
+    controllerPleaseSpecify: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    // ============================================================
+    // WIRE
+    // ============================================================
+
+    // Exact frontend key is "measurementUnit".
+    measurementUnit: {
+      type: String,
+      required: true,
+      enum: [
+        "Feet",
+        "Inches",
+        "Meter",
+        "Millimeter",
+      ],
+    },
+
+    twoConductor: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    fourConductor: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    sevenConductor: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    twelveConductor: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    junctionBoxQuantities: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    // ============================================================
+    // TECHNICIAN NOTE
+    // ============================================================
+
+    technicianNote: {
+      type: String,
+      required: true,
+      trim: true,
+    },
   },
-
-  conveyorLength: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-  conveyorLengthUnit: {
-    type: String,
-    enum: [
-      "Feet",
-    ],
-    required: false,
-  },
-
-  // Website shows this as required dropdown,
-  // but exact options were not confirmed.
-  applicationEnvironment: {
-    type: String,
-    required: true,
-    trim: true,
-  },
-
-
-  // ============================================================
-  // CUSTOMER POWER UTILITIES
-  // ============================================================
-
-  controlVoltage: {
-    type: String,
-    required: true,
-    trim: true,
-  },
-
-
-  // ============================================================
-  // CONVEYOR SPECIFICATIONS
-  // ============================================================
-
-  currentLubricationEquipmentBrand: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-  currentLubricantType: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-  currentLubricantViscosityGrade: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-  lubricationFromSideOfChain: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-  lubricationFromTopOfChain: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-
-  // ============================================================
-  // CONTROLLER
-  // ============================================================
-
-  controllerSpecialOptions: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-  controllerPleaseSpecify: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-
-  // ============================================================
-  // WIRE
-  // ============================================================
-
-  wireMeasurementUnit: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-  twoConductor: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-  fourConductor: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-  sevenConductor: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-  twelveConductor: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-  junctionBoxQuantities: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-
-
-  // ============================================================
-  // TECHNICIAN NOTE
-  // Retained as part of current product workflow.
-  // ============================================================
-
-  technicianNote: {
-    type: String,
-    required: true,
-    trim: true,
-  },
-
-});
-
+  {
+    timestamps: true,
+  }
+);
 
 // Keep existing Mongo model / collection mapping unchanged.
-const OHP_CDL = mongoose.model("tblOHP_CDL", OHP_CDLSchema);
+const OHP_CDL =
+  mongoose.models.tblOHP_CDL ||
+  mongoose.model("tblOHP_CDL", OHP_CDLSchema);
 
-module.exports = OHP_CDL
+module.exports = OHP_CDL;

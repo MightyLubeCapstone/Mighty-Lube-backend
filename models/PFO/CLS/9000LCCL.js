@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const PFO_CLS_9000L_Schema = new mongoose.Schema(
+const PFO_9000LCCL_Schema = new mongoose.Schema(
   {
     // ========================================================
     // GENERAL INFORMATION
@@ -12,48 +12,18 @@ const PFO_CLS_9000L_Schema = new mongoose.Schema(
       required: true,
     },
 
+    // Supports custom "Other" value in same field
     conveyorChainSize: {
       type: String,
-      enum: [
-        'X348 Chain (3")',
-        'X458 Chain (4")',
-        'X678 Chain (6")',
-        '3/8" Log Chain',
-        "Other",
-      ],
+      trim: true,
       required: true,
     },
 
-    otherConveyorChainSize: {
-      type: String,
-      trim: true,
-      required: function () {
-        return this.conveyorChainSize === "Other";
-      },
-    },
-
+    // Supports custom "Other" value in same field
     chainManufacturer: {
       type: String,
-      enum: [
-        "Daifuku",
-        "Frost",
-        "NKC",
-        "Pacline",
-        "Rapid",
-        "WEBB",
-        "Webb-Stiles",
-        "Wilkie Brothers",
-        "Other",
-      ],
-      required: true,
-    },
-
-    otherChainManufacturer: {
-      type: String,
       trim: true,
-      required: function () {
-        return this.chainManufacturer === "Other";
-      },
+      required: true,
     },
 
     conveyorLength: {
@@ -103,51 +73,37 @@ const PFO_CLS_9000L_Schema = new mongoose.Schema(
       required: true,
     },
 
+    // Supports custom "Other" value in same field
     applicationEnvironment: {
       type: String,
-      enum: [
-        "Ambient",
-        "Caustic (i.e. Phosphate / E-Coat, etc.)",
-        "Oven",
-        "Wash Down",
-        "Intrinsic",
-        "Food Grade",
-        "Other",
-      ],
-      required: true,
-    },
-
-    otherApplicationEnvironment: {
-      type: String,
       trim: true,
-      required: function () {
-        return this.applicationEnvironment === "Other";
-      },
+      required: true,
     },
 
     surroundingTemperature: {
       type: String,
-      enum: [
-        "Yes",
-        "No",
-      ],
+      enum: ["Yes", "No"],
       required: true,
     },
 
     conveyorLoadedOrUnloaded: {
       type: String,
-      enum: [
-        "Loaded",
-        "Unloaded",
-      ],
+      enum: ["Loaded", "Unloaded"],
       required: true,
     },
 
     conveyorSwingStatus: {
       type: String,
+      enum: ["Yes", "No"],
+      required: true,
+    },
+
+    conveyorOrientation: {
+      type: String,
       enum: [
-        "Yes",
-        "No",
+        "Overhead",
+        "Inverted",
+        "Inverted/Inverted",
       ],
       required: true,
     },
@@ -169,25 +125,167 @@ const PFO_CLS_9000L_Schema = new mongoose.Schema(
     },
 
     // ========================================================
-    // MONITORING SYSTEM
+    // NEW MONITORING SYSTEM OR ADDING TO EXISTING MONITORING
     // ========================================================
 
     connectingToExistingMonitoring: {
       type: String,
-      enum: [
-        "Yes",
-        "No",
-      ],
+      enum: ["Yes", "No"],
       required: true,
     },
 
     addNewMonitoringSystem: {
       type: String,
-      enum: [
-        "Yes",
-        "No",
-      ],
+      enum: ["Yes", "No"],
       required: true,
+    },
+
+    addDcu: {
+      type: String,
+      enum: ["Yes", "No"],
+      required: true,
+    },
+
+    // Frontend shows this only when addDcu == "Yes".
+    // Backend conditionally requires it in the same case.
+    dcuQuantity: {
+      type: String,
+      trim: true,
+      required: function () {
+        return this.addDcu === "Yes";
+      },
+      default: "",
+    },
+
+    // ========================================================
+    // IT INFORMATION
+    // ========================================================
+
+    // IT INFORMATION - 1
+    // First IT group is required in the current frontend.
+
+    itName1: {
+      type: String,
+      trim: true,
+      required: true,
+    },
+
+    itIpAddress1: {
+      type: String,
+      trim: true,
+      required: true,
+    },
+
+    itGateway1: {
+      type: String,
+      trim: true,
+      required: true,
+    },
+
+    itSubnet1: {
+      type: String,
+      trim: true,
+      required: true,
+    },
+
+    itDns1: {
+      type: String,
+      trim: true,
+      required: true,
+    },
+
+    itSmtp1: {
+      type: String,
+      trim: true,
+      required: true,
+    },
+
+    // --------------------------------------------------------
+    // IT INFORMATION - 2
+    // Optional in current frontend
+    // --------------------------------------------------------
+
+    itName2: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+
+    itIpAddress2: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+
+    itGateway2: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+
+    itSubnet2: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+
+    itDns2: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+
+    itSmtp2: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+
+    // --------------------------------------------------------
+    // IT INFORMATION - 3
+    // Optional in current frontend
+    // --------------------------------------------------------
+
+    itName3: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+
+    itIpAddress3: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+
+    itGateway3: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+
+    itSubnet3: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+
+    itDns3: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+
+    itSmtp3: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+
+    itNotes: {
+      type: String,
+      trim: true,
+      default: "",
     },
 
     // ========================================================
@@ -216,28 +314,19 @@ const PFO_CLS_9000L_Schema = new mongoose.Schema(
 
     powerChain: {
       type: String,
-      enum: [
-        "Yes",
-        "No",
-      ],
+      enum: ["Yes", "No"],
       required: true,
     },
 
     chainPins: {
       type: String,
-      enum: [
-        "Yes",
-        "No",
-      ],
+      enum: ["Yes", "No"],
       required: true,
     },
 
     caterpillarDrive: {
       type: String,
-      enum: [
-        "Yes",
-        "No",
-      ],
+      enum: ["Yes", "No"],
       required: true,
     },
 
@@ -249,19 +338,13 @@ const PFO_CLS_9000L_Schema = new mongoose.Schema(
 
     railLubrication: {
       type: String,
-      enum: [
-        "Yes",
-        "No",
-      ],
+      enum: ["Yes", "No"],
       required: true,
     },
 
     externalLubrication: {
       type: String,
-      enum: [
-        "Yes",
-        "No",
-      ],
+      enum: ["Yes", "No"],
       required: true,
     },
 
@@ -285,19 +368,13 @@ const PFO_CLS_9000L_Schema = new mongoose.Schema(
 
     lubricationFromSideOfChain: {
       type: String,
-      enum: [
-        "Yes",
-        "No",
-      ],
+      enum: ["Yes", "No"],
       required: true,
     },
 
     lubricationFromTopOfChain: {
       type: String,
-      enum: [
-        "Yes",
-        "No",
-      ],
+      enum: ["Yes", "No"],
       required: true,
     },
 
@@ -318,10 +395,7 @@ const PFO_CLS_9000L_Schema = new mongoose.Schema(
 
     conveyorChainClean: {
       type: String,
-      enum: [
-        "Yes",
-        "No",
-      ],
+      enum: ["Yes", "No"],
       required: true,
     },
 
@@ -338,6 +412,7 @@ const PFO_CLS_9000L_Schema = new mongoose.Schema(
     controllerPleaseSpecify: {
       type: String,
       trim: true,
+      default: "",
     },
 
     // ========================================================
@@ -418,6 +493,12 @@ const PFO_CLS_9000L_Schema = new mongoose.Schema(
       required: true,
     },
 
+    invertedPowerAndFreeChainDropA: {
+      type: String,
+      trim: true,
+      required: true,
+    },
+
     invertedPowerTrolleyWheelB: {
       type: String,
       trim: true,
@@ -436,6 +517,30 @@ const PFO_CLS_9000L_Schema = new mongoose.Schema(
       required: true,
     },
 
+    invertedPowerAndFreeTrolleyPitchK2: {
+      type: String,
+      trim: true,
+      required: true,
+    },
+
+    invertedPowerAndFreeTrolleyPitchL2: {
+      type: String,
+      trim: true,
+      required: true,
+    },
+
+    invertedPowerAndFreeTrolleyPitchM2: {
+      type: String,
+      trim: true,
+      required: true,
+    },
+
+    invertedPowerAndFreeTrolleyPitchN2: {
+      type: String,
+      trim: true,
+      required: true,
+    },
+
     // ========================================================
     // TECHNICIAN NOTE
     // ========================================================
@@ -443,7 +548,7 @@ const PFO_CLS_9000L_Schema = new mongoose.Schema(
     technicianNote: {
       type: String,
       trim: true,
-      required: true,
+      default: "",
     },
   },
   {
@@ -451,11 +556,11 @@ const PFO_CLS_9000L_Schema = new mongoose.Schema(
   }
 );
 
-const PFO_CLS_9000L =
-  mongoose.models.PFO_CLS_9000L ||
+const PFO_9000LCCL =
+  mongoose.models.PFO_9000LCCL ||
   mongoose.model(
-    "PFO_CLS_9000L",
-    PFO_CLS_9000L_Schema
+    "PFO_9000LCCL",
+    PFO_9000LCCL_Schema
   );
 
-module.exports = PFO_CLS_9000L;
+module.exports = PFO_9000LCCL;

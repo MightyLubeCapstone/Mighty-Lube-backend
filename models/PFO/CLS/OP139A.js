@@ -1,31 +1,5 @@
 const mongoose = require("mongoose");
 
-
-// ============================================================
-// PFO - CONVEYOR LUBRICATION SYSTEMS
-// OP-139A
-//
-// Product ID:
-// PFO_CLS_OP139A
-//
-// PURPOSE OF THIS MODEL:
-//
-// This model is used ONLY for validating the product-specific
-// configuration submitted by the frontend.
-//
-// This collection is NOT used for actual persistence.
-//
-// After successful validation, the route converts the validated
-// document into a plain object and stores it inside the generic:
-//
-// ProductConfiguration
-//
-// collection as:
-//
-// configurationData
-// ============================================================
-
-
 const PFO_CLS_OP139A_Schema = new mongoose.Schema(
   {
     // ========================================================
@@ -38,66 +12,19 @@ const PFO_CLS_OP139A_Schema = new mongoose.Schema(
       required: true,
     },
 
-
-    // --------------------------------------------------------
-    // Conveyor Chain Size
-    // --------------------------------------------------------
-
+    // "Other" custom value is stored in the same frontend field
     conveyorChainSize: {
       type: String,
-      enum: [
-        'X348 Chain (3")',
-        'X458 Chain (4")',
-        'X678 Chain (6")',
-        '3/8" Log Chain',
-        "Other",
-      ],
+      trim: true,
       required: true,
     },
 
-    // Required only when Conveyor Chain Size = Other.
-    otherConveyorChainSize: {
-      type: String,
-      trim: true,
-      required: function () {
-        return this.conveyorChainSize === "Other";
-      },
-    },
-
-
-    // --------------------------------------------------------
-    // Chain Manufacturer
-    // --------------------------------------------------------
-
+    // "Other" custom value is stored in the same frontend field
     chainManufacturer: {
       type: String,
-      enum: [
-        "Daifuku",
-        "Frost",
-        "NKC",
-        "Pacline",
-        "Rapid",
-        "WEBB",
-        "Webb-Stiles",
-        "Wilkie Brothers",
-        "Other",
-      ],
+      trim: true,
       required: true,
     },
-
-    // Required only when Chain Manufacturer = Other.
-    otherChainManufacturer: {
-      type: String,
-      trim: true,
-      required: function () {
-        return this.chainManufacturer === "Other";
-      },
-    },
-
-
-    // --------------------------------------------------------
-    // Conveyor Length
-    // --------------------------------------------------------
 
     conveyorLength: {
       type: String,
@@ -115,11 +42,6 @@ const PFO_CLS_OP139A_Schema = new mongoose.Schema(
       ],
       required: true,
     },
-
-
-    // --------------------------------------------------------
-    // Conveyor Speed
-    // --------------------------------------------------------
 
     conveyorSpeed: {
       type: String,
@@ -151,38 +73,12 @@ const PFO_CLS_OP139A_Schema = new mongoose.Schema(
       required: true,
     },
 
-
-    // --------------------------------------------------------
-    // Application Environment
-    // --------------------------------------------------------
-
+    // "Other" custom value is stored in the same frontend field
     applicationEnvironment: {
       type: String,
-      enum: [
-        "Ambient",
-        "Caustic (i.e. Phosphate / E-Coat, etc.)",
-        "Oven",
-        "Wash Down",
-        "Intrinsic",
-        "Food Grade",
-        "Other",
-      ],
+      trim: true,
       required: true,
     },
-
-    // Required only when Application Environment = Other.
-    otherApplicationEnvironment: {
-      type: String,
-      trim: true,
-      required: function () {
-        return this.applicationEnvironment === "Other";
-      },
-    },
-
-
-    // --------------------------------------------------------
-    // Installation Conditions
-    // --------------------------------------------------------
 
     surroundingTemperature: {
       type: String,
@@ -221,7 +117,6 @@ const PFO_CLS_OP139A_Schema = new mongoose.Schema(
       required: true,
     },
 
-
     // ========================================================
     // CUSTOMER POWER UTILITIES
     // ========================================================
@@ -248,9 +143,8 @@ const PFO_CLS_OP139A_Schema = new mongoose.Schema(
       required: true,
     },
 
-
     // ========================================================
-    // NEW / EXISTING MONITORING SYSTEM
+    // MONITORING SYSTEM
     // ========================================================
 
     connectingToExistingMonitoring: {
@@ -270,7 +164,6 @@ const PFO_CLS_OP139A_Schema = new mongoose.Schema(
       ],
       required: true,
     },
-
 
     // ========================================================
     // CONVEYOR SPECIFICATIONS
@@ -330,7 +223,6 @@ const PFO_CLS_OP139A_Schema = new mongoose.Schema(
       required: true,
     },
 
-
     // ========================================================
     // CONTROLLER
     // ========================================================
@@ -344,27 +236,14 @@ const PFO_CLS_OP139A_Schema = new mongoose.Schema(
       required: true,
     },
 
-
-    // --------------------------------------------------------
-    // Other Units Controlled
-    //
-    // Current website presents this as:
-    // "Controls other units (list)"
-    //
-    // Therefore this is stored as free text rather than using
-    // the Timer dropdown values from the legacy OHP model.
-    // --------------------------------------------------------
-
     controlsOtherUnits: {
       type: String,
-      trim: true,
+      enum: [
+        "Yes",
+        "No",
+      ],
       required: true,
     },
-
-
-    // --------------------------------------------------------
-    // Timer
-    // --------------------------------------------------------
 
     timer: {
       type: String,
@@ -403,34 +282,12 @@ const PFO_CLS_OP139A_Schema = new mongoose.Schema(
       required: true,
     },
 
-
-    // --------------------------------------------------------
-    // Pre-Mounting Requirements
-    // --------------------------------------------------------
-
+    // "Other" custom value is stored in the same frontend field
     preMountingRequirements: {
       type: String,
-      enum: [
-        "OPCO Track",
-        "Customer Provided Track",
-        "Other",
-      ],
+      trim: true,
       required: true,
     },
-
-    // Required only when Pre-Mounting Requirements = Other.
-    otherPreMountingRequirements: {
-      type: String,
-      trim: true,
-      required: function () {
-        return this.preMountingRequirements === "Other";
-      },
-    },
-
-
-    // --------------------------------------------------------
-    // PLC / Other Controller Information
-    // --------------------------------------------------------
 
     plcConnection: {
       type: String,
@@ -444,13 +301,8 @@ const PFO_CLS_OP139A_Schema = new mongoose.Schema(
     otherControllerDescribe: {
       type: String,
       trim: true,
-      required: true,
+      default: "",
     },
-
-
-    // --------------------------------------------------------
-    // Special Controller Options
-    // --------------------------------------------------------
 
     controllerSpecialOptions: {
       type: String,
@@ -461,17 +313,12 @@ const PFO_CLS_OP139A_Schema = new mongoose.Schema(
     controllerPleaseSpecify: {
       type: String,
       trim: true,
-      required: true,
+      default: "",
     },
 
-
     // ========================================================
-    // P&F MEASUREMENTS
+    // P&F: MEASUREMENTS
     // ========================================================
-
-    // --------------------------------------------------------
-    // Overhead P&F
-    // --------------------------------------------------------
 
     freeTrolleyWheelPositionVerticalL: {
       type: String,
@@ -490,11 +337,6 @@ const PFO_CLS_OP139A_Schema = new mongoose.Schema(
       trim: true,
       required: true,
     },
-
-
-    // --------------------------------------------------------
-    // Inverted Power & Free
-    // --------------------------------------------------------
 
     invertedPowerAndFreeChainDropA: {
       type: String,
@@ -520,12 +362,8 @@ const PFO_CLS_OP139A_Schema = new mongoose.Schema(
       required: true,
     },
 
-
     // ========================================================
     // TECHNICIAN NOTE
-    //
-    // Internal application workflow field.
-    // Not required.
     // ========================================================
 
     technicianNote: {
@@ -539,20 +377,11 @@ const PFO_CLS_OP139A_Schema = new mongoose.Schema(
   }
 );
 
-
-// ============================================================
-// MODEL
-//
-// Reuse the model when already registered.
-// This avoids OverwriteModelError during development/hot reload.
-// ============================================================
-
 const PFO_CLS_OP139A =
   mongoose.models.PFO_CLS_OP139A ||
   mongoose.model(
     "PFO_CLS_OP139A",
     PFO_CLS_OP139A_Schema
   );
-
 
 module.exports = PFO_CLS_OP139A;

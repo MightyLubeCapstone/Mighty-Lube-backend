@@ -1,110 +1,118 @@
 const mongoose = require("mongoose");
 
-const OHCCSOP8NPSchema = new mongoose.Schema(
+const OH_CCS_OP8NPSchema = new mongoose.Schema(
   {
-    // =========================================================
+    // ========================================================
     // GENERAL INFORMATION
-    // =========================================================
+    // ========================================================
 
     conveyorName: {
       type: String,
-      required: false,
+      required: true,
       trim: true,
     },
 
+    // "Other" option exists.
+    // Custom string value is allowed.
     conveyorChainSize: {
       type: String,
-      required: false,
+      required: true,
       trim: true,
     },
 
-    otherConveyorChainSize: {
-      type: String,
-      required: function () {
-        return this.conveyorChainSize === "Other";
-      },
-      trim: true,
-    },
-
+    // "Other" option exists.
+    // Custom string value is allowed.
     chainManufacturer: {
       type: String,
-      required: false,
-      trim: true,
-    },
-
-    otherChainManufacturer: {
-      type: String,
-      required: function () {
-        return this.chainManufacturer === "Other";
-      },
+      required: true,
       trim: true,
     },
 
     conveyorLength: {
       type: String,
-      required: false,
+      required: true,
       trim: true,
     },
 
+    // Fixed dropdown - no "Other".
     conveyorLengthUnit: {
       type: String,
-      required: false,
-      trim: true,
+      required: true,
+      enum: [
+        "Feet",
+        "Inches",
+        "m Meter",
+        "mm Millimeter",
+      ],
     },
 
+    // "Other" option exists.
+    // Custom string value is allowed.
     applicationEnvironment: {
       type: String,
       required: true,
       trim: true,
     },
 
-    conveyorLoadState: {
+    // Fixed Yes / No dropdown.
+    conveyorLoadedStatus: {
       type: String,
       required: true,
-      trim: true,
+      enum: [
+        "Yes",
+        "No",
+      ],
     },
 
-    // =========================================================
+    // ========================================================
     // OVERHEAD POWER RAIL: MEASUREMENTS
-    // =========================================================
+    // ========================================================
 
-    measurementUnit: {
+    // Fixed dropdown - no "Other".
+    freeRailMeasurementUnit: {
       type: String,
-      required: false,
-      trim: true,
+      required: true,
+      enum: [
+        "Feet",
+        "Inches",
+        "m Meter",
+        "mm Millimeter",
+      ],
     },
 
     chainDropA: {
       type: String,
-      required: false,
+      required: true,
       trim: true,
     },
 
     overheadPowerMonoRailPowerTrolleyWheelB: {
       type: String,
-      required: false,
+      required: true,
       trim: true,
     },
 
     overheadPowerMonoRailPowerRailG: {
       type: String,
-      required: false,
+      required: true,
       trim: true,
     },
 
     overheadPowerMonoRailPowerRailH: {
       type: String,
-      required: false,
+      required: true,
       trim: true,
     },
 
-    // =========================================================
+    // ========================================================
     // TECHNICIAN NOTE
-    // =========================================================
+    //
+    // Frontend required: false
+    // ========================================================
 
     technicianNote: {
       type: String,
-      required: true,
+      default: "",
       trim: true,
     },
   },
@@ -113,8 +121,15 @@ const OHCCSOP8NPSchema = new mongoose.Schema(
   }
 );
 
+// ==========================================================
+// MODEL
+// ==========================================================
+
 const OH_CCS_OP8NP =
   mongoose.models.OH_CCS_OP8NP ||
-  mongoose.model("OH_CCS_OP8NP", OHCCSOP8NPSchema);
+  mongoose.model(
+    "OH_CCS_OP8NP",
+    OH_CCS_OP8NPSchema
+  );
 
 module.exports = OH_CCS_OP8NP;

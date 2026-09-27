@@ -1,22 +1,24 @@
 const express = require("express");
 
 const { authenticate } = require("../../sessions");
-const PFO_CLS_ES =
-  require("../../../models/PFO/CLS/PFO_CLS_ES");
-const ProductConfiguration =
-  require("../../../models/product_configuration");
+const PFO_9000LCCL =require("../../../models/PFO/CLS/9000LCCL");
+const ProductConfiguration = require("../../../models/product_configuration");
 
 const router = express.Router();
 
 
 // ============================================================
-// POST /api/pfo_cls_es
+// POST /api/9000lccl
 //
 // Product:
-// E-Series
+// 9000L Series Central System Power and Free
+// C-Channel Conveyor Lubricators
 //
 // Product ID:
-// PFO_CLS_ES
+// 9000LCCL
+//
+// Frontend Request Key:
+// 9000LCCLData
 //
 // Product-specific model:
 // Validation only
@@ -27,10 +29,13 @@ const router = express.Router();
 
 router.post("/", authenticate, async (req, res) => {
   try {
-    const {
-      PFO_CLS_ESData,
-      numRequested,
-    } = req.body || {};
+    // JavaScript variable names cannot start with a number,
+    // therefore read the request key using bracket notation.
+    const productData =
+      req.body?.["9000LCCLData"];
+
+    const numRequested =
+      req.body?.numRequested;
 
 
     // ========================================================
@@ -38,13 +43,13 @@ router.post("/", authenticate, async (req, res) => {
     // ========================================================
 
     if (
-      !PFO_CLS_ESData ||
-      typeof PFO_CLS_ESData !== "object" ||
-      Array.isArray(PFO_CLS_ESData)
+      !productData ||
+      typeof productData !== "object" ||
+      Array.isArray(productData)
     ) {
       return res.status(400).json({
         success: false,
-        message: "PFO_CLS_ESData is required",
+        message: "9000LCCLData is required",
       });
     }
 
@@ -61,17 +66,18 @@ router.post("/", authenticate, async (req, res) => {
     ) {
       return res.status(400).json({
         success: false,
-        message: "numRequested must be a positive integer",
+        message:
+          "numRequested must be a positive integer",
       });
     }
 
 
     // ========================================================
-    // PRODUCT-SPECIFIC MODEL VALIDATION
+    // PRODUCT-SPECIFIC VALIDATION
     // ========================================================
 
     const validation =
-      new PFO_CLS_ES(PFO_CLS_ESData);
+      new PFO_9000LCCL(productData);
 
     await validation.validate();
 
@@ -104,22 +110,23 @@ router.post("/", authenticate, async (req, res) => {
 
 
     // ========================================================
-    // GENERIC PRODUCT CONFIGURATION
+    // CREATE GENERIC PRODUCT CONFIGURATION
     // ========================================================
 
     const productConfiguration =
       new ProductConfiguration({
-        userID: req.user.userID,
+        userID:
+          req.user.userID,
 
         configurationName:
           configurationData.conveyorName ||
-          "E-Series",
+          "9000L Series Central System Power and Free C-Channel Conveyor Lubricators",
 
         productType:
-          "PFO_CLS_ES",
+          "9000LCCL",
 
         productName:
-          "E-Series",
+          "9000L Series Central System Power and Free C-Channel Conveyor Lubricators",
 
         status:
           "cart",
@@ -149,14 +156,14 @@ router.post("/", authenticate, async (req, res) => {
 
 
     // ========================================================
-    // SUCCESS
+    // SUCCESS RESPONSE
     // ========================================================
 
     return res.status(201).json({
       success: true,
 
       message:
-        "PFO_CLS_ES configuration added to cart successfully",
+        "9000LCCL configuration added to cart successfully",
 
       configurationID:
         savedConfiguration.configurationID,
@@ -190,7 +197,7 @@ router.post("/", authenticate, async (req, res) => {
 
   } catch (error) {
     console.error(
-      "PFO_CLS_ES configuration error:",
+      "9000LCCL configuration error:",
       error
     );
 
@@ -210,7 +217,7 @@ router.post("/", authenticate, async (req, res) => {
       return res.status(422).json({
         success: false,
         message:
-          "Invalid PFO_CLS_ES configuration",
+          "Invalid 9000LCCL configuration",
         errors,
       });
     }
@@ -223,7 +230,7 @@ router.post("/", authenticate, async (req, res) => {
     return res.status(500).json({
       success: false,
       message:
-        "Failed to add PFO_CLS_ES configuration",
+        "Failed to add 9000LCCL configuration",
     });
   }
 });

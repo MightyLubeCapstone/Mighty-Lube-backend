@@ -1,8 +1,7 @@
 const express = require("express");
 
 const { authenticate } = require("../../sessions");
-const PFO_CGS_FR317 =
-  require("../../../models/PFO/CGS/PFO_CGS_FR317");
+const PFO_CGS_FR317 = require("../../../models/PFO/CGS/PFO_CGS_FR317");
 const ProductConfiguration =
   require("../../../models/product_configuration");
 

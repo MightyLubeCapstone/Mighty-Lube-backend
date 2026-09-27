@@ -1,53 +1,53 @@
 const express = require("express");
 
 const { authenticate } = require("../../sessions");
-const PFO_CLS_CDL =
-  require("../../../models/PFO/CLS/PFO_CLS_CDL");
-const ProductConfiguration =
-  require("../../../models/product_configuration");
+const PFO_CMS_MLAIO = require("../../../models/PFO/CMS/MLAIO");
+const ProductConfiguration = require("../../../models/product_configuration");
 
 const router = express.Router();
 
-
 // ============================================================
-// POST /api/pfo_cls_cdl
-//
-// Product:
-// Caterpillar Drive Lubricators
+// PFO - CONVEYOR MONITOR SYSTEMS
+// MULTI LINE (PERMANENT) ALL IN ONE
 //
 // Product ID:
-// PFO_CLS_CDL
+// PFO_CMS_MLAIO
 //
-// Product-specific model:
-// Validation only
+// Endpoint:
+// POST /api/pfo_cms_mlaio
 //
-// Actual persistence:
-// ProductConfiguration
+// Request Body:
+// {
+//   "PFO_CMS_MLAIOData": { ... },
+//   "numRequested": 1
+// }
 // ============================================================
 
 router.post("/", authenticate, async (req, res) => {
   try {
+    // ========================================================
+    // REQUEST DATA
+    // ========================================================
+
     const {
-      PFO_CLS_CDLData,
+      PFO_CMS_MLAIOData,
       numRequested,
     } = req.body || {};
 
-
     // ========================================================
-    // REQUEST VALIDATION
+    // CONFIGURATION DATA VALIDATION
     // ========================================================
 
     if (
-      !PFO_CLS_CDLData ||
-      typeof PFO_CLS_CDLData !== "object" ||
-      Array.isArray(PFO_CLS_CDLData)
+      !PFO_CMS_MLAIOData ||
+      typeof PFO_CMS_MLAIOData !== "object" ||
+      Array.isArray(PFO_CMS_MLAIOData)
     ) {
       return res.status(400).json({
         success: false,
-        message: "PFO_CLS_CDLData is required",
+        message: "PFO_CMS_MLAIOData is required",
       });
     }
-
 
     // ========================================================
     // QUANTITY VALIDATION
@@ -55,43 +55,41 @@ router.post("/", authenticate, async (req, res) => {
 
     const quantity = Number(numRequested);
 
-    if (
-      !Number.isInteger(quantity) ||
-      quantity < 1
-    ) {
+    if (!Number.isInteger(quantity) || quantity < 1) {
       return res.status(400).json({
         success: false,
         message: "numRequested must be a positive integer",
       });
     }
 
-
     // ========================================================
-    // PRODUCT-SPECIFIC MODEL VALIDATION
+    // PRODUCT-SPECIFIC VALIDATION
+    //
+    // PFO_CMS_MLAIO is validation-only.
+    // It is NOT directly persisted.
     // ========================================================
 
-    const validation =
-      new PFO_CLS_CDL(PFO_CLS_CDLData);
+    const validation = new PFO_CMS_MLAIO(
+      PFO_CMS_MLAIOData
+    );
 
     await validation.validate();
 
-
     // ========================================================
-    // CLEAN VALIDATED CONFIGURATION
+    // CONVERT VALIDATED DOCUMENT TO PLAIN OBJECT
     // ========================================================
 
-    const configurationData =
-      validation.toObject({
-        versionKey: false,
-      });
+    const configurationData = validation.toObject({
+      versionKey: false,
+    });
 
+    // Remove validation-model-only Mongo/Mongoose fields.
     delete configurationData._id;
     delete configurationData.createdAt;
     delete configurationData.updatedAt;
 
-
     // ========================================================
-    // USER / AUDIT SNAPSHOT
+    // USER / ACTOR INFORMATION
     // ========================================================
 
     const actor = {
@@ -102,61 +100,51 @@ router.post("/", authenticate, async (req, res) => {
       role: req.user.role || "user",
     };
 
+    // ========================================================
+    // CREATE GENERIC PRODUCT CONFIGURATION
+    // ========================================================
+
+    const productConfiguration = new ProductConfiguration({
+      userID: req.user.userID,
+
+      configurationName:
+        configurationData.conveyorName ||
+        "Multi Line (Permanent) All In One",
+
+      productType: "PFO_CMS_MLAIO",
+
+      productName:
+        "Multi Line (Permanent) All In One",
+
+      status: "cart",
+
+      isComplete: true,
+
+      numRequested: quantity,
+
+      configurationData,
+
+      createdBy: actor,
+
+      updatedBy: actor,
+    });
 
     // ========================================================
-    // GENERIC PRODUCT CONFIGURATION
-    // ========================================================
-
-    const productConfiguration =
-      new ProductConfiguration({
-        userID: req.user.userID,
-
-        configurationName:
-          configurationData.conveyorName ||
-          "Caterpillar Drive Lubricators",
-
-        productType:
-          "PFO_CLS_CDL",
-
-        productName:
-          "Caterpillar Drive Lubricators",
-
-        status:
-          "cart",
-
-        isComplete:
-          true,
-
-        numRequested:
-          quantity,
-
-        configurationData,
-
-        createdBy:
-          actor,
-
-        updatedBy:
-          actor,
-      });
-
-
-    // ========================================================
-    // SAVE
+    // SAVE TO PRODUCT CONFIGURATION COLLECTION
     // ========================================================
 
     const savedConfiguration =
       await productConfiguration.save();
 
-
     // ========================================================
-    // SUCCESS
+    // SUCCESS RESPONSE
     // ========================================================
 
     return res.status(201).json({
       success: true,
 
       message:
-        "PFO_CLS_CDL configuration added to cart successfully",
+        "PFO_CMS_MLAIO configuration added to cart successfully",
 
       configurationID:
         savedConfiguration.configurationID,
@@ -187,13 +175,15 @@ router.post("/", authenticate, async (req, res) => {
           savedConfiguration.configurationData,
       },
     });
-
   } catch (error) {
+    // ========================================================
+    // ERROR LOG
+    // ========================================================
+
     console.error(
-      "PFO_CLS_CDL configuration error:",
+      "PFO_CMS_MLAIO configuration error:",
       error
     );
-
 
     // ========================================================
     // MONGOOSE VALIDATION ERROR
@@ -210,11 +200,10 @@ router.post("/", authenticate, async (req, res) => {
       return res.status(422).json({
         success: false,
         message:
-          "Invalid PFO_CLS_CDL configuration",
+          "Invalid PFO_CMS_MLAIO configuration",
         errors,
       });
     }
-
 
     // ========================================================
     // INTERNAL SERVER ERROR
@@ -223,10 +212,9 @@ router.post("/", authenticate, async (req, res) => {
     return res.status(500).json({
       success: false,
       message:
-        "Failed to add PFO_CLS_CDL configuration",
+        "Failed to add PFO_CMS_MLAIO configuration",
     });
   }
 });
-
 
 module.exports = router;

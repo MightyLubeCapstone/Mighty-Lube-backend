@@ -1,6 +1,18 @@
 const mongoose = require("mongoose");
 
-const PFO_CLS_9000LECCCL_Schema = new mongoose.Schema(
+// ============================================================
+// PFO - CONVEYOR MONITOR SYSTEMS
+// MULTI LINE (PERMANENT) ALL IN ONE
+// MONITORING + LUBRICATION
+//
+// Product ID:
+// PFO_CMS_MLAIO
+//
+// Validation-only model.
+// Validated data is stored inside ProductConfiguration.
+// ============================================================
+
+const PFO_CMS_MLAIO_Schema = new mongoose.Schema(
   {
     // ========================================================
     // GENERAL INFORMATION
@@ -12,48 +24,20 @@ const PFO_CLS_9000LECCCL_Schema = new mongoose.Schema(
       required: true,
     },
 
+    // Frontend supports "Other" and stores the custom value
+    // directly in this same field.
     conveyorChainSize: {
       type: String,
-      enum: [
-        'X348 Chain (3")',
-        'X458 Chain (4")',
-        'X678 Chain (6")',
-        '3/8" Log Chain',
-        "Other",
-      ],
+      trim: true,
       required: true,
     },
 
-    otherConveyorChainSize: {
-      type: String,
-      trim: true,
-      required: function () {
-        return this.conveyorChainSize === "Other";
-      },
-    },
-
+    // Frontend supports "Other" and stores the custom value
+    // directly in this same field.
     chainManufacturer: {
       type: String,
-      enum: [
-        "Daifuku",
-        "Frost",
-        "NKC",
-        "Pacline",
-        "Rapid",
-        "WEBB",
-        "Webb-Stiles",
-        "Wilkie Brothers",
-        "Other",
-      ],
-      required: true,
-    },
-
-    otherChainManufacturer: {
-      type: String,
       trim: true,
-      required: function () {
-        return this.chainManufacturer === "Other";
-      },
+      required: true,
     },
 
     conveyorLength: {
@@ -83,7 +67,7 @@ const PFO_CLS_9000LECCCL_Schema = new mongoose.Schema(
       type: String,
       enum: [
         "Feet / minute",
-        "Meters /minute",
+        "Meters / minute",
       ],
       required: true,
     },
@@ -103,26 +87,12 @@ const PFO_CLS_9000LECCCL_Schema = new mongoose.Schema(
       required: true,
     },
 
+    // Frontend supports "Other" and stores the custom value
+    // directly in this same field.
     applicationEnvironment: {
       type: String,
-      enum: [
-        "Ambient",
-        "Caustic (i.e. Phosphate / E-Coat, etc.)",
-        "Oven",
-        "Wash Down",
-        "Intrinsic",
-        "Food Grade",
-        "Other",
-      ],
-      required: true,
-    },
-
-    otherApplicationEnvironment: {
-      type: String,
       trim: true,
-      required: function () {
-        return this.applicationEnvironment === "Other";
-      },
+      required: true,
     },
 
     surroundingTemperature: {
@@ -207,7 +177,7 @@ const PFO_CLS_9000LECCCL_Schema = new mongoose.Schema(
     wheelOpenRaceStyle: {
       type: String,
       enum: [
-        "No Applicable",
+        "Not Applicable",
         "Open Inside",
         "Open Outside",
       ],
@@ -345,51 +315,11 @@ const PFO_CLS_9000LECCCL_Schema = new mongoose.Schema(
       required: true,
     },
 
+    // Optional in frontend.
     controllerPleaseSpecify: {
       type: String,
       trim: true,
-    },
-
-    // ========================================================
-    // WIRE
-    // ========================================================
-
-    wireDropdown: {
-      type: String,
-      enum: [
-        "Option 1",
-      ],
-      required: true,
-    },
-
-    twoConductor: {
-      type: String,
-      trim: true,
-      required: true,
-    },
-
-    fourConductor: {
-      type: String,
-      trim: true,
-      required: true,
-    },
-
-    sevenConductor: {
-      type: String,
-      trim: true,
-      required: true,
-    },
-
-    twelveConductor: {
-      type: String,
-      trim: true,
-      required: true,
-    },
-
-    junctionBoxQuantities: {
-      type: String,
-      trim: true,
-      required: true,
+      default: "",
     },
 
     // ========================================================
@@ -425,12 +355,6 @@ const PFO_CLS_9000LECCCL_Schema = new mongoose.Schema(
       required: true,
     },
 
-    invertedPowerAndFreeChainDropA: {
-      type: String,
-      trim: true,
-      required: true,
-    },
-
     invertedPowerTrolleyWheelB: {
       type: String,
       trim: true,
@@ -443,6 +367,12 @@ const PFO_CLS_9000LECCCL_Schema = new mongoose.Schema(
       required: true,
     },
 
+    invertedPowerAndFreeRailH: {
+      type: String,
+      trim: true,
+      required: true,
+    },
+
     // ========================================================
     // TECHNICIAN NOTE
     // ========================================================
@@ -450,7 +380,7 @@ const PFO_CLS_9000LECCCL_Schema = new mongoose.Schema(
     technicianNote: {
       type: String,
       trim: true,
-      required: true,
+      default: "",
     },
   },
   {
@@ -458,11 +388,15 @@ const PFO_CLS_9000LECCCL_Schema = new mongoose.Schema(
   }
 );
 
-const PFO_CLS_9000LECCCL =
-  mongoose.models.PFO_CLS_9000LECCCL ||
+// ============================================================
+// MODEL REGISTRATION
+// ============================================================
+
+const PFO_CMS_MLAIO =
+  mongoose.models.PFO_CMS_MLAIO ||
   mongoose.model(
-    "PFO_CLS_9000LECCCL",
-    PFO_CLS_9000LECCCL_Schema
+    "PFO_CMS_MLAIO",
+    PFO_CMS_MLAIO_Schema
   );
 
-module.exports = PFO_CLS_9000LECCCL;
+module.exports = PFO_CMS_MLAIO;

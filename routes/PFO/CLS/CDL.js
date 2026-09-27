@@ -1,57 +1,55 @@
 const express = require("express");
 
 const { authenticate } = require("../../sessions");
-const OH_CCS_IBEAM = require("../models/OH_CCS_IBEAM");
+const PFO_CLS_CDL =require("../../../models/PFO/CLS/CDL");
 const ProductConfiguration = require("../../../models/product_configuration");
 
 const router = express.Router();
 
 
-// =========================================================
-// POST /api/oh_ccs_ibeam
+// ============================================================
+// POST /api/pfo_cls_cdl
 //
 // Product:
-// OH CCS I-Beam
+// Caterpillar Drive Lubricators
 //
 // Product ID:
-// OH_CCS_IBEAM
+// PFO_CLS_CDL
 //
-// OH_CCS_IBEAM model:
-// validation only
+// Product-specific model:
+// Validation only
 //
-// Actual storage:
-// product_configurations
-//
-// Add to Cart:
-// status = "cart"
-// isComplete = true
-// =========================================================
+// Actual persistence:
+// ProductConfiguration
+// ============================================================
 
 router.post("/", authenticate, async (req, res) => {
   try {
     const {
-      OH_CCS_IBEAMData,
+      PFO_CLS_CDLData,
       numRequested,
     } = req.body || {};
 
-    // =====================================================
+
+    // ========================================================
     // REQUEST VALIDATION
-    // =====================================================
+    // ========================================================
 
     if (
-      !OH_CCS_IBEAMData ||
-      typeof OH_CCS_IBEAMData !== "object" ||
-      Array.isArray(OH_CCS_IBEAMData)
+      !PFO_CLS_CDLData ||
+      typeof PFO_CLS_CDLData !== "object" ||
+      Array.isArray(PFO_CLS_CDLData)
     ) {
       return res.status(400).json({
         success: false,
-        message: "OH_CCS_IBEAMData is required",
+        message: "PFO_CLS_CDLData is required",
       });
     }
 
-    // =====================================================
+
+    // ========================================================
     // QUANTITY VALIDATION
-    // =====================================================
+    // ========================================================
 
     const quantity = Number(numRequested);
 
@@ -65,24 +63,20 @@ router.post("/", authenticate, async (req, res) => {
       });
     }
 
-    // =====================================================
-    // PRODUCT-SPECIFIC VALIDATION
-    //
-    // Direct flat match.
-    // No alias/template/transformation required.
-    //
-    // OH_CCS_IBEAM is validation-only.
-    // Do NOT call validation.save().
-    // =====================================================
+
+    // ========================================================
+    // PRODUCT-SPECIFIC MODEL VALIDATION
+    // ========================================================
 
     const validation =
-      new OH_CCS_IBEAM(OH_CCS_IBEAMData);
+      new PFO_CLS_CDL(PFO_CLS_CDLData);
 
     await validation.validate();
 
-    // =====================================================
-    // CLEAN VALIDATED CONFIGURATION DATA
-    // =====================================================
+
+    // ========================================================
+    // CLEAN VALIDATED CONFIGURATION
+    // ========================================================
 
     const configurationData =
       validation.toObject({
@@ -93,9 +87,10 @@ router.post("/", authenticate, async (req, res) => {
     delete configurationData.createdAt;
     delete configurationData.updatedAt;
 
-    // =====================================================
-    // AUTHENTICATED USER / AUDIT SNAPSHOT
-    // =====================================================
+
+    // ========================================================
+    // USER / AUDIT SNAPSHOT
+    // ========================================================
 
     const actor = {
       userID: req.user.userID,
@@ -105,9 +100,10 @@ router.post("/", authenticate, async (req, res) => {
       role: req.user.role || "user",
     };
 
-    // =====================================================
-    // CREATE GENERIC PRODUCT CONFIGURATION
-    // =====================================================
+
+    // ========================================================
+    // GENERIC PRODUCT CONFIGURATION
+    // ========================================================
 
     const productConfiguration =
       new ProductConfiguration({
@@ -115,13 +111,13 @@ router.post("/", authenticate, async (req, res) => {
 
         configurationName:
           configurationData.conveyorName ||
-          "OH CCS I-Beam",
+          "Caterpillar Drive Lubricators",
 
         productType:
-          "OH_CCS_IBEAM",
+          "PFO_CLS_CDL",
 
         productName:
-          "OH CCS I-Beam",
+          "Caterpillar Drive Lubricators",
 
         status:
           "cart",
@@ -141,22 +137,24 @@ router.post("/", authenticate, async (req, res) => {
           actor,
       });
 
-    // =====================================================
-    // SAVE ONLY GENERIC PRODUCT CONFIGURATION
-    // =====================================================
+
+    // ========================================================
+    // SAVE
+    // ========================================================
 
     const savedConfiguration =
       await productConfiguration.save();
 
-    // =====================================================
-    // SUCCESS RESPONSE
-    // =====================================================
+
+    // ========================================================
+    // SUCCESS
+    // ========================================================
 
     return res.status(201).json({
       success: true,
 
       message:
-        "OH_CCS_IBEAM configuration added to cart successfully",
+        "PFO_CLS_CDL configuration added to cart successfully",
 
       configurationID:
         savedConfiguration.configurationID,
@@ -182,18 +180,22 @@ router.post("/", authenticate, async (req, res) => {
 
         numRequested:
           savedConfiguration.numRequested,
+
+        configurationData:
+          savedConfiguration.configurationData,
       },
     });
 
   } catch (error) {
     console.error(
-      "OH_CCS_IBEAM configuration error:",
+      "PFO_CLS_CDL configuration error:",
       error
     );
 
-    // =====================================================
+
+    // ========================================================
     // MONGOOSE VALIDATION ERROR
-    // =====================================================
+    // ========================================================
 
     if (error?.name === "ValidationError") {
       const errors = {};
@@ -206,19 +208,20 @@ router.post("/", authenticate, async (req, res) => {
       return res.status(422).json({
         success: false,
         message:
-          "Invalid OH_CCS_IBEAM configuration",
+          "Invalid PFO_CLS_CDL configuration",
         errors,
       });
     }
 
-    // =====================================================
+
+    // ========================================================
     // INTERNAL SERVER ERROR
-    // =====================================================
+    // ========================================================
 
     return res.status(500).json({
       success: false,
       message:
-        "Failed to add OH_CCS_IBEAM configuration",
+        "Failed to add PFO_CLS_CDL configuration",
     });
   }
 });

@@ -1,5 +1,43 @@
 const mongoose = require("mongoose");
 
+// ===========================================================
+// IMAGE METADATA SCHEMA
+//
+// Customer-uploaded images are stored in private object
+// storage. We only save permanent file metadata here.
+// Signed URLs are NOT stored because they expire.
+// ===========================================================
+
+const ImageMetadataSchema = new mongoose.Schema(
+  {
+    objectKey: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    originalName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    contentType: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    size: {
+      type: Number,
+      required: true,
+    },
+  },
+  {
+    _id: false,
+  },
+);
+
 const CC5_CLSchema = new mongoose.Schema(
   {
     // =======================================================
@@ -96,10 +134,22 @@ const CC5_CLSchema = new mongoose.Schema(
       trim: true,
     },
 
+    // Uploaded plant layout image metadata.
+    plantLayoutImage: {
+      type: ImageMetadataSchema,
+      required: false,
+    },
+
     chainPicture: {
       type: String,
       required: true,
       trim: true,
+    },
+
+    // Uploaded chain picture metadata.
+    chainPictureImage: {
+      type: ImageMetadataSchema,
+      required: false,
     },
 
     // =======================================================
@@ -138,13 +188,17 @@ const CC5_CLSchema = new mongoose.Schema(
     // CONVEYOR SPECIFICATIONS
     // =======================================================
 
-    wheelOpenRaceStyle: {
+    // Frontend sends:
+    // wheelOpenType: "Not Applicable"
+    wheelOpenType: {
       type: String,
       required: true,
       trim: true,
     },
 
-    wheelSealedStyle: {
+    // Frontend sends:
+    // wheelClosedType: "Flush"
+    wheelClosedType: {
       type: String,
       required: true,
       trim: true,
@@ -356,13 +410,13 @@ const CC5_CLSchema = new mongoose.Schema(
 
     // =======================================================
     // TECHNICIAN NOTE
-    // Optional multiline note from mobile app.
     // =======================================================
 
     technicianNote: {
       type: String,
       required: false,
       trim: true,
+      default: "",
     },
   },
   {
@@ -372,6 +426,9 @@ const CC5_CLSchema = new mongoose.Schema(
 
 const CC5_CL =
   mongoose.models.CC5_CL ||
-  mongoose.model("CC5_CL", CC5_CLSchema);
+  mongoose.model(
+    "CC5_CL",
+    CC5_CLSchema,
+  );
 
-module.exports = CC5_CL
+module.exports = CC5_CL;

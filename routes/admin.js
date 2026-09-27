@@ -2,7 +2,12 @@ const express = require("express");
 const mongoose = require("mongoose");
 
 const User = require("../models/user");
+
 const ProductConfiguration = require("../models/product_configuration");
+
+const {
+  getSignedFileUrl,
+} = require("../services/object_storage_service");
 
 const {
   authenticate,
@@ -946,6 +951,285 @@ router.get(
 
 
 // =========================================================
+// POST /api/admin/configurations/:configurationID/image-url
+//
+// ADMIN ONLY
+//
+// Generates a temporary signed URL for an image stored
+// inside a ProductConfiguration.
+//
+// REQUEST BODY:
+//
+// {
+//   "imageKey": "someFieldImage"
+// }
+//
+// IMPORTANT:
+//
+// Frontend does NOT send objectKey directly.
+//
+// Backend:
+//
+// 1. Finds configuration by configurationID.
+// 2. Reads configurationData[imageKey].
+// 3. Gets the stored objectKey.
+// 4. Verifies that the object belongs to the same user.
+// 5. Generates a temporary signed URL.
+//
+// Object Storage remains private.
+//
+// Signed URL expiry:
+// 3600 seconds = 1 hour.
+// =========================================================
+
+router.post(
+  "/configurations/:configurationID/image-url",
+  async (req, res) => {
+    try {
+      const {
+        configurationID,
+      } = req.params;
+
+      const {
+        imageKey,
+      } = req.body || {};
+
+      // ===================================================
+      // VALIDATE IMAGE KEY
+      // ===================================================
+
+      if (
+        typeof imageKey !== "string" ||
+        !imageKey.trim()
+      ) {
+        return res
+          .status(400)
+          .json({
+            success: false,
+            message:
+              "imageKey is required",
+          });
+      }
+
+      const normalizedImageKey =
+        imageKey.trim();
+
+      // ===================================================
+      // FIND CONFIGURATION
+      // ===================================================
+
+      const configuration =
+        await ProductConfiguration
+          .findOne({
+            configurationID,
+          })
+          .lean();
+
+      if (!configuration) {
+        return res
+          .status(404)
+          .json({
+            success: false,
+            message:
+              "Configuration not found",
+          });
+      }
+
+      // ===================================================
+      // VALIDATE CONFIGURATION DATA
+      // ===================================================
+
+      const configurationData =
+        configuration.configurationData;
+
+      if (
+        !configurationData ||
+        typeof configurationData !==
+          "object" ||
+        Array.isArray(
+          configurationData
+        )
+      ) {
+        return res
+          .status(404)
+          .json({
+            success: false,
+            message:
+              "Configuration data not found",
+          });
+      }
+
+      // ===================================================
+      // FIND IMAGE METADATA
+      //
+      // Example:
+      //
+      // configurationData = {
+      //   someFieldImage: {
+      //     objectKey:
+      //       "product-configurations/USER123/abc.jpg",
+      //     originalName:
+      //       "factory.jpg",
+      //     contentType:
+      //       "image/jpeg",
+      //     size:
+      //       123456
+      //   }
+      // }
+      // ===================================================
+
+      const imageData =
+        configurationData[
+          normalizedImageKey
+        ];
+
+      if (
+        !imageData ||
+        typeof imageData !==
+          "object" ||
+        Array.isArray(imageData)
+      ) {
+        return res
+          .status(404)
+          .json({
+            success: false,
+            message:
+              "Image not found in configuration",
+          });
+      }
+
+      // ===================================================
+      // VALIDATE OBJECT KEY
+      // ===================================================
+
+      const objectKey =
+        imageData.objectKey;
+
+      if (
+        typeof objectKey !== "string" ||
+        !objectKey.trim()
+      ) {
+        return res
+          .status(404)
+          .json({
+            success: false,
+            message:
+              "Image object key not found",
+          });
+      }
+
+      const normalizedObjectKey =
+        objectKey.trim();
+
+      // ===================================================
+      // VERIFY IMAGE OWNERSHIP
+      //
+      // Upload route stores files using:
+      //
+      // product-configurations/{userID}/{uuid}.extension
+      //
+      // Therefore the object referenced by this
+      // configuration must belong to the same user.
+      // ===================================================
+
+      if (
+        !configuration.userID ||
+        typeof configuration.userID !==
+          "string"
+      ) {
+        return res
+          .status(500)
+          .json({
+            success: false,
+            message:
+              "Configuration user information is invalid",
+          });
+      }
+
+      const expectedPrefix =`product-configurations/${configuration.userID}-${configuration.productType}/`;
+
+      if (
+        !normalizedObjectKey.startsWith(
+          expectedPrefix
+        )
+      ) {
+        return res
+          .status(403)
+          .json({
+            success: false,
+            message:
+              "Image does not belong to this configuration",
+          });
+      }
+
+      // ===================================================
+      // GENERATE TEMPORARY SIGNED URL
+      // ===================================================
+
+      const expiresIn =
+        3600;
+
+      const signedUrl =
+        await getSignedFileUrl(
+          normalizedObjectKey,
+          expiresIn
+        );
+
+      // ===================================================
+      // RESPONSE
+      // ===================================================
+
+      return res
+        .status(200)
+        .json({
+          success: true,
+
+          file: {
+            objectKey:
+              normalizedObjectKey,
+
+            originalName:
+              typeof imageData.originalName ===
+              "string"
+                ? imageData.originalName
+                : "",
+
+            contentType:
+              typeof imageData.contentType ===
+              "string"
+                ? imageData.contentType
+                : "",
+
+            size:
+              typeof imageData.size ===
+              "number"
+                ? imageData.size
+                : 0,
+
+            url:
+              signedUrl,
+
+            expiresIn,
+          },
+        });
+    } catch (error) {
+      console.error(
+        "Failed to generate admin image signed URL:",
+        error
+      );
+
+      return res
+        .status(500)
+        .json({
+          success: false,
+          message:
+            "Failed to generate image URL",
+        });
+    }
+  }
+);
+
+// =========================================================
 // PATCH /api/admin/configurations/:configurationID
 //
 // Admin can edit configuration content.
@@ -1370,9 +1654,7 @@ router.patch(
           configuration.submittedAt ||
           now;
 
-        configuration.adminStartedAt =
-          configuration.adminStartedAt ||
-          now;
+        configuration.adminStartedAt = now;
 
         configuration.adminCompletedAt =
           null;
@@ -1392,13 +1674,7 @@ router.patch(
           configuration.submittedAt ||
           now;
 
-        configuration.adminStartedAt =
-          configuration.adminStartedAt ||
-          now;
-
-        configuration.adminCompletedAt =
-          configuration.adminCompletedAt ||
-          now;
+       configuration.adminCompletedAt = now;
       }
 
 

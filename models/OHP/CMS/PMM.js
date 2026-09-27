@@ -1,87 +1,74 @@
 const mongoose = require("mongoose");
 
-const OHP_PMMSchema = new mongoose.Schema({
+const OHP_PMMSchema = new mongoose.Schema(
+  {
+    // ============================================================
+    // GENERAL INFORMATION
+    // ============================================================
 
-  // ============================================================
-  // GENERAL INFORMATION
-  // ============================================================
+    // "Other" exists -> custom value can be stored in same field.
+    conveyorChainSize: {
+      type: String,
+      required: true,
+      trim: true,
+    },
 
-  conveyorChainSize: {
-    type: String,
-    enum: [
-      "Other",
-    ],
-  },
+    // "Other" exists -> custom value can be stored in same field.
+    chainManufacturer: {
+      type: String,
+      required: true,
+      trim: true,
+    },
 
-  otherConveyorChainSize: {
-    type: String,
-    trim: true,
-    required: function () {
-      return this.conveyorChainSize === "Other";
+    // ============================================================
+    // NEW OR EXISTING MONITORING SYSTEM
+    // ============================================================
+
+    connectingToExistingMonitoring: {
+      type: String,
+      required: true,
+      enum: [
+        "Yes",
+        "No",
+      ],
+    },
+
+    addNewMonitoringSystem: {
+      type: String,
+      required: true,
+      enum: [
+        "Yes",
+        "No",
+      ],
+    },
+
+    // ============================================================
+    // CONFIGURATION
+    // ============================================================
+
+    dcuQuantity: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    // ============================================================
+    // TECHNICIAN NOTE
+    // ============================================================
+
+    technicianNote: {
+      type: String,
+      default: "",
+      trim: true,
     },
   },
-
-  chainManufacturer: {
-    type: String,
-    enum: [
-      "Other",
-    ],
-  },
-
-  otherChainManufacturer: {
-    type: String,
-    trim: true,
-    required: function () {
-      return this.chainManufacturer === "Other";
-    },
-  },
-
-
-  // ============================================================
-  // NEW MONITORING SYSTEM OR ADDING TO EXISTING
-  // ============================================================
-
-  connectingToExistingMonitoring: {
-    type: String,
-    enum: [
-      "Yes",
-      "No",
-    ],
-  },
-
-  addNewMonitoringSystem: {
-    type: String,
-    enum: [
-      "Yes",
-      "No",
-    ],
-  },
-
-
-  // ============================================================
-  // CONFIGURATION
-  // ============================================================
-
-  dcuQuantity: {
-    type: String,
-    trim: true,
-  },
-
-
-  // ============================================================
-  // TECHNICIAN NOTE
-  // ============================================================
-
-  technicianNote: {
-    type: String,
-    required: true,
-    trim: true,
-  },
-
-});
+  {
+    timestamps: true,
+  }
+);
 
 const OHP_PMM =
   mongoose.models.tblOHP_PMM ||
   mongoose.model("tblOHP_PMM", OHP_PMMSchema);
 
-module.exports = OHP_PMM
+module.exports = OHP_PMM;

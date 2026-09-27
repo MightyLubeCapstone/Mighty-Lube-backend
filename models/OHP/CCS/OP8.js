@@ -1,68 +1,92 @@
 const mongoose = require("mongoose");
 
-const OHCCSOP8Schema = new mongoose.Schema(
+const OH_CCS_OP8Schema = new mongoose.Schema(
   {
-    // =========================================================
+    // ========================================================
     // GENERAL INFORMATION
-    // =========================================================
+    // ========================================================
 
     conveyorName: {
       type: String,
-      default: "",
+      required: true,
       trim: true,
     },
 
+    // "Other" option exists.
+    // Custom string value is allowed.
     conveyorChainSize: {
       type: String,
-      default: "",
+      required: true,
       trim: true,
     },
 
+    // "Other" option exists.
+    // Custom string value is allowed.
     chainManufacturer: {
       type: String,
-      default: "",
+      required: true,
       trim: true,
     },
 
     conveyorLength: {
       type: String,
-      default: "",
+      required: true,
       trim: true,
     },
 
+    // Fixed dropdown - no "Other".
     conveyorLengthUnit: {
       type: String,
-      default: "",
-      trim: true,
+      required: true,
+      enum: [
+        "Feet",
+        "Inches",
+        "m Meter",
+        "mm Millimeter",
+      ],
     },
 
-    directionOfTravel: {
+    // Fixed dropdown - no "Other".
+    travelDirection: {
       type: String,
-      default: "",
-      trim: true,
+      required: true,
+      enum: [
+        "Right to Left",
+        "Left to Right",
+      ],
     },
 
+    // "Other" option exists.
+    // Custom string value is allowed.
     applicationEnvironment: {
       type: String,
       required: true,
       trim: true,
     },
 
+    // Fixed Yes / No dropdown.
     surroundingTemperatureOutsideRange: {
       type: String,
-      default: "",
-      trim: true,
+      required: true,
+      enum: [
+        "Yes",
+        "No",
+      ],
     },
 
-    conveyorLoadState: {
+    // Fixed Yes / No dropdown.
+    conveyorLoadedStatus: {
       type: String,
       required: true,
-      trim: true,
+      enum: [
+        "Yes",
+        "No",
+      ],
     },
 
-    // =========================================================
+    // ========================================================
     // CUSTOMER POWER UTILITIES
-    // =========================================================
+    // ========================================================
 
     operatingVoltage3Phase: {
       type: String,
@@ -76,113 +100,147 @@ const OHCCSOP8Schema = new mongoose.Schema(
       trim: true,
     },
 
-    // =========================================================
+    // ========================================================
     // OP-SS
-    // =========================================================
+    // ========================================================
 
+    // Fixed dropdown - no "Other".
     poweredNonPoweredAvailable: {
       type: String,
       required: true,
-      trim: true,
       enum: [
         "Powered",
         "Non-Powered",
       ],
     },
 
+    // "Other" option exists.
+    // Custom string value is allowed.
     brushMaterialsAvailable: {
       type: String,
       required: true,
       trim: true,
     },
 
+    // Fixed Yes / No dropdown.
     installationClearanceConfirmed: {
       type: String,
-      default: "",
-      trim: true,
+      required: true,
+      enum: [
+        "Yes",
+        "No",
+      ],
     },
 
-    // =========================================================
+    // ========================================================
     // ADDITIONAL OPTIONS AVAILABLE
-    // =========================================================
+    // ========================================================
 
+    // Fixed Yes / No dropdown.
     washDown: {
       type: String,
-      default: "",
-      trim: true,
+      required: true,
+      enum: [
+        "Yes",
+        "No",
+      ],
     },
 
+    // Fixed Yes / No dropdown.
     foodIndustry: {
       type: String,
-      default: "",
-      trim: true,
+      required: true,
+      enum: [
+        "Yes",
+        "No",
+      ],
     },
 
+    // Fixed dropdown - no "Other".
     powerPanelWithTimer: {
       type: String,
-      default: "",
-      trim: true,
+      required: true,
+      enum: [
+        "Option 1",
+      ],
     },
 
+    // Fixed dropdown - no "Other".
     threeStationPushButtonSwitch: {
       type: String,
-      default: "",
-      trim: true,
+      required: true,
+      enum: [
+        "Option 1",
+      ],
     },
 
+    // Fixed dropdown - no "Other".
     shroud: {
       type: String,
-      default: "",
-      trim: true,
+      required: true,
+      enum: [
+        "Neoprene Curtain",
+        "Full Steel Enclosure",
+      ],
     },
 
+    // Frontend text field.
+    // Not marked required.
     otherAdditionalOptions: {
       type: String,
       default: "",
       trim: true,
     },
 
-    // =========================================================
+    // ========================================================
     // OVERHEAD POWER RAIL: MEASUREMENTS
-    // =========================================================
+    // ========================================================
 
-    measurementUnit: {
+    // Fixed dropdown - no "Other".
+    freeRailMeasurementUnit: {
       type: String,
-      default: "",
-      trim: true,
+      required: true,
+      enum: [
+        "Feet",
+        "Inches",
+        "m Meter",
+        "mm Millimeter",
+      ],
     },
 
     chainDropA: {
       type: String,
-      default: "",
+      required: true,
       trim: true,
     },
 
     overheadPowerMonoRailPowerTrolleyWheelB: {
       type: String,
-      default: "",
+      required: true,
       trim: true,
     },
 
     overheadPowerMonoRailPowerRailG: {
       type: String,
-      default: "",
+      required: true,
       trim: true,
     },
 
     overheadPowerMonoRailPowerRailH: {
       type: String,
-      default: "",
+      required: true,
       trim: true,
     },
 
-    // =========================================================
+    // ========================================================
     // TECHNICIAN NOTE
-    // =========================================================
+    //
+    // Frontend required: false
+    // ========================================================
 
     technicianNote: {
       type: String,
-      required: true,
+      default: "",
       trim: true,
     },
   },
@@ -191,8 +249,15 @@ const OHCCSOP8Schema = new mongoose.Schema(
   }
 );
 
+// ==========================================================
+// MODEL
+// ==========================================================
+
 const OH_CCS_OP8 =
   mongoose.models.OH_CCS_OP8 ||
-  mongoose.model("OH_CCS_OP8", OHCCSOP8Schema);
+  mongoose.model(
+    "OH_CCS_OP8",
+    OH_CCS_OP8Schema
+  );
 
 module.exports = OH_CCS_OP8;

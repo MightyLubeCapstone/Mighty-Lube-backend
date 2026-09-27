@@ -1,226 +1,151 @@
 const mongoose = require("mongoose");
 
-const OHP_001Schema = new mongoose.Schema({
+const OH_CCS_3000Schema = new mongoose.Schema(
+  {
+    // ========================================================
+    // GENERAL INFORMATION
+    // ========================================================
 
-  // ============================================================
-  // GENERAL INFORMATION
-  // ============================================================
+    conveyorName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
 
-  conveyorName: {
-    type: String,
-    trim: true,
-  },
+    // "Other" option exists in frontend.
+    // Custom string value is allowed.
+    conveyorChainSize: {
+      type: String,
+      required: true,
+      trim: true,
+    },
 
-  conveyorChainSize: {
-    type: String,
-    enum: [
-      'X348 Chain (3")',
-      'X458 Chain (4")',
-      'X678 Chain (6")',
-      '3/8" Log Chain',
-      'Other',
-    ],
-  },
+    // "Other" option exists in frontend.
+    // Custom string value is allowed.
+    chainManufacturer: {
+      type: String,
+      required: true,
+      trim: true,
+    },
 
-  otherConveyorChainSize: {
-    type: String,
-    trim: true,
-    required: function () {
-      return this.conveyorChainSize === "Other";
+    conveyorLength: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    // Fixed dropdown - no "Other" option.
+    conveyorLengthUnit: {
+      type: String,
+      required: true,
+      enum: [
+        "Feet",
+        "Inches",
+        "m Meter",
+        "mm Millimeter",
+      ],
+    },
+
+    conveyorSpeed: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    // Fixed dropdown - no "Other" option.
+    conveyorSpeedUnit: {
+      type: String,
+      required: true,
+      enum: [
+        "Feet / minute",
+        "Meters / minute",
+      ],
+    },
+
+    // "Other" option exists in frontend.
+    // Custom string value is allowed.
+    applicationEnvironment: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    // Fixed dropdown - no "Other" option.
+    surroundingTemperatureOutsideRange: {
+      type: String,
+      required: true,
+      enum: [
+        "No",
+        "yes",
+      ],
+    },
+
+    // ========================================================
+    // OVERHEAD POWER RAIL: MEASUREMENTS
+    // ========================================================
+
+    // Fixed dropdown - no "Other" option.
+    measurementUnit: {
+      type: String,
+      required: true,
+      enum: [
+        "Feet",
+        "Inches",
+        "m Meter",
+        "mm Millimeter",
+      ],
+    },
+
+    chainDropA: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    overheadPowerMonoRailPowerTrolleyWheelB: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    overheadPowerMonoRailPowerRailG: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    overheadPowerMonoRailPowerRailH: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    // ========================================================
+    // TECHNICIAN NOTE
+    //
+    // Frontend required: false
+    // ========================================================
+
+    technicianNote: {
+      type: String,
+      default: "",
+      trim: true,
     },
   },
+  {
+    timestamps: true,
+  }
+);
 
-  chainManufacturer: {
-    type: String,
-    enum: [
-      "Daifuku",
-      "Frost",
-      "NKC",
-      "Pacline",
-      "Rapid",
-      "WEBB",
-      "Webb-Stiles",
-      "Wilkie Brothers",
-      "Other",
-    ],
-  },
+// ==========================================================
+// MODEL
+// ==========================================================
 
-  otherChainManufacturer: {
-    type: String,
-    trim: true,
-    required: function () {
-      return this.chainManufacturer === "Other";
-    },
-  },
+const OH_CCS_3000 =
+  mongoose.models.OH_CCS_3000 ||
+  mongoose.model(
+    "OH_CCS_3000",
+    OH_CCS_3000Schema
+  );
 
-  conveyorLength: {
-    type: String,
-    trim: true,
-  },
-
-  conveyorLengthUnit: {
-    type: String,
-    enum: [
-      "Feet",
-      "Inches",
-      "m Meter",
-      "mm Millimeter",
-    ],
-  },
-
-  conveyorSpeed: {
-    type: String,
-    trim: true,
-  },
-
-  conveyorSpeedUnit: {
-    type: String,
-    enum: [
-      "Feet / minute",
-      "Meters / minute",
-    ],
-  },
-
-  indexingOrVariableSpeedConditions: {
-    type: String,
-    trim: true,
-  },
-
-  directionOfTravel: {
-    type: String,
-    enum: [
-      "Right to Left",
-      "Left to Right",
-    ],
-  },
-
-  applicationEnvironment: {
-    type: String,
-    enum: [
-      "Ambient",
-      "Caustic (i.e. Phosphate / E-Coat, etc.)",
-      "Oven",
-      "Wash Down",
-      "Intrinsic",
-      "Food Grade",
-      "Other",
-    ],
-    required: true,
-  },
-
-  otherApplicationEnvironment: {
-    type: String,
-    trim: true,
-    required: function () {
-      return this.applicationEnvironment === "Other";
-    },
-  },
-
-  surroundingAreaTemperature: {
-    type: String,
-    trim: true,
-  },
-
-  conveyorLoadedOrUnloaded: {
-    type: String,
-    enum: [
-      "Loaded",
-      "Unloaded",
-    ],
-    required: true,
-  },
-
-  conveyorSwingSwaySurge: {
-    type: String,
-    enum: [
-      "Yes",
-      "No",
-    ],
-    required: true,
-  },
-
-
-  // ============================================================
-  // CUSTOMER POWER UTILITIES
-  // ============================================================
-
-  operatingVoltageSinglePhase: {
-    type: String,
-    trim: true,
-    required: true,
-  },
-
-  controlVoltage: {
-    type: String,
-    trim: true,
-    required: true,
-  },
-
-
-  // ============================================================
-  // MONITORING FEATURES REQUESTED
-  // ============================================================
-
-  paintMarkerSystem: {
-    type: String,
-    trim: true,
-  },
-
-
-  // ============================================================
-  // CONVEYOR SPECIFICATIONS
-  // ============================================================
-
-  isConveyorChainClean: {
-    type: String,
-    trim: true,
-  },
-
-
-  // ============================================================
-  // OVERHEAD POWER RAIL MEASUREMENTS
-  // ============================================================
-
-  measurementUnit: {
-    type: String,
-    enum: [
-      "Feet",
-      "Inches",
-      "m Meter",
-      "mm Millimeter",
-    ],
-  },
-
-  powerTrolleyWheelDiameter: {
-    type: String,
-    trim: true,
-  },
-
-  powerRailWidth: {
-    type: String,
-    trim: true,
-  },
-
-  powerRailHeight: {
-    type: String,
-    trim: true,
-  },
-
-
-  // ============================================================
-  // TECHNICIAN NOTE
-  // ============================================================
-
-  technicianNote: {
-    type: String,
-    required: true,
-    trim: true,
-  },
-
-});
-
-const OHP_001 =
-  mongoose.models.OHP_001 ||
-  mongoose.model("OHP_001", OHP_001Schema);
-
-module.exports = OHP_001
+module.exports = OH_CCS_3000;

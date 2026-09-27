@@ -82,7 +82,7 @@ router.post("/", authenticate, async (req, res) => {
     // We do NOT call save() on CC5_CL.
     // =======================================================
 
-    const cc5Validation = new CC5_CL(CC5_CLData);
+    const cc5Validation = new MLCCL(CC5_CLData);
 
     await cc5Validation.validate();
 

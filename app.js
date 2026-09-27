@@ -47,7 +47,7 @@ const fgcoRoute = require("./routes/fgco");
 // CC5
 // ============================================================
 
-const cc5clRoute = require("./routes/CC5/CL/mlccl");
+const cc5clRoute = require("./routes/CC5/CL/MLCCL");
 const cc5op4OeRoute = require("./routes/CC5/CL/OP4OE");
 
 
@@ -113,7 +113,7 @@ const froOp139aRoute = require("./routes/FRO_OP139A");
 const ftFtlRoute = require("./routes/FT/CLS/MLFTL");
 const ftOp40eRoute = require("./routes/FT/CLS/OP40E");
 const ftOpcoRoute = require("./routes/FT/CGS/OPCO_300");
-const ftMlcelRoute = require("./routes/FT_MLCEL");
+const ftMlcelRoute = require("./routes/FT/CLS/MLFTL");
 const flatTopCdlRoute = require("./routes/FT/CLS/CDL");
 
 
@@ -138,14 +138,14 @@ const ibrc300Route = require("./routes/IBRC/CGS/IBRC_300");
 // OVERHEAD POWER RAIL - CLEANING SYSTEMS
 // ============================================================
 
-// const ohCcsIbeamRoute = require("./routes/OH_CCS_IBEAM");
-// const ohCcsOp13Route = require("./routes/OH_CCS_OP13");
-// const ohCcsBrushRoute = require("./routes/OH_CCS_BRUSH");
-// const ohCcs3000Route = require("./routes/OH_CCS_3000");
-// const ohCcsOp8Route = require("./routes/OH_CCS_OP8");
-// const ohCcsOp8npRoute = require("./routes/OH_CCS_OP8NP");
-// const ohCcsO55Route = require("./routes/OH_CCS_O55");
-// const ohCcsCleaningBrushRoute = require("./routes/OH_CCS_CLEANING_BRUSH");
+const ohCcsIbeamRoute = require("./routes/OHP/CCS/IBCBS");
+const ohCcsOp13Route =  require("./routes/OHP/CCS/OP13");
+const ohCcsBrushRoute = require("./routes/OHP/CCS/OEB");
+const ohCcs3000Route = require("./routes/OHP/CCS/3001");
+const ohCcsOp8Route = require("./routes/OHP/CCS/OP8");
+const ohCcsOp8npRoute = require("./routes/OHP/CCS/OP8NP");
+const ohCcsO55Route = require("./routes/OHP/CCS/OP55");
+const ohCcsCleaningBrushRoute = require("./routes/OHP/CCS/YCB");
 
 
 // ============================================================
@@ -170,8 +170,7 @@ const ohpMlpRoute = require("./routes/OHP/CMS/MLP");
 const ohpPmlRoute = require("./routes/OHP/CMS/PML");
 
 // Single Line (Stationary) Mighty Lube Monitoring System
-// Product ID: OHP_001
-const ohp001Route = require("./routes/OHP/CCS/3001");
+const slmlmsRoute = require("./routes/OHP/CMS/SLMLMS");
 
 // Paint Marker for Monitoring System (Optional)
 // Product ID: OHP_PMM
@@ -192,12 +191,48 @@ const pfoCcsOp8npRoute = require("./routes/PFO/CCS/PFO_CCS_OP8NP");
 const pfoCgsFr314Route = require("./routes/PFO/CGS/PFO_CGS_FR314");
 const pfoCgsFr317Route = require("./routes/PFO/CGS/PFO_CGS_FR317");
 const pfoCgsGpcRoute = require("./routes/PFO/CGS/PFO_CGS_GPC");
-const pfoCls9000lRoute = require("./routes/PFO/CLS/PFO_CLS_9000L");
-const pfoCls9000leccclRoute = require("./routes/PFO/CLS/PFO_CLS_9000LECCCL");
-const pfoCls9000ltclRoute = require("./routes/PFO/CLS/PFO_CLS_9000LTCL");
-const pfoClsCdlRoute = require("./routes/PFO/CLS/PFO_CLS_CDL");
-const pfoClsEsRoute = require("./routes/PFO/CLS/PFO_CLS_ES");
-const pfoClsOp139aRoute = require("./routes/PFO/CLS/PFO_CLS_OP139A");
+const pfoCls9000lIbeamRoute = require("./routes/PFO/CLS/9000LIBEAM");
+const pfoCls9000letclRoute = require("./routes/PFO/CLS/9000LETCL");
+const pfoCls9000ltclRoute = require("./routes/PFO/CLS/9000LCCL");
+const pfoClsCdlRoute = require("./routes/PFO/CLS/CDL");
+const pfoClsEsRoute = require("./routes/PFO/CLS/ES");
+const pfoClsOp139aRoute = require("./routes/PFO/CLS/OP139A");
+const pfoCmsMlaioRoute = require("./routes/PFO/CMS/MLAIO");
+const pfoCmsPmlmsRoute = require("./routes/PFO/CMS/PMLMS");
+const pfoCmsPmmsRoute = require("./routes/PFO/CMS/PMMS");
+
+
+
+
+
+
+
+// ============================================================
+// PROTEIN
+// ============================================================
+
+const proteinOp8ssRoute = require("./routes/Protein/PROTEIN_OP8SS");
+const proteinFglmRoute = require("./routes/Protein/PROTEIN_FGLM");
+
+
+// ============================================================
+// TECHNICIAN
+// ============================================================
+
+// Technician Notes
+const technicianNotesRoute = require("./routes/Technician/TECHNICIAN_NOTES");
+
+
+
+
+// ============================================================
+// FILE UPLOAD ROUTE
+// jahan comveyor or plant ke image upload honge
+// ============================================================
+
+const uploadRoute = require("./routes/IMAGE_UPLOAD/Upload");
+
+
 
 // ============================================================
 // DASHBOARD ROUTE USAGE
@@ -317,36 +352,15 @@ app.use("/api/ibrc_300", ibrc300Route);
 // OVERHEAD POWER RAIL - CLEANING SYSTEM ROUTES
 // ============================================================
 
-// app.use("/api/oh_ccs_ibeam", ohCcsIbeamRoute);
-// app.use("/api/oh_ccs_op13", ohCcsOp13Route);
-// app.use("/api/oh_ccs_brush", ohCcsBrushRoute);
-// app.use("/api/oh_ccs_3000", ohCcs3000Route);
-// app.use("/api/oh_ccs_op8", ohCcsOp8Route);
-// app.use("/api/oh_ccs_op8np", ohCcsOp8npRoute);
-// app.use("/api/oh_ccs_o55", ohCcsO55Route);
-// app.use("/api/oh_ccs_cleaning_brush", ohCcsCleaningBrushRoute);
+app.use("/api/oh_ccs_ibeam", ohCcsIbeamRoute);
+app.use("/api/oh_ccs_op13", ohCcsOp13Route);
+app.use("/api/oh_ccs_brush", ohCcsBrushRoute);
+app.use("/api/oh_ccs_3000", ohCcs3000Route);
+app.use("/api/oh_ccs_op8", ohCcsOp8Route);
+app.use("/api/oh_ccs_op8np", ohCcsOp8npRoute);
+app.use("/api/oh_ccs_o55", ohCcsO55Route);
+app.use("/api/oh_ccs_cleaning_brush", ohCcsCleaningBrushRoute);
 
-
-// ============================================================
-// POWER AND FREE OVERHEAD OR INVERTED ROUTES
-// ============================================================
-
-// Overhead Non-Powered Mighty Lube Brush Cleaners
-// 300I / 400I / 600I
-// Product ID: PFO_CCS_300I
-// POST /api/pfo_ccs_300i
-app.use("/api/pfo_ccs_300i", pfoCcs300iRoute);
-app.use("/api/pfo_ccs_op8", pfoCcsOp8Route);
-app.use("/api/pfo_ccs_op8np", pfoCcsOp8npRoute);
-app.use("/api/pfo_cgs_fr314",pfoCgsFr314Route);
-app.use("/api/pfo_cgs_fr317", pfoCgsFr317Route);
-app.use("/api/pfo_cgs_gpc", pfoCgsGpcRoute);
-app.use( "/api/pfo_cls_9000l", pfoCls9000lRoute );
-app.use( "/api/pfo_cls_9000lecccl", pfoCls9000leccclRoute );
-app.use( "/api/pfo_cls_9000ltcl", pfoCls9000ltclRoute);
-app.use( "/api/pfo_cls_cdl", pfoClsCdlRoute);
-app.use("/api/pfo_cls_es",pfoClsEsRoute);
-app.use( "/api/pfo_cls_op139a", pfoClsOp139aRoute )
 
 // ============================================================
 // OVERHEAD POWER RAIL - LUBRICATION / MONITORING ROUTES
@@ -374,12 +388,76 @@ app.use("/api/ohp_pml", ohpPmlRoute);
 // Single Line (Stationary) Mighty Lube Monitoring System
 // Product ID: OHP_001
 // POST /api/ohp_001
-app.use("/api/ohp_001", ohp001Route);
+app.use("/api/slmlms", slmlmsRoute);
 
 // Paint Marker for Monitoring System (Optional)
 // Product ID: OHP_PMM
 // POST /api/ohp_pmm
 app.use("/api/ohp_pmm", ohpPmmRoute);
+
+
+// ============================================================
+// POWER AND FREE OVERHEAD OR INVERTED ROUTES
+// ============================================================
+
+// Overhead Non-Powered Mighty Lube Brush Cleaners
+// 300I / 400I / 600I
+// Product ID: PFO_CCS_300I
+// POST /api/pfo_ccs_300i
+app.use("/api/pfo_ccs_300i", pfoCcs300iRoute);
+app.use("/api/pfo_ccs_op8", pfoCcsOp8Route);
+app.use("/api/pfo_ccs_op8np", pfoCcsOp8npRoute);
+app.use("/api/pfo_cgs_fr314",pfoCgsFr314Route);
+app.use("/api/pfo_cgs_fr317", pfoCgsFr317Route);
+app.use("/api/pfo_cgs_gpc", pfoCgsGpcRoute);
+app.use( "/api/pfo_cls_9000lIbeam", pfoCls9000lIbeamRoute );
+app.use( "/api/pfo_cls_9000letcl", pfoCls9000letclRoute );
+app.use( "/api/pfo_cls_9000lccl", pfoCls9000ltclRoute);
+app.use( "/api/pfo_cls_cdl", pfoClsCdlRoute);
+app.use("/api/pfo_cls_es",pfoClsEsRoute);
+app.use( "/api/pfo_cls_op139a", pfoClsOp139aRoute )
+app.use( "/api/pfo_cms_mlaio", pfoCmsMlaioRoute);
+app.use( "/api/pfo_cms_pmlms", pfoCmsPmlmsRoute);
+app.use( "/api/pfo_cms_pmms", pfoCmsPmmsRoute );
+
+
+
+
+
+
+
+
+
+
+
+
+// ============================================================
+// PROTEIN
+// FOOD GRADE CLEANER OP-8SS
+// ============================================================
+
+app.use("/api/protein_op8ss",  proteinOp8ssRoute);
+app.use( "/api/protein_fglm", proteinFglmRoute );
+
+
+// ============================================================
+// TECHNICIAN ROUTES
+// ============================================================
+
+// Technician Notes
+// POST /api/technician_notes
+app.use("/api/technician_notes",technicianNotesRoute);
+
+
+
+
+
+// ============================================================
+// FILE UPLOAD
+// ============================================================
+app.use("/api/uploads", uploadRoute);
+
+
 
 
 // ============================================================

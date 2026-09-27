@@ -1,8 +1,7 @@
 const express = require("express");
 
 const { authenticate } = require("../../sessions");
-const PFO_CLS_OP139A =
-  require("../../../models/PFO/CLS/PFO_CLS_OP139A");
+const PFO_CMS_PMMS = require("../../../models/PFO/CMS/PMMS");
 const ProductConfiguration =
   require("../../../models/product_configuration");
 
@@ -10,66 +9,83 @@ const router = express.Router();
 
 
 // ============================================================
-// POST /api/pfo_cls_op139a
+// PFO - CONVEYOR MONITOR SYSTEMS
 //
-// Product:
-// OP-139A
+// PAINT MARKER FOR MONITORING SYSTEM (OPTIONAL)
 //
 // Product ID:
-// PFO_CLS_OP139A
+// PFO_CMS_PMMS
 //
-// Request Body:
+// Endpoint:
+// POST /api/pfo_cms_pmms
+//
+// Expected Request Body:
+//
 // {
-//   "PFO_CLS_OP139AData": { ... },
+//   "PFO_CMS_PMMSData": {
+//     "conveyorName": "...",
+//     "conveyorChainSize": "...",
+//     "otherConveyorChainSize": "...",
+//     "chainManufacturer": "...",
+//     "otherChainManufacturer": "...",
+//     "conveyorOrientation": "..."
+//   },
 //   "numRequested": 1
 // }
 //
-// Product-specific model:
-// PFO_CLS_OP139A
+// ARCHITECTURE:
+//
+// Flutter Product Configurator
+//            ↓
+// POST /api/pfo_cms_pmms
+//            ↓
+// This Route
+//            ↓
+// PFO_CMS_PMMS validation model
+//            ↓
+// ProductConfiguration
+//            ↓
+// MongoDB
 //
 // IMPORTANT:
-// The product-specific model is used for VALIDATION ONLY.
 //
-// Actual persistence:
-// ProductConfiguration
+// PFO_CMS_PMMS is used only for product-specific validation.
 //
-// The validated OP-139A configuration is stored inside:
-//
-// ProductConfiguration.configurationData
-//
-// This keeps the cart / configuration workflow consistent with
-// the other PFO product configurators.
+// The actual configuration is persisted using the generic
+// ProductConfiguration model.
 // ============================================================
+
 
 router.post("/", authenticate, async (req, res) => {
   try {
     // ========================================================
-    // REQUEST BODY
+    // READ REQUEST BODY
     // ========================================================
 
     const {
-      PFO_CLS_OP139AData,
+      PFO_CMS_PMMSData,
       numRequested,
     } = req.body || {};
 
 
     // ========================================================
-    // CONFIGURATION REQUEST VALIDATION
+    // CONFIGURATION BODY VALIDATION
     //
-    // Configuration must:
-    // - Exist
-    // - Be an object
-    // - Not be an array
+    // PFO_CMS_PMMSData must:
+    //
+    // 1. Exist
+    // 2. Be an object
+    // 3. Not be an Array
     // ========================================================
 
     if (
-      !PFO_CLS_OP139AData ||
-      typeof PFO_CLS_OP139AData !== "object" ||
-      Array.isArray(PFO_CLS_OP139AData)
+      !PFO_CMS_PMMSData ||
+      typeof PFO_CMS_PMMSData !== "object" ||
+      Array.isArray(PFO_CMS_PMMSData)
     ) {
       return res.status(400).json({
         success: false,
-        message: "PFO_CLS_OP139AData is required",
+        message: "PFO_CMS_PMMSData is required",
       });
     }
 
@@ -77,10 +93,16 @@ router.post("/", authenticate, async (req, res) => {
     // ========================================================
     // QUANTITY VALIDATION
     //
-    // numRequested must be:
-    // - Numeric
-    // - Integer
-    // - Greater than zero
+    // numRequested must be a positive integer.
+    //
+    // Valid:
+    // 1, 2, 3, ...
+    //
+    // Invalid:
+    // 0
+    // -1
+    // 1.5
+    // abc
     // ========================================================
 
     const quantity = Number(numRequested);
@@ -97,33 +119,32 @@ router.post("/", authenticate, async (req, res) => {
 
 
     // ========================================================
-    // PRODUCT-SPECIFIC MODEL VALIDATION
+    // PRODUCT-SPECIFIC VALIDATION
+    //
+    // Create a temporary Mongoose document using the
+    // PFO_CMS_PMMS schema.
     //
     // IMPORTANT:
-    // Calling validate() does NOT save this model.
     //
-    // The PFO_CLS_OP139A model exists only to validate:
+    // We call validate(), NOT save().
+    //
+    // This validates:
+    //
     // - Required fields
-    // - Enum values
-    // - Conditional fields
-    // - Field structure
+    // - Dropdown enum values
+    // - Conditional "Other" fields
     //
-    // Actual persistence happens later using
-    // ProductConfiguration.
+    // No PFO_CMS_PMMS document is persisted here.
     // ========================================================
 
     const validation =
-      new PFO_CLS_OP139A(PFO_CLS_OP139AData);
+      new PFO_CMS_PMMS(PFO_CMS_PMMSData);
 
     await validation.validate();
 
 
     // ========================================================
-    // CLEAN VALIDATED CONFIGURATION
-    //
-    // Convert the validated Mongoose document into a plain
-    // JavaScript object before storing it inside the generic
-    // ProductConfiguration document.
+    // CONVERT VALIDATED DOCUMENT TO PLAIN OBJECT
     // ========================================================
 
     const configurationData =
@@ -132,11 +153,12 @@ router.post("/", authenticate, async (req, res) => {
       });
 
 
-    // --------------------------------------------------------
-    // Remove product-validation document metadata.
+    // ========================================================
+    // REMOVE TEMPORARY MONGOOSE METADATA
     //
-    // We only need the actual product configuration fields.
-    // --------------------------------------------------------
+    // These fields belong to the temporary validation model
+    // and must not be stored as part of configurationData.
+    // ========================================================
 
     delete configurationData._id;
     delete configurationData.createdAt;
@@ -144,11 +166,9 @@ router.post("/", authenticate, async (req, res) => {
 
 
     // ========================================================
-    // USER / AUDIT SNAPSHOT
+    // AUTHENTICATED USER SNAPSHOT
     //
-    // Store the authenticated user's current information so
-    // ProductConfiguration has an audit record of who created
-    // and last updated the configuration.
+    // Used by ProductConfiguration for audit information.
     // ========================================================
 
     const actor = {
@@ -161,11 +181,9 @@ router.post("/", authenticate, async (req, res) => {
 
 
     // ========================================================
-    // GENERIC PRODUCT CONFIGURATION
+    // CREATE GENERIC PRODUCT CONFIGURATION
     //
-    // The product-specific PFO_CLS_OP139A model is NOT saved.
-    //
-    // All actual configuration persistence happens here.
+    // This is the document that is actually saved to MongoDB.
     // ========================================================
 
     const productConfiguration =
@@ -174,19 +192,22 @@ router.post("/", authenticate, async (req, res) => {
         // Owner
         // ----------------------------------------------------
 
-        userID: req.user.userID,
+        userID:
+          req.user.userID,
 
 
         // ----------------------------------------------------
         // Configuration Name
         //
-        // Prefer the conveyor name entered by the user.
-        // If unavailable, use the product name.
+        // Prefer Name of Conveyor System.
+        //
+        // Fall back to the product name if conveyorName is
+        // somehow unavailable.
         // ----------------------------------------------------
 
         configurationName:
           configurationData.conveyorName ||
-          "OP-139A",
+          "Paint Marker for Monitoring System (Optional)",
 
 
         // ----------------------------------------------------
@@ -194,10 +215,10 @@ router.post("/", authenticate, async (req, res) => {
         // ----------------------------------------------------
 
         productType:
-          "PFO_CLS_OP139A",
+          "PFO_CMS_PMMS",
 
         productName:
-          "OP-139A",
+          "Paint Marker for Monitoring System (Optional)",
 
 
         // ----------------------------------------------------
@@ -220,7 +241,7 @@ router.post("/", authenticate, async (req, res) => {
 
 
         // ----------------------------------------------------
-        // Validated Product Configuration
+        // Validated Product-Specific Configuration
         // ----------------------------------------------------
 
         configurationData,
@@ -241,8 +262,7 @@ router.post("/", authenticate, async (req, res) => {
     // ========================================================
     // SAVE
     //
-    // Persist the complete configuration into the generic
-    // ProductConfiguration collection.
+    // This is the actual MongoDB persistence operation.
     // ========================================================
 
     const savedConfiguration =
@@ -257,7 +277,7 @@ router.post("/", authenticate, async (req, res) => {
       success: true,
 
       message:
-        "PFO_CLS_OP139A configuration added to cart successfully",
+        "PFO_CMS_PMMS configuration added to cart successfully",
 
       configurationID:
         savedConfiguration.configurationID,
@@ -295,7 +315,7 @@ router.post("/", authenticate, async (req, res) => {
     // ========================================================
 
     console.error(
-      "PFO_CLS_OP139A configuration error:",
+      "PFO_CMS_PMMS configuration error:",
       error
     );
 
@@ -303,10 +323,8 @@ router.post("/", authenticate, async (req, res) => {
     // ========================================================
     // MONGOOSE VALIDATION ERROR
     //
-    // Product-specific validation failures return 422.
-    //
-    // Each invalid field is returned separately so the
-    // frontend can identify the exact validation problem.
+    // Return individual field validation errors so the
+    // frontend can identify exactly what failed.
     // ========================================================
 
     if (error?.name === "ValidationError") {
@@ -321,7 +339,7 @@ router.post("/", authenticate, async (req, res) => {
         success: false,
 
         message:
-          "Invalid PFO_CLS_OP139A configuration",
+          "Invalid PFO_CMS_PMMS configuration",
 
         errors,
       });
@@ -336,7 +354,7 @@ router.post("/", authenticate, async (req, res) => {
       success: false,
 
       message:
-        "Failed to add PFO_CLS_OP139A configuration",
+        "Failed to add PFO_CMS_PMMS configuration",
     });
   }
 });

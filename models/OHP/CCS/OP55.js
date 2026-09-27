@@ -7,7 +7,7 @@ const mongoose = require("mongoose");
 // Product ID: OH_CCS_O55
 // =========================================================
 
-const OHCCSO55Schema = new mongoose.Schema(
+const OH_CCS_O55Schema = new mongoose.Schema(
   {
     // =====================================================
     // GENERAL INFORMATION
@@ -15,62 +15,91 @@ const OHCCSO55Schema = new mongoose.Schema(
 
     conveyorName: {
       type: String,
-      required: false,
+      required: true,
       trim: true,
     },
 
+    // "Other" option exists.
+    // Custom string value is allowed.
     conveyorChainSize: {
       type: String,
-      required: false,
+      required: true,
       trim: true,
     },
 
+    // "Other" option exists.
+    // Custom string value is allowed.
     chainManufacturer: {
       type: String,
-      required: false,
+      required: true,
       trim: true,
     },
 
     conveyorLength: {
       type: String,
-      required: false,
+      required: true,
       trim: true,
     },
 
+    // Fixed dropdown - no "Other".
     conveyorLengthUnit: {
       type: String,
-      required: false,
-      trim: true,
+      required: true,
+      enum: [
+        "Feet",
+        "Inches",
+        "m Meter",
+        "mm Millimeter",
+      ],
     },
 
-    directionOfTravel: {
+    // Fixed dropdown - no "Other".
+    travelDirection: {
       type: String,
-      required: false,
-      trim: true,
+      required: true,
+      enum: [
+        "Right to Left",
+        "Left to Right",
+      ],
     },
 
+    // "Other" option exists.
+    // Custom string value is allowed.
     applicationEnvironment: {
       type: String,
       required: true,
       trim: true,
     },
 
+    // Fixed Yes / No dropdown.
     surroundingTemperatureOutsideRange: {
       type: String,
-      required: false,
-      trim: true,
+      required: true,
+      enum: [
+        "Yes",
+        "No",
+      ],
     },
 
-    conveyorLoadState: {
+    // Fixed Yes / No dropdown.
+    conveyorLoadedStatus: {
       type: String,
       required: true,
-      trim: true,
+      enum: [
+        "Yes",
+        "No",
+      ],
     },
 
-    conveyorOrientation: {
+    // Fixed dropdown - no "Other".
+    conveyorOverhead: {
       type: String,
-      required: false,
-      trim: true,
+      required: true,
+      enum: [
+        "Overhead",
+        "Inverted",
+        "Inverted/Inverted",
+      ],
     },
 
     // =====================================================
@@ -89,43 +118,66 @@ const OHCCSO55Schema = new mongoose.Schema(
       trim: true,
     },
 
+    // Fixed dropdown - no "Other".
     compressedAirSupplyUnit: {
       type: String,
-      required: false,
-      trim: true,
+      required: true,
+      enum: [
+        "PSI",
+        "KPI",
+        "Bar",
+      ],
     },
 
     // =====================================================
     // CONTROLLER
     // =====================================================
 
+    // Fixed Yes / No dropdown.
     chainMasterController: {
       type: String,
-      required: false,
-      trim: true,
+      required: true,
+      enum: [
+        "Yes",
+        "No",
+      ],
     },
 
+    // Fixed dropdown - no "Other".
     timer: {
       type: String,
-      required: false,
-      trim: true,
+      required: true,
+      enum: [
+        "Not Required",
+        "12 Hour",
+        "1000 Hour",
+      ],
     },
 
+    // Fixed dropdown - no "Other".
     electricOnOff: {
       type: String,
-      required: false,
-      trim: true,
+      required: true,
+      enum: [
+        "On",
+        "Off",
+      ],
     },
 
+    // Fixed dropdown - no "Other".
     pneumaticOnOff: {
       type: String,
-      required: false,
-      trim: true,
+      required: true,
+      enum: [
+        "On",
+        "Off",
+      ],
     },
 
+    // Frontend required: false
     otherDescribe: {
       type: String,
-      required: false,
+      default: "",
       trim: true,
     },
 
@@ -133,37 +185,45 @@ const OHCCSO55Schema = new mongoose.Schema(
     // OVERHEAD POWER RAIL: MEASUREMENTS
     // =====================================================
 
+    // Fixed dropdown - no "Other".
     measurementUnit: {
       type: String,
-      required: false,
-      trim: true,
+      required: true,
+      enum: [
+        "Feet",
+        "Inches",
+        "m Meter",
+        "mm Millimeter",
+      ],
     },
 
     chainDropA: {
       type: String,
-      required: false,
+      required: true,
       trim: true,
     },
 
     overheadPowerMonoRailPowerRailG: {
       type: String,
-      required: false,
+      required: true,
       trim: true,
     },
 
     overheadPowerMonoRailPowerRailH: {
       type: String,
-      required: false,
+      required: true,
       trim: true,
     },
 
     // =====================================================
     // TECHNICIAN NOTE
+    //
+    // Frontend required: false
     // =====================================================
 
     technicianNote: {
       type: String,
-      required: true,
+      default: "",
       trim: true,
     },
   },
@@ -176,9 +236,11 @@ const OHCCSO55Schema = new mongoose.Schema(
 // MODEL
 // =========================================================
 
-const OH_CCS_O55 = mongoose.model(
-  "OH_CCS_O55",
-  OHCCSO55Schema
-);
+const OH_CCS_O55 =
+  mongoose.models.OH_CCS_O55 ||
+  mongoose.model(
+    "OH_CCS_O55",
+    OH_CCS_O55Schema
+  );
 
 module.exports = OH_CCS_O55;

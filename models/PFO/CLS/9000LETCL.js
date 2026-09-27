@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const PFO_CLS_ES_Schema = new mongoose.Schema(
+const PFO_CLS_9000LETCL_Schema = new mongoose.Schema(
   {
     // ========================================================
     // GENERAL INFORMATION
@@ -12,48 +12,18 @@ const PFO_CLS_ES_Schema = new mongoose.Schema(
       required: true,
     },
 
+    // "Other" custom value is stored in the same field
     conveyorChainSize: {
       type: String,
-      enum: [
-        'X348 Chain (3")',
-        'X458 Chain (4")',
-        'X678 Chain (6")',
-        '3/8" Log Chain',
-        "Other",
-      ],
+      trim: true,
       required: true,
     },
 
-    otherConveyorChainSize: {
-      type: String,
-      trim: true,
-      required: function () {
-        return this.conveyorChainSize === "Other";
-      },
-    },
-
+    // "Other" custom value is stored in the same field
     chainManufacturer: {
       type: String,
-      enum: [
-        "Daifuku",
-        "Frost",
-        "NKC",
-        "Pacline",
-        "Rapid",
-        "WEBB",
-        "Webb-Stiles",
-        "Wilkie Brothers",
-        "Other",
-      ],
-      required: true,
-    },
-
-    otherChainManufacturer: {
-      type: String,
       trim: true,
-      required: function () {
-        return this.chainManufacturer === "Other";
-      },
+      required: true,
     },
 
     conveyorLength: {
@@ -83,7 +53,7 @@ const PFO_CLS_ES_Schema = new mongoose.Schema(
       type: String,
       enum: [
         "Feet / minute",
-        "Meters / minute",
+        "Meters /minute",
       ],
       required: true,
     },
@@ -103,26 +73,11 @@ const PFO_CLS_ES_Schema = new mongoose.Schema(
       required: true,
     },
 
+    // "Other" custom value is stored in the same field
     applicationEnvironment: {
       type: String,
-      enum: [
-        "Ambient",
-        "Caustic (i.e. Phosphate / E-Coat, etc.)",
-        "Oven",
-        "Wash Down",
-        "Intrinsic",
-        "Food Grade",
-        "Other",
-      ],
-      required: true,
-    },
-
-    otherApplicationEnvironment: {
-      type: String,
       trim: true,
-      required: function () {
-        return this.applicationEnvironment === "Other";
-      },
+      required: true,
     },
 
     surroundingTemperature: {
@@ -207,7 +162,7 @@ const PFO_CLS_ES_Schema = new mongoose.Schema(
     wheelOpenRaceStyle: {
       type: String,
       enum: [
-        "Not Applicable",
+        "No Applicable",
         "Open Inside",
         "Open Outside",
       ],
@@ -224,7 +179,7 @@ const PFO_CLS_ES_Schema = new mongoose.Schema(
       required: true,
     },
 
-    openInsideShieldedOutside: {
+    powerChain: {
       type: String,
       enum: [
         "Yes",
@@ -233,7 +188,7 @@ const PFO_CLS_ES_Schema = new mongoose.Schema(
       required: true,
     },
 
-    freeTrolleyWheels: {
+    chainPins: {
       type: String,
       enum: [
         "Yes",
@@ -242,7 +197,7 @@ const PFO_CLS_ES_Schema = new mongoose.Schema(
       required: true,
     },
 
-    guideRollers: {
+    caterpillarDrive: {
       type: String,
       enum: [
         "Yes",
@@ -251,63 +206,22 @@ const PFO_CLS_ES_Schema = new mongoose.Schema(
       required: true,
     },
 
-    guideRollersOpenRaceStyle: {
+    caterpillarDriveQuantity: {
       type: String,
-      enum: [
-        "Not Applicable",
-        "Open Inside",
-        "Open Outside",
-      ],
-      required: true,
-    },
-
-    guideRollersSealedStyle: {
-      type: String,
-      enum: [
-        "Extended",
-        "Flush",
-        "Recessed",
-      ],
-      required: true,
-    },
-
-    openHole: {
-      type: String,
-      enum: [
-        "Yes",
-        "No",
-      ],
-      required: true,
-    },
-
-    dogActuator: {
-      type: String,
-      enum: [
-        "Yes",
-        "No",
-      ],
-      required: true,
-    },
-
-    pivotPoints: {
-      type: String,
-      enum: [
-        "Yes",
-        "No",
-      ],
-      required: true,
-    },
-
-    kingPin: {
-      type: String,
-      enum: [
-        "Yes",
-        "No",
-      ],
+      trim: true,
       required: true,
     },
 
     railLubrication: {
+      type: String,
+      enum: [
+        "Yes",
+        "No",
+      ],
+      required: true,
+    },
+
+    externalLubrication: {
       type: String,
       enum: [
         "Yes",
@@ -352,70 +266,33 @@ const PFO_CLS_ES_Schema = new mongoose.Schema(
       required: true,
     },
 
-    // ========================================================
-    // CONTROLLER
-    // ========================================================
-
-    chainMasterController: {
+    reservoirSize: {
       type: String,
       enum: [
-        "Yes",
-        "No",
+        "10 Gallon",
+        "65 Gallon",
       ],
       required: true,
     },
 
-    timer: {
-      type: String,
-      enum: [
-        "Not Required",
-        "12 Hour",
-        "1000 Hour",
-      ],
-      required: true,
-    },
-
-    electricOnOff: {
-      type: String,
-      enum: [
-        "Yes",
-        "No",
-      ],
-      required: true,
-    },
-
-    pneumaticOnOff: {
-      type: String,
-      enum: [
-        "Yes",
-        "No",
-      ],
-      required: true,
-    },
-
-    mightyLubeMonitoring: {
-      type: String,
-      enum: [
-        "Yes",
-        "No",
-      ],
-      required: true,
-    },
-
-    plcConnection: {
-      type: String,
-      enum: [
-        "Yes",
-        "No",
-      ],
-      required: true,
-    },
-
-    otherControllerDescribe: {
+    reservoirSizeQuantity: {
       type: String,
       trim: true,
       required: true,
     },
+
+    conveyorChainClean: {
+      type: String,
+      enum: [
+        "Yes",
+        "No",
+      ],
+      required: true,
+    },
+
+    // ========================================================
+    // CONTROLLER
+    // ========================================================
 
     controllerSpecialOptions: {
       type: String,
@@ -426,11 +303,53 @@ const PFO_CLS_ES_Schema = new mongoose.Schema(
     controllerPleaseSpecify: {
       type: String,
       trim: true,
+      default: "",
+    },
+
+    // ========================================================
+    // WIRE
+    // ========================================================
+
+    wireDropdown: {
+      type: String,
+      enum: [
+        "Option 1",
+      ],
+      required: true,
+    },
+
+    twoConductor: {
+      type: String,
+      trim: true,
+      required: true,
+    },
+
+    fourConductor: {
+      type: String,
+      trim: true,
+      required: true,
+    },
+
+    sevenConductor: {
+      type: String,
+      trim: true,
+      required: true,
+    },
+
+    twelveConductor: {
+      type: String,
+      trim: true,
+      required: true,
+    },
+
+    junctionBoxQuantities: {
+      type: String,
+      trim: true,
       required: true,
     },
 
     // ========================================================
-    // P&F MEASUREMENTS
+    // P&F: MEASUREMENTS
     // ========================================================
 
     measurementUnit: {
@@ -462,6 +381,12 @@ const PFO_CLS_ES_Schema = new mongoose.Schema(
       required: true,
     },
 
+    invertedPowerAndFreeChainDropA: {
+      type: String,
+      trim: true,
+      required: true,
+    },
+
     invertedPowerTrolleyWheelB: {
       type: String,
       trim: true,
@@ -469,12 +394,6 @@ const PFO_CLS_ES_Schema = new mongoose.Schema(
     },
 
     invertedPowerAndFreeRailG: {
-      type: String,
-      trim: true,
-      required: true,
-    },
-
-    invertedPowerAndFreeRailH: {
       type: String,
       trim: true,
       required: true,
@@ -495,11 +414,11 @@ const PFO_CLS_ES_Schema = new mongoose.Schema(
   }
 );
 
-const PFO_CLS_ES =
-  mongoose.models.PFO_CLS_ES ||
+const PFO_CLS_9000LETCL =
+  mongoose.models.PFO_CLS_9000LETCL ||
   mongoose.model(
-    "PFO_CLS_ES",
-    PFO_CLS_ES_Schema
+    "PFO_CLS_9000LETCL",
+    PFO_CLS_9000LETCL_Schema
   );
 
-module.exports = PFO_CLS_ES;
+module.exports = PFO_CLS_9000LETCL;
