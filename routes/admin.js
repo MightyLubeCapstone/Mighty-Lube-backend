@@ -7,7 +7,7 @@ const ProductConfiguration = require("../models/product_configuration");
 
 const {
   getSignedFileUrl,
-} = require("../services/object_storage_service");
+} = require("../Services/object_storage_service");
 
 const {
   authenticate,
