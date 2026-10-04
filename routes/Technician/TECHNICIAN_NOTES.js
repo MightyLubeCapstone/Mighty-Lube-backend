@@ -1,10 +1,8 @@
 const express = require("express");
 
 const { authenticate } = require("../sessions");
-const TECHNICIAN_NOTES =
-  require("../../models/Technician/TECHNICIAN_NOTES");
-const ProductConfiguration =
-  require("../../models/product_configuration");
+const TECHNICIAN_NOTES = require("../../models/Technician/TECHNICIAN_NOTES");
+const ProductConfiguration = require("../../models/product_configuration");
 
 const router = express.Router();
 

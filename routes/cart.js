@@ -251,21 +251,48 @@ router.put("/order", authenticate, async (req, res) => {
     // UPDATE CONFIGURATION DATA
     // =====================================================
 
+    // if (
+    //   data &&
+    //   typeof data === "object" &&
+    //   !Array.isArray(data)
+    // ) {
+    //   configuration.configurationData = {
+    //     ...configuration.configurationData,
+    //     ...data,
+    //   };
+
+    //   configuration.markModified(
+    //     "configurationData"
+    //   );
+    // }
+
     if (
-      data &&
-      typeof data === "object" &&
-      !Array.isArray(data)
-    ) {
-      configuration.configurationData = {
-        ...configuration.configurationData,
-        ...data,
-      };
+  data &&
+  typeof data === "object" &&
+  !Array.isArray(data)
+) {
+  configuration.configurationData = {
+    ...configuration.configurationData,
+    ...data,
+  };
 
-      configuration.markModified(
-        "configurationData"
-      );
-    }
+  configuration.markModified(
+    "configurationData"
+  );
 
+  // Keep top-level configurationName in sync
+  // with the conveyorName used by product creation routes.
+  const conveyorName =
+    configuration.configurationData?.conveyorName;
+
+  if (
+    typeof conveyorName === "string" &&
+    conveyorName.trim().length > 0
+  ) {
+    configuration.configurationName =
+      conveyorName.trim();
+  }
+}
 
     // =====================================================
     // UPDATE QUANTITY
