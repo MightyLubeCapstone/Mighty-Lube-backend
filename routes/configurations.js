@@ -1,9 +1,14 @@
 const express = require("express");
 
 const { authenticate } = require("./sessions");
-const { sendOrderNotification } = require("../utils/emailnotif");
 
-const ProductConfiguration = require("../models/product_configuration");
+const {
+  sendOrderNotification,
+} = require("../utils/emailnotif");
+
+const ProductConfiguration = require(
+  "../models/product_configuration"
+);
 
 const router = express.Router();
 
@@ -34,96 +39,123 @@ const router = express.Router();
 // done
 // =========================================================
 
-router.get("/", authenticate, async (req, res) => {
-  try {
-    const configurations =
-      await ProductConfiguration.find({
-        userID: req.user.userID,
+router.get(
+  "/",
+  authenticate,
+  async (req, res) => {
+    try {
+      const configurations =
+        await ProductConfiguration.find({
+          userID:
+            req.user.userID,
 
-        status: {
-          $in: [
-            "submitted",
-            "completed",
-          ],
-        },
-      }).sort({
-        submittedAt: -1,
-        createdAt: -1,
-      });
+          status: {
+            $in: [
+              "submitted",
+              "completed",
+            ],
+          },
+        }).sort({
+          submittedAt: -1,
+          createdAt: -1,
+        });
 
 
-    return res.status(200).json({
-      success: true,
+      return res
+        .status(200)
+        .json({
+          success: true,
 
-      count:
-        configurations.length,
+          count:
+            configurations.length,
 
-      configurations:
-        configurations.map((item) => ({
-          configurationID:
-            item.configurationID,
+          configurations:
+            configurations.map(
+              (item) => ({
+                configurationID:
+                  item.configurationID,
 
-          configurationName:
-            item.configurationName,
+                configurationName:
+                  item.configurationName,
 
-          productType:
-            item.productType,
+                productType:
+                  item.productType,
 
-          productName:
-            item.productName,
+                productName:
+                  item.productName,
 
-          quantity:
-            item.numRequested,
+                quantity:
+                  item.numRequested,
 
-          status:
-            item.status,
+                status:
+                  item.status,
 
-          adminStatus:
-            item.adminStatus,
+                adminStatus:
+                  item.adminStatus,
 
-          isComplete:
-            item.isComplete,
+                isComplete:
+                  item.isComplete,
 
-          submittedAt:
-            item.submittedAt,
+                submittedAt:
+                  item.submittedAt,
 
-          completedAt:
-            item.completedAt,
+                completedAt:
+                  item.completedAt,
 
-          adminRequestedAt:
-            item.adminRequestedAt,
+                adminRequestedAt:
+                  item.adminRequestedAt,
 
-          adminStartedAt:
-            item.adminStartedAt,
+                adminStartedAt:
+                  item.adminStartedAt,
 
-          adminCompletedAt:
-            item.adminCompletedAt,
+                adminCompletedAt:
+                  item.adminCompletedAt,
 
-          createdAt:
-            item.createdAt,
+                // -----------------------------------------
+                // CURRENT ADMIN STATUS TIMER
+                //
+                // New configurations use:
+                // adminStatusChangedAt
+                //
+                // Legacy records may not have it yet.
+                // -----------------------------------------
 
-          updatedAt:
-            item.updatedAt,
-        })),
-    });
+                adminStatusChangedAt:
+                  item.adminStatusChangedAt ||
+                  item.adminStartedAt ||
+                  item.adminRequestedAt ||
+                  item.submittedAt ||
+                  null,
 
-  } catch (error) {
-    console.error(
-      "GET /api/configurations error:",
-      error
-    );
+                createdAt:
+                  item.createdAt,
 
-    return res.status(500).json({
-      success: false,
+                updatedAt:
+                  item.updatedAt,
+              })
+            ),
+        });
 
-      message:
-        "Failed to fetch configurations",
+    } catch (error) {
+      console.error(
+        "GET /api/configurations error:",
+        error
+      );
 
-      error:
-        error.message,
-    });
+      return res
+        .status(500)
+        .json({
+          success: false,
+
+          message:
+            "Failed to fetch configurations",
+
+          error:
+            error.message,
+        });
+    }
   }
-});
+);
 
 
 // =========================================================
@@ -170,158 +202,76 @@ router.get("/", authenticate, async (req, res) => {
 // status = "cart"
 // adminStatus = null
 //
+// AUDIT:
+//
+// Every submitted configuration gets:
+//
+// action = configuration_submitted
+//
+// changes:
+//
+// status:
+// cart -> submitted
+//
+// adminStatus:
+// null -> requested
+//
+// adminStatusChangedAt becomes the authoritative
+// start time for the current Requested status.
 // =========================================================
 
-router.put("/", authenticate, async (req, res) => {
-  try {
-    const {
-      configurationIDs,
-    } = req.body;
+router.put(
+  "/",
+  authenticate,
+  async (req, res) => {
+    try {
+      const {
+        configurationIDs,
+      } = req.body;
 
 
-    // =====================================================
-    // VALIDATE INPUT
-    // =====================================================
+      // =====================================================
+      // VALIDATE INPUT
+      // =====================================================
 
-    if (
-      !Array.isArray(configurationIDs) ||
-      configurationIDs.length === 0
-    ) {
-      return res.status(400).json({
-        success: false,
+      if (
+        !Array.isArray(
+          configurationIDs
+        ) ||
+        configurationIDs.length === 0
+      ) {
+        return res
+          .status(400)
+          .json({
+            success: false,
 
-        message:
-          "At least one configurationID is required",
-      });
-    }
-
-
-    // Remove duplicate IDs
-    const uniqueConfigurationIDs = [
-      ...new Set(configurationIDs),
-    ];
+            message:
+              "At least one configurationID is required",
+          });
+      }
 
 
-    // =====================================================
-    // FIND SELECTED CART ITEMS
-    //
-    // SECURITY:
-    //
-    // userID comes from authenticated user.
-    //
-    // User cannot submit another user's configuration.
-    // =====================================================
+      // Remove duplicate IDs
 
-    const configurations =
-      await ProductConfiguration.find({
-        configurationID: {
-          $in: uniqueConfigurationIDs,
-        },
-
-        userID:
-          req.user.userID,
-
-        status:
-          "cart",
-      });
+      const uniqueConfigurationIDs = [
+        ...new Set(
+          configurationIDs
+        ),
+      ];
 
 
-    // =====================================================
-    // VERIFY EVERY REQUESTED ID
-    //
-    // If frontend sends 3 IDs,
-    // backend must find exactly 3 valid cart records.
-    // =====================================================
+      // =====================================================
+      // FIND SELECTED CART ITEMS
+      //
+      // SECURITY:
+      //
+      // userID comes from authenticated user.
+      //
+      // User cannot submit another user's configuration.
+      // =====================================================
 
-    if (
-      configurations.length !==
-      uniqueConfigurationIDs.length
-    ) {
-      return res.status(400).json({
-        success: false,
-
-        message:
-          "One or more configurations were not found in your cart",
-      });
-    }
-
-
-    // =====================================================
-    // MAKE SURE ALL ARE COMPLETE
-    // =====================================================
-
-    const incompleteConfigurations =
-      configurations.filter(
-        (item) =>
-          item.isComplete !== true
-      );
-
-
-    if (
-      incompleteConfigurations.length > 0
-    ) {
-      return res.status(400).json({
-        success: false,
-
-        message:
-          "One or more configurations are incomplete",
-
-        incompleteConfigurationIDs:
-          incompleteConfigurations.map(
-            (item) =>
-              item.configurationID
-          ),
-      });
-    }
-
-
-    // =====================================================
-    // AUDIT ACTOR
-    // =====================================================
-
-    const actor = {
-      userID:
-        req.user.userID,
-
-      username:
-        req.user.username,
-
-      firstName:
-        req.user.firstName || "",
-
-      lastName:
-        req.user.lastName || "",
-
-      role:
-        req.user.role || "user",
-    };
-
-
-    const now =
-      new Date();
-
-
-    // =====================================================
-    // SUBMIT SELECTED CONFIGURATIONS
-    //
-    // Same records stay in:
-    //
-    // product_configurations
-    //
-    // USER STATUS:
-    //
-    // cart -> submitted
-    //
-    // ADMIN STATUS:
-    //
-    // null -> requested
-    //
-    // configurationID DOES NOT CHANGE.
-    // =====================================================
-
-    const updateResult =
-      await ProductConfiguration.updateMany(
-        {
+      const configurations =
+        await ProductConfiguration.find({
           configurationID: {
             $in:
               uniqueConfigurationIDs,
@@ -332,160 +282,357 @@ router.put("/", authenticate, async (req, res) => {
 
           status:
             "cart",
-        },
-
-        {
-          $set: {
-            status:
-              "submitted",
-
-            adminStatus:
-              "requested",
-
-            submittedAt:
-              now,
-
-            adminRequestedAt:
-              now,
-
-            adminStartedAt:
-              null,
-
-            adminCompletedAt:
-              null,
-
-            updatedBy:
-              actor,
-
-            draftID:
-              null,
-
-            draftTitle:
-              null,
-          },
-        }
-      );
+        });
 
 
-    // =====================================================
-    // FETCH UPDATED CONFIGURATIONS
-    //
-    // Useful for response + email notification.
-    //
-    // These records should now be:
-    //
-    // status = submitted
-    // adminStatus = requested
-    // =====================================================
+      // =====================================================
+      // VERIFY EVERY REQUESTED ID
+      //
+      // If frontend sends 3 IDs,
+      // backend must find exactly 3 valid cart records.
+      // =====================================================
 
-    const submittedConfigurations =
-      await ProductConfiguration.find({
-        configurationID: {
-          $in:
-            uniqueConfigurationIDs,
-        },
+      if (
+        configurations.length !==
+        uniqueConfigurationIDs.length
+      ) {
+        return res
+          .status(400)
+          .json({
+            success: false,
 
+            message:
+              "One or more configurations were not found in your cart",
+          });
+      }
+
+
+      // =====================================================
+      // MAKE SURE ALL ARE COMPLETE
+      // =====================================================
+
+      const incompleteConfigurations =
+        configurations.filter(
+          (item) =>
+            item.isComplete !== true
+        );
+
+
+      if (
+        incompleteConfigurations.length >
+        0
+      ) {
+        return res
+          .status(400)
+          .json({
+            success: false,
+
+            message:
+              "One or more configurations are incomplete",
+
+            incompleteConfigurationIDs:
+              incompleteConfigurations.map(
+                (item) =>
+                  item.configurationID
+              ),
+          });
+      }
+
+
+      // =====================================================
+      // AUDIT ACTOR
+      // =====================================================
+
+      const actor = {
         userID:
           req.user.userID,
 
-        status:
-          "submitted",
+        username:
+          req.user.username,
 
-        adminStatus:
-          "requested",
-      });
+        firstName:
+          req.user.firstName || "",
 
+        lastName:
+          req.user.lastName || "",
 
-    // =====================================================
-    // EMAIL NOTIFICATION
-    //
-    // Existing notification utility is retained.
-    //
-    // If its expected structure needs changing,
-    // we will migrate emailnotif.js separately.
-    // =====================================================
-
-    try {
-      await sendOrderNotification(
-        req.user,
-        submittedConfigurations,
-        "new"
-      );
-
-    } catch (emailError) {
-      console.error(
-        "Failed to send configuration submission email:",
-        emailError
-      );
-    }
+        role:
+          req.user.role || "user",
+      };
 
 
-    // =====================================================
-    // RESPONSE
-    // =====================================================
+      const now =
+        new Date();
 
-    return res.status(200).json({
-      success: true,
 
-      message:
-        "Configurations submitted successfully",
+      // =====================================================
+      // SUBMIT SELECTED CONFIGURATIONS
+      //
+      // Same records stay in:
+      //
+      // product_configurations
+      //
+      // USER STATUS:
+      //
+      // cart -> submitted
+      //
+      // ADMIN STATUS:
+      //
+      // null -> requested
+      //
+      // configurationID DOES NOT CHANGE.
+      //
+      // IMPORTANT:
+      //
+      // We use updateMany because all selected records are
+      // guaranteed above to currently have:
+      //
+      // status = cart
+      //
+      // This route's workflow defines cart adminStatus as:
+      //
+      // null
+      //
+      // Therefore the audit transition is:
+      //
+      // status:
+      // cart -> submitted
+      //
+      // adminStatus:
+      // null -> requested
+      // =====================================================
 
-      submittedCount:
-        updateResult.modifiedCount,
+      const updateResult =
+        await ProductConfiguration.updateMany(
+          {
+            configurationID: {
+              $in:
+                uniqueConfigurationIDs,
+            },
 
-      configurationIDs:
-        uniqueConfigurationIDs,
-
-      configurations:
-        submittedConfigurations.map(
-          (item) => ({
-            configurationID:
-              item.configurationID,
-
-            configurationName:
-              item.configurationName,
-
-            productType:
-              item.productType,
-
-            productName:
-              item.productName,
-
-            quantity:
-              item.numRequested,
+            userID:
+              req.user.userID,
 
             status:
-              item.status,
+              "cart",
+          },
 
-            adminStatus:
-              item.adminStatus,
+          {
+            $set: {
+              status:
+                "submitted",
 
-            submittedAt:
-              item.submittedAt,
+              adminStatus:
+                "requested",
 
-            adminRequestedAt:
-              item.adminRequestedAt,
-          })
-        ),
-    });
+              submittedAt:
+                now,
 
-  } catch (error) {
-    console.error(
-      "PUT /api/configurations error:",
-      error
-    );
+              adminRequestedAt:
+                now,
 
-    return res.status(500).json({
-      success: false,
+              adminStartedAt:
+                null,
 
-      message:
-        "Failed to submit configurations",
+              adminCompletedAt:
+                null,
 
-      error:
-        error.message,
-    });
+              // -------------------------------------------
+              // NEW
+              //
+              // Authoritative start time of CURRENT
+              // admin workflow status.
+              // -------------------------------------------
+
+              adminStatusChangedAt:
+                now,
+
+              updatedBy:
+                actor,
+
+              draftID:
+                null,
+
+              draftTitle:
+                null,
+            },
+
+            // ---------------------------------------------
+            // NEW AUDIT HISTORY
+            //
+            // One submission activity is appended to EACH
+            // submitted configuration.
+            // ---------------------------------------------
+
+            $push: {
+              activityHistory: {
+                action:
+                  "configuration_submitted",
+
+                actor,
+
+                changedAt:
+                  now,
+
+                changes: [
+                  {
+                    field:
+                      "status",
+
+                    from:
+                      "cart",
+
+                    to:
+                      "submitted",
+                  },
+
+                  {
+                    field:
+                      "adminStatus",
+
+                    from:
+                      null,
+
+                    to:
+                      "requested",
+                  },
+                ],
+              },
+            },
+          }
+        );
+
+
+      // =====================================================
+      // FETCH UPDATED CONFIGURATIONS
+      //
+      // Useful for response + email notification.
+      //
+      // These records should now be:
+      //
+      // status = submitted
+      // adminStatus = requested
+      // =====================================================
+
+      const submittedConfigurations =
+        await ProductConfiguration.find({
+          configurationID: {
+            $in:
+              uniqueConfigurationIDs,
+          },
+
+          userID:
+            req.user.userID,
+
+          status:
+            "submitted",
+
+          adminStatus:
+            "requested",
+        });
+
+
+      // =====================================================
+      // EMAIL NOTIFICATION
+      //
+      // Existing notification utility is retained.
+      //
+      // If its expected structure needs changing,
+      // we will migrate emailnotif.js separately.
+      // =====================================================
+
+      try {
+        await sendOrderNotification(
+          req.user,
+          submittedConfigurations,
+          "new"
+        );
+
+      } catch (emailError) {
+        console.error(
+          "Failed to send configuration submission email:",
+          emailError
+        );
+      }
+
+
+      // =====================================================
+      // RESPONSE
+      // =====================================================
+
+      return res
+        .status(200)
+        .json({
+          success: true,
+
+          message:
+            "Configurations submitted successfully",
+
+          submittedCount:
+            updateResult.modifiedCount,
+
+          configurationIDs:
+            uniqueConfigurationIDs,
+
+          configurations:
+            submittedConfigurations.map(
+              (item) => ({
+                configurationID:
+                  item.configurationID,
+
+                configurationName:
+                  item.configurationName,
+
+                productType:
+                  item.productType,
+
+                productName:
+                  item.productName,
+
+                quantity:
+                  item.numRequested,
+
+                status:
+                  item.status,
+
+                adminStatus:
+                  item.adminStatus,
+
+                submittedAt:
+                  item.submittedAt,
+
+                adminRequestedAt:
+                  item.adminRequestedAt,
+
+                adminStatusChangedAt:
+                  item.adminStatusChangedAt ||
+                  item.adminRequestedAt ||
+                  item.submittedAt ||
+                  null,
+              })
+            ),
+        });
+
+    } catch (error) {
+      console.error(
+        "PUT /api/configurations error:",
+        error
+      );
+
+      return res
+        .status(500)
+        .json({
+          success: false,
+
+          message:
+            "Failed to submit configurations",
+
+          error:
+            error.message,
+        });
+    }
   }
-});
+);
 
 
 // =========================================================
@@ -500,6 +647,20 @@ router.put("/", authenticate, async (req, res) => {
 //
 // User status and admin workflow status are returned
 // separately.
+//
+// NEW:
+//
+// This response also returns:
+//
+// adminStatusChangedAt
+// activityHistory
+//
+// This allows frontend/admin UI to show:
+//
+// - current status timer
+// - complete activity timeline
+// - who made each change
+// - from -> to values
 // =========================================================
 
 router.get(
@@ -528,7 +689,8 @@ router.get(
       // ===================================================
 
       if (
-        req.user.role !== "admin"
+        req.user.role !==
+        "admin"
       ) {
         query.userID =
           req.user.userID;
@@ -541,78 +703,108 @@ router.get(
         );
 
 
-      if (!configuration) {
-        return res.status(404).json({
-          success: false,
+      if (
+        !configuration
+      ) {
+        return res
+          .status(404)
+          .json({
+            success: false,
 
-          message:
-            "Configuration not found",
-        });
+            message:
+              "Configuration not found",
+          });
       }
 
 
-      return res.status(200).json({
-        success: true,
+      return res
+        .status(200)
+        .json({
+          success: true,
 
-        configuration: {
-          configurationID:
-            configuration.configurationID,
+          configuration: {
+            configurationID:
+              configuration.configurationID,
 
-          userID:
-            configuration.userID,
+            userID:
+              configuration.userID,
 
-          configurationName:
-            configuration.configurationName,
+            configurationName:
+              configuration.configurationName,
 
-          productType:
-            configuration.productType,
+            productType:
+              configuration.productType,
 
-          productName:
-            configuration.productName,
+            productName:
+              configuration.productName,
 
-          status:
-            configuration.status,
+            status:
+              configuration.status,
 
-          adminStatus:
-            configuration.adminStatus,
+            adminStatus:
+              configuration.adminStatus,
 
-          isComplete:
-            configuration.isComplete,
+            isComplete:
+              configuration.isComplete,
 
-          numRequested:
-            configuration.numRequested,
+            numRequested:
+              configuration.numRequested,
 
-          configurationData:
-            configuration.configurationData,
+            configurationData:
+              configuration.configurationData,
 
-          createdBy:
-            configuration.createdBy,
+            createdBy:
+              configuration.createdBy,
 
-          updatedBy:
-            configuration.updatedBy,
+            updatedBy:
+              configuration.updatedBy,
 
-          submittedAt:
-            configuration.submittedAt,
+            submittedAt:
+              configuration.submittedAt,
 
-          completedAt:
-            configuration.completedAt,
+            completedAt:
+              configuration.completedAt,
 
-          adminRequestedAt:
-            configuration.adminRequestedAt,
+            adminRequestedAt:
+              configuration.adminRequestedAt,
 
-          adminStartedAt:
-            configuration.adminStartedAt,
+            adminStartedAt:
+              configuration.adminStartedAt,
 
-          adminCompletedAt:
-            configuration.adminCompletedAt,
+            adminCompletedAt:
+              configuration.adminCompletedAt,
 
-          createdAt:
-            configuration.createdAt,
+            // ---------------------------------------------
+            // CURRENT ADMIN STATUS START TIME
+            //
+            // Legacy fallback retained.
+            // ---------------------------------------------
 
-          updatedAt:
-            configuration.updatedAt,
-        },
-      });
+            adminStatusChangedAt:
+              configuration.adminStatusChangedAt ||
+              configuration.adminStartedAt ||
+              configuration.adminRequestedAt ||
+              configuration.submittedAt ||
+              null,
+
+            // ---------------------------------------------
+            // COMPLETE AUDIT / ACTIVITY HISTORY
+            // ---------------------------------------------
+
+            activityHistory:
+              Array.isArray(
+                configuration.activityHistory
+              )
+                ? configuration.activityHistory
+                : [],
+
+            createdAt:
+              configuration.createdAt,
+
+            updatedAt:
+              configuration.updatedAt,
+          },
+        });
 
     } catch (error) {
       console.error(
@@ -620,15 +812,17 @@ router.get(
         error
       );
 
-      return res.status(500).json({
-        success: false,
+      return res
+        .status(500)
+        .json({
+          success: false,
 
-        message:
-          "Failed to fetch configuration",
+          message:
+            "Failed to fetch configuration",
 
-        error:
-          error.message,
-      });
+          error:
+            error.message,
+        });
     }
   }
 );
@@ -640,9 +834,11 @@ router.get(
 // HARD DELETE ONE configuration.
 //
 // NORMAL USER:
+//
 // Can delete ONLY their own configuration.
 //
 // ADMIN:
+//
 // Can delete any user's configuration.
 //
 // Permanent tracking is done using configurationID.
@@ -664,8 +860,10 @@ router.delete(
 
 
       // Normal user ownership restriction
+
       if (
-        req.user.role !== "admin"
+        req.user.role !==
+        "admin"
       ) {
         query.userID =
           req.user.userID;
@@ -673,30 +871,38 @@ router.delete(
 
 
       const deletedConfiguration =
-        await ProductConfiguration.findOneAndDelete(
-          query
-        );
+        await ProductConfiguration
+          .findOneAndDelete(
+            query
+          );
 
 
-      if (!deletedConfiguration) {
-        return res.status(404).json({
-          success: false,
+      if (
+        !deletedConfiguration
+      ) {
+        return res
+          .status(404)
+          .json({
+            success: false,
 
-          message:
-            "Configuration not found",
-        });
+            message:
+              "Configuration not found",
+          });
       }
 
 
-      return res.status(200).json({
-        success: true,
+      return res
+        .status(200)
+        .json({
+          success: true,
 
-        message:
-          "Configuration deleted successfully",
+          message:
+            "Configuration deleted successfully",
 
-        configurationID:
-          deletedConfiguration.configurationID,
-      });
+          configurationID:
+            deletedConfiguration.configurationID,
+        });
+
 
     } catch (error) {
       console.error(
@@ -704,18 +910,20 @@ router.delete(
         error
       );
 
-      return res.status(500).json({
-        success: false,
+      return res
+        .status(500)
+        .json({
+          success: false,
 
-        message:
-          "Failed to delete configuration",
+          message:
+            "Failed to delete configuration",
 
-        error:
-          error.message,
-      });
+          error:
+            error.message,
+        });
     }
   }
 );
 
 
-module.exports = router
+module.exports = router;

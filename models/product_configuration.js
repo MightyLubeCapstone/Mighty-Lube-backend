@@ -5,8 +5,14 @@ const uuid = require("uuid");
 // =========================================================
 // CONFIGURATION ACTOR
 //
-// Stores who created / last updated the configurator.
-// This can be either a normal user or an admin.
+// Stores who created / updated the configurator.
+//
+// This can be either:
+//
+// user
+// admin
+//
+// This same schema is also reused inside activityHistory.
 // =========================================================
 
 const configurationActorSchema = new mongoose.Schema(
@@ -35,6 +41,116 @@ const configurationActorSchema = new mongoose.Schema(
       type: String,
       enum: ["user", "admin"],
       required: true,
+    },
+  },
+  {
+    _id: false,
+  }
+);
+
+
+// =========================================================
+// ACTIVITY CHANGE
+//
+// Stores ONE changed value.
+//
+// Example:
+//
+// {
+//   field: "configurationData.conveyorSpeed",
+//   from: "25",
+//   to: "30"
+// }
+//
+// Mixed is intentionally used for from/to because a
+// configuration value may be:
+//
+// String
+// Number
+// Boolean
+// Array
+// Object
+// null
+//
+// =========================================================
+
+const activityChangeSchema = new mongoose.Schema(
+  {
+    field: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    from: {
+      type: mongoose.Schema.Types.Mixed,
+      default: null,
+    },
+
+    to: {
+      type: mongoose.Schema.Types.Mixed,
+      default: null,
+    },
+  },
+  {
+    _id: false,
+  }
+);
+
+
+// =========================================================
+// CONFIGURATION ACTIVITY
+//
+// Immutable audit entry describing what happened.
+//
+// Examples:
+//
+// configuration_created
+// configuration_updated
+// configuration_submitted
+// admin_status_changed
+//
+// IMPORTANT:
+//
+// The backend routes are responsible for:
+//
+// - identifying the authenticated actor
+// - comparing old/new values
+// - creating changes[]
+// - appending the activity
+//
+// Frontend should never be trusted to create audit entries.
+// =========================================================
+
+const configurationActivitySchema = new mongoose.Schema(
+  {
+    action: {
+      type: String,
+
+      enum: [
+        "configuration_created",
+        "configuration_updated",
+        "configuration_submitted",
+        "admin_status_changed",
+      ],
+
+      required: true,
+    },
+
+    actor: {
+      type: configurationActorSchema,
+      required: true,
+    },
+
+    changedAt: {
+      type: Date,
+      required: true,
+      default: Date.now,
+    },
+
+    changes: {
+      type: [activityChangeSchema],
+      default: [],
     },
   },
   {
@@ -183,6 +299,7 @@ const ProductConfigurationSchema = new mongoose.Schema(
 
     status: {
       type: String,
+
       enum: [
         "draft",
         "cart",
@@ -190,6 +307,7 @@ const ProductConfigurationSchema = new mongoose.Schema(
         "completed",
         "archived",
       ],
+
       default: "draft",
       required: true,
       index: true,
@@ -219,7 +337,11 @@ const ProductConfigurationSchema = new mongoose.Schema(
     //     ↓
     // done
     //
-    // IMPORTANT:
+    // Admin can also move a configuration backwards:
+    //
+    // pending -> requested
+    // done -> pending
+    // etc.
     //
     // Changing adminStatus should NOT change the user's
     // configuration status.
@@ -227,11 +349,53 @@ const ProductConfigurationSchema = new mongoose.Schema(
 
     adminStatus: {
       type: String,
+
       enum: [
         "requested",
         "pending",
         "done",
       ],
+
+      default: null,
+      index: true,
+    },
+
+
+    // =====================================================
+    // CURRENT ADMIN STATUS START TIME
+    //
+    // This is the authoritative timestamp for the CURRENT
+    // admin workflow status.
+    //
+    // Example:
+    //
+    // 10 Sep:
+    // requested
+    // adminStatusChangedAt = 10 Sep
+    //
+    // 20 Sep:
+    // requested -> pending
+    // adminStatusChangedAt = 20 Sep
+    //
+    // 25 Sep:
+    // pending -> requested
+    // adminStatusChangedAt = 25 Sep
+    //
+    // Therefore the Requested timer starts again from
+    // 25 Sep instead of incorrectly using 10 Sep.
+    //
+    // IMPORTANT:
+    //
+    // This should change ONLY when adminStatus genuinely
+    // changes.
+    //
+    // pending -> pending
+    //
+    // should NOT reset this timestamp.
+    // =====================================================
+
+    adminStatusChangedAt: {
+      type: Date,
       default: null,
       index: true,
     },
@@ -342,6 +506,49 @@ const ProductConfigurationSchema = new mongoose.Schema(
 
 
     // =====================================================
+    // COMPLETE ACTIVITY HISTORY
+    //
+    // This stores historical changes to the configuration.
+    //
+    // It is append-only from application routes.
+    //
+    // Example:
+    //
+    // activityHistory: [
+    //   {
+    //     action: "configuration_updated",
+    //
+    //     actor: {
+    //       userID: "...",
+    //       username: "...",
+    //       firstName: "...",
+    //       lastName: "...",
+    //       role: "admin"
+    //     },
+    //
+    //     changedAt: "...",
+    //
+    //     changes: [
+    //       {
+    //         field: "configurationData.conveyorSpeed",
+    //         from: "25",
+    //         to: "30"
+    //       }
+    //     ]
+    //   }
+    // ]
+    //
+    // We store ONLY changed values rather than copying the
+    // entire configuration before/after every edit.
+    // =====================================================
+
+    activityHistory: {
+      type: [configurationActivitySchema],
+      default: [],
+    },
+
+
+    // =====================================================
     // USER WORKFLOW TIMESTAMPS
     // =====================================================
 
@@ -357,16 +564,27 @@ const ProductConfigurationSchema = new mongoose.Schema(
 
 
     // =====================================================
-    // ADMIN WORKFLOW TIMESTAMPS
+    // LEGACY / MILESTONE ADMIN WORKFLOW TIMESTAMPS
+    //
+    // These fields are intentionally retained for backward
+    // compatibility with the existing application.
     //
     // adminRequestedAt:
-    // Configuration entered the admin queue.
+    // Existing requested milestone timestamp.
     //
     // adminStartedAt:
-    // Admin changed requested -> pending.
+    // Existing pending milestone timestamp.
     //
     // adminCompletedAt:
-    // Admin changed status -> done.
+    // Existing done milestone timestamp.
+    //
+    // IMPORTANT:
+    //
+    // These are NOT the authoritative timer source for the
+    // current admin status anymore.
+    //
+    // adminStatusChangedAt should be used for the current
+    // status duration.
     // =====================================================
 
     adminRequestedAt: {
@@ -399,6 +617,7 @@ const ProductConfigurationSchema = new mongoose.Schema(
 
 
 // Fetch user's cart / drafts / submitted items
+
 ProductConfigurationSchema.index({
   userID: 1,
   status: 1,
@@ -406,6 +625,7 @@ ProductConfigurationSchema.index({
 
 
 // Fetch user's configurations for particular product
+
 ProductConfigurationSchema.index({
   userID: 1,
   productType: 1,
@@ -413,6 +633,7 @@ ProductConfigurationSchema.index({
 
 
 // User + product + status filtering
+
 ProductConfigurationSchema.index({
   userID: 1,
   productType: 1,
@@ -421,6 +642,7 @@ ProductConfigurationSchema.index({
 
 
 // Admin filtering
+
 ProductConfigurationSchema.index({
   productType: 1,
   status: 1,
@@ -428,6 +650,7 @@ ProductConfigurationSchema.index({
 
 
 // Search configuration by name
+
 ProductConfigurationSchema.index({
   userID: 1,
   configurationName: 1,
@@ -435,6 +658,7 @@ ProductConfigurationSchema.index({
 
 
 // Fetch all items belonging to one saved draft
+
 ProductConfigurationSchema.index({
   userID: 1,
   draftID: 1,
@@ -442,6 +666,7 @@ ProductConfigurationSchema.index({
 
 
 // Fetch user's draft groups efficiently
+
 ProductConfigurationSchema.index({
   userID: 1,
   status: 1,
@@ -466,6 +691,7 @@ ProductConfigurationSchema.index({
 
 
 // User configuration state + admin processing state
+
 ProductConfigurationSchema.index({
   status: 1,
   adminStatus: 1,
@@ -473,15 +699,26 @@ ProductConfigurationSchema.index({
 
 
 // Product-specific admin queue
+
 ProductConfigurationSchema.index({
   productType: 1,
   adminStatus: 1,
 });
 
 
+// Current admin status + current status start time.
+//
+// Useful for current workflow duration / queue queries.
+
+ProductConfigurationSchema.index({
+  adminStatus: 1,
+  adminStatusChangedAt: 1,
+});
+
+
 // =========================================================
 // MODEL
-// =====================================================
+// =========================================================
 
 const ProductConfiguration =
   mongoose.models.ProductConfiguration ||
