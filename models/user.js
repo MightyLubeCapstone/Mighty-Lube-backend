@@ -1,3 +1,4 @@
+
 const mongoose = require('mongoose');
 const uuid = require('uuid');
 
@@ -29,6 +30,8 @@ const UserSchema = new mongoose.Schema(
             required: true,
         },
 
+        // Legacy password recovery fields.
+        // Keep until the new email OTP flow is fully tested.
         resetCode: {
             type: String,
             default: null,
@@ -37,6 +40,85 @@ const UserSchema = new mongoose.Schema(
         securityPin: {
             type: String,
             default: null,
+        },
+
+
+        // =====================================================
+        // SECURITY PIN PASSWORD RESET TOKEN
+        // Valid for 10 minutes after PIN verification.
+        // =====================================================
+
+        passwordResetPinTokenHash: {
+            type: String,
+            default: null,
+        },
+
+        passwordResetPinTokenExpiresAt: {
+            type: Date,
+            default: null,
+        },
+
+
+        // =====================================================
+        // FORGOT PASSWORD EMAIL OTP
+        // =====================================================
+
+        passwordResetOtp: {
+            codeHash: {
+                type: String,
+                default: null,
+            },
+
+            expiresAt: {
+                type: Date,
+                default: null,
+            },
+
+            attempts: {
+                type: Number,
+                default: 0,
+                min: 0,
+            },
+
+            lastSentAt: {
+                type: Date,
+                default: null,
+            },
+        },
+
+        // =====================================================
+        // EMAIL VERIFICATION (FUTURE FEATURE)
+        //
+        // Verification will not be enforced until enabled
+        // in the backend authentication and registration flow.
+        // =====================================================
+
+        emailVerified: {
+            type: Boolean,
+            default: false,
+        },
+
+        emailVerificationOtp: {
+            codeHash: {
+                type: String,
+                default: null,
+            },
+
+            expiresAt: {
+                type: Date,
+                default: null,
+            },
+
+            attempts: {
+                type: Number,
+                default: 0,
+                min: 0,
+            },
+
+            lastSentAt: {
+                type: Date,
+                default: null,
+            },
         },
 
         firstName: {

@@ -225,6 +225,10 @@ const technicianNotesRoute = require("./routes/Technician/TECHNICIAN_NOTES");
 
 
 
+// Android / iOS app update configuration
+const appVersionRoute = require("./routes/appVersion");
+
+
 // ============================================================
 // FILE UPLOAD ROUTE
 // jahan comveyor or plant ke image upload honge
@@ -459,6 +463,8 @@ app.use("/api/uploads", uploadRoute);
 
 
 
+// Public app version check (Android / iOS)
+app.use("/api/app-version", appVersionRoute);
 
 // ============================================================
 // HEALTH CHECK

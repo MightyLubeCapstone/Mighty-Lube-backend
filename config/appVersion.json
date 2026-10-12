@@ -1,0 +1,29 @@
+
+{
+  "android": {
+    "backendVersion": "1.0.0",
+    "frontendVersion": "3.0.2",
+    "latestVersion": "3.0.3",
+    "updateEnabled": true,
+    "updateType": "optional",
+    "title": "New Update Available",
+    "message": "A new version of Mighty Lube is available. Please update for the latest improvements.",
+    "forceUpdateTitle": "Update Required",
+    "forceUpdateMessage": "You must update Mighty Lube to continue using the app.",
+    "releaseNotes": "Bug fixes and performance improvements.",
+    "storeUrl": "https://play.google.com/store/apps/details?id=com.mightylube.configurator"
+  },
+  "ios": {
+    "backendVersion": "1.0.0",
+    "frontendVersion": "3.0.3",
+    "latestVersion": "3.0.3",
+    "updateEnabled": true,
+    "updateType": "optional",
+    "title": "New Update Available",
+    "message": "A new version of Mighty Lube is available. Please update to enjoy the latest improvements.",
+    "forceUpdateTitle": "Update Required",
+    "forceUpdateMessage": "Please update Mighty Lube to continue using the app.",
+    "releaseNotes": "Bug fixes and performance improvements.",
+    "storeUrl": "https://apps.apple.com/in/app/mighty-lube/id6743176100"
+  }
+}

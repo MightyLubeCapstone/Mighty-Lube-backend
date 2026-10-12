@@ -869,10 +869,8 @@ sessionsRoute.delete(
 			);
 
 			return res.status(500).json({
-				error:
-					"Internal server error",
-				message:
-					"Unable to forget remembered account"
+				error:"Internal server error",
+				message:"Unable to forget remembered account"
 			});
 		}
 	}
