@@ -1,4 +1,4 @@
-const { Resend } = require('resend');
+const nodemailer = require('nodemailer');
 const User = require('../models/user');
 
 // Utility function to calculate duration between two dates
@@ -37,19 +37,34 @@ function formatTimestamp(date) {
   });
 }
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-const emailFrom = process.env.EMAIL_FROM;
-const emailTo = process.env.ORDER_EMAIL_TO || emailFrom;
+// Same Gmail SMTP account as the OTP / verification emails
+// (routes/email.js).
+const emailFrom = process.env.SMTP_USER;
+
+// All RFQ emails go to the shared team inbox only.
+// No fallback to the sender address.
+const emailTo = process.env.ORDER_EMAIL_TO || 'config@mightylube.com';
+
+const emailTransporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST || 'smtp.gmail.com',
+  port: Number(process.env.SMTP_PORT || 465),
+  secure: String(process.env.SMTP_SECURE || 'true').toLowerCase() === 'true',
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_APP_PASSWORD,
+  },
+});
 
 async function sendEmail(mailOptions) {
-  if (!process.env.RESEND_API_KEY || !emailFrom) {
-    throw new Error('RESEND_API_KEY or EMAIL_FROM is missing in environment variables');
+  if (!process.env.SMTP_USER || !process.env.SMTP_APP_PASSWORD) {
+    throw new Error('SMTP_USER or SMTP_APP_PASSWORD is missing in environment variables');
   }
 
-  return resend.emails.send({
+  return emailTransporter.sendMail({
     from: mailOptions.from || emailFrom,
     to: mailOptions.to,
     cc: mailOptions.cc,
+    replyTo: mailOptions.replyTo,
     subject: mailOptions.subject,
     text: mailOptions.text,
     attachments: mailOptions.attachments,
@@ -142,33 +157,61 @@ function generatePdfBuffer(text) {
   });
 }
 
+// Turns a configuration's configurationData into readable lines.
+// Skips internal ids; uploaded images (stored as metadata) show as "Image attached".
+function formatConfigurationData(configurationData) {
+  if (!configurationData || typeof configurationData !== 'object') {
+    return '';
+  }
+
+  return Object.entries(configurationData)
+    .filter(([key, value]) => key !== '_id' && value !== null && value !== undefined && `${value}`.trim() !== '')
+    .map(([key, value]) => {
+      let text;
+
+      if (Array.isArray(value)) {
+        text = value.join(', ');
+      } else if (typeof value === 'object') {
+        text = value.objectKey ? 'Image attached' : JSON.stringify(value);
+      } else {
+        text = `${value}`;
+      }
+
+      const label = key
+        .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+        .replace(/_/g, ' ')
+        .replace(/^./, (c) => c.toUpperCase());
+
+      return `            ${label}: ${text}`;
+    })
+    .join('\n');
+}
+
 async function sendOrderNotification(user, orderData, actionType = 'added', configurationName = null) {
   try {
     // Check if orderData is an array (configuration order) or single order
     if (Array.isArray(orderData)) {
       // Configuration order with multiple items
       const cartItems = orderData;
-      const finalConfigName = configurationName || 'Configuration Order';
+      // All RFQs of one Finalize share the same project (or none).
+      const projectItem = cartItems.find((item) => item.projectName);
+      const projectLine = projectItem
+        ? `${projectItem.projectNumber ? `P-${projectItem.projectNumber} – ` : ''}${projectItem.projectName}`
+        : null;
+      const finalConfigName = configurationName || (projectLine ? `Project ${projectLine}` : 'Configuration Order');
 
       const itemsList = cartItems.map((item, index) => {
-        const config = item.productConfigurationInfo || {};
-        const configList = Object.entries(config).map(([key, value]) => `    ${key}: ${value}`).join('\n');
-
-        // Get timing information
-        const createdTime = formatTimestamp(item.orderCreated);
-        const completeTime = formatTimestamp(item.completeDate);
-        const duration = item.processingDuration ? item.processingDuration.formatted : calculateDuration(item.orderCreated, item.completeDate);
+        const configList = formatConfigurationData(item.configurationData);
 
         return `
           Item ${index + 1}:
-          - Product Type: ${item.productType || 'N/A'}
+          - RFQ Number: ${item.rfqNumber ? `RFQ-${item.rfqNumber}` : 'N/A'}
+          - Product: ${item.productName || item.productType || 'N/A'}
+          - Product ID: ${item.productType || 'N/A'}
           - Quantity: ${item.numRequested || 'N/A'}
-          - Order ID: ${item.orderID || 'Pending'}
-          - Created: ${createdTime}
-          - Completed: ${completeTime}
-          - Processing Time: ${duration}
+          - Submitted: ${formatTimestamp(item.submittedAt || item.updatedAt)}
           - Configuration:
-            ${configList || '    No configuration details'}
+${configList || '            No configuration details'}
         `;
       }).join('\n');
 
@@ -197,6 +240,7 @@ async function sendOrderNotification(user, orderData, actionType = 'added', conf
         - Company: ${user.companyName || 'N/A'}
         
         Configuration Name: ${finalConfigName}
+        Project: ${projectLine || 'Standalone'}
         Total Items: ${cartItems.length}
         ${actionType.toLowerCase() === 'complete' ? 'Status: COMPLETE' : ''}
         
@@ -294,4 +338,62 @@ async function sendOrderNotification(user, orderData, actionType = 'added', conf
   }
 }
 
-module.exports = { sendOrderNotification };
+// =========================================================
+// AWAITING RESPONSE EMAIL (to the RFQ creator)
+//
+// Sent every time an admin sets an RFQ to Awaiting Response.
+// Uses the client's template. Replies go to the team inbox.
+//
+// Returns true when the SMTP server accepted the email, false
+// otherwise. Never throws, so the status change is not
+// blocked by an email problem.
+// =========================================================
+
+async function sendAwaitingResponseEmail(user, configuration) {
+  try {
+    if (!user || !user.email) {
+      console.warn(`Awaiting Response email skipped: no email for user ${configuration.userID}`);
+      return false;
+    }
+
+    const rfqText = configuration.rfqNumber ? `RFQ-${configuration.rfqNumber}` : 'N/A';
+
+    const projectLine = configuration.projectName
+      ? `Project: ${configuration.projectNumber ? `P-${configuration.projectNumber} – ` : ''}${configuration.projectName}\n`
+      : '';
+
+    const text = `Hello ${user.firstName || 'there'},
+
+Thank you for submitting your request for a quote. We appreciate your interest in our products and services.
+
+RFQ Number: ${rfqText}
+${projectLine}
+We need a few additional details before we can complete your quote. A brief conversation will help us confirm your requirements and prepare an accurate quote promptly.
+
+Please reply with a few convenient times for a conference call, including your time zone, or call our office directly at 231.924.6160.
+
+Thank you,
+Mighty Lube
+`;
+
+    const result = await sendEmail({
+      to: user.email,
+      replyTo: emailTo,
+      subject: `Additional details needed – ${rfqText}`,
+      text,
+    });
+
+    if (!result || (result.rejected && result.rejected.length > 0)) {
+      console.error('Awaiting Response email rejected:', result && result.rejected);
+      return false;
+    }
+
+    console.log(`Awaiting Response email sent for ${rfqText} to user ${configuration.userID}`);
+    return true;
+  } catch (error) {
+    console.error('Failed to send Awaiting Response email:', error);
+    return false;
+  }
+}
+
+module.exports = { sendOrderNotification, sendAwaitingResponseEmail };

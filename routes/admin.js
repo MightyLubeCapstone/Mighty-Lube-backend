@@ -2761,6 +2761,10 @@ const User = require("../models/user");
 const ProductConfiguration = require("../models/product_configuration");
 
 const {
+  sendAwaitingResponseEmail,
+} = require("../utils/emailnotif");
+
+const {
   getSignedFileUrl,
 } = require("../Services/object_storage_service");
 
@@ -3401,6 +3405,7 @@ function getStatusFilter(query) {
   const allowedStatuses = [
     "requested",
     "pending",
+    "awaiting_response",
     "done",
   ];
 
@@ -3417,7 +3422,7 @@ function getStatusFilter(query) {
   ) {
     const error =
       new Error(
-        "status must be requested, pending, done, all, or a comma-separated combination"
+        "status must be requested, pending, awaiting_response, done, all, or a comma-separated combination"
       );
 
     error.status = 400;
@@ -3539,6 +3544,8 @@ router.get(
 
         pending: 0,
 
+        awaiting_response: 0,
+
         done: 0,
       };
 
@@ -3595,6 +3602,18 @@ router.get(
 
                 productName:
                   configuration.productName,
+
+                rfqNumber:
+                  configuration.rfqNumber,
+
+                projectID:
+                  configuration.projectID,
+
+                projectNumber:
+                  configuration.projectNumber,
+
+                projectName:
+                  configuration.projectName,
 
                 status:
                   configuration.status,
@@ -4556,6 +4575,7 @@ router.patch(
       const allowedStatuses = [
         "requested",
         "pending",
+        "awaiting_response",
         "done",
       ];
 
@@ -4568,7 +4588,7 @@ router.patch(
           .status(400)
           .json({
             error:
-              "Admin status must be requested, pending, or done",
+              "Admin status must be requested, pending, awaiting_response, or done",
           });
       }
 
@@ -4767,6 +4787,27 @@ router.patch(
 
       else if (
         requestedStatus ===
+        "awaiting_response"
+      ) {
+        // Work has started; waiting on the user.
+        configuration.adminRequestedAt =
+          configuration.adminRequestedAt ||
+          configuration.submittedAt ||
+          now;
+
+        configuration.adminStartedAt =
+          configuration.adminStartedAt ||
+          now;
+
+        configuration.adminCompletedAt =
+          null;
+
+        configuration.completedAt =
+          null;
+      }
+
+      else if (
+        requestedStatus ===
         "done"
       ) {
         configuration.adminRequestedAt =
@@ -4849,6 +4890,41 @@ router.patch(
 
 
       // ===================================================
+      // AWAITING RESPONSE EMAIL
+      //
+      // Sent to the RFQ creator every time this status is
+      // set. An email problem never undoes the status
+      // change; emailSent tells the admin app whether it
+      // went out (null for other statuses).
+      // ===================================================
+
+      let emailSent = null;
+
+      if (
+        requestedStatus ===
+        "awaiting_response"
+      ) {
+        const owner =
+          await User.findOne(
+            {
+              userID:
+                configuration.userID,
+            },
+            {
+              firstName: 1,
+              email: 1,
+            }
+          ).lean();
+
+        emailSent =
+          await sendAwaitingResponseEmail(
+            owner,
+            configuration
+          );
+      }
+
+
+      // ===================================================
       // RESPONSE
       // ===================================================
 
@@ -4859,6 +4935,8 @@ router.patch(
             "Admin configuration status updated",
 
           configuration,
+
+          emailSent,
         });
 
     } catch (error) {

@@ -350,9 +350,12 @@ const ProductConfigurationSchema = new mongoose.Schema(
     adminStatus: {
       type: String,
 
+      // awaiting_response: admin needs more details from
+      // the user; the user is emailed each time it is set.
       enum: [
         "requested",
         "pending",
+        "awaiting_response",
         "done",
       ],
 
@@ -451,6 +454,51 @@ const ProductConfigurationSchema = new mongoose.Schema(
     },
 
     draftTitle: {
+      type: String,
+      default: null,
+      trim: true,
+    },
+
+
+    // =====================================================
+    // RFQ NUMBER
+    //
+    // Unique 5-digit number (10001 -> 99999) given when the
+    // configuration is finalized. One per configuration.
+    //
+    // Shown in the apps as RFQ-10001.
+    //
+    // null for draft/cart records.
+    // =====================================================
+
+    rfqNumber: {
+      type: Number,
+      default: null,
+    },
+
+
+    // =====================================================
+    // PROJECT
+    //
+    // Set when the user grouped this RFQ into a project at
+    // Finalize. null for standalone RFQs.
+    //
+    // Copied from the Project record so lists can group
+    // RFQs without extra lookups. Project names never
+    // change after creation.
+    // =====================================================
+
+    projectID: {
+      type: String,
+      default: null,
+    },
+
+    projectNumber: {
+      type: Number,
+      default: null,
+    },
+
+    projectName: {
       type: String,
       default: null,
       trim: true,
@@ -714,6 +762,31 @@ ProductConfigurationSchema.index({
   adminStatus: 1,
   adminStatusChangedAt: 1,
 });
+
+
+// All RFQs of one project.
+
+ProductConfigurationSchema.index({
+  projectID: 1,
+});
+
+
+// Every RFQ number is unique. Records without a number
+// (draft/cart) are not part of this index.
+
+ProductConfigurationSchema.index(
+  {
+    rfqNumber: 1,
+  },
+  {
+    unique: true,
+    partialFilterExpression: {
+      rfqNumber: {
+        $type: "number",
+      },
+    },
+  }
+);
 
 
 // =========================================================

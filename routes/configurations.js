@@ -10,6 +10,18 @@ const ProductConfiguration = require(
   "../models/product_configuration"
 );
 
+const uuid = require("uuid");
+
+const {
+  nextRfqNumber,
+  nextProjectNumber,
+} = require("../models/counter");
+
+const {
+  Project,
+  projectNameKey,
+} = require("../models/project");
+
 const router = express.Router();
 
 
@@ -84,8 +96,25 @@ router.get(
                 productName:
                   item.productName,
 
+                rfqNumber:
+                  item.rfqNumber,
+
+                projectID:
+                  item.projectID,
+
+                projectNumber:
+                  item.projectNumber,
+
+                projectName:
+                  item.projectName,
+
                 quantity:
                   item.numRequested,
+
+                // Lets the user's view-only details screen
+                // show what was configured.
+                configurationData:
+                  item.configurationData,
 
                 status:
                   item.status,
@@ -227,6 +256,7 @@ router.put(
     try {
       const {
         configurationIDs,
+        projectName,
       } = req.body;
 
 
@@ -366,6 +396,112 @@ router.put(
 
 
       // =====================================================
+      // OPTIONAL PROJECT
+      //
+      // projectName missing/empty -> standalone RFQs.
+      //
+      // projectName given -> create a NEW project first.
+      // If this user already has a project with that name,
+      // stop here with 409 so nothing gets submitted and the
+      // user can pick another name.
+      // =====================================================
+
+      let project = null;
+
+      if (
+        projectName !== undefined &&
+        projectName !== null &&
+        `${projectName}`.trim() !== ""
+      ) {
+        if (typeof projectName !== "string") {
+          return res
+            .status(400)
+            .json({
+              success: false,
+              message:
+                "projectName must be text",
+            });
+        }
+
+        const cleanProjectName =
+          projectName.trim().replace(/\s+/g, " ");
+
+        if (cleanProjectName.length > 100) {
+          return res
+            .status(400)
+            .json({
+              success: false,
+              message:
+                "Project name must be 100 characters or less",
+            });
+        }
+
+        const nameKey =
+          projectNameKey(cleanProjectName);
+
+        const existingProject =
+          await Project.exists({
+            userID:
+              req.user.userID,
+            nameKey,
+          });
+
+        if (existingProject) {
+          return res
+            .status(409)
+            .json({
+              success: false,
+              errorCode:
+                "PROJECT_NAME_EXISTS",
+              message:
+                "Project name already exists",
+            });
+        }
+
+        try {
+          project =
+            await Project.create({
+              projectID:
+                uuid.v4(),
+              projectNumber:
+                await nextProjectNumber(),
+              projectName:
+                cleanProjectName,
+              nameKey,
+              userID:
+                req.user.userID,
+              createdBy: {
+                userID:
+                  actor.userID,
+                username:
+                  actor.username,
+                firstName:
+                  actor.firstName,
+                lastName:
+                  actor.lastName,
+              },
+            });
+        } catch (projectError) {
+          // Same name created at the same moment
+          // (unique index on userID + nameKey).
+          if (projectError.code === 11000) {
+            return res
+              .status(409)
+              .json({
+                success: false,
+                errorCode:
+                  "PROJECT_NAME_EXISTS",
+                message:
+                  "Project name already exists",
+              });
+          }
+
+          throw projectError;
+        }
+      }
+
+
+      // =====================================================
       // SUBMIT SELECTED CONFIGURATIONS
       //
       // Same records stay in:
@@ -455,6 +591,16 @@ router.put(
 
               draftTitle:
                 null,
+
+              // null for standalone RFQs.
+              projectID:
+                project ? project.projectID : null,
+
+              projectNumber:
+                project ? project.projectNumber : null,
+
+              projectName:
+                project ? project.projectName : null,
             },
 
             // ---------------------------------------------
@@ -504,6 +650,41 @@ router.put(
 
 
       // =====================================================
+      // ASSIGN RFQ NUMBERS
+      //
+      // One unique number per configuration, in the order
+      // the user sent them.
+      //
+      // Finalize (3 items) -> 10001, 10002, 10003
+      //
+      // Only records without a number get one, so a retry
+      // never changes an existing number.
+      // =====================================================
+
+      for (const configurationID of uniqueConfigurationIDs) {
+        const rfqNumber =
+          await nextRfqNumber();
+
+        await ProductConfiguration.updateOne(
+          {
+            configurationID,
+            userID:
+              req.user.userID,
+            status:
+              "submitted",
+            rfqNumber:
+              null,
+          },
+          {
+            $set: {
+              rfqNumber,
+            },
+          }
+        );
+      }
+
+
+      // =====================================================
       // FETCH UPDATED CONFIGURATIONS
       //
       // Useful for response + email notification.
@@ -529,6 +710,8 @@ router.put(
 
           adminStatus:
             "requested",
+        }).sort({
+          rfqNumber: 1,
         });
 
 
@@ -574,6 +757,19 @@ router.put(
           configurationIDs:
             uniqueConfigurationIDs,
 
+          // null for standalone submissions.
+          project:
+            project
+              ? {
+                projectID:
+                  project.projectID,
+                projectNumber:
+                  project.projectNumber,
+                projectName:
+                  project.projectName,
+              }
+              : null,
+
           configurations:
             submittedConfigurations.map(
               (item) => ({
@@ -588,6 +784,18 @@ router.put(
 
                 productName:
                   item.productName,
+
+                rfqNumber:
+                  item.rfqNumber,
+
+                projectID:
+                  item.projectID,
+
+                projectNumber:
+                  item.projectNumber,
+
+                projectName:
+                  item.projectName,
 
                 quantity:
                   item.numRequested,
@@ -737,6 +945,18 @@ router.get(
 
             productName:
               configuration.productName,
+
+            rfqNumber:
+              configuration.rfqNumber,
+
+            projectID:
+              configuration.projectID,
+
+            projectNumber:
+              configuration.projectNumber,
+
+            projectName:
+              configuration.projectName,
 
             status:
               configuration.status,
