@@ -2,7 +2,7 @@
 {
   "android": {
     "backendVersion": "1.0.0",
-    "frontendVersion": "3.0.2",
+    "frontendVersion": "3.0.3",
     "latestVersion": "3.0.3",
     "updateEnabled": true,
     "updateType": "optional",
