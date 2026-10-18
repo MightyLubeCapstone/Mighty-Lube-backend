@@ -3,6 +3,7 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const { dbConnect } = require("./config/config");
 const { name: packageName, version: backendVersion } = require("./package.json");
+const { activityLogger } = require("./utils/activityLogger");
 const path = require("path");
 const dotenv = require("dotenv");
 
@@ -18,6 +19,11 @@ const app = express();
 app.use(bodyParser.json());
 app.use(cors());
 
+// Writes business activity logs (login, RFQ submit, status
+// change, ...) after successful requests.
+// See utils/activityLogger.js.
+app.use(activityLogger);
+
 
 // ============================================================
 // DASHBOARD ROUTES
@@ -27,6 +33,7 @@ const user_orders = require("./routes/user_orders");
 const orders = require("./routes/orders");
 const rfq = require("./routes/rfq");
 const adminRoute = require("./routes/admin");
+const activityLogsRoute = require("./routes/activityLogs");
 
 
 // ============================================================
@@ -245,6 +252,8 @@ const uploadRoute = require("./routes/IMAGE_UPLOAD/Upload");
 app.use("/api/user_orders", user_orders);
 app.use("/api/orders", orders);
 app.use("/api/rfq", rfq);
+// Mounted before /api/admin so the admin router never sees it.
+app.use("/api/admin/activity-logs", activityLogsRoute);
 app.use("/api/admin", adminRoute);
 
 
