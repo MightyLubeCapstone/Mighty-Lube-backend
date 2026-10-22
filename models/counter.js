@@ -34,11 +34,15 @@ const CounterSchema = new mongoose.Schema(
 );
 
 
+// Own model name and collection: utils/orderutils.js already
+// registers a "Counter" model ({ _id, sequence_value }) on the
+// "counters" collection for order IDs.
 const Counter =
-  mongoose.models.Counter ||
+  mongoose.models.RfqCounter ||
   mongoose.model(
-    "Counter",
-    CounterSchema
+    "RfqCounter",
+    CounterSchema,
+    "rfq_counters"
   );
 
 
