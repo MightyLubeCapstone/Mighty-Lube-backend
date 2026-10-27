@@ -2761,6 +2761,16 @@ const User = require("../models/user");
 const ProductConfiguration = require("../models/product_configuration");
 
 const {
+  Project,
+  projectCustomerDetailsMap,
+  customerDetailsFor,
+} = require("../models/project");
+
+const {
+  normalizeCustomerDetails,
+} = require("../models/customer_details");
+
+const {
   sendAwaitingResponseEmail,
 } = require("../utils/emailnotif");
 
@@ -3536,6 +3546,11 @@ router.get(
           })
           .lean();
 
+      const projectDetails =
+        await projectCustomerDetailsMap(
+          configurations
+        );
+
       const summary = {
         total:
           configurations.length,
@@ -3614,6 +3629,13 @@ router.get(
 
                 projectName:
                   configuration.projectName,
+
+                // Project RFQs: the project's live details.
+                customerDetails:
+                  customerDetailsFor(
+                    configuration,
+                    projectDetails
+                  ),
 
                 status:
                   configuration.status,
@@ -3739,10 +3761,23 @@ router.get(
           });
       }
 
+      const projectDetails =
+        await projectCustomerDetailsMap([
+          configuration,
+        ]);
+
       return res
         .status(200)
         .json({
-          configuration,
+          configuration: {
+            ...configuration.toObject(),
+
+            customerDetails:
+              customerDetailsFor(
+                configuration,
+                projectDetails
+              ),
+          },
         });
 
     } catch (error) {
@@ -5926,6 +5961,103 @@ router.delete(
         .json({
           error:
             "Failed to delete user",
+        });
+    }
+  }
+);
+
+
+// =========================================================
+// PATCH /api/admin/projects/:projectID/details
+//
+// Admin edits ANY project's customer details. Every RFQ in
+// the project shows the new details.
+//
+// Body: { customerDetails: { customer, finalCustomer,
+//         contact, additionalInfo } }
+// =========================================================
+
+router.patch(
+  "/projects/:projectID/details",
+  async (req, res) => {
+    try {
+      const project =
+        await Project.findOne({
+          projectID:
+            req.params.projectID,
+        });
+
+      if (!project) {
+        return res
+          .status(404)
+          .json({
+            error:
+              "Project not found",
+          });
+      }
+
+      const normalized =
+        normalizeCustomerDetails(
+          req.body?.customerDetails
+        );
+
+      if (normalized.error) {
+        return res
+          .status(400)
+          .json({
+            error:
+              normalized.error,
+          });
+      }
+
+      project.customerDetails =
+        normalized.value;
+      project.customerDetailsUpdatedAt =
+        new Date();
+      project.customerDetailsUpdatedBy = {
+        userID:
+          req.user.userID,
+        username:
+          req.user.username,
+        firstName:
+          req.user.firstName || "",
+        lastName:
+          req.user.lastName || "",
+      };
+
+      await project.save();
+
+      return res
+        .status(200)
+        .json({
+          message:
+            "Project details updated",
+
+          project: {
+            projectID:
+              project.projectID,
+            projectNumber:
+              project.projectNumber,
+            projectName:
+              project.projectName,
+            customerDetails:
+              project.customerDetails,
+            customerDetailsUpdatedAt:
+              project.customerDetailsUpdatedAt,
+          },
+        });
+
+    } catch (error) {
+      console.error(
+        "Failed to update project details:",
+        error
+      );
+
+      return res
+        .status(500)
+        .json({
+          error:
+            "Failed to update project details",
         });
     }
   }

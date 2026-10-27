@@ -1,6 +1,10 @@
 const mongoose = require("mongoose");
 const uuid = require("uuid");
 
+const {
+  customerDetailsSchema,
+} = require("./customer_details");
+
 
 // =========================================================
 // CONFIGURATION ACTOR
@@ -502,6 +506,20 @@ const ProductConfigurationSchema = new mongoose.Schema(
       type: String,
       default: null,
       trim: true,
+    },
+
+
+    // =====================================================
+    // CUSTOMER DETAILS (STANDALONE RFQs)
+    //
+    // Entered at Finalize for standalone RFQs. Project RFQs
+    // keep null here and use the Project's customerDetails
+    // instead, so edits to the project show on every RFQ.
+    // =====================================================
+
+    customerDetails: {
+      type: customerDetailsSchema,
+      default: null,
     },
 
 

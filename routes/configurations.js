@@ -20,7 +20,14 @@ const {
 const {
   Project,
   projectNameKey,
+  projectCustomerDetailsMap,
+  customerDetailsFor,
 } = require("../models/project");
+
+const {
+  normalizeCustomerDetails,
+  hasCustomerDetails,
+} = require("../models/customer_details");
 
 const router = express.Router();
 
@@ -72,6 +79,11 @@ router.get(
           createdAt: -1,
         });
 
+      const projectDetails =
+        await projectCustomerDetailsMap(
+          configurations
+        );
+
 
       return res
         .status(200)
@@ -107,6 +119,12 @@ router.get(
 
                 projectName:
                   item.projectName,
+
+                customerDetails:
+                  customerDetailsFor(
+                    item,
+                    projectDetails
+                  ),
 
                 quantity:
                   item.numRequested,
@@ -257,6 +275,8 @@ router.put(
       const {
         configurationIDs,
         projectName,
+        projectID,
+        customerDetails: customerDetailsInput,
       } = req.body;
 
 
@@ -398,21 +418,96 @@ router.put(
       // =====================================================
       // OPTIONAL PROJECT
       //
-      // projectName missing/empty -> standalone RFQs.
+      // both missing/empty -> standalone RFQs.
+      //
+      // projectID given -> attach to the user's EXISTING
+      // project. 404 if it is not one of this user's projects.
       //
       // projectName given -> create a NEW project first.
       // If this user already has a project with that name,
       // stop here with 409 so nothing gets submitted and the
       // user can pick another name.
+      //
+      // Sending both -> 400.
+      //
+      // customerDetails: required for a new project, an
+      // existing project that has none yet (saved to it for
+      // next time) and standalone RFQs. Ignored for an
+      // existing project that already has details.
       // =====================================================
 
       let project = null;
 
-      if (
+      const hasProjectID =
+        projectID !== undefined &&
+        projectID !== null &&
+        `${projectID}`.trim() !== "";
+
+      const hasProjectName =
         projectName !== undefined &&
         projectName !== null &&
-        `${projectName}`.trim() !== ""
+        `${projectName}`.trim() !== "";
+
+      if (hasProjectID && hasProjectName) {
+        return res
+          .status(400)
+          .json({
+            success: false,
+            message:
+              "Send either projectID or projectName, not both",
+          });
+      }
+
+      if (hasProjectID) {
+        project =
+          await Project.findOne({
+            projectID:
+              `${projectID}`.trim(),
+            userID:
+              req.user.userID,
+          });
+
+        if (!project) {
+          return res
+            .status(404)
+            .json({
+              success: false,
+              errorCode:
+                "PROJECT_NOT_FOUND",
+              message:
+                "Project not found",
+            });
+        }
+      }
+
+      let customerDetails = null;
+
+      if (
+        !project ||
+        !hasCustomerDetails(project.customerDetails)
       ) {
+        const normalized =
+          normalizeCustomerDetails(
+            customerDetailsInput
+          );
+
+        if (normalized.error) {
+          return res
+            .status(400)
+            .json({
+              success: false,
+              errorCode:
+                "CUSTOMER_DETAILS_INVALID",
+              message:
+                normalized.error,
+            });
+        }
+
+        customerDetails =
+          normalized.value;
+      }
+
+      if (hasProjectName) {
         if (typeof projectName !== "string") {
           return res
             .status(400)
@@ -480,6 +575,9 @@ router.put(
                 lastName:
                   actor.lastName,
               },
+              customerDetails,
+              customerDetailsUpdatedAt:
+                now,
             });
         } catch (projectError) {
           // Same name created at the same moment
@@ -498,6 +596,27 @@ router.put(
 
           throw projectError;
         }
+      } else if (
+        project &&
+        customerDetails
+      ) {
+        // Existing project without details yet.
+        project.customerDetails =
+          customerDetails;
+        project.customerDetailsUpdatedAt =
+          now;
+        project.customerDetailsUpdatedBy = {
+          userID:
+            actor.userID,
+          username:
+            actor.username,
+          firstName:
+            actor.firstName,
+          lastName:
+            actor.lastName,
+        };
+
+        await project.save();
       }
 
 
@@ -601,6 +720,10 @@ router.put(
 
               projectName:
                 project ? project.projectName : null,
+
+              // Project RFQs read the project's details.
+              customerDetails:
+                project ? null : customerDetails,
             },
 
             // ---------------------------------------------
@@ -725,10 +848,15 @@ router.put(
       // =====================================================
 
       try {
+        // Project RFQs use the project's details.
         await sendOrderNotification(
           req.user,
           submittedConfigurations,
-          "new"
+          "new",
+          null,
+          project
+            ? project.customerDetails
+            : customerDetails
         );
 
       } catch (emailError) {
@@ -767,6 +895,8 @@ router.put(
                   project.projectNumber,
                 projectName:
                   project.projectName,
+                customerDetails:
+                  project.customerDetails,
               }
               : null,
 
@@ -796,6 +926,11 @@ router.put(
 
                 projectName:
                   item.projectName,
+
+                customerDetails:
+                  project
+                    ? project.customerDetails
+                    : item.customerDetails,
 
                 quantity:
                   item.numRequested,
@@ -834,6 +969,187 @@ router.put(
 
           message:
             "Failed to submit configurations",
+
+          error:
+            error.message,
+        });
+    }
+  }
+);
+
+
+// =========================================================
+// GET /api/configurations/projects
+//
+// Projects of the logged-in user, newest first. Used by the
+// Finalize dialog's "Add to existing project" option.
+//
+// Must stay above GET /:configurationID.
+// =========================================================
+
+router.get(
+  "/projects",
+  authenticate,
+  async (req, res) => {
+    try {
+      const projects =
+        await Project.find({
+          userID:
+            req.user.userID,
+        })
+          .sort({
+            createdAt: -1,
+          })
+          .lean();
+
+      return res
+        .status(200)
+        .json({
+          success: true,
+
+          data:
+            projects.map(
+              (project) => ({
+                projectID:
+                  project.projectID,
+                projectNumber:
+                  project.projectNumber,
+                projectName:
+                  project.projectName,
+                // null for old projects: Finalize asks for
+                // the details before sending.
+                customerDetails:
+                  project.customerDetails || null,
+                createdAt:
+                  project.createdAt,
+              })
+            ),
+        });
+    } catch (error) {
+      console.error(
+        "GET /api/configurations/projects error:",
+        error
+      );
+
+      return res
+        .status(500)
+        .json({
+          success: false,
+
+          message:
+            "Failed to fetch projects",
+
+          error:
+            error.message,
+        });
+    }
+  }
+);
+
+
+// =========================================================
+// PATCH /api/configurations/projects/:projectID/details
+//
+// The project owner edits the project's customer details.
+// Every RFQ in the project shows the new details.
+//
+// Body: { customerDetails: { customer, finalCustomer,
+//         contact, additionalInfo } }
+// =========================================================
+
+router.patch(
+  "/projects/:projectID/details",
+  authenticate,
+  async (req, res) => {
+    try {
+      const project =
+        await Project.findOne({
+          projectID:
+            req.params.projectID,
+          userID:
+            req.user.userID,
+        });
+
+      if (!project) {
+        return res
+          .status(404)
+          .json({
+            success: false,
+            errorCode:
+              "PROJECT_NOT_FOUND",
+            message:
+              "Project not found",
+          });
+      }
+
+      const normalized =
+        normalizeCustomerDetails(
+          req.body?.customerDetails
+        );
+
+      if (normalized.error) {
+        return res
+          .status(400)
+          .json({
+            success: false,
+            errorCode:
+              "CUSTOMER_DETAILS_INVALID",
+            message:
+              normalized.error,
+          });
+      }
+
+      project.customerDetails =
+        normalized.value;
+      project.customerDetailsUpdatedAt =
+        new Date();
+      project.customerDetailsUpdatedBy = {
+        userID:
+          req.user.userID,
+        username:
+          req.user.username,
+        firstName:
+          req.user.firstName || "",
+        lastName:
+          req.user.lastName || "",
+      };
+
+      await project.save();
+
+      return res
+        .status(200)
+        .json({
+          success: true,
+
+          message:
+            "Project details updated",
+
+          project: {
+            projectID:
+              project.projectID,
+            projectNumber:
+              project.projectNumber,
+            projectName:
+              project.projectName,
+            customerDetails:
+              project.customerDetails,
+            customerDetailsUpdatedAt:
+              project.customerDetailsUpdatedAt,
+          },
+        });
+    } catch (error) {
+      console.error(
+        "PATCH /api/configurations/projects/:projectID/details error:",
+        error
+      );
+
+      return res
+        .status(500)
+        .json({
+          success: false,
+
+          message:
+            "Failed to update project details",
 
           error:
             error.message,
@@ -925,6 +1241,12 @@ router.get(
       }
 
 
+      const projectDetails =
+        await projectCustomerDetailsMap([
+          configuration,
+        ]);
+
+
       return res
         .status(200)
         .json({
@@ -957,6 +1279,12 @@ router.get(
 
             projectName:
               configuration.projectName,
+
+            customerDetails:
+              customerDetailsFor(
+                configuration,
+                projectDetails
+              ),
 
             status:
               configuration.status,

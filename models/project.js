@@ -1,5 +1,9 @@
 const mongoose = require("mongoose");
 
+const {
+  customerDetailsSchema,
+} = require("./customer_details");
+
 
 // =========================================================
 // PROJECT
@@ -7,8 +11,8 @@ const mongoose = require("mongoose");
 // A user can group the RFQs of one Finalize under a named
 // project, e.g. "Ford Plant Line 2".
 //
-// - Created only at Finalize (RFQs cannot be added to an
-//   existing project later).
+// - Created at Finalize. A later Finalize can attach its
+//   RFQs to an existing project (projectID).
 // - projectNumber shown as P-10001.
 // - Name is unique per user, ignoring case and extra
 //   spaces ("Ford" == "ford "). Different users can use the
@@ -18,6 +22,10 @@ const mongoose = require("mongoose");
 //
 // Each RFQ also stores projectID / projectNumber /
 // projectName so lists can group without extra lookups.
+//
+// customerDetails is entered once at Finalize and shared by
+// every RFQ in the project. The owner and admins can edit
+// it later. null for projects created before it existed.
 // =========================================================
 
 const projectActorSchema = new mongoose.Schema(
@@ -85,6 +93,21 @@ const ProjectSchema = new mongoose.Schema(
       type: projectActorSchema,
       default: null,
     },
+
+    customerDetails: {
+      type: customerDetailsSchema,
+      default: null,
+    },
+
+    customerDetailsUpdatedAt: {
+      type: Date,
+      default: null,
+    },
+
+    customerDetailsUpdatedBy: {
+      type: projectActorSchema,
+      default: null,
+    },
   },
   {
     timestamps: true,
@@ -123,7 +146,67 @@ const Project =
   );
 
 
+// =========================================================
+// CUSTOMER DETAILS FOR RFQ LISTS
+//
+// Project RFQs show their project's (live) details,
+// standalone RFQs their own.
+//
+// const map = await projectCustomerDetailsMap(rfqs);
+// customerDetailsFor(rfq, map);
+// =========================================================
+
+async function projectCustomerDetailsMap(configurations) {
+  const projectIDs = [
+    ...new Set(
+      configurations
+        .map((item) => item.projectID)
+        .filter(Boolean)
+    ),
+  ];
+
+  const map = new Map();
+
+  if (projectIDs.length === 0) {
+    return map;
+  }
+
+  const projects =
+    await Project.find(
+      {
+        projectID: {
+          $in: projectIDs,
+        },
+      },
+      {
+        projectID: 1,
+        customerDetails: 1,
+      }
+    ).lean();
+
+  for (const project of projects) {
+    map.set(
+      project.projectID,
+      project.customerDetails || null
+    );
+  }
+
+  return map;
+}
+
+
+function customerDetailsFor(configuration, projectMap) {
+  if (configuration.projectID) {
+    return projectMap.get(configuration.projectID) || null;
+  }
+
+  return configuration.customerDetails || null;
+}
+
+
 module.exports = {
   Project,
   projectNameKey,
+  projectCustomerDetailsMap,
+  customerDetailsFor,
 };

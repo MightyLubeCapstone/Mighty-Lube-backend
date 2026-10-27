@@ -2,8 +2,8 @@
 {
   "android": {
     "backendVersion": "1.0.0",
-    "frontendVersion": "3.0.3",
-    "latestVersion": "3.0.3",
+    "frontendVersion": "3.0.4",
+    "latestVersion": "3.0.4",
     "updateEnabled": true,
     "updateType": "optional",
     "title": "New Update Available",
@@ -15,8 +15,8 @@
   },
   "ios": {
     "backendVersion": "1.0.0",
-    "frontendVersion": "3.0.3",
-    "latestVersion": "3.0.3",
+    "frontendVersion": "3.0.4",
+    "latestVersion": "3.0.4",
     "updateEnabled": true,
     "updateType": "optional",
     "title": "New Update Available",

@@ -88,7 +88,7 @@ const OHCCSCleaningBrushSchema = new mongoose.Schema(
 
     technicianNote: {
       type: String,
-      required: true,
+      required: false,
       trim: true,
     },
   },

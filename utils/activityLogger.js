@@ -524,6 +524,31 @@ const RULES = [
 
 
   // =======================================================
+  // PROJECT CUSTOMER DETAILS (OWNER / ADMIN)
+  // =======================================================
+
+  {
+    method: "PATCH",
+    path: /^\/api\/(?:admin|configurations)\/projects\/([^/]+)\/details\/?$/,
+    entity: "RFQ",
+    action: "PROJECT_DETAILS_UPDATED",
+    build: ({ body, params }) => {
+      const project = body?.project;
+
+      const label = project
+        ? `P-${project.projectNumber} – ${project.projectName}`
+        : null;
+
+      return {
+        message: "Edited project customer details",
+        entityID: params[0],
+        entityLabel: label,
+      };
+    },
+  },
+
+
+  // =======================================================
   // USER - CONFIGURATIONS / CART / DRAFTS
   // =======================================================
 

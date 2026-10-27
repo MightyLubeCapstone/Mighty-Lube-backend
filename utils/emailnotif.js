@@ -187,7 +187,62 @@ function formatConfigurationData(configurationData) {
     .join('\n');
 }
 
-async function sendOrderNotification(user, orderData, actionType = 'added', configurationName = null) {
+// =========================================================
+// CUSTOMER DETAILS (RFQ Finalize email)
+//
+// Customer:
+// - Customer: Fresaders
+// - City: Fremont
+//
+// Empty fields and empty sections are left out.
+// =========================================================
+
+const CUSTOMER_DETAIL_SECTIONS = [
+  ['Customer', 'customer', [
+    ['name', 'Customer'], ['address1', 'Street address'], ['address2', 'Apt / Suite'],
+    ['city', 'City'], ['state', 'State'], ['postalCode', 'ZIP Code'],
+    ['country', 'Country'], ['phone', 'Phone'], ['email', 'Email'],
+  ]],
+  ['Final Customer', 'finalCustomer', [
+    ['name', 'Name'], ['address1', 'Address 1'], ['address2', 'Address 2'],
+    ['city', 'City'], ['state', 'State'], ['postalCode', 'Postal'], ['country', 'Country'],
+  ]],
+  ['Contact', 'contact', [
+    ['type', 'Type'], ['name', 'Name'], ['email', 'Email'], ['phone', 'Phone'],
+  ]],
+  ['Additional Information', 'additionalInfo', [
+    ['orderNotes', 'Order notes'], ['consultation', 'Consultation'],
+    ['projectStatus', 'Project Status'], ['install', 'Install'],
+    ['shipping', 'Shipping'], ['preferredShippingDate', 'Preferred Shipping Date'],
+  ]],
+];
+
+function formatCustomerDetails(customerDetails) {
+  if (!customerDetails) {
+    return '        Customer:\n        - No customer details';
+  }
+
+  return CUSTOMER_DETAIL_SECTIONS
+    .map(([title, key, fields]) => {
+      const values = customerDetails[key] || {};
+
+      const lines = fields
+        .filter(([field]) => `${values[field] || ''}`.trim() !== '')
+        .map(([field, label]) => `        - ${label}: ${values[field]}`);
+
+      return lines.length > 0
+        ? `        ${title}:\n${lines.join('\n')}`
+        : null;
+    })
+    .filter(Boolean)
+    .join('\n\n');
+}
+
+
+// customerDetails: only passed by RFQ Finalize. Then the
+// logged-in user is shown as "Submitted By" and the RFQ's
+// customer details follow. Other callers are unchanged.
+async function sendOrderNotification(user, orderData, actionType = 'added', configurationName = null, customerDetails = undefined) {
   try {
     // Check if orderData is an array (configuration order) or single order
     if (Array.isArray(orderData)) {
@@ -234,11 +289,13 @@ ${configList || '            No configuration details'}
         
         ${actionType.toLowerCase() === 'complete' ? 'Your configuration order has been successfully complete and is ready for delivery/pickup!' : ''}
         
-        Customer Information:
+        ${customerDetails === undefined ? 'Customer Information' : 'Submitted By'}:
         - Name: ${user.firstName} ${user.lastName}
         - Email: ${user.email}
         - Company: ${user.companyName || 'N/A'}
-        
+        ${customerDetails === undefined ? '' : `
+${formatCustomerDetails(customerDetails)}
+`}
         Configuration Name: ${finalConfigName}
         Project: ${projectLine || 'Standalone'}
         Total Items: ${cartItems.length}
