@@ -1215,6 +1215,154 @@ These workflows support configuration/order processing and notifications.
 
 ---
 
+# RFQ Numbers and Projects
+
+Every finalized configuration receives an RFQ number.
+
+```text
+RFQ numbers:      10001, 10002, ...
+Project numbers:  P-10001, P-10002, ...
+```
+
+Numbers are generated atomically by the `RfqCounter` model
+(`rfq_counters` collection). It is separate from the older `Counter`
+model used for order IDs.
+
+When a user finalizes, they can send a `projectName`:
+
+- A new project is created for that user.
+- Project names are unique per user (`409` on duplicate).
+- `rfqNumber` and project fields are returned by user and admin APIs.
+
+Already-submitted configurations can be backfilled once with:
+
+```bash
+node scripts/backfillRfqNumbers.js
+```
+
+---
+
+# Customer Details
+
+Customer details are entered at Finalize
+(`models/customer_details.js`). There are four sections:
+
+```text
+customer        Name, country, address, city, state, postal code, phone, email
+finalCustomer   Final destination address
+contact         Contact type, name, email, phone
+additionalInfo  Order notes, consultation, project status, install,
+                shipping, preferred shipping date
+```
+
+Required: customer `country`, `address1`, `city`, `state`,
+`postalCode`, `phone`, `email`.
+
+- **Project RFQs** - details are saved once on the Project and shared
+  by every RFQ in it.
+- **Standalone RFQs** - details are saved on each RFQ.
+
+Edit project details:
+
+```http
+PATCH /api/configurations/projects/:projectID/details   (owner)
+PATCH /api/admin/projects/:projectID/details            (admin)
+```
+
+List the user's projects:
+
+```http
+GET /api/configurations/projects
+```
+
+The RFQ Finalize email includes the customer details. Empty fields and
+empty sections are left out.
+
+---
+
+# RFQ Emails
+
+RFQ emails are sent through Gmail SMTP (nodemailer).
+
+- RFQ emails go only to `ORDER_EMAIL_TO`
+  (default `config@mightylube.com`).
+- The email body reads the current configuration fields.
+
+---
+
+# Awaiting Response Status
+
+Admin workflow statuses:
+
+```text
+requested → pending → awaiting_response → done
+```
+
+`awaiting_response` means the Admin needs more details from the user.
+The RFQ creator is emailed each time this status is set.
+
+---
+
+# Admin Activity Logs
+
+All important user and admin actions are recorded by the
+`activityLogger` middleware (`utils/activityLogger.js`) into the
+`activity_log` model.
+
+```http
+GET /api/admin/activity-logs
+Authorization: Bearer <adminSessionID>
+```
+
+Query parameters:
+
+| Param | Meaning |
+| --- | --- |
+| `page` | Page number (default `1`) |
+| `limit` | Page size (default `30`) |
+| `entityType` | Filter by entity, e.g. `RFQ`, `USER` |
+| `from` / `to` | Date range |
+| `search` | Text search |
+
+---
+
+# App Version API
+
+Mobile app versions are configured in `config/appVersion.json`
+(Android and iOS separately).
+
+```http
+GET /api/app-version/check?platform=android&version=3.0.3
+GET /api/app-version/display?platform=ios
+```
+
+`check` tells the app whether an update is available and whether it is
+optional or forced.
+
+---
+
+# Email OTP, Forgot Password and Forgot Username
+
+```http
+POST /api/email/verification/request-otp
+POST /api/email/verification/verify-otp
+POST /api/email/forgot/request-otp
+POST /api/email/forgot/verify-otp
+POST /api/email/forgot/verify-pin
+POST /api/email/forgot/reset-password
+POST /api/email/forgot-username
+```
+
+---
+
+# Remember Me Login
+
+Login supports `rememberAccount`. When set, a remember token is stored
+on the user (`rememberTokens`) so the session can be restored without
+entering the password again.
+
+---
+
 # Database Architecture
 
 MongoDB stores:
@@ -1533,3 +1681,72 @@ The main backend design principle is:
 > **Product-specific models validate the product data, while the common
 > ProductConfiguration structure manages the shared configuration
 > lifecycle and persistence.**
+---
+
+# Branch History
+
+Every feature branch has been merged into `V3.0.1` and then deleted.
+`V3.0.1` is the final, locked branch.
+
+### `AddTechNote` (Feb – Jul 2026)
+
+- Technician note field added to every product configuration.
+- MongoDB Atlas connection setup.
+- More startup logs in `app.js`.
+- Collections are created only when data is inserted.
+- Email sending moved from SMTP to the Resend API, with better error
+  logs.
+- `.env` added to `.gitignore`.
+- Security PIN password recovery flow and password reset API.
+
+### `adminDashboard` (Jul 2026)
+
+- Secure Admin dashboard management APIs (`/api/admin`).
+- Admin user management, role management and configuration APIs.
+- Admin dashboard backend release v2.0.0.
+- Backend version API (`GET /api/version`).
+- Stronger account recovery validation.
+
+### `CleanArch` (Sep 2026)
+
+- Backend updated for the new frontend data parser.
+- Clean architecture: product-specific validation models + common
+  `ProductConfiguration`.
+- New folder structure (`models/<FAMILY>/<GROUP>/...`,
+  `routes/<FAMILY>/<GROUP>/...`).
+- New products: IBRC 300, OP41A, MLAIO, FT CDL, PFO (CCS, CGS, CLS,
+  CMS) and OHP products.
+- Customer image upload with private object storage
+  (`Services/object_storage_service.js`) and signed image URLs.
+- README rewritten.
+
+### `V3.0.1` (Oct 2026)
+
+- Cart configurations can be edited.
+- Configuration audit history and status tracking.
+- Remember-token (Remember Me) authentication.
+- Email OTP verification, forgot password and forgot username.
+- App version API (`/api/app-version`) and `config/appVersion.json`.
+- Android frontend version bumped to 3.0.3.
+
+### `v3.0.1_rfq_projects` (Oct 2026)
+
+- RFQ numbers (10001+) and project numbers (P-10001+).
+- Projects created at Finalize, unique per user.
+- `awaiting_response` Admin status with email to the RFQ creator.
+- RFQ emails moved from Resend to Gmail SMTP (nodemailer).
+- `scripts/backfillRfqNumbers.js` for old submitted configurations.
+- Admin activity logs (`GET /api/admin/activity-logs`).
+- Separate `RfqCounter` model for RFQ/project numbers.
+- Customer details for RFQs and projects, included in the RFQ email.
+- YCB `technicianNote` is no longer required.
+- App version bumped to 3.0.4 (Android and iOS).
+
+### Older branches (2024 – 2025, previous team)
+
+`Zach`, `login_api`, `fglmEndpoints`, `fgcoEndpoints`, `cc5clEndpoints`,
+`freeRailEndpoints`, `flatTopEndpoints`, `InBoardRollerChainEndpoint`,
+`ManyEndpoints`, `Dashboard`, `Updated_SixHex`, `order_editing`,
+`emailPDF`, `WebDeploy`, `Quickfixes` and others - original product
+endpoints, login, dashboard, order editing and email PDF. These were
+merged into `main` through PRs #1 – #60.
