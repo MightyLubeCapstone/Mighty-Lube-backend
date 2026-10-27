@@ -1,4 +1,4 @@
-const nodemailer = require('nodemailer');
+const { sendMail, emailFrom } = require('./mailer');
 const User = require('../models/user');
 
 // Utility function to calculate duration between two dates
@@ -37,30 +37,12 @@ function formatTimestamp(date) {
   });
 }
 
-// Same Gmail SMTP account as the OTP / verification emails
-// (routes/email.js).
-const emailFrom = process.env.SMTP_USER;
-
 // All RFQ emails go to the shared team inbox only.
 // No fallback to the sender address.
 const emailTo = process.env.ORDER_EMAIL_TO || 'config@mightylube.com';
 
-const emailTransporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'smtp.gmail.com',
-  port: Number(process.env.SMTP_PORT || 465),
-  secure: String(process.env.SMTP_SECURE || 'true').toLowerCase() === 'true',
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_APP_PASSWORD,
-  },
-});
-
 async function sendEmail(mailOptions) {
-  if (!process.env.SMTP_USER || !process.env.SMTP_APP_PASSWORD) {
-    throw new Error('SMTP_USER or SMTP_APP_PASSWORD is missing in environment variables');
-  }
-
-  return emailTransporter.sendMail({
+  return sendMail({
     from: mailOptions.from || emailFrom,
     to: mailOptions.to,
     cc: mailOptions.cc,

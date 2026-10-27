@@ -1,6 +1,6 @@
 require('dotenv').config();
 const express = require('express');
-const nodemailer = require("nodemailer");
+const { sendMail, isMailConfigured, emailFrom } = require("../utils/mailer");
 const { authenticate, comparePassword, hashPassword } = require("../routes/sessions");
 const mappings = require("../models/mappings");
 const User = require('../models/user');
@@ -75,29 +75,12 @@ function logElapsed(traceId, step, startedAt) {
 
 
 /**
- * Email API configuration.
- * All outgoing emails use Gmail SMTP via Nodemailer.
+ * Email configuration.
+ * Sending is handled by utils/mailer.js (Brevo API in production,
+ * Gmail SMTP locally).
  */
 
-const emailFrom = process.env.SMTP_USER;
-
 const SECURITY_PIN_VERIFIED_MARKER = "SECURITY_PIN_VERIFIED";
-
-if (!process.env.SMTP_USER || !process.env.SMTP_APP_PASSWORD) {
-  console.warn(
-    "[email] Gmail SMTP credentials are missing."
-  );
-}
-
-const emailTransporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || "smtp.gmail.com",
-  port: Number(process.env.SMTP_PORT || 465),
-  secure: String(process.env.SMTP_SECURE || "true").toLowerCase() === "true",
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_APP_PASSWORD,
-  },
-});
 
 async function sendMailWithRetry(
   mailOptions,
@@ -108,7 +91,7 @@ async function sendMailWithRetry(
 
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
-      const result = await emailTransporter.sendMail(mailOptions);
+      const result = await sendMail(mailOptions);
 
       console.log(`[email:${traceId}] Sent successfully`, {
         messageId: result.messageId,
@@ -952,11 +935,8 @@ async function otpMatches(email, code, storedHash) {
 }
 
 function otpConfigReady(res) {
-  if (
-    !process.env.SMTP_USER ||
-    !process.env.SMTP_APP_PASSWORD
-  ) {
-    console.error("[email-otp] Gmail SMTP not configured");
+  if (!isMailConfigured()) {
+    console.error("[email-otp] Email sending is not configured");
 
     res.status(503).json({
       error: "Password recovery is temporarily unavailable.",
@@ -1114,7 +1094,7 @@ try {
 
   await sendMailWithRetry(mailOptions, traceId);
 
-  console.log("[email-otp] OTP email accepted by SMTP", {
+  console.log("[email-otp] OTP email accepted for delivery", {
     traceId,
     email: maskEmail(email),
   });
@@ -1413,10 +1393,10 @@ router.post("/forgot-username", async (req, res) => {
   const traceId = createTraceId();
 
   try {
-    // Check SMTP configuration.
-    if (!process.env.SMTP_USER || !process.env.SMTP_APP_PASSWORD) {
+    // Check email configuration.
+    if (!isMailConfigured()) {
       console.error(
-        `[forgot-username:${traceId}] SMTP is not configured`
+        `[forgot-username:${traceId}] Email sending is not configured`
       );
 
       return res.status(503).json({
