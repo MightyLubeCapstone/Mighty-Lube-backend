@@ -17,10 +17,18 @@ const nodemailer = require('nodemailer');
 const BREVO_API_URL = 'https://api.brevo.com/v3/smtp/email';
 const BREVO_TIMEOUT_MS = 15000;
 
-const useBrevo = Boolean(process.env.BREVO_API_KEY);
+// Strips whitespace and wrapping quotes that often sneak in when
+// values are pasted into a hosting dashboard.
+function cleanEnv(value) {
+  if (!value) return '';
+  return String(value).trim().replace(/^['"]+|['"]+$/g, '').trim();
+}
 
-const emailFrom = process.env.EMAIL_FROM || process.env.SMTP_USER;
-const emailFromName = process.env.EMAIL_FROM_NAME || 'Mighty Lube';
+const brevoApiKey = cleanEnv(process.env.BREVO_API_KEY);
+const useBrevo = Boolean(brevoApiKey);
+
+const emailFrom = cleanEnv(process.env.EMAIL_FROM) || process.env.SMTP_USER;
+const emailFromName = cleanEnv(process.env.EMAIL_FROM_NAME) || 'Mighty Lube';
 
 const smtpTransporter = useBrevo
   ? null
@@ -47,6 +55,20 @@ if (!isMailConfigured()) {
   );
 } else {
   console.log(`[mailer] Sending email via ${useBrevo ? 'Brevo API' : 'Gmail SMTP'}`);
+}
+
+// Safe key details for debugging. Never logs the full key.
+if (useBrevo) {
+  const rawKey = String(process.env.BREVO_API_KEY);
+  console.log('[mailer] Brevo key check', {
+    startsWith: brevoApiKey.slice(0, 8),
+    endsWith: brevoApiKey.slice(-4),
+    length: brevoApiKey.length,
+    isApiKey: brevoApiKey.startsWith('xkeysib-'),
+    isSmtpKey: brevoApiKey.startsWith('xsmtpsib-'),
+    hadExtraSpacesOrQuotes: rawKey !== brevoApiKey,
+    sender: emailFrom,
+  });
 }
 
 // Accepts "a@x.com", "a@x.com, b@x.com" or ["a@x.com"] and returns
@@ -85,7 +107,7 @@ async function sendViaBrevo(mailOptions) {
   const response = await fetch(BREVO_API_URL, {
     method: 'POST',
     headers: {
-      'api-key': process.env.BREVO_API_KEY,
+      'api-key': brevoApiKey,
       'content-type': 'application/json',
       accept: 'application/json',
     },
